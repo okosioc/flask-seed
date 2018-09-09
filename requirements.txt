@@ -1,0 +1,18 @@
+Flask
+Flask-Caching
+Flask-Principal
+Flask-Login
+Flask-WTF
+Flask-Mail
+Flask-Script
+Flask-Babel
+Flask-Uploads
+pytest
+pymongo
+blinker
+fabric<2.0
+schedule
+requests
+lxml
+# mac: xcode-select --install
+# centos: yum install python-lxml libxml2-devel libxslt-devel

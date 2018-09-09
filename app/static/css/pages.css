@@ -1,0 +1,32 @@
+/* ===========
+   Core file List
+
+   - Accounts
+
+ =============*/
+/* ===========
+   Accounts
+ =============*/
+.wrapper-page {
+  margin: 7.5% auto;
+  max-width: 360px;
+}
+.wrapper-page .form-control {
+  height: 40px;
+  padding-left: 40px;
+}
+.wrapper-page .form-control-feedback {
+  left: 15px;
+  top: 3px;
+  color: rgba(76, 86, 103, 0.4);
+  font-size: 20px;
+}
+.wrapper-page .btn-email {
+  padding: 9px 20px;
+}
+.logo-lg {
+  font-size: 26px !important;
+  font-weight: 600;
+  line-height: 70px;
+  color: #228bdf !important;
+}

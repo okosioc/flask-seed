@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+
+{% block title %}CRUD Index{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <!-- left start -->
+            <div class="left col-md-2">
+                <h4>{{ _('Registered Models') }}</h4>
+                <div class="list-group">
+                    {% for m in models %}
+                        <a href="/crud/index/{{ m.__name__|lower }}"
+                           class="list-group-item {{ 'active' if m.__name__.lower()==model.__name__.lower() }}">
+                            {{ m.__name__ }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- left end -->
+
+            <!-- right start -->
+            <div class="right col-md-10">
+                <h4>{{ _('Query') }} {{ model.__name__ }}</h4>
+                <hr>
+                <form id="search-form" class="form-horizontal">
+                    {% for k,v in index_dict.iteritems() %}
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">{{ k }}</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="{{ k }}"
+                                       {% if request.args.get(k, None) %}value="{{ request.args.get(k) }}"{% endif %}>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <a href="javascript:;" class="btn btn-primary btn-sm"
+                               onclick="query(1)">{{ _('Query') }}</a>
+                            &nbsp;&nbsp;
+                            <a href="/crud/new/{{ model.__name__|lower }}"
+                               class="btn btn-default btn-sm">{{ _('New') }}</a>
+                        </div>
+                    </div>
+                </form>
+                <hr>
+                <table class="table table-bordered table-hover table-condensed">
+                    <tr>
+                        {% for f in index_dict %}
+                            <th>{{ f }}</th>
+                        {% endfor %}
+                        <th>{{ _('Actions') }}</th>
+                    </tr>
+                    {% for r in records %}
+                        <tr>
+                            {% for f in index_dict %}
+                                <td>{% if '.' in f %}{{ r[f.split('.')[0]] }}{% else %}{{ r[f] }}{% endif %}</td>
+                            {% endfor %}
+                            <td>
+                                <a href="/crud/change/{{ model.__name__|lower }}/{{ r._id|string }}"><i
+                                        class="fa fa-edit"></i></a>
+                                &nbsp;
+                                <a href="javascript:;" onclick="deleteRecord($(this))" rid="{{ r._id }}"><i
+                                        class="fa fa-trash-o"></i></a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ model.required_fields|length + 1 }}">{{ _('No records found.') }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                {% if pagination.pages > 0 %}
+                    <div class="text-center">
+                        <ul class="pagination" style="margin-bottom:20px;">
+                            {% if pagination.has_prev %}
+                                <li><a href="javascript:;" onclick="query({{ pagination.page - 1 }})"><</a></li>
+                            {% endif %}
+                            {% for page in pagination.iter_pages() %}
+                                {% if page %}
+                                    {% if page != pagination.page %}
+                                        <li><a href="javascript:;" onclick="query({{ page }})">{{ page }}</a></li>
+                                    {% else %}
+                                        <li class="active">
+                                            <a href="javascript:;">{{ page }}<span class="sr-only">(current)</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li><a href="javascript:;">...</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if pagination.has_next %}
+                                <li><a href="javascript:;" onclick="query({{ pagination.page + 1 }})">></a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- right end -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        function query(page) {
+            location.href = "{{ page_base }}?_p=" + page + "&" + $("#search-form").serialize();
+        }
+
+        function deleteRecord(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("{{ _('Are you sure to delete this record?') }}");
+            if (!con) {
+                return false;
+            }
+            btn.addClass("doing");
+
+            $.post("/crud/delete/{{ model.__name__|lower }}/" + btn.attr("rid"), {"r": Math.random()}, function (result) {
+                if (result.success) {
+                    showSuccess(result.message)
+                    btn.closest("tr").remove();
+                } else {
+                    showError(result.message)
+                }
+                btn.removeClass("doing");
+            }, 'json');
+        }
+    </script>
+{% endblock %}

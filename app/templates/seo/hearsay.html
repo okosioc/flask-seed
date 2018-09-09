@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+
+{% block title %}Hearsay{% endblock %}
+
+{% block style %}
+    <link href="{{ base_url() }}/plugins/pen/pen.css" rel="stylesheet">
+    <style>
+        #hearsay-body {
+            padding: 12px;
+            width: 100%;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 18px;
+            line-height: 1.42857143;
+            min-height: 400px;
+        }
+
+        #hearsay-body img {
+            max-width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <!-- main start -->
+            <div class="main col-md-9">
+                <h3>撰写关键字
+                    <mark>{{ keyword.name }}</mark>
+                    的文章
+                </h3>
+                <div class="separator-2"></div>
+                <form>
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input id="hearsay-title" class="form-control"
+                               value="{{ keyword.hearsay.title if keyword.hearsay else keyword.name }}"/>
+                    </div>
+                    <div class="form-group">
+                        <label>正文</label>
+                        <div id="hearsay-body"
+                             contenteditable>{{ keyword.hearsay.body|safe if keyword.hearsay else '' }}</div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="save($(this))">保存</button>
+                </form>
+            </div>
+            <!-- main end -->
+            <!-- sidebar start -->
+            <aside class="col-md-3">
+                <div class="sidebar">
+                    <div class="block clearfix">
+                        <h4 class="title">关键字基本信息</h4>
+                        <div class="separator"></div>
+                        <table class="table table-striped">
+                            <tr>
+                                <td>指数</td>
+                                <td>搜索</td>
+                                <td>动作</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="http://index.baidu.com/?tpl=trend&word={{ keyword.name|urlquote('gbk') }}"
+                                       target="_blank">{{ keyword.baiduIndex|commas }}</a></td>
+                                <td>
+                                    <a href="http://www.baidu.com/s?wd={{ keyword.name }}"
+                                       target="_blank">{{ keyword.baiduResult|commas }}</a>
+                                </td>
+                                <td>
+                                    <a href="/crud/change/keyword/{{ keyword._id }}" target="_blank" title="编辑"><i
+                                            class="fa fa-edit"></i></a>&nbsp;
+                                    <a href="http://www.5118.com/seo/words/{{ keyword.name }}" target="_blank"
+                                       title="5118关键词挖掘">5</a>&nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="block clearfix">
+                        <h4 class="title">注意事项</h4>
+                        <div class="separator"></div>
+                        <p>尽量围绕关键字的主题来撰写文章。</p>
+                    </div>
+                </div>
+            </aside>
+            <!-- sidebar end -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ base_url() }}/plugins/pen/pen.js" type="text/javascript"></script>
+    <script src="{{ base_url() }}/plugins/pen/markdown.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        // Editor
+        var options = {
+            editor: document.getElementById("hearsay-body"),
+            class: "pen",
+            debug: false,
+            textarea: "<textarea name='content'></textarea>",
+            list: [
+                'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist',
+                'bold', 'italic', 'underline', 'createlink', 'insertimage'
+            ],
+            stay: false,
+            linksInNewWindow: true
+        };
+        var editor = new Pen(options);
+
+        function save(btn) {
+            if (!editor) {
+                return
+            }
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("确定要发布文章么？");
+            if (!con) {
+                return false;
+            }
+
+            var title = $("#hearsay-title").val();
+            var body = $("#hearsay-body").html();
+            if (!title) {
+                showError("文章标题不能为空！");
+                return false;
+            }
+            if (!body) {
+                showError("文章正文不能为空！");
+                return false;
+            }
+
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            var param = {"r": Math.random()};
+            param["title"] = title;
+            param["body"] = body;
+
+            // Post
+            $.post("/seo/hearsay/{{ keyword._id }}", param, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    location.href = "/hearsay/{{ keyword._id }}";
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+    </script>
+{% endblock %}

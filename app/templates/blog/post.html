@@ -1,0 +1,222 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block style %}
+    <style>
+        .panel-body img {
+            max-width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <!-- left start -->
+            <div class="col-md-8">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>{{ post.title }}</h3>
+                        <p class="panel-sub-title">{% for t in post.tags %}
+                            #{{ _(t.name) }}
+                        {% endfor %}</p>
+                    </div>
+                    <div class="panel-body">
+                        {{ post.body|safe }}
+                    </div>
+                    <div class="panel-footer">
+                        <span><i class="fa fa-clock-o"></i> {{ post.createTime|timesince }}</span>
+                        <span class="pull-right">
+                            <i class="fa fa-eye pl-10"></i> {{ post.viewTimes }}&nbsp;{{ _('views') }}
+                        </span>
+                    </div>
+                </div>
+
+
+                <div id="div-comments" class="p-t-10 m-b-20">
+                    <h4>{{ _('There are totally %(count)s comments', count=post.comments|length) }}</h4>
+                    <hr>
+                    {% for c in post.comments %}
+                        <div class="media m-b-20">
+                            <div class="media-left">
+                                <a href="javascript:;">
+                                    {% set user = user_dict[c.uid] %}
+                                    <img class="media-object thumb-sm"
+                                         src="{{ user.head if user and user.head else '/static/img/avatar.png' }}">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <h4 class="media-heading"><a href="javascript:;">{{ user.name if user else '-' }}</a>
+                                </h4>
+                                <p>{{ c.content }}</p>
+                                <div>
+                                    <span class="text-muted">{{ c.time|timesince }}</span>
+                                    <a href="javascript:;" class="pull-right text-muted" onclick="toggleReply($(this))">
+                                        <i class="fa fa-reply"></i> {{ _('Reply') }}
+                                    </a>
+                                    <div class="well well-sm m-t-10 m-b-0 reply-form" style="display:none">
+                                        <div class="input-group">
+                                            <input class="form-control"/>
+                                            <span class="input-group-btn">
+                                                <a href="javascript:;" onclick="reply($(this))" class="btn btn-default"
+                                                   cid="{{ c.id }}" rid="{{ c.uid }}">{{ _('Submit') }}
+                                                </a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% for r in c.replys %}
+                                        <hr>
+                                        <div class="media m-b-20">
+                                            <div class="media-left">
+                                                <a href="javascript:;">
+                                                    {% set user = user_dict[r.uid] %}
+                                                    <img class="media-object thumb-sm"
+                                                         src="{{ user.head if user and user.head else '/static/img/avatar.png' }}">
+                                                </a>
+                                            </div>
+                                            <div class="media-body">
+                                                <h5 class="media-heading"><a
+                                                        href="javascript:;">{{ user.name if user else '-' }}</a>
+                                                    {{ _('replys') }}
+                                                    {% set ruser = user_dict[r.rid] %}
+                                                    <a href="javascript:;">{{ ruser.name if ruser else '-' }}</a>
+                                                </h5>
+                                                <p>{{ r.content }}</p>
+                                                <div>
+                                                    <span class="text-muted">{{ r.time|timesince }}</span>
+                                                    <a href="javascript:;" class="pull-right text-muted"
+                                                       onclick="toggleReply($(this))">
+                                                        <i class="fa fa-reply"></i> {{ _('Reply') }}
+                                                    </a>
+                                                    <div class="well well-sm m-t-10 m-b-0 reply-form"
+                                                         style="display:none">
+                                                        <div class="input-group">
+                                                            <input class="form-control"/>
+                                                            <span class="input-group-btn">
+                                                                <a href="javascript:;" onclick="reply($(this))"
+                                                                   class="btn btn-default"
+                                                                   cid="{{ c.id }}"
+                                                                   rid="{{ r.uid }}">{{ _('Submit') }}</a>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                    {% endfor %}
+                    <h4 class="p-t-10">{{ _('Leave a comment') }}</h4>
+                    <div class="m-b-20">
+                        <textarea class="form-control m-b-10" rows="3"></textarea>
+                        <button class="btn btn-primary"
+                                onclick="comment($(this))">{{ _('Submit') }}</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- left end -->
+
+            <!-- sidebar start -->
+            <div class="col-md-4">
+                <div class="m-b-20">
+                    <h3>{{ _('Tags') }}</h3>
+                    <a href="/blog/index" class="btn btn-primary">#{{ _('All') }}</a>
+                    {% for t in tags %}
+                        <a href="/blog/index?t={{ t._id }}"
+                           class="btn btn-primary">#{{ _(t.name) }}</a>
+                    {% endfor %}
+                </div>
+                {% if current_user.is_admin %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h3 class="panel-title">{{ _('Admin') }}</h3></div>
+                        <div class="panel-body">
+                            <a href="/blog/post/change/{{ post._id }}">{{ _('Edit post') }}</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- sidebar end -->
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //
+        });
+
+        function comment(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("{{ _('Sure to submit this comment?') }}");
+            if (!con) {
+                return false;
+            }
+
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            $.post("/blog/comment/{{ post._id }}", {
+                "r": Math.random(),
+                "content": btn.prev("textarea").val()
+            }, function (result) {
+                if (result.success) {
+                    showSuccess(result.message)
+                    location.hash = "#div-comments";
+                    location.reload();
+                } else {
+                    showError(result.message)
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+
+        function toggleReply(btn) {
+            var form = btn.next(".reply-form");
+            form[form.is(':hidden') ? "show" : "hide"]();
+        }
+
+        function reply(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("{{ _('Sure to submit this reply?') }}");
+            if (!con) {
+                return false;
+            }
+
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            $.post("/blog/reply/{{ post._id }}/" + btn.attr("cid"), {
+                "r": Math.random(),
+                "content": btn.parent().prev("input").val(),
+                "rid": btn.attr("rid")
+            }, function (result) {
+                if (result.success) {
+                    showSuccess(result.message)
+                    location.reload();
+                } else {
+                    showError(result.message)
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+    </script>
+{% endblock %}
+

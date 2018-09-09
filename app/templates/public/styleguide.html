@@ -1,0 +1,186 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('Style Guide') }}{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h1 class="page-header m-t-0" id="structure">Structure</h1>
+                        <h2 id="file">File & Folder Structure</h2>
+                <pre class="prettyprint">
+static/
+├── less/
+│   └── All LESS files
+├── css/
+│   └── All css files
+├── fonts/
+├── pages/
+│   └── All the pages related scripts
+├── img/
+│   └── All images
+├── plugins/
+│   └── The plugins files
+└── js/
+    └── All common Javascripts files
+</pre>
+                        <br>
+
+                        <h2 id="less">CSS & LESS</h2>
+                        <table class="table table-bordered m-0">
+                            <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>bootstrap.css</code></td>
+                                <td>The core bootstrap file is being used in all the pages.</td>
+                            </tr>
+                            <tr>
+                                <td><code>elements.less</code></td>
+                                <td>
+                                    This file is containing some of the utility functions or mixins for less. This file
+                                    is from
+                                    Joel Sutherland.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>core.less</code>/<code>core.css</code></td>
+                                <td>
+                                    This file is containing all common styles for all the pages.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>pages.less</code>/<code>pages.css</code></td>
+                                <td>
+                                    Pages contains the styles for all supported third-party JS/CSS plugins. It has
+                                    overwritten
+                                    version of styles.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>components.less</code>/<code>components.css</code></td>
+                                <td>
+                                    This is the one of the core and important file. It contains the styles for all the
+                                    components, ui elements, and some other parts of the theme.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>responsive.less</code>/<code>responsive.css</code></td>
+                                <td>
+                                    This file is containing the styles related to responsiveness support.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>icons.less</code>/<code>icons.css</code></td>
+                                <td>
+                                    Combines various font icons. Currently we are using font awesome.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>menu.less</code></td>
+                                <td>Menu</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <br>
+
+                        <h2 id="javascript">Javascript</h2>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>jquery.min.js</code>/<code>bootstrap.min.js</code></td>
+                                <td>These files are used at core of the theme.</td>
+                            </tr>
+                            <tr>
+                                <td><code>detect.js</code></td>
+                                <td>jQuery.browser.mobile will be true if the browser is a mobile device.</td>
+                            </tr>
+                            <tr>
+                                <td><code>fastclick.js</code></td>
+                                <td>Polyfill to remove click delays on browsers with touch UIs.</td>
+                            </tr>
+                            <tr>
+                                <td><code>bootstrap-growl.min.js</code></td>
+                                <td>Toast messages.</td>
+                            </tr>
+                            <tr>
+                                <td><code>jquery.app.js</code></td>
+                                <td>This is a main js file. It contains the custom JS code needed for features including
+                                    layout,
+                                    sidebar, etc.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>pages/*.js</code></td>
+                                <td>These are the files containing pages specific code.</td>
+                            </tr>
+                            <tr>
+                                <td><code>plugins/**.js</code></td>
+                                <td>All supported and integrated third-party plugins are included in here.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <br>
+
+                        <h1 class="page-header" id="styles">Styles</h1>
+                        <h2 id="colors">Colors</h2>
+                        <ul class="list-inline">
+                            <li>
+                                <div class="bg-primary m-r-10" style="height:100px;width:100px;"></div>
+                            </li>
+                            <li>
+                                <div class="bg-success m-r-10" style="height:100px;width:100px;"></div>
+                            </li>
+                            <li>
+                                <div class="bg-info m-r-10" style="height:100px;width:100px;"></div>
+                            </li>
+                            <li>
+                                <div class="bg-warning m-r-10" style="height:100px;width:100px;"></div>
+                            </li>
+                            <li>
+                                <div class="bg-danger m-r-10" style="height:100px;width:100px;"></div>
+                            </li>
+                        </ul>
+                        <br>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <ul class="list-unstyled">
+                            <li>
+                                <a href="#structure">Structure</a>
+                                <ul>
+                                    <li><a href="#file">File & Folder Structure</a></li>
+                                    <li><a href="#less">CSS & LESS</a></li>
+                                    <li><a href="#javascript">Javascript</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#styles">Styles</a>
+                                <ul>
+                                    <li><a href="#colors">Colors</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

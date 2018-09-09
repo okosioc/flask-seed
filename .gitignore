@@ -1,0 +1,29 @@
+# Byte-compiled
+*.pyc
+
+# Logs
+app/logs/*.log
+app/logs/*.log.*
+
+# LocalConfig
+instance/config.py
+
+# PyCharm
+.idea/
+
+# Data preparation
+app/scripts/*.json
+
+# Wsgi
+wsgi.pid
+
+# Uploads
+app/static/uploads/
+app/static/downloads/
+app/static/exports/
+
+# npm
+node_modules/
+
+# pytest
+.pytest_cache

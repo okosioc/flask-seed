@@ -1,0 +1,728 @@
+{% extends "layout.html" %}
+
+{% set change = 'change' in request.url %}
+
+{% block title %}CRUD {{ 'Update' if change else 'New' }}{% endblock %}
+
+{% block style %}
+    <style>
+
+        .left h4 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #CCC;
+        }
+
+        #editor {
+            font-size: 11pt;
+            font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+            min-height: 400px;
+            position: relative;
+        }
+
+        #editor textarea {
+            font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+        }
+
+        #editor .irow {
+            width: 100%;
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+            padding: 0px 0px 0px 15px;
+            border-left: 1px solid #ddd;
+            line-height: 1.3em;
+            position: relative;
+        }
+
+        #editor .irow:before {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #editor .irow:last-child {
+            border: none;
+        }
+
+        #editor .irow:last-child:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 15px;
+            border-left: 1px solid #ddd;
+        }
+
+        #editor .irow:hover {
+            background-color: rgba(0, 0, 0, 0.018);
+        }
+
+        #editor .ikey {
+            width: 115px;
+            padding-right: 10px;
+            display: inline-block;
+            word-break: break-all;
+            font-size: 95%;
+            line-height: 1.1em;
+            opacity: 0.7;
+            overflow: hidden;
+            vertical-align: top;
+            margin: 0.15em 0 0.4em 0px;
+        }
+
+        #editor .ilabel {
+            font-size: 80%;
+            padding: 0 5px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 2px;
+            opacity: 0.9;
+            display: inline-block;
+            margin: -1px 5px 0 5px;
+        }
+
+        #editor .ivalue {
+            word-break: break-all;
+        }
+
+        #editor .ilist {
+            word-break: break-all;
+        }
+
+        #editor .ivalue {
+            width: 100%;
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+        }
+
+        #editor .ilist {
+            width: 100%;
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+        }
+
+        #editor .idesc {
+            width: 100%;
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top;
+            cursor: pointer;
+        }
+
+        #editor .ivalue {
+            cursor: pointer;
+        }
+
+        #editor .imulti.ivalue {
+            cursor: inherit;
+        }
+
+        #editor .iseditor .ivalue {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre;
+            padding: 0.2em 0.4em 0.4em 0.5em;
+            font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+            max-height: 400px;
+            overflow: auto;
+            outline: none;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-size: 90%;
+            border-radius: 2px;
+            margin: -4px 0 -3px 0;
+            tab-size: 2;
+            background-color: rgba(255, 255, 240, 0.8);
+            cursor: text;
+        }
+
+        #editor .inav {
+            padding-left: 115px;
+            margin: 4px 0;
+        }
+
+        #editor .inav .ikey {
+            margin-left: -115px;
+        }
+
+        #editor .iact {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 3px;
+        }
+
+        #editor .iact:hover {
+            display: block;
+            opacity: 1 !important;
+        }
+
+        #editor .inav:hover ~ .iact {
+            display: block;
+            opacity: 0.7;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        #editor .inav.iseditor ~ .iact {
+            display: none;
+        }
+
+        #editor #doc {
+            padding: 0;
+            border: none;
+            overflow: visible;
+        }
+
+        #editor #doc:before {
+            display: none;
+        }
+
+        #editor #doc:after {
+            display: none;
+        }
+
+        #editor #doc:hover {
+            /*background: white;*/
+        }
+
+        #editor #doc > .inav {
+            padding-left: 120px;
+        }
+
+        #editor #doc > .inav .ikey {
+            font-size: 105%;
+            font-weight: bold;
+            margin: 0 0 0 -120px;
+            width: 120px;
+        }
+
+        #editor #doc > .iact {
+            opacity: 0.3;
+            top: -4px;
+            right: 0;
+        }
+
+        #editor .tag.active {
+            background-color: rgba(135, 212, 0, 0.17) !important;
+            color: rgb(65, 132, 0) !important;
+        }
+
+        #editor .imulti .template {
+            display: none;
+        }
+
+        #editor .iact a {
+            border-radius: 0;
+            margin-right: 2px;
+            padding: 0.25em 0.7em 0.15em 0.7em;
+            margin-top: 0;
+            margin-bottom: 0;
+            display: block;
+            border: 1px solid #E2E7EB;
+            background-color: #E2E7EB;
+            color: #3C5168;
+        }
+
+        #editor .iact a:hover {
+            border-color: #65A1D8;
+            background-color: #fff;
+        }
+
+        #editor .iact a:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        #editor .iact a:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            margin-right: 0;
+        }
+
+        #editor .iact a.add-list-item,
+        #editor .iact a.add-dict-item {
+            border-color: #E5ECDF;
+            background-color: #E5ECDF;
+            color: #748A30;
+        }
+
+        #editor .iact a.add-list-item:hover,
+        #editor .iact a.add-dict-item:hover {
+            border-color: #B4D865;
+        }
+
+        #editor .iact a.del-list-item {
+            border-color: rgb(255, 217, 217);
+            background-color: rgb(255, 217, 217);
+            color: #D5445C;
+        }
+
+        #editor .iact a.del-list-item:hover {
+            border-color: #CF4D4D;
+        }
+
+        #editor .bold {
+            font-weight: bold;
+        }
+
+        #editor .number span {
+            color: #f76500 !important;
+        }
+
+        #editor .bool span,
+        #editor .choice span {
+            color: #82888E !important;
+            padding: 0 10px !important;
+            border-radius: 100px !important;
+        }
+
+        #editor .bool span.active,
+        #editor .choice span.active {
+            background-color: rgba(135, 212, 0, 0.17) !important;
+            color: rgb(65, 132, 0) !important;
+        }
+
+        #editor .datetime i {
+            color: #cccccc !important;
+        }
+
+        #editor .null {
+            color: #A3293D !important;
+        }
+
+        #editor .unsupported span {
+            color: #cccccc !important;
+        }
+
+        #editor .imulti.list > .ilist > .irow > .inav > .ikey {
+            cursor: move;
+        }
+
+        .ghost {
+            opacity: 0.2;
+        }
+
+        .chosen {
+            color: #fff;
+            background-color: #c00;
+        }
+    </style>
+{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <div class="left col-md-3">
+                <div class="well">
+                    <h4>{{ 'Update' if change else 'New' }} {{ model.__name__ }}</h4>
+                    <p>{{ _('Please note record will be updated/created directly into database.') }}</p>
+                    <a class="btn btn-primary btn-sm" onclick="save($(this));">{{ _('Save') }}</a>
+                    {% if change %}
+                    <a class="btn btn-success btn-sm" onclick="save($(this), true);">{{ _('Copy') }}</a>
+                    <a class="btn btn-warning btn-sm" href="/crud/json/{{ model.__name__|lower }}/{{ record._id }}"
+                       target="_blank">{{ _('JSON') }}</a>
+                    {% endif %}
+                    <a class="btn btn-default btn-sm"
+                       href="/crud/index/{{ model.__name__|lower }}">{{ _('Cancel') }}</a>
+                </div>
+            </div> <!-- /left -->
+            <div class="right col-md-9">
+                <div id="editor">
+                    <div id="doc">
+                        {{ render('Root', model.structure, record, True, False, model.use_schemaless) }}
+                    </div>
+                </div>
+            </div> <!-- /right -->
+        </div>
+    </div>
+{% endblock %}
+
+{% macro render(name, struct, doc, is_root=False, is_in_list=False, use_schemaless=False) %}
+    {% if ms_is_simple(struct) %}
+        <div class="inav">
+            <div class="ikey">{{ name }}</div>
+            {{- render_ivalue(name, struct, doc) }}
+        </div>
+        <div class="iact">
+            {% if is_in_list %}
+                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
+            {% endif %}
+            {% if struct.__name__ == 'datetime' %}
+                <a class="get-current-time" href="javascript:;"><i class="fa fa-clock-o"></i></a>
+            {% endif %}
+        </div>
+    {% elif ms_is_dict(struct) %}
+        <div class="inav">
+            <div class="ikey">{{ name }}</div>
+            {{- render_idesc(struct, doc) }}
+        </div>
+        <div class="ivalue imulti dict" name="{{ name }}">
+            <div class="ilist">
+                {% for k,v in struct.iteritems() %}
+                    {% if is_root and k =='_id' %}
+                        {# skip #}
+                    {% else %}
+                        <div class="irow">
+                            {{ render(k, v, doc|attr(k)) }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="iact">
+            {% if use_schemaless %}
+                <a class="add-dict-item" href="javascript:;"><i class="fa fa-plus"></i></a>
+            {% endif %}
+            {% if is_in_list %}
+                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
+            {% endif %}
+        </div>
+    {% elif ms_is_list(struct) %}
+        <div class="inav">
+            <div class="ikey">{{ name }}</div>
+            {{- render_idesc(struct, doc) }}
+        </div>
+        <div class="ivalue imulti list" name="{{ name }}" {{ 'style=display:none' if not doc }}>
+            <div class="ilist">
+                {% for each in doc %}
+                    <div class="irow">
+                        {{ render(loop.index0, struct[0], each, False, True) }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="template">
+                <div class="irow">
+                    {{ render('-1', struct[0], ms_create_empty_dict_or_list(struct[0]), False, True) }}
+                </div>
+            </div>
+        </div>
+        <div class="iact">
+            <a class="add-list-item" href="javascript:;"><i class="fa fa-plus"></i></a>
+            {% if is_in_list %}
+                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
+            {% endif %}
+        </div>
+    {% elif ms_is_operator_in(struct) %}
+        <div class="inav">
+            <div class="ikey">{{ name }}</div>
+            {{- render_ivalue(name, struct, doc) }}
+        </div>
+        <div class="iact">
+            {% if is_in_list %}
+                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_idesc(type, value) %}
+    {%- if ms_is_dict(type) -%}
+        <div class="idesc">Object {{ '{' }}{{ type|length }}{{ '}' }} <i class="fa fa-caret-down"></i>
+        </div>
+    {%- elif ms_is_list(type) -%}
+        <div class="idesc">Array [{{ value|length }}] <i class="fa fa-caret-down"></i></div>
+    {%- endif -%}
+{% endmacro %}
+
+{% macro render_ivalue(name, type, value) %}
+    {%- if ms_is_operator_in(type) -%}
+        <div class="ivalue choice" name="{{ name }}">
+            {% for each in type %}
+                <span {{ 'class=active' if each==value }}>{{ each }}</span>
+            {% endfor %}
+        </div>
+    {%- elif type.__name__ in ['int', 'long', 'float'] -%}
+        <div class="ivalue number" name="{{ name }}">
+            {% if value is none %}
+                <span class="null">Null</span>
+            {% else %}
+                <span>{{ value }}</span>
+            {% endif %}
+        </div>
+    {%- elif type.__name__ in ['bool'] -%}
+        <div class="ivalue bool" name="{{ name }}">
+            <span {{ 'class=active' if value }}>true</span>
+            <span {{ 'class=active' if not value }}>false</span>
+        </div>
+    {%- elif type.__name__ in ['datetime'] -%}
+        <div class="ivalue datetime" name="{{ name }}">
+            {% if value is none %}
+                <span class="null">Null</span>
+            {% else %}
+                <span>{{ value }}</span>
+            {% endif %}
+        </div>
+    {%- elif type.__name__ in ['unicode'] -%}
+        <div class="ivalue string" name="{{ name }}">
+            {% if value is none %}
+                <span class="null">Null</span>
+            {% else %}
+                {% if value|length > 200 %}
+                    <span>"{{ value[:200] }} ..."<i class='ilabel'>{{ value|length }} chars</i></span>
+                {% else %}
+                    <span>"{{ value }}"</span>
+                {% endif %}
+            {% endif %}
+        </div>
+    {%- elif type.__name__ in ['ObjectId'] -%}
+        <div class="ivalue objectid" name="{{ name }}">
+            {% if value is none %}
+                <span class="null">Null</span>
+            {% else %}
+                <span>{{ value }}</span>
+            {% endif %}
+        </div>
+    {%- else -%}
+        <div class="ivalue unsupported" name="{{ name }}">
+            <span>Unsupported type, {{ type }}</span>
+        </div>
+    {% endif %}
+    <input type="hidden" value="{{ '' if value is none else value }}" model-type="{{ ms_get_type(type) }}"/>
+{% endmacro %}
+
+{% block script %}
+
+    <script type="text/javascript" src="{{ base_url() }}/js/moment.min.js"></script>
+    <script type="text/javascript" src="{{ base_url() }}/js/Sortable.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // idesc
+            $(".idesc").click(function () {
+                var caret = $(this).children(".fa");
+                var imulti = $(this).parent(".inav").next(".imulti");
+                if (caret.is(".fa-caret-down")) {
+                    caret.removeClass("fa-caret-down").addClass("fa-caret-right");
+                    imulti.hide();
+                } else {
+                    caret.removeClass("fa-caret-right").addClass("fa-caret-down");
+                    imulti.show();
+                }
+            });
+
+            // ivalue
+            $(".ivalue").each(function (i, n) {
+                // number/string/datetime/objectid
+                if ($(n).is(".number") || $(n).is(".string") || $(n).is(".datetime") || $(n).is(".objectid")) {
+                    // Enter editing
+                    $(n).on("click", function () {
+                        var inav = $(this).parent(".inav");
+                        var hidden = $(this).next(":hidden");
+                        if (!inav.is(".iseditor")) {
+                            inav.addClass("iseditor");
+                            $(this).attr("contenteditable", true).attr("spellcheck", false);
+                            $(this).text(hidden.val()).focus();
+                        }
+                    });
+                    // Quit editing
+                    $(n).on("blur", function () {
+                        var inav = $(this).parent(".inav");
+                        var hidden = $(this).next(":hidden");
+                        if (inav.is(".iseditor")) {
+                            var type = hidden.attr("model-type");
+                            var val = $(this).text().trim();
+                            if (val.length > 0) {
+                                msg = validate(type, val);
+                                if (msg) {
+                                    showError(msg);
+                                    return;
+                                }
+                            }
+                            inav.removeClass("iseditor");
+                            hidden.val(val);
+                            $(this).attr("contenteditable", false);
+                            if (hidden.val()) {
+                                var v = hidden.val();
+                                var more = "";
+                                if ($(this).is(".string")) {
+                                    var length = v.length;
+                                    if (length > 200) {
+                                        v = v.substr(0, 200) + " ...";
+                                        more = "<i class='ilabel'>" + length + " chars</i>";
+                                    }
+                                    v = '"' + v + '"';
+                                }
+                                span = $("<span>").text(v);
+                                $(this).html(span);
+                                $(this).append(more)
+                            } else {
+                                $(this).html('<span class="null">Null</span>');
+                            }
+                        }
+                    });
+                }
+                // bool/choice
+                else if ($(n).is(".bool") || $(n).is(".choice")) {
+                    $(n).children("span").click(function () {
+                        var hidden = $(this).parent(".ivalue").next(":hidden");
+                        if ($(this).is(".active")) {
+                            $(this).removeClass("active");
+                            hidden.val("");
+                        } else {
+                            $(this).siblings(".active").removeClass("active");
+                            $(this).addClass("active");
+                            hidden.val($(this).text());
+                        }
+                    });
+                }
+            });
+
+            // list
+            $(".imulti.list > .ilist").each(function (i, n) {
+                Sortable.create(n, {
+                    handle: ".ikey",
+                    ghostClass: "ghost"
+                });
+            });
+            $(".add-list-item").click(function () {
+                var irow = $(this).closest(".irow");
+                var inav = irow.children(".inav");
+                var imulti = irow.children(".imulti");
+                var ilist = imulti.children(".ilist");
+                var irowTemplate = imulti.find("> .template > .irow");
+                if (irowTemplate) {
+                    var clone = irowTemplate.clone(true);
+                    var max = -1, count = 0;
+                    ilist.children(".irow").each(function (i, n) {
+                        var current = new Number($(n).find("> .inav > .ikey").text());
+                        if (current > max) {
+                            max = current;
+                        }
+                        count++;
+                    });
+                    clone.find("> .inav > .ikey").text(++max);
+                    ilist.append(clone);
+                    //
+                    inav.children(".idesc").html("Array [" + (++count) + "] <i class='fa fa-caret-down'></i>");
+                    imulti.show();
+                }
+            });
+            $(".del-list-item").click(function () {
+                var con = window.confirm('确定要删除此节点么？');
+                if (!con) {
+                    return false;
+                }
+                var irow = $(this).closest(".irow");
+                var count = irow.siblings(".irow").length;
+                var parentInav = irow.parent().closest(".irow").children(".inav");
+                parentInav.children(".idesc").html("Array [" + count + "] <i class='fa fa-caret-down'></i>");
+                irow.remove();
+            });
+
+            // datetime
+            $(".get-current-time").click(function () {
+                var irow = $(this).closest(".irow");
+                var ivalue = irow.find("> .inav > .ivalue");
+                var val = moment.utc().format("YYYY-MM-DD HH:mm:ss.SSSSSS");
+                ivalue.html("<span>" + val + "</span>");
+                ivalue.next(":hidden").val(val);
+            });
+
+        });
+
+        function validate(type, val) {
+            /* Type validation
+             - Build-in Type
+             bool,
+             int,
+             long,
+             float,
+             unicode,
+             datetime,
+             ObjectId,
+             - SchemaOperator
+             IN
+             */
+            var msg = null;
+            if ($.inArray(type, ["int", "long"]) >= 0) {
+                msg = val.match(/^\d+$/) ? null : "Invalid " + type + "!";
+            } else if ($.inArray(type, ["float"]) >= 0) {
+                msg = val.match(/^-?\d*(\.\d+)?$/) ? null : "Invalid " + type + "!";
+            } else if ($.inArray(type, ["unicode", "str"]) >= 0) {
+                //
+            } else if ($.inArray(type, ["datetime"]) >= 0) {
+                msg = moment(val, ["YYYY-MM-DD HH:mm:ss.SSSSSS", "YYYY-MM-DD HH:mm:ss.SSS", "YYYY-MM-DD HH:mm:ss"], true).isValid() ? null : "Invalid " + type + "!";
+            } else if ($.inArray(type, ["ObjectId"]) >= 0) {
+                msg = val.match(/^[0-9a-fA-F]{24}$/) ? null : "Invalid " + type + "!";
+            }
+            return msg;
+        }
+
+        function save(btn, copy) {
+            copy = copy || false;
+            if (btn.is(".doing")) {
+                return;
+            }
+            if (isEditing()) {
+                showError("{{ _('Some fields are being editing, can not save!') }}");
+                return false;
+            }
+            var msg = copy ? "{{ _('Are you sure to copy this record?') }}" : "{{ _('Are you sure to save this record?') }}";
+            var con = window.confirm(msg);
+            if (!con) {
+                return false;
+            }
+
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            var param = {"r": Math.random()};
+            process(param, $("#doc > .ivalue"), "{{ model.__name__|lower }}");
+            if (console && console.log) {
+                console.log(param);
+            }
+
+            {% if change %}
+                var url = copy ? "/crud/create/{{ model.__name__|lower }}" : "/crud/save/{{ model.__name__|lower }}/{{ record._id|string }}";
+            {% else %}
+                var url = "/crud/create/{{ model.__name__|lower }}";
+            {% endif %}
+            $.post(url, param, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    if (copy) {
+                        location.href = "/crud/change/{{ model.__name__|lower }}/" + result.rid;
+                    }
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, "json");
+        }
+
+        function isEditing() {
+            return $("#doc .inav.iseditor").length > 0;
+        }
+
+        function process(param, ivalue, path) {
+            // console.log("Try to process path " + path + " - " + ivalue.attr("class"));
+            if (ivalue.is(".imulti")) {
+                ivalue.find("> .ilist > .irow").each(function (i, n) {
+                    var iv = $(n).find("> .inav > .ivalue");
+                    if (iv.length == 0) {
+                        iv = $(n).find("> .ivalue.imulti");
+                    }
+                    if (ivalue.is(".dict")) {
+                        process(param, iv, path + "." + iv.attr("name"));
+                    } else if (ivalue.is(".list")) {
+                        process(param, iv, path + "[" + i + "]");
+                    }
+                });
+            } else {
+                var hidden = ivalue.next(":hidden");
+                var val = hidden.val();
+                if (val.length > 0) {
+                    param[path] = hidden.val();
+                }
+            }
+        }
+    </script>
+{% endblock %}

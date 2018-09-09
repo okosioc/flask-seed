@@ -1,0 +1,157 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('Change Post') if post else _('New Post') }}{% endblock %}
+
+{% block style %}
+    <link href="{{ base_url() }}/plugins/chosen/chosen.min.css" rel="stylesheet">
+    <link href="{{ base_url() }}/plugins/pen/pen.css" rel="stylesheet">
+    <style>
+        #post-body {
+            padding: 12px;
+            width: 100%;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 18px;
+            line-height: 1.42857143;
+            min-height: 400px;
+        }
+
+        #post-body img {
+            max-width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>{{ _('Change Post') if post else _('New Post') }}</h2>
+                <form class="m-b-20">
+                    <div class="form-group">
+                        <label>{{ _('Title') }}</label>
+                        <input id="post-title" class="form-control" value="{{ post.title if post else '' }}"/>
+                    </div>
+                    <div class="form-group">
+                        <label>{{ _('Tags') }}</label>
+                        <select data-placeholder="{{ _('Choose a tag...') }}" id="post-tags" multiple
+                                class="form-control">
+                            {% for t in tags %}
+                                <option value="{{ t._id }}" {{ 'selected' if post and t._id in post.tids else '' }}>{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>{{ _('Body') }}</label>
+                        <div id="post-body" contenteditable>{{ post.body|safe if post else '' }}</div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="save($(this))">{{ _('Save') }}</button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <div class="m-b-20">
+                    <h3>{{ _('Tags') }}</h3>
+                    <a href="/blog/index" class="btn btn-primary">#{{ _('All') }}</a>
+                    {% for t in tags %}
+                        <a href="/blog/index?t={{ t._id }}"
+                           class="btn btn-primary">#{{ _(t.name) }}</a>
+                    {% endfor %}
+                </div>
+                <div>
+                    <h3>{{ _('Editing Helps') }}</h3>
+                    <p>{{ _('Select to apply effect, click items of toolbar to toggle effects.') }}</p>
+                    <p>{{ _('Markdown commands are supported:') }}</p>
+                    <ul>
+                        <li>{{ _('Headings: type 1~6 <code>#</code> at the line start') }}</li>
+                        <li>{{ _('Unordered List: type <code>-</code> or <code>*</code>') }}</li>
+                        <li>{{ _('Ordered List: type <code>1.</code>') }}</li>
+                        <li>{{ _('Code block: type <strong>```</strong>') }}</li>
+                        <li>{{ _('Block Quote: type <code>&gt;</code>') }}</li>
+                        <li>{{ _('Horizontal Rule: more than 3 <code>-</code>, <code>*</code>, <code>.</code> will create a <code>&lt;hr /&gt;</code>, like <code>......</code>') }}</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ base_url() }}/plugins/chosen/chosen.jquery.min.js" type="text/javascript"></script>
+    <script src="{{ base_url() }}/plugins/pen/pen.js" type="text/javascript"></script>
+    <script src="{{ base_url() }}/plugins/pen/markdown.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#post-tags").chosen();
+        });
+
+        // Editor
+        var options = {
+            editor: document.getElementById("post-body"),
+            class: "pen",
+            debug: false,
+            textarea: "<textarea name='content'></textarea>",
+            list: [
+                'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist',
+                'bold', 'italic', 'underline', 'createlink', 'insertimage'
+            ],
+            stay: false,
+            linksInNewWindow: true
+        };
+        var editor = new Pen(options);
+
+        function save(btn) {
+            if (!editor) {
+                return
+            }
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("{{ _('Sure to publish this post?') }}");
+            if (!con) {
+                return false;
+            }
+
+            var title = $("#post-title").val();
+            var body = $("#post-body").html();
+            if (!title) {
+                showError("{{ _('Post title can not be blank!') }}");
+                return false;
+            }
+            if (!body) {
+                showError("{{ _('Post body can not be blank!') }}");
+                return false;
+            }
+
+            // Set doing to prevent duplicate clicks
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            var param = {"r": Math.random()};
+            {% if post %}
+                var action = "/blog/post/change/{{ post._id }}";
+            {% else %}
+                var action = "/blog/post/new";
+            {% endif %}
+            param["post.title"] = title;
+            param["post.body"] = body;
+            $("#post-tags option:selected").each(function (i, n) {
+                param["post.tids[" + i + "]"] = $(n).attr("value");
+            });
+
+            // Post
+            $.post(action, param, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    location.href = "/blog/post/" + result.pid
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+    </script>
+{% endblock %}

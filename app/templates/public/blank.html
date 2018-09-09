@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('Blank Page') }}{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h1>{{ _('Blank Page') }}</h1>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        function action(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("action?");
+            if (!con) {
+                return false;
+            }
+
+            // Validation goes here.
+
+            // Set doing to prevent duplicate clicks
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            // Post
+            $.post("action", {"r": Math.random()}, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "layout.html" %}
+
+{% block title %}SEO{% endblock %}
+
+{% block main_inner %}
+    <div class="container">
+        <div class="row">
+            <!-- main start -->
+            <div class="main col-md-9">
+                <h3>长尾关键字管理</h3>
+                <div class="separator-2"></div>
+                <form class="form-horizontal" id="form-query">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">当前关键字</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <mark>{{ keyword.name }}</mark>
+                                By {{ keyword.owner|d('-', true) }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">关键词状态</label>
+                        <div class="col-sm-10" style="margin-top:7px;">
+                            {% set status = [['bare','待处理'],['processed','已处理'],['repeated','标记为重复'],['rejected','已屏蔽']] %}
+                            {% for s in status %}
+                                <label style="font-weight:normal;">
+                                    <input {{ 'checked' if s[0] in request.args.get('status', 'bare,processed,repeated') else '' }}
+                                            name="status"
+                                            type="checkbox"
+                                            value="{{ s[0] }}"> {{ s[1] }}</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="query(1);">查询</button>
+                            &nbsp;&nbsp;
+                            <button type="button" class="btn btn-default btn-sm" onclick="refresh($(this));">刷新</button>
+                        </div>
+                    </div>
+                </form>
+                <hr style="width:61.8%;margin-bottom:30px;">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>关键词</th>
+                        <th>百度指数</th>
+                        <th>百度搜索结果数</th>
+                        <th>状态</th>
+                        <th>动作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if keywords %}
+                        {% for k in keywords %}
+                            <tr>
+                                <td>{{ k.name }}</td>
+                                <td><a href="http://index.baidu.com/?tpl=trend&word={{ k.name|urlquote('gbk') }}"
+                                       target="_blank" style="color:#666;">{{ k.baiduIndex|commas }}</a></td>
+                                <td><a href="http://www.baidu.com/s?wd={{ k.name }}"
+                                       target="_blank" style="color:#666;">{{ k.baiduResult|commas }}</a></td>
+                                <td>{{ k.status }}</td>
+                                <td>
+                                    <a href="/seo/hearsay/{{ k._id }}" title="撰写文章" target="_blank"><i
+                                            class="fa fa-file-text-o"></i></a>&nbsp;
+                                    <a href="/crud/change/keyword/{{ k._id }}" target="_blank" title="编辑"><i
+                                            class="fa fa-edit"></i></a>&nbsp;
+                                    <a href="http://www.5118.com/seo/words/{{ k.name }}" target="_blank"
+                                       title="5118关键词挖掘">5</a>&nbsp;
+                                    {% if k.refer %}
+                                        <a href="{{ k.refer }}" target="_blank" title="关键词源链接">源</a>&nbsp;
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7">没有找到相关的关键词！</td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+                {% if pagination.pages > 0 %}
+                    <div class="text-center">
+                        <ul class="pagination" style="margin-bottom:20px;">
+                            {% if pagination.has_prev %}
+                                <li><a href="javascript:;" onclick="query({{ pagination.page - 1 }})"><</a></li>
+                            {% endif %}
+                            {% for page in pagination.iter_pages() %}
+                                {% if page %}
+                                    {% if page != pagination.page %}
+                                        <li><a href="javascript:;" onclick="query({{ page }})">{{ page }}</a></li>
+                                    {% else %}
+                                        <li class="active">
+                                            <a href="javascript:;">{{ page }}<span class="sr-only">(current)</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li><a href="javascript:;">...</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if pagination.has_next %}
+                                <li><a href="javascript:;" onclick="query({{ pagination.page + 1 }})">></a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- main end -->
+            <!-- sidebar start -->
+            <aside class="col-md-3">
+                <div class="sidebar">
+                    <div class="block clearfix">
+                        <h4 class="title">关键字基本信息</h4>
+                        <div class="separator"></div>
+                        <p>该关键字为{{ '站点关键字' if keyword.level == 1 else '长尾关键字' }}。</p>
+                        <table class="table table-striped">
+                            <tr>
+                                <td>指数</td>
+                                <td>搜索</td>
+                                <td>动作</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="http://index.baidu.com/?tpl=trend&word={{ keyword.name|urlquote('gbk') }}"
+                                       target="_blank">{{ keyword.baiduIndex|commas }}</a></td>
+                                <td>
+                                    <a href="http://www.baidu.com/s?wd={{ keyword.name }}"
+                                       target="_blank">{{ keyword.baiduResult|commas }}</a>
+                                </td>
+                                <td>
+                                    <a href="/crud/change/keyword/{{ keyword._id }}" target="_blank" title="编辑"><i
+                                            class="fa fa-edit"></i></a>&nbsp;
+                                    <a href="http://www.5118.com/seo/words/{{ keyword.name }}" target="_blank"
+                                       title="5118关键词挖掘">5</a>&nbsp;
+                                    {% if keyword.refer %}
+                                        <a href="{{ keyword.refer }}" target="_blank" title="关键词源链接">源</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="block clearfix">
+                        <h4 class="title">注意事项</h4>
+                        <div class="separator"></div>
+                        <p>为每个长尾关键词撰写一篇原创文章。如果长尾词的百度指数很高，可以考虑升级为站点关键词。</p>
+                    </div>
+                </div>
+            </aside>
+            <!-- sidebar end -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        function query(page) {
+            var status = [];
+            $("#form-query :checkbox[name='status']:checked").each(function (i, n) {
+                status.push($(n).val());
+            });
+            location.href = "{{ page_base }}?page=" + page + "&status=" + status.join(',');
+        }
+        function refresh(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+
+            var con = window.confirm("确定要刷新「{{ keyword.name }}」的长尾关键字么？");
+            if (!con) {
+                return false;
+            }
+
+            // Validation goes here.
+
+            // Set doing to prevent duplicate clicks
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            // Post
+            $.post("/seo/refresh/{{ keyword._id }}", {"r": Math.random()}, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+    </script>
+{% endblock %}

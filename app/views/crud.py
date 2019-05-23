@@ -17,7 +17,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.extensions import mdb
 from app.mongosupport import Pagination, populate_model, MongoSupportError, convert_from_string
-from app.tools import check_roles, role_admin
+from app.tools import check_permission, permission_admin
 
 crud = Blueprint('crud', __name__)
 
@@ -26,7 +26,7 @@ PAGE_COUNT = 30
 
 @crud.route('/index')
 @crud.route('/index/<string:model_name>')
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def index(model_name=None):
     """
     Index page.
@@ -94,7 +94,7 @@ def index(model_name=None):
 
 @crud.route('/new/<string:model_name>')
 @crud.route('/change/<string:model_name>/<ObjectId:record_id>', endpoint='change_model')
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def form(model_name, record_id=None):
     """
     Form page which is used to new/change a record.
@@ -115,7 +115,7 @@ def form(model_name, record_id=None):
 
 
 @crud.route('/json/<string:model_name>/<ObjectId:record_id>')
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def json(model_name, record_id):
     """
     Output a json string for specified record.
@@ -134,7 +134,7 @@ def json(model_name, record_id):
 
 @crud.route('/create/<string:model_name>', methods=('POST',))
 @crud.route('/save/<string:model_name>/<ObjectId:record_id>', methods=('POST',))
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def save(model_name, record_id=None):
     """
     Create a new record or save an existing record.
@@ -160,7 +160,7 @@ def save(model_name, record_id=None):
 
 
 @crud.route('/delete/<string:model_name>/<ObjectId:record_id>', methods=('GET', 'POST'))
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def delete(model_name, record_id):
     """
     Delete record.

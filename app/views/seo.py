@@ -18,7 +18,7 @@ from werkzeug.urls import url_quote
 
 from app.models import KeywordLevel, KeywordStatus, Keyword
 from app.mongosupport import Pagination
-from app.tools import async_exec, check_roles, role_admin
+from app.tools import async_exec, check_permission, permission_admin
 
 seo = Blueprint('seo', __name__)
 
@@ -43,7 +43,7 @@ ss.headers.update(headers)
 
 @seo.route('/')
 @seo.route('/index')
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def index():
     """
     关键词管理首页, 列举站点级别的关键词, 并支持简单查询和翻页.
@@ -85,7 +85,7 @@ def set_index(k):
 
 
 @seo.route('/longtail/<ObjectId:keyword_id>')
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def longtail(keyword_id):
     """
     获取指定站点关键字下的长尾关键字.
@@ -113,7 +113,7 @@ def longtail(keyword_id):
 
 
 @seo.route('/hearsay/<ObjectId:keyword_id>', methods=('GET', 'POST'))
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def hearsay(keyword_id):
     """
     编辑关键字对应的文章.
@@ -165,7 +165,7 @@ def notify_baidu(app, id):
 
 
 @seo.route('/refresh/<ObjectId:keyword_id>', methods=('POST',))
-@check_roles([role_admin])
+@check_permission(permission_admin)
 def refresh(keyword_id):
     """
     刷新一个指定关键字的长尾关键字.

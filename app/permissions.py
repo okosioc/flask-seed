@@ -14,6 +14,5 @@ from flask_principal import RoleNeed, Permission
 auth_permission = Permission(RoleNeed('authenticated'))
 admin_permission = Permission(RoleNeed('admin'))
 
-# this is assigned when you want to block a permission to all
-# never assign this role to anyone !
+# this is assigned when you want to block a permission to all, never assign this role to anyone!
 null = Permission(RoleNeed('null'))

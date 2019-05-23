@@ -15,16 +15,14 @@ from threading import Thread
 from flask import abort
 from flask_login import current_user, login_required
 
-from app.extensions import cache
 from app.permissions import admin_permission
 
-# 角色定义
-role_admin = 'admin'  # 管理员
+permission_admin = 'admin'
 
 
 def async_exec(f):
     """
-    异步执行函数.
+    Async execution.
     """
 
     @wraps(f)
@@ -40,7 +38,7 @@ def async_exec(f):
 
 def user_not_rejected(f):
     """
-    检测当前用户是否被封.
+    Check if user is rejected.
     """
 
     @wraps(f)
@@ -52,31 +50,11 @@ def user_not_rejected(f):
     return wrapper
 
 
-def user_not_evil(f):
+def check_permission(needed=None):
     """
-    检测当前用户是否是非法用户.
-    1) 15秒内不能重复操作.
-    """
+    Check permission needed.
 
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        key = 'evil_' + str(current_user._id)
-        rv = cache.get(key)
-        if not rv:
-            # 15秒
-            cache.set(key, object(), timeout=15)
-        else:
-            abort(403)
-        return f(*args, **kwargs)
-
-    return wrapper
-
-
-def check_roles(needed=[]):
-    """
-    检查所需权限，默认调用该装饰器的函数需要登录并且是非拒绝用户.
-
-    :param needed:权限列表，参照本文件开头处常量定义
+    :param needed:
     :return:
     """
 
@@ -85,7 +63,7 @@ def check_roles(needed=[]):
         @login_required
         @user_not_rejected
         def wrapper(*args, **kwargs):
-            if role_admin in needed:
+            if needed == 'permission_admin':
                 with admin_permission.require(403):
                     pass
 

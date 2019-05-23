@@ -17,7 +17,7 @@ env.password = ''
 # The servers where the commands are executed
 env.hosts = ['']
 # www folder
-project_folder = '/appl/projects/fb/www'
+project_folder = '/appl/projects/seed/www'
 
 
 def deploy():
@@ -37,10 +37,10 @@ def deploy():
             run('git pull')
             # Restart unicorn
             # run('killall -9 gunicorn')
-            # run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 -D --log-file app/logs/gunicorn.log')
+            # run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 -D --timeout 300 --log-file app/logs/gunicorn.log')
             run('kill -HUP `cat wsgi.pid`')
 
 
 def ustart():
     with cd(project_folder):
-        run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 --log-file app/logs/gunicorn.log')
+        run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 -D --timeout 300 --log-file app/logs/gunicorn.log')

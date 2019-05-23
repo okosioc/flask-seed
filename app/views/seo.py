@@ -18,8 +18,7 @@ from werkzeug.urls import url_quote
 
 from app.models import KeywordLevel, KeywordStatus, Keyword
 from app.mongosupport import Pagination
-from app.permissions import admin_permission
-from app.tools import async_exec
+from app.tools import async_exec, check_roles, role_admin
 
 seo = Blueprint('seo', __name__)
 
@@ -44,7 +43,7 @@ ss.headers.update(headers)
 
 @seo.route('/')
 @seo.route('/index')
-@admin_permission.require(403)
+@check_roles([role_admin])
 def index():
     """
     关键词管理首页, 列举站点级别的关键词, 并支持简单查询和翻页.
@@ -86,7 +85,7 @@ def set_index(k):
 
 
 @seo.route('/longtail/<ObjectId:keyword_id>')
-@admin_permission.require(403)
+@check_roles([role_admin])
 def longtail(keyword_id):
     """
     获取指定站点关键字下的长尾关键字.
@@ -114,7 +113,7 @@ def longtail(keyword_id):
 
 
 @seo.route('/hearsay/<ObjectId:keyword_id>', methods=('GET', 'POST'))
-@admin_permission.require(403)
+@check_roles([role_admin])
 def hearsay(keyword_id):
     """
     编辑关键字对应的文章.
@@ -166,7 +165,7 @@ def notify_baidu(app, id):
 
 
 @seo.route('/refresh/<ObjectId:keyword_id>', methods=('POST',))
-@admin_permission.require(403)
+@check_roles([role_admin])
 def refresh(keyword_id):
     """
     刷新一个指定关键字的长尾关键字.
@@ -195,7 +194,7 @@ def analyze_keyword(app, keyword):
     for dl in dls:
         if dl.get('class', '') == 'dl-word':
             continue
-        name = str(dl.xpath('./dd[1]//a[1]/@title')[0].strip())
+        name = dl.xpath('./dd[1]//a[1]/@title')[0].strip()
         baidu_index = dl.xpath('./dd[2]/text()')[0].strip()
         baidu_result = dl.xpath('./dd[3]/text()')[0].strip()
         if not baidu_index.isdigit():

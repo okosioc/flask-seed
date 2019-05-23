@@ -17,7 +17,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.extensions import mdb
 from app.mongosupport import Pagination, populate_model, MongoSupportError, convert_from_string
-from app.permissions import admin_permission
+from app.tools import check_roles, role_admin
 
 crud = Blueprint('crud', __name__)
 
@@ -26,7 +26,7 @@ PAGE_COUNT = 30
 
 @crud.route('/index')
 @crud.route('/index/<string:model_name>')
-@admin_permission.require(403)
+@check_roles([role_admin])
 def index(model_name=None):
     """
     Index page.
@@ -55,7 +55,7 @@ def index(model_name=None):
                     index_dict[val] = model._valid_paths[val]
 
     # 查询条件
-    ''' 20161123/Samuel/暂时不使用populate_model来生成查询条件g
+    ''' 20161123/Samuel/暂时不使用populate_model来生成查询条件
     # 调用populate_model将查询条件转化为数据对象, 会自动转换查询条件的数据类型
     search_record = populate_model(request.args, model, False)
     # 将数据对象中非空的值提取出来, 构造成一个mongoDB查询的条件
@@ -93,8 +93,8 @@ def index(model_name=None):
 
 
 @crud.route('/new/<string:model_name>')
-@crud.route('/change/<string:model_name>/<ObjectId:record_id>')
-@admin_permission.require(403)
+@crud.route('/change/<string:model_name>/<ObjectId:record_id>', endpoint='change_model')
+@check_roles([role_admin])
 def form(model_name, record_id=None):
     """
     Form page which is used to new/change a record.
@@ -115,7 +115,7 @@ def form(model_name, record_id=None):
 
 
 @crud.route('/json/<string:model_name>/<ObjectId:record_id>')
-@admin_permission.require(403)
+@check_roles([role_admin])
 def json(model_name, record_id):
     """
     Output a json string for specified record.
@@ -134,7 +134,7 @@ def json(model_name, record_id):
 
 @crud.route('/create/<string:model_name>', methods=('POST',))
 @crud.route('/save/<string:model_name>/<ObjectId:record_id>', methods=('POST',))
-@admin_permission.require(403)
+@check_roles([role_admin])
 def save(model_name, record_id=None):
     """
     Create a new record or save an existing record.
@@ -151,16 +151,16 @@ def save(model_name, record_id=None):
             record._id = ObjectId()
             record.save(True)
     except (MongoSupportError, DuplicateKeyError) as err:
-        return jsonify(success=False, message='Save failed! (%s)' % str(err.message))
+        return jsonify(success=False, message='Save failed! (%s)' % err.message)
     except:
         current_app.logger.exception('Failed when saving %s' % model_name)
         return jsonify(success=False, message='Save failed!')
 
-    return jsonify(success=True, message='Save successfully. (%s)' % str(record._id), rid=str(record._id))
+    return jsonify(success=True, message='Save successfully. (%s)' % record._id, rid=record._id)
 
 
 @crud.route('/delete/<string:model_name>/<ObjectId:record_id>', methods=('GET', 'POST'))
-@admin_permission.require(403)
+@check_roles([role_admin])
 def delete(model_name, record_id):
     """
     Delete record.
@@ -173,4 +173,4 @@ def delete(model_name, record_id):
         abort(404)
     record.delete()
 
-    return jsonify(success=True, message='Delete successfully. (%s)' % str(record_id))
+    return jsonify(success=True, message='Delete successfully. (%s)' % record_id)

@@ -18,7 +18,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email
 
-from app.models import User
+from app.models import User, UserRole
 from app.tools import send_support_email
 
 public = Blueprint('public', __name__)
@@ -131,8 +131,17 @@ def signup():
 
         u = User()
         u.email = em
-        u.password = str(generate_password_hash(form.password.data.strip()))
+        u.password = generate_password_hash(form.password.data.strip())
         u.name = u.email.split('@')[0]
+
+        count = User.count({})
+        # Set first signup user to admin
+        if count == 0:
+            u.roles = [UserRole.MEMBER, UserRole.ADMIN]
+            current_app.logger.info('First user, set it to admin')
+        else:
+            current_app.logger.info('Current number of users is %s' % count)
+
         u.save()
 
         current_app.logger.info('A new user created, %s' % u)

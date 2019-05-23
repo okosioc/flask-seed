@@ -13,11 +13,13 @@ from flask_caching import Cache
 from flask_mail import Mail
 from flask_uploads import UploadSet, IMAGES
 
+from app.components import QiniuSupport
 from app.mongosupport import MongoSupport
 
-__all__ = ['mail', 'cache', 'mdb', 'uploads']
+__all__ = ['mail', 'cache', 'mdb', 'uploads', 'qiniu']
 
 mail = Mail()
 cache = Cache()
 mdb = MongoSupport()
 uploads = UploadSet('uploads', IMAGES)
+qiniu = QiniuSupport()

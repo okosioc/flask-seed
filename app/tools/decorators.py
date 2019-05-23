@@ -13,9 +13,13 @@ from functools import wraps
 from threading import Thread
 
 from flask import abort
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from app.extensions import cache
+from app.permissions import admin_permission
+
+# 角色定义
+role_admin = 'admin'  # 管理员
 
 
 def async_exec(f):
@@ -41,7 +45,7 @@ def user_not_rejected(f):
 
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if current_user.is_rejected:
+        if current_user.is_anonymous or current_user.is_rejected:
             abort(403)
         return f(*args, **kwargs)
 
@@ -66,3 +70,27 @@ def user_not_evil(f):
         return f(*args, **kwargs)
 
     return wrapper
+
+
+def check_roles(needed=[]):
+    """
+    检查所需权限，默认调用该装饰器的函数需要登录并且是非拒绝用户.
+
+    :param needed:权限列表，参照本文件开头处常量定义
+    :return:
+    """
+
+    def decorator(f):
+        @wraps(f)
+        @login_required
+        @user_not_rejected
+        def wrapper(*args, **kwargs):
+            if role_admin in needed:
+                with admin_permission.require(403):
+                    pass
+
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

@@ -65,7 +65,7 @@ def fetch_keywords():
         msg = 'Processing keyword %s' % link.get('title')
         text = link.get('title').strip()
         keyword = Keyword.find_one({'name': text})
-        name = str(text)
+        name = text
         if keyword:
             msg += ', skipped as existing'
         else:
@@ -101,7 +101,7 @@ def analyze_keyword(k):
     for dl in dls:
         if dl.get('class', '') == 'dl-word':
             continue
-        name = str(dl.xpath('./dd[1]//a[1]/@title')[0].strip())
+        name = dl.xpath('./dd[1]//a[1]/@title')[0].strip()
         baidu_index = dl.xpath('./dd[2]/text()')[0].strip()
         baidu_result = dl.xpath('./dd[3]/text()')[0].strip()
         if not baidu_index.isdigit():

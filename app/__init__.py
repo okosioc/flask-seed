@@ -12,6 +12,7 @@
 import logging
 import os
 import re
+import socket
 from datetime import datetime
 from logging.handlers import SMTPHandler, TimedRotatingFileHandler
 
@@ -24,7 +25,7 @@ from flask_uploads import patch_request_class, UploadConfiguration
 from werkzeug.urls import url_quote
 
 from app import views
-from app.extensions import mail, cache, mdb, uploads
+from app.extensions import mail, cache, mdb, uploads, qiniu
 from app.jobs import init_schedule
 from app.models import User
 from app.mongosupport import MongoSupportJSONEncoder
@@ -84,6 +85,7 @@ def create_app(blueprints=None, pytest=False):
 def configure_extensions(app):
     mail.init_app(app)
     cache.init_app(app)
+    qiniu.init_app(app)
     mdb.init_app(app)
 
 
@@ -112,9 +114,9 @@ def configure_identity(app):
 def configure_uploads(app):
     """
     文件上传支持.
-    我们将图片直接保存在static目录之下, 因此在生产环境中可以直接由nginx提供服务.
-    注意我们没有调用flask_uploads的configure_uploads(), 这个方法负责为每个uploadset生成UploadConfiguration, 并且注册一个blueprint用来生成上传后的url.
-    所以我们直接初始化UploadConfiguration, 注意在上传完文件后要使用url_for('static', filename=[])来生成url.
+    将图片直接保存在static目录之下, 因此在生产环境中可以直接由nginx提供服务.
+    注意没有调用flask_uploads的configure_uploads(), 这个方法负责为每个uploadset生成UploadConfiguration, 并且注册一个blueprint用来生成上传后的url.
+    所以直接初始化UploadConfiguration, 注意在上传完文件后要使用url_for('static', filename=[])来生成url.
     """
     # 设置上传目标路径, 无需通过配置文件设置一个绝对路径
     uploads._config = UploadConfiguration(os.path.join(app.root_path, 'static', 'uploads'))
@@ -241,18 +243,20 @@ def configure_blueprints(app, blueprints):
 
 def configure_logging(app):
     subject = '[Error] %s encountered errors on %s' % (app.config['DOMAIN'], datetime.now().strftime('%Y/%m/%d'))
-    subject += (' [DEV]' if app.debug else '')
+    hostname = socket.gethostname()
+    subject += (' [%s]' % hostname if hostname else '')
 
-    if app.config['MAIL_DEFAULT_SENDER']:
-        mail_config = [(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
-                       app.config['MAIL_DEFAULT_SENDER'], app.config['ADMINS'],
-                       subject,
-                       (app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])]
-        if app.config['MAIL_USE_SSL']:
-            mail_handler = SSLSMTPHandler(*mail_config)
-        else:
-            mail_handler = SMTPHandler(*mail_config)
+    mail_config = [(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
+                   app.config['MAIL_DEFAULT_SENDER'], app.config['ADMINS'],
+                   subject,
+                   (app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])]
+    if app.config['MAIL_USE_SSL']:
+        mail_handler = SSLSMTPHandler(*mail_config)
+    else:
+        mail_handler = SMTPHandler(*mail_config)
 
+    # 产品模式时才发送错误邮件
+    if not app.debug:
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
 
@@ -272,5 +276,5 @@ def configure_logging(app):
     app.logger.addHandler(error_file_handler)
 
     # Flask运行在产品模式时, 只会输出ERROR, 此处使之输入INFO
-    if not app.config['DEBUG']:
+    if not app.debug:
         app.logger.setLevel(logging.INFO)

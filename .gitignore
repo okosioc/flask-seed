@@ -1,5 +1,6 @@
 # Byte-compiled
 *.pyc
+*.DS_Store
 
 # Logs
 app/logs/*.log
@@ -13,6 +14,8 @@ instance/config.py
 
 # Data preparation
 app/scripts/*.json
+app/scripts/*.log
+app/scripts/templates/out*
 
 # Wsgi
 wsgi.pid
@@ -21,9 +24,10 @@ wsgi.pid
 app/static/uploads/
 app/static/downloads/
 app/static/exports/
+app/static/reports/
 
-# npm
-node_modules/
+# Qiniu
+.qiniu*
 
 # pytest
 .pytest_cache

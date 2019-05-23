@@ -105,7 +105,6 @@ DATETIME_FORMATS = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%dT%H:%M
 AUTHORIZED_TYPES = [
     bool,
     int,
-    int,
     float,
     str,
     datetime,
@@ -122,7 +121,7 @@ class MongoSupportJSONEncoder(json.JSONEncoder):
         if isinstance(o, ObjectId):
             return str(o)
         elif isinstance(o, datetime):
-            return str(o.strftime(DATETIME_FORMATS[0]))
+            return o.strftime(DATETIME_FORMATS[0])
 
         return json.JSONEncoder.default(self, o)
 
@@ -401,7 +400,6 @@ class Model(dict, metaclass=ModelMetaclass):
     必填和验证器的逻辑可以勉强实现一致, 但是设置默认值的逻辑则不完全相同,
     mongoengine总是可以在生成这个子数据对象的时候初始化默认值, 而mongosupport作为一个整体, 初始化的机会只有一次,
     后续想要添加子数据结构的时候, 则没有生成默认值的机制了, 除非使用自己定义的dict（牺牲代码的简洁度）或者是重载__setattr__方法.
-
     '''
 
     # 必填字段
@@ -552,9 +550,9 @@ class Model(dict, metaclass=ModelMetaclass):
                     for validator in validators:
                         try:
                             if not validator(val):
-                                raise DataError("%s does not pass the validator " + validator.__name__)
+                                raise DataError("%s does not pass the validator %s" % (key, validator.__name__))
                         except Exception as e:
-                            self._raise_exception(DataError, key, str(e) % key)
+                            self._raise_exception(DataError, key, e.message)
 
     def _raise_exception(self, exception, field, message):
         """
@@ -579,7 +577,9 @@ class Model(dict, metaclass=ModelMetaclass):
                 if val is None or key not in val:
                     continue
                 val = val[key]
-                if isinstance(val, list):
+                if val is None:
+                    continue
+                elif isinstance(val, list):
                     for v in val:
                         new_vals.append(v)
                 else:
@@ -744,6 +744,15 @@ class Model(dict, metaclass=ModelMetaclass):
     def find_one(cls, filter_or_id=None, *args, **kwargs):
         collection = cls.get_collection(**kwargs)
         doc = collection.find_one(filter_or_id, *args, **kwargs)
+        if doc:
+            return cls(doc)
+        else:
+            return None
+
+    @classmethod
+    def find_one_and_update(cls, filter_or_id, update, *args, **kwargs):
+        collection = cls.get_collection(**kwargs)
+        doc = collection.find_one_and_update(filter_or_id, update, *args, **kwargs)
         if doc:
             return cls(doc)
         else:
@@ -963,8 +972,8 @@ class ModelCursor(PyMongoCursor):
         self._document_class = document_class
         super(ModelCursor, self).__init__(collection, *args, **kwargs)
 
-    def __next__(self):
-        return self._document_class(next(super(ModelCursor, self)))
+    def next(self):
+        return self._document_class(super(ModelCursor, self).next())
 
     def __next__(self):
         return self._document_class(super(ModelCursor, self).__next__())
@@ -1096,7 +1105,7 @@ def _get_connection(alias=DEFAULT_CONNECTION_NAME, reconnect=False):
 
 def get_db(alias=DEFAULT_CONNECTION_NAME, reconnect=False):
     """
-    获取数据库实例
+    获取数据库实例.
     """
     global _dbs
 
@@ -1239,11 +1248,8 @@ class DotListProxy(MutableSequence, object):
     def __delitem__(self, index):
         del self._obj_[index]
 
-    def insert(self, index, value):
-        if isinstance(value, (DotDictProxy, DotListProxy)):
-            self._obj_.insert(index, value._obj_)
-        else:
-            self._obj_.insert(index, value)
+    def __reversed__(self):
+        return self._obj_.__reversed__()
 
     def __len__(self):
         return self._obj_.__len__()
@@ -1258,6 +1264,24 @@ class DotListProxy(MutableSequence, object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    def insert(self, index, value):
+        if isinstance(value, (DotDictProxy, DotListProxy)):
+            self._obj_.insert(index, value._obj_)
+        else:
+            self._obj_.insert(index, value)
+
+    def append(self, value):
+        if isinstance(value, (DotDictProxy, DotListProxy)):
+            self._obj_.append(value._obj_)
+        else:
+            self._obj_.append(value)
+
+    def remove(self, value):
+        self._obj_.remove(value)
+
+    def reverse(self):
+        self._obj_.reverse()
 
     def raw(self):
         return self._obj_

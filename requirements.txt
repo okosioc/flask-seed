@@ -16,3 +16,7 @@ requests
 lxml
 # mac: xcode-select --install
 # centos: yum install python-lxml libxml2-devel libxslt-devel
+arrow
+qiniu
+pandas
+pydash==4.5.0 # error in macOS with 4.7.2

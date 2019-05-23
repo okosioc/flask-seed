@@ -2,7 +2,7 @@ DOMAIN = 'flask-seed.com'
 
 ENV = 'production'
 DEBUG = False
-SECRET_KEY = 'this is a secret'
+SECRET_KEY = '<FIXME>'
 
 CACHE_TYPE = "simple"
 CACHE_DEFAULT_TIMEOUT = 300
@@ -22,12 +22,17 @@ MAIL_SERVER = 'smtp.mxhichina.com'
 MAIL_PORT = 465
 MAIL_USE_TLS = False
 MAIL_USE_SSL = True
-MAIL_USERNAME = ''
-MAIL_PASSWORD = ''
-MAIL_DEFAULT_SENDER = ''
+MAIL_USERNAME = '<FIXME>'
+MAIL_PASSWORD = '<FIXME>'
+MAIL_DEFAULT_SENDER = '<FIXME>'
 
 MONGODB_DATABASE = 'flask-seed'
 MONGODB_HOST = 'localhost'
 MONGODB_PORT = 27017
 MONGODB_USERNAME = None
 MONGODB_PASSWORD = None
+
+QINIU_AK = '<FIXME>'
+QINIU_SK = '<FIXME>'
+QINIU_BUCKET = 'flask-seed'
+QINIU_BASE_URL = 'http://cdn.flask-seed.com'

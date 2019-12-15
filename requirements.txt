@@ -19,4 +19,4 @@ lxml
 arrow
 qiniu
 pandas
-pydash==4.5.0 # error in macOS with 4.7.2
+pydash

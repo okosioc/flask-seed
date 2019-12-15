@@ -364,7 +364,7 @@
         </div>
         <div class="ivalue imulti dict" name="{{ name }}">
             <div class="ilist">
-                {% for k,v in struct.iteritems() %}
+                {% for k,v in struct.items() %}
                     {% if is_root and k =='_id' %}
                         {# skip #}
                     {% else %}
@@ -458,7 +458,7 @@
                 <span>{{ value }}</span>
             {% endif %}
         </div>
-    {%- elif type.__name__ in ['unicode'] -%}
+    {%- elif type.__name__ in ['str'] -%}
         <div class="ivalue string" name="{{ name }}">
             {% if value is none %}
                 <span class="null">Null</span>

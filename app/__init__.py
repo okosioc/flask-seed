@@ -43,7 +43,7 @@ DEFAULT_BLUEPRINTS = (
 )
 
 
-def create_app(blueprints=None, pytest=False):
+def create_app(blueprints=None, pytest=False, runscripts=False):
     if blueprints is None:
         blueprints = DEFAULT_BLUEPRINTS
 
@@ -60,7 +60,7 @@ def create_app(blueprints=None, pytest=False):
     app.config.from_object('app.config')
     app.config.from_pyfile('config.py')
     if pytest:
-        # 使用测试数据库
+        # Use test db
         app.config['MONGODB_DATABASE'] = 'pytest'
 
     # Chain
@@ -73,7 +73,8 @@ def create_app(blueprints=None, pytest=False):
     configure_template_filters(app)
     configure_context_processors(app)
     configure_i18n(app)
-    configure_schedulers(app)
+    if not pytest and not runscripts:  # Do not start schedules during testing
+        configure_schedulers(app)
     configure_uploads(app)
 
     # Register blueprints
@@ -131,15 +132,15 @@ def configure_i18n(app):
     def get_locale():
         if has_request_context() and request:
             # 某个请求加了此参数, 则保存到session中, 优先使用此locale
-            l = request.args.get('locale', None)
+            l = request.args.get('_locale', None)
             if l:
                 accept_languages = app.config.get('ACCEPT_LANGUAGES')
                 if l not in accept_languages:
                     l = request.accept_languages.best_match(accept_languages)
-                session['locale'] = l
+                session['_locale'] = l
 
             # 从Session中读取locale, 没有则读取默认值
-            sl = session.get('locale', app.config.get('BABEL_DEFAULT_LOCALE'))
+            sl = session.get('_locale', app.config.get('BABEL_DEFAULT_LOCALE'))
             return sl
         else:
             return None

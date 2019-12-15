@@ -16,7 +16,7 @@ BABEL_DEFAULT_TIMEZONE = 'Asia/Shanghai'
 DEBUG_LOG = 'logs/debug.log'
 ERROR_LOG = 'logs/error.log'
 
-ADMINS = ['okosioc@gmail.com']
+ADMINS = ['<FIXME>']
 
 MAIL_SERVER = 'smtp.mxhichina.com'
 MAIL_PORT = 465

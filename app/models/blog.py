@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    blog
+    blog.py
     ~~~~~~~~~~~~~~
 
-    blog definition.
+    blog related models.
 
     :copyright: (c) 2016 by fengweimin.
     :date: 16/8/16

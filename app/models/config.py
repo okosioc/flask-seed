@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    teammate
+    config
     ~~~~~~~~~~~~~~
 
     Model config.

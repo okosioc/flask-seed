@@ -16,16 +16,12 @@ from app import create_app
 
 @pytest.fixture
 def app():
-    """
-    为每个测试配置一个app, 使用测试用的数据库.
-    """
+    """Prepare a app for each testing, using testing db pytest."""
     app = create_app(pytest=True)
     return app
 
 
 @pytest.fixture
 def client(app):
-    """
-    用于测试app的客户端模拟.
-    """
+    """Creates a test client for this application."""
     return app.test_client()

@@ -15,7 +15,6 @@ instance/config.py
 # Data preparation
 app/scripts/*.json
 app/scripts/*.log
-app/scripts/templates/out*
 
 # Wsgi
 wsgi.pid

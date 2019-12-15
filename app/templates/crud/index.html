@@ -24,7 +24,7 @@
                 <h4>{{ _('Query') }} {{ model.__name__ }}</h4>
                 <hr>
                 <form id="search-form" class="form-horizontal">
-                    {% for k,v in index_dict.iteritems() %}
+                    {% for k,v in index_dict.items() %}
                         <div class="form-group">
                             <label class="col-sm-2 control-label">{{ k }}</label>
                             <div class="col-sm-10">

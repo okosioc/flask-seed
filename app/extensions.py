@@ -14,7 +14,7 @@ from flask_mail import Mail
 from flask_uploads import UploadSet, IMAGES
 
 from app.components import QiniuSupport
-from app.mongosupport import MongoSupport
+from app.core import MongoSupport
 
 __all__ = ['mail', 'cache', 'mdb', 'uploads', 'qiniu']
 

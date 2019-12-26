@@ -16,7 +16,7 @@ from bson.objectid import ObjectId
 from werkzeug.utils import cached_property
 
 from app.extensions import mdb
-from app.mongosupport import Model, IN
+from app.core import Model, IN
 
 
 class KeywordLevel(object):
@@ -42,7 +42,7 @@ class KeywordStatus(object):
 @mdb.register
 class Keyword(Model):
     __collection__ = 'keywords'
-    structure = {
+    schema = {
         'name': str,
         'level': IN(KeywordLevel.SITE, KeywordLevel.LONG_TAIL),
         'status': IN(KeywordStatus.BARE, KeywordStatus.PROCESSED, KeywordStatus.REPEATED, KeywordStatus.REJECTED),

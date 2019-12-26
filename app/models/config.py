@@ -12,13 +12,13 @@
 from datetime import datetime
 
 from app.extensions import mdb
-from app.mongosupport import Model
+from app.core import Model
 
 
 @mdb.register
 class Config(Model):
     __collection__ = 'configs'
-    structure = {
+    schema = {
         'name': str,
         'createTime': datetime
     }

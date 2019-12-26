@@ -15,13 +15,13 @@ from werkzeug.utils import cached_property
 
 from app.extensions import mdb
 from app.models import User
-from app.mongosupport import Model
+from app.core import Model
 
 
 @mdb.register
 class Tag(Model):
     __collection__ = 'tags'
-    structure = {
+    schema = {
         'name': str,
         'weight': int,
         'createTime': datetime,
@@ -35,7 +35,7 @@ class Tag(Model):
 @mdb.register
 class Post(Model):
     __collection__ = 'posts'
-    structure = {
+    schema = {
         'uid': ObjectId,
         'pics': [str],
         'title': str,

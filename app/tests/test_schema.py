@@ -12,7 +12,7 @@ from datetime import datetime
 
 import pytest
 
-from app.core import IN, SchemaDict, DataError
+from app.core import IN, SchemaDict, SeedDataError
 
 
 class TestStatus:
@@ -54,18 +54,18 @@ def test_schema_dict(app):
     assert td.accounts[0].balance == 0.0
 
     # Test validate
-    with pytest.raises(DataError, match='name') as excinfo:
+    with pytest.raises(SeedDataError, match='name') as excinfo:
         td.validate()
     # print(excinfo.value)
     td.name = 'test'
 
-    with pytest.raises(DataError, match='accounts\.id') as excinfo:
+    with pytest.raises(SeedDataError, match='accounts\.id') as excinfo:
         td.validate()
     # print(excinfo.value)
     td.accounts[0].id = 'test'
 
     td.status = 'DELETED'
-    with pytest.raises(DataError, match='status') as excinfo:
+    with pytest.raises(SeedDataError, match='status') as excinfo:
         td.validate()
     # print(excinfo.value)
     td.status = TestStatus.NORMAL

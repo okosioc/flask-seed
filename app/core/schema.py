@@ -15,7 +15,6 @@ from collections import MutableSequence, MutableMapping
 from copy import deepcopy
 from datetime import datetime
 
-import pymongo
 from bson import ObjectId
 
 
@@ -24,7 +23,7 @@ from bson import ObjectId
 #
 
 class SchemaOperator(object):
-    """Customized operators which can be used to define a schema."""
+    """ Customized operators which can be used to define a schema. """
 
     repr = None
 
@@ -55,7 +54,7 @@ class SchemaOperator(object):
 
 
 class IN(SchemaOperator):
-    """Defined available values of a field."""
+    """ Defined available values of a field. """
     repr = 'in'
 
     def __init__(self, *args):
@@ -110,13 +109,13 @@ class SchemaJSONEncoder(json.JSONEncoder):
 # Exceptions
 #
 
-class SchemaError(Exception):
-    """Schema error."""
+class SeedSchemaError(Exception):
+    """ Schema error. """
     pass
 
 
-class DataError(Exception):
-    """Schema error."""
+class SeedDataError(Exception):
+    """ Data error. """
     pass
 
 
@@ -125,11 +124,11 @@ class DataError(Exception):
 #
 
 class SchemaMetaclass(type):
-    """Meta class with a simple built-in schema."""
+    """ Meta class with a simple built-in schema. """
 
     def __new__(mcs, name, bases, attrs):
-        # SchemaDict itself should be abstracted and can NOT be used directly
-        if name == 'SchemaDict':
+        # Abstract classes such as SchemaDict or Model do not define schema
+        if 'schema' not in attrs or attrs['schema'] is None:
             return type.__new__(mcs, name, bases, attrs)
 
         # Protected field names, when dot-mode enabled, can NOT use these names as schema's field names
@@ -149,14 +148,14 @@ class SchemaMetaclass(type):
             k.replace(name + '.', ''): v for k, v in attrs['_valid_paths'].items() if not k == name
         }
 
-        # Validate schema descriptors, e.g, default_values/required_fields/validators/indexes
+        # Validate schema descriptors, e.g, default_values/required_fields/validators
         mcs._validate_descriptors(name, attrs)
 
         return type.__new__(mcs, name, bases, attrs)
 
     @classmethod
     def _validate_schema(mcs, name, attrs):
-        """Validate schema."""
+        """ Validate schema. """
         schema = attrs['schema']
         protected = attrs['_protected_field_names']
 
@@ -165,131 +164,95 @@ class SchemaMetaclass(type):
             if type(_schema) is type:
                 attrs['_valid_paths'][_name] = _schema
                 if _schema not in AUTHORIZED_TYPES:
-                    raise SchemaError('%s: %s is not an authorized type' % (_name, _schema))
+                    raise SeedSchemaError('%s: %s is not an authorized type' % (_name, _schema))
             # {}
             elif isinstance(_schema, dict):
                 attrs['_valid_paths'][_name] = {}
                 if not len(_schema):
-                    raise SchemaError(
+                    raise SeedSchemaError(
                         '%s: %s can not be a empty dict' % (_name, _schema))
                 for key in _schema:
                     # Check key type
                     if isinstance(key, str):
                         if not re.match('^[a-zA-Z0-9_]+$', key):
-                            raise SchemaError('%s: %s can only contain letters, numbers or _' % (_name, key))
+                            raise SeedSchemaError('%s: %s can only contain letters, numbers or _' % (_name, key))
                         if key[0].isdigit():
-                            raise SchemaError('%s: %s must not start with digit' % (_name, key))
+                            raise SeedSchemaError('%s: %s must not start with digit' % (_name, key))
                         if attrs.get('use_dot_notation', True) and key in protected:
-                            raise SchemaError(
+                            raise SeedSchemaError(
                                 '%s: %s is a protected field name, please set use_dot_notation = False if you insist '
                                 'to use this field name; protected fields are %s.' % (_name, key, sorted(protected)))
                     else:
-                        raise SchemaError('%s: %s must be a str' % (_name, key))
+                        raise SeedSchemaError('%s: %s must be a str' % (_name, key))
 
                     __validate_schema(_schema[key], '%s.%s' % (_name, key))
             # []
             elif isinstance(_schema, list):
                 attrs['_valid_paths'][_name] = []
                 if not len(_schema):
-                    raise SchemaError(
+                    raise SeedSchemaError(
                         '%s: %s can not be a empty list' % (_name, _schema))
                 if len(_schema) > 1:
-                    raise SchemaError(
+                    raise SeedSchemaError(
                         '%s: %s must not have more then one type' % (_name, _schema))
                 __validate_schema(_schema[0], _name)
             # SchemaOperator
             elif isinstance(_schema, SchemaOperator):
                 if len(_schema) == 0:
-                    raise SchemaError('%s: %s can not be empty' % (_name, _schema))
+                    raise SeedSchemaError('%s: %s can not be empty' % (_name, _schema))
                 if isinstance(_schema, IN):
                     types = set()
                     for operand in _schema:
                         types.add(type(operand))
                         if type(operand) not in AUTHORIZED_TYPES:
-                            raise SchemaError('%s: %s in %s is not an authorized type (%s found)' % (
+                            raise SeedSchemaError('%s: %s in %s is not an authorized type (%s found)' % (
                                 _name, operand, _schema, type(operand).__name__))
                     if len(types) > 1:
-                        raise SchemaError('%s: %s can not have more than one type' % (_name, _schema))
+                        raise SeedSchemaError('%s: %s can not have more than one type' % (_name, _schema))
                     attrs['_valid_paths'][_name] = list(types)[0]
                 else:
                     for operand in _schema:
                         if operand not in AUTHORIZED_TYPES:
-                            raise SchemaError('%s: %s in %s is not an authorized type (%s found)' % (
+                            raise SeedSchemaError('%s: %s in %s is not an authorized type (%s found)' % (
                                 _name, operand, _schema, type(operand).__name__))
                     # Use tuple to represent many available types
                     attrs['_valid_paths'][_name] = tuple(_schema)
             else:
-                raise SchemaError(
+                raise SeedSchemaError(
                     '%s: %s is not a supported thing' % (_name, _schema))
 
         if schema is None:
-            raise SchemaError('%s.schema must not be None' % name)
+            raise SeedSchemaError('%s.schema must not be None' % name)
         if not isinstance(schema, dict):
-            raise SchemaError('%s.schema must be a dict instance' % name)
+            raise SeedSchemaError('%s.schema must be a dict instance' % name)
         __validate_schema(schema, name)
 
     @classmethod
     def _validate_descriptors(mcs, name, attrs):
-        """Validate schema descriptors, e.g, default_values/required_fields/validators/indexes."""
+        """ Validate schema descriptors, e.g, default_values/required_fields/validators. """
         valid_paths = attrs['_valid_paths']
 
         # default_values
         for dv in attrs.get('default_values', {}):
             if dv not in valid_paths:
-                raise SchemaError('%s: Error in default_values: can\'t find %s in schema' % (name, dv))
+                raise SeedSchemaError('%s: Error in default_values: can\'t find %s in schema' % (name, dv))
 
         # required_fields
         for rf in attrs.get('required_fields', []):
             if rf not in valid_paths:
-                raise SchemaError('%s: Error in required_fields: can\'t find %s in schema' % (name, rf))
+                raise SeedSchemaError('%s: Error in required_fields: can\'t find %s in schema' % (name, rf))
         if attrs.get('required_fields', []):
             if len(attrs['required_fields']) != len(set(attrs['required_fields'])):
-                raise SchemaError('%s: duplicate required_fields : %s' % (name, attrs['required_fields']))
+                raise SeedSchemaError('%s: duplicate required_fields : %s' % (name, attrs['required_fields']))
 
         # validators
         for v in attrs.get('validators', {}):
             if v not in valid_paths:
-                raise SchemaError('%s: Error in validators: can\'t find %s in schema' % (name, v))
-
-        # indexes
-        if attrs.get('indexes'):
-            for index in attrs['indexes']:
-                if index.get('check', True):
-                    if 'fields' not in index:
-                        raise SchemaError('%s: \'fields\' key must be specify in indexes' % name)
-                    for key, value in index.items():
-                        if key == 'fields':  # Normal Index
-                            if isinstance(value, str):
-                                if value not in valid_paths:
-                                    raise SchemaError(
-                                        '%s: Error in indexes: can\'t find %s in schema' % (name, value))
-                            elif isinstance(value, list):
-                                for val in value:
-                                    if isinstance(val, tuple):
-                                        field, direction = val
-                                        if field not in valid_paths:
-                                            raise SchemaError(
-                                                '%s: Error in indexes: can\'t find %s in schema' % (name, field))
-                                        if direction not in [pymongo.DESCENDING, pymongo.ASCENDING, pymongo.HASHED,
-                                                             pymongo.GEO2D, pymongo.GEOHAYSTACK,
-                                                             pymongo.GEOSPHERE, pymongo.TEXT]:
-                                            raise SchemaError(
-                                                '%s: index direction must be INDEX_DESCENDING, INDEX_ASCENDING, '
-                                                'INDEX_HASHED, INDEX_GEO2D, INDEX_GEOHAYSTACK, '
-                                                'INDEX_GEOSPHERE, INDEX_TEXT. Got %s' % (name, direction))
-                                    else:
-                                        if val not in valid_paths:
-                                            raise SchemaError(
-                                                '%s: Error in indexes: can\'t find %s in schema' % (name, val))
-                            else:
-                                raise SchemaError('%s: fields must be a string, a list of string or tuple '
-                                                  '(got %s instead)' % (name, type(value)))
-                        elif key == 'ttl':  # Time-To-Live Index
-                            assert isinstance(value, int)
+                raise SeedSchemaError('%s: Error in validators: can\'t find %s in schema' % (name, v))
 
 
 class SchemaDict(dict, metaclass=SchemaMetaclass):
-    """Schema dict = dict schema definition + dict content validation."""
+    """ Schema dict = dict schema definition + dict content validation. """
 
     schema = None
     required_fields = []
@@ -299,7 +262,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
     use_dot_notation = True
 
     def __init__(self, doc=None, set_default=True):
-        """ Init.
+        """Init.
 
         :param doc:
         :param set_default:
@@ -319,9 +282,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
         return "%s(%s)" % (self.__class__.__name__, dict(self))
 
     def validate(self):
-        """Validate the document.
-
-        This method will verify if:
+        """
+        Validate the document, this method will verify if:
           1. the doc follow the schema,
           2. all required fields are filled
           3. this method will process all validators.
@@ -337,19 +299,19 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
         return False if self.validation_errors else True
 
     def _validate_doc(self, doc, schema, path=""):
-        """Check if doc field types match the doc field schema."""
+        """ Check if doc field types match the doc field schema. """
         if doc is None:
             return
         # type
         if type(schema) is type:
             if not isinstance(doc, schema):
-                self._raise_exception(DataError, path,
+                self._raise_exception(SeedDataError, path,
                                       '%s must be an instance of %s not %s' % (
                                           path, schema.__name__, type(doc).__name__))
         # {}
         elif isinstance(schema, dict):
             if not isinstance(doc, dict):
-                self._raise_exception(DataError, path,
+                self._raise_exception(SeedDataError, path,
                                       '%s must be an instance of dict not %s' % (
                                           path, type(doc).__name__))
 
@@ -357,7 +319,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
             doc_schema_diff = list(set(doc).difference(set(schema)))
             bad_fields = [d for d in doc_schema_diff]
             if bad_fields:
-                self._raise_exception(DataError, None,
+                self._raise_exception(SeedDataError, None,
                                       'unknown fields %s in %s' % (bad_fields, type(doc).__name__))
             for key in schema:
                 if key in doc:
@@ -365,7 +327,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
         # []
         elif isinstance(schema, list):
             if not isinstance(doc, list):
-                self._raise_exception(DataError, path,
+                self._raise_exception(SeedDataError, path,
                                       '%s must be an instance of list not %s' % (path, type(doc).__name__))
             for obj in doc:
                 self._validate_doc(obj, schema[0], path)
@@ -373,26 +335,26 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
         elif isinstance(schema, SchemaOperator):
             if not schema.validate(doc):
                 if isinstance(schema, IN):
-                    self._raise_exception(DataError, path,
+                    self._raise_exception(SeedDataError, path,
                                           '%s must be in %s not %s' % (path, schema.operands, doc))
                 else:
-                    self._raise_exception(DataError, path,
+                    self._raise_exception(SeedDataError, path,
                                           '%s must be an instance of %s not %s' % (path, schema, type(doc).__name__))
         #
         else:
-            self._raise_exception(DataError, path,
+            self._raise_exception(SeedDataError, path,
                                   '%s must be an instance of %s not %s' % (
                                       path, schema.__name__, type(doc).__name__))
 
     def _validate_required(self, doc):
-        """Validate required fields."""
+        """ Validate required fields. """
         for rf in self.required_fields:
             vals = self._get_values_by_path(doc, rf)
             if not vals:
-                self._raise_exception(DataError, rf, '%s is required' % rf)
+                self._raise_exception(SeedDataError, rf, '%s is required' % rf)
 
     def _process_validators(self, doc):
-        """Invoke validators."""
+        """ Invoke validators. """
         for key, validators in self.validators.items():
             vals = self._get_values_by_path(doc, key)
             if vals:
@@ -402,12 +364,12 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                     for validator in validators:
                         try:
                             if not validator(val):
-                                raise DataError('%s does not pass the validator %s' % (key, validator.__name__))
+                                raise SeedDataError('%s does not pass the validator %s' % (key, validator.__name__))
                         except Exception as e:
-                            self._raise_exception(DataError, key, e.message)
+                            self._raise_exception(SeedDataError, key, e.message)
 
     def _raise_exception(self, exception, field, message):
-        """Handle exceptions."""
+        """ Handle exceptions. """
         if self.raise_validation_errors:
             raise exception(message)
         else:
@@ -416,7 +378,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
             self.validation_errors[field].append(exception(message))
 
     def _get_values_by_path(self, doc, path):
-        """Get values from a path."""
+        """ Get values from a path. """
         vals = [doc]
         for key in path.split('.'):
             # print('getting values by path %s from %s' % (key, vals))
@@ -437,7 +399,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
         return vals
 
     def _set_default_values(self, doc, schema, path=""):
-        """Set default values."""
+        """ Set default values. """
         for key in schema:
             new_path = ('%s.%s' % (path, key)).strip('.')
             # print("setting default value for %s with type %s" % (new_path, schema[key]))
@@ -485,7 +447,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                     doc[key] = new_value
 
     def __setattr__(self, key, value):
-        """Support dot notation."""
+        """ Support dot notation. """
         if self.use_dot_notation and key not in self._protected_field_names and key in self.schema:
             # print('setting attr %s with %s' % (key, value))
             if isinstance(value, (DotDictProxy, DotListProxy)):
@@ -496,7 +458,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
             dict.__setattr__(self, key, value)
 
     def __getattr__(self, key):
-        """Support dot notation."""
+        """ Support dot notation. """
         if self.use_dot_notation and key not in self._protected_field_names and key in self.schema:
             s = self.schema[key]
             found = self.get(key, None)
@@ -514,19 +476,26 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
         else:
             return dict.__getattribute__(self, key)
 
-    #
+    def __delattr__(self, key):
+        """ Support dot notation. """
+        if self.use_dot_notation and key not in self._protected_field_names and key in self.schema:
+            del self[key]
+        else:
+            dict.__delattr__(self, key)
+
+    #   
     #
     # JSON serialization
     #
     #
 
     def to_json(self, **kwargs):
-        """Convert the model instance to a json string."""
+        """ Convert the model instance to a json string. """
         return json.dumps(self, cls=SchemaJSONEncoder, **kwargs)
 
     @classmethod
     def from_json(cls, doc, **kwargs):
-        """Convert a json string to a model instance, making use of the schema for decoding."""
+        """ Convert a json string to a model instance, making use of the schema for decoding. """
 
         def json_decode(value, type):
             if value is None:
@@ -593,7 +562,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
 #
 
 class DotDictProxy(MutableMapping, object):
-    """A proxy for a dictionary that allows attribute access to underlying keys."""
+    """ A proxy for a dictionary that allows attribute access to underlying keys. """
 
     def __init__(self, obj, schema):
         self._obj_ = obj
@@ -658,7 +627,7 @@ class DotDictProxy(MutableMapping, object):
 
 
 class DotListProxy(MutableSequence, object):
-    """A proxy for a list that allows for wrapping items."""
+    """ A proxy for a list that allows for wrapping items. """
 
     def __init__(self, obj, schema):
         self._obj_ = obj
@@ -721,7 +690,7 @@ class DotListProxy(MutableSequence, object):
 
 
 def proxywrapper(value, schema):
-    """The top-level API for wrapping an arbitrary object."""
+    """ The top-level API for wrapping an arbitrary object. """
     if isinstance(schema, dict):
         return DotDictProxy(value, schema)
     if isinstance(schema, list):

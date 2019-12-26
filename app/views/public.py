@@ -61,7 +61,7 @@ class LoginForm(Form):
 
 @public.route('/login', methods=('GET', 'POST'))
 def login():
-    """Login."""
+    """ Login. """
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -89,7 +89,7 @@ def login():
 @public.route('/logout')
 @login_required
 def logout():
-    """Logout."""
+    """ Logout. """
     logout_user()
 
     # Remove session keys set by Flask-Principal
@@ -111,7 +111,7 @@ class SignupForm(Form):
 
 @public.route('/signup', methods=('GET', 'POST'))
 def signup():
-    """Signup."""
+    """ Signup. """
     form = SignupForm()
 
     if form.validate_on_submit():

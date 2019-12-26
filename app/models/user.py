@@ -15,22 +15,18 @@ from flask_login import UserMixin
 from flask_principal import RoleNeed, UserNeed
 from werkzeug.utils import cached_property
 
+from app.core import Model, IN
 from app.extensions import mdb
-from app.mongosupport import Model, IN
 
 
 class UserRole(object):
-    """
-    用户角色.
-    """
+    """ User roles. """
     MEMBER = 1
     ADMIN = 9
 
 
 class UserStatus(object):
-    """
-    用户状态.
-    """
+    """ User Status. """
     NORMAL = 'normal'
     REJECTED = 'rejected'
 
@@ -38,7 +34,7 @@ class UserStatus(object):
 @mdb.register
 class User(Model, UserMixin):
     __collection__ = 'users'
-    structure = {
+    schema = {
         'name': str,
         'email': str,
         'password': str,

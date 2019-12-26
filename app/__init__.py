@@ -25,10 +25,10 @@ from flask_uploads import patch_request_class, UploadConfiguration
 from werkzeug.urls import url_quote
 
 from app import views
+from app.core import SchemaJSONEncoder
 from app.extensions import mail, cache, mdb, uploads, qiniu
 from app.jobs import init_schedule
 from app.models import User
-from app.mongosupport import MongoSupportJSONEncoder
 from app.tools import SSLSMTPHandler, helpers
 from app.tools.converters import ListConverter, BSONObjectIdConverter
 
@@ -50,7 +50,7 @@ def create_app(blueprints=None, pytest=False, runscripts=False):
     app = Flask(DEFAULT_APP_NAME, instance_relative_config=True)
 
     # Json Encoder
-    app.json_encoder = MongoSupportJSONEncoder
+    app.json_encoder = SchemaJSONEncoder
 
     # Url converter
     app.url_map.converters['list'] = ListConverter
@@ -61,7 +61,7 @@ def create_app(blueprints=None, pytest=False, runscripts=False):
     app.config.from_pyfile('config.py')
     if pytest:
         # Use test db
-        app.config['MONGODB_DATABASE'] = 'pytest'
+        app.config['MONGODB_URI'] = app.config['MONGODB_URI_PYTEST']
 
     # Chain
     configure_extensions(app)

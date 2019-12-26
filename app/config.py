@@ -26,11 +26,8 @@ MAIL_USERNAME = '<FIXME>'
 MAIL_PASSWORD = '<FIXME>'
 MAIL_DEFAULT_SENDER = '<FIXME>'
 
-MONGODB_DATABASE = 'flask-seed'
-MONGODB_HOST = 'localhost'
-MONGODB_PORT = 27017
-MONGODB_USERNAME = None
-MONGODB_PASSWORD = None
+MONGODB_URI = 'mongodb://localhost:27017/flask-seed'
+MONGODB_URI_PYTEST = 'mongodb://localhost:27017/pytest'
 
 QINIU_AK = '<FIXME>'
 QINIU_SK = '<FIXME>'

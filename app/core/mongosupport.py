@@ -407,16 +407,16 @@ def populate_model(multidict, model_cls, set_default=True):
             key = key[len(model_prefix):]
         else:
             continue
-        # Normalized the path
+        # Normalized the path, e.g, user.roles[0] -> user.roles-0
         path = _normalized_path(key)
-        # Convert the path to dot notation
-        path = re.sub('\-[0-9]+', '.', path)
+        # Model valid paths do not contains list index, so remove them here
+        path = re.sub('\-[0-9]+', '', path)
         if path in valid_paths:
             t = valid_paths[path]
             # print "try to convert %s with value %s to type %s" % (path, value, t)
             try:
                 if isinstance(value, list):  # Value should be instance of list
-                    t = valid_paths[path + '.']
+                    t = valid_paths[path]
                     converted_value = [convert_from_string(v, t) for v in value if v]
                 else:
                     converted_value = convert_from_string(value, t)
@@ -431,7 +431,10 @@ def populate_model(multidict, model_cls, set_default=True):
 
 
 def _normalized_path(path, list_char='-'):
-    # Change [] -> - for easier processing
+    """ Change [] -> - for easier processing.
+
+    e.g, user.roles[0] -> user.roles-0
+    """
     return path.replace('[', list_char).replace(']', '')
 
 

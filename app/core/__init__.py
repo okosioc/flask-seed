@@ -10,4 +10,4 @@
 """
 
 from .schema import IN, SchemaJSONEncoder, SchemaDict, SeedDataError, SeedSchemaError, DotDictProxy, DotListProxy
-from .mongosupport import MongoSupport, Pagination, Model
+from .mongosupport import MongoSupport, Pagination, Model, populate_model, convert_from_string, SeedConnectionError

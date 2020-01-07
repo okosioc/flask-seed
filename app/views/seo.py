@@ -17,7 +17,7 @@ from lxml import html
 from werkzeug.urls import url_quote
 
 from app.models import KeywordLevel, KeywordStatus, Keyword
-from app.mongosupport import Pagination
+from app.core import Pagination
 from app.tools import async_exec, check_permission, permission_admin
 
 seo = Blueprint('seo', __name__)

@@ -17,7 +17,6 @@ DEBUG_LOG = 'logs/debug.log'
 ERROR_LOG = 'logs/error.log'
 
 ADMINS = ['<FIXME>']
-
 MAIL_SERVER = 'smtp.mxhichina.com'
 MAIL_PORT = 465
 MAIL_USE_TLS = False

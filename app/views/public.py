@@ -13,7 +13,7 @@ from flask import Blueprint, render_template, current_app, session, redirect, re
 from flask_babel import gettext as _
 from flask_login import login_user, logout_user, login_required
 from flask_principal import identity_changed, Identity, AnonymousIdentity
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email
@@ -52,7 +52,7 @@ def styleguide():
 # Login/Signup
 #
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email()])
     password = PasswordField('password', validators=[DataRequired()])
     remember = BooleanField('remember')
@@ -102,7 +102,7 @@ def logout():
     return redirect("/")
 
 
-class SignupForm(Form):
+class SignupForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email()])
     password = PasswordField('password', validators=[DataRequired()])
     repassword = PasswordField('repassword', validators=[DataRequired()])

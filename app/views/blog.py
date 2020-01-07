@@ -19,7 +19,7 @@ from flask_login import current_user
 
 from app.jobs import post_view_times_counter
 from app.models import Post, Tag, User
-from app.mongosupport import Pagination, populate_model
+from app.core import Pagination, populate_model
 from app.tools import check_permission, send_support_email
 
 blog = Blueprint('blog', __name__)

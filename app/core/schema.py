@@ -298,7 +298,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
 
         return False if self.validation_errors else True
 
-    def _validate_doc(self, doc, schema, path=""):
+    def _validate_doc(self, doc, schema, path=''):
         """ Check if doc field types match the doc field schema. """
         if doc is None:
             return

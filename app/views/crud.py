@@ -15,8 +15,8 @@ from bson.objectid import ObjectId
 from flask import Blueprint, render_template, abort, current_app, request, jsonify, make_response
 from pymongo.errors import DuplicateKeyError
 
+from app.core import Pagination, populate_model, SeedConnectionError, SeedDataError, convert_from_string
 from app.extensions import mdb
-from app.mongosupport import Pagination, populate_model, MongoSupportError, convert_from_string
 from app.tools import check_permission, permission_admin
 
 crud = Blueprint('crud', __name__)
@@ -150,7 +150,7 @@ def save(model_name, record_id=None):
         else:
             record._id = ObjectId()
             record.save(True)
-    except (MongoSupportError, DuplicateKeyError) as err:
+    except (SeedConnectionError, SeedDataError, DuplicateKeyError) as err:
         return jsonify(success=False, message='Save failed! (%s)' % err.message)
     except:
         current_app.logger.exception('Failed when saving %s' % model_name)

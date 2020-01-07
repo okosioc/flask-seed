@@ -1,18 +1,38 @@
 # -*- coding: utf-8 -*-
 """
-    test_crud
+    test_mongosupport
     ~~~~~~~~~~~~~~
 
     Test cases for mongosupport.
 
     :copyright: (c) 2018 by fengweimin.
-    :date: 2018/5/15
+    :date: 2019/12/15
 """
+from datetime import datetime
+
 import pytest
 from pymongo.errors import DuplicateKeyError
+from werkzeug.datastructures import MultiDict
 
-from app.core import SeedDataError
-from app.models import User
+from app.core import SeedDataError, populate_model
+from app.models import User, UserRole, UserStatus
+
+
+def test_populate_model(app):
+    md = MultiDict([
+        ('user.name', 'test'),
+        ('user.email', 'test@test.com'),
+        ('user.password', 'test'),
+        ('user.roles[0]', UserRole.MEMBER),
+        ('user.roles[1]', UserRole.ADMIN),
+        ('user.createTime', '2019-12-15 10:00:00')
+    ])
+    user = populate_model(md, User)
+
+    assert user.point == 0
+    assert user.status == UserStatus.NORMAL
+    assert user.is_admin
+    assert user.createTime < datetime.now()
 
 
 def test_crud(app):

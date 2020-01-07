@@ -55,6 +55,8 @@ def init_schedule(app):
     Init.
     """
     # http://stackoverflow.com/questions/9449101/how-to-stop-flask-from-initialising-twice-in-debug-mode/
+    app.logger.info('Try to init schedule, current app status is %s/%s/%s' % (
+        app.debug, app.env, os.environ.get('WERKZEUG_RUN_MAIN')))
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         t = threading.Thread(target=run_schedule, args=(app,))
         # Python threads don't die when the main thread exits, unless they are daemon threads.

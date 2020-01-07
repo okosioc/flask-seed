@@ -20,7 +20,7 @@ class TestStatus:
     REJECTED = 'rejected'
 
 
-class TestDict(SchemaDict):
+class UserDict(SchemaDict):
     schema = {
         'name': str,
         'point': int,
@@ -44,34 +44,33 @@ class TestDict(SchemaDict):
 
 
 def test_schema_dict(app):
-    td = TestDict()
+    ud = UserDict()
 
     # Test default values
-    assert td.point == 0
-    assert td['point'] == 0
-    assert td.status == TestStatus.NORMAL
-    assert td.roles[0] == 1
-    assert td.accounts[0].balance == 0.0
+    assert ud.point == 0
+    assert ud['point'] == 0
+    assert ud.status == TestStatus.NORMAL
+    assert ud.roles[0] == 1
+    assert ud.accounts[0].balance == 0.0
 
     # Test validate
     with pytest.raises(SeedDataError, match='name') as excinfo:
-        td.validate()
+        ud.validate()
     # print(excinfo.value)
-    td.name = 'test'
+    ud.name = 'test'
 
     with pytest.raises(SeedDataError, match='accounts\.id') as excinfo:
-        td.validate()
+        ud.validate()
     # print(excinfo.value)
-    td.accounts[0].id = 'test'
+    ud.accounts[0].id = 'test'
 
-    td.status = 'DELETED'
+    ud.status = 'DELETED'
     with pytest.raises(SeedDataError, match='status') as excinfo:
-        td.validate()
+        ud.validate()
     # print(excinfo.value)
-    td.status = TestStatus.NORMAL
+    ud.status = TestStatus.NORMAL
 
     # Test json
-    td_json = td.to_json()
-    td2 = TestDict.from_json(td_json)
-    assert td.createTime == td2.createTime
-
+    td_json = ud.to_json()
+    td2 = UserDict.from_json(td_json)
+    assert ud.createTime == td2.createTime

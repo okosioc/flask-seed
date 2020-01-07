@@ -3,8 +3,8 @@
     __init__.py
     ~~~~~~~~~~~~~~
 
-    # Enter description here
+    API definition.
 
     :copyright: (c) 2019 by weiminfeng.
-    :date: 2019/10/15
+    :date: 2019/12/27
 """

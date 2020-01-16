@@ -1,0 +1,37 @@
+//Fonts
+@import "custom/fonts/fonts";
+//Core files
+@import "../../../node_modules/bootstrap/scss/functions";
+@import "../../../node_modules/bootstrap/scss/variables";
+@import "variables";
+@import "../../../node_modules/bootstrap/scss/mixins.scss";
+// Structure
+@import "custom/structure/general";
+@import "custom/structure/horizontal-nav";
+@import "custom/structure/topbar";
+@import "custom/structure/page-head";
+@import "custom/structure/footer";
+@import "custom/structure/right-sidebar";
+//Components
+@import "custom/components/helper";
+@import "custom/components/social";
+@import "custom/components/widgets";
+@import "custom/components/custom-checkbox";
+@import "custom/components/custom-radio";
+@import "custom/components/ribbons";
+@import "custom/components/print";
+@import "custom/components/preloader";
+// Plugins
+@import "custom/plugins/waves";
+@import "custom/plugins/slimscroll";
+// Pages
+// RTL
+@import "custom/rtl/general-rtl";
+@import "custom/rtl/bootstrap-rtl";
+@import "custom/rtl/spacing-rtl";
+@import "custom/rtl/float-rtl";
+@import "custom/rtl/text-rtl";
+@import "custom/rtl/structure-rtl";
+@import "custom/rtl/plugins-rtl";
+@import "custom/rtl/components-rtl";
+@import "custom/rtl/pages-rtl";

@@ -30,3 +30,9 @@ app/static/reports/
 
 # pytest
 .pytest_cache
+
+# npm
+node_modules/
+build/
+npm-debug.log
+.env

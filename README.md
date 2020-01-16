@@ -1,2 +1,2 @@
-# flast-seed
-A flask seed project for python3.
+# flask-seed
+A lightning seed project using flask.

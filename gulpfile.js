@@ -6,7 +6,6 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     rename = require('gulp-rename'),
     plumber = require('gulp-plumber'),
-    pixrem = require('gulp-pixrem'),
     uglify = require('gulp-uglify'),
     imagemin = require('gulp-imagemin'),
     lodash = require("lodash");
@@ -49,7 +48,6 @@ function styles() {
         }).on('error', sass.logError))
         .pipe(plumber()) // Checks for errors
         .pipe(autoprefixer()) // Adds vendor prefixes
-        .pipe(pixrem())  // Add fallbacks for rem units
         .pipe(gulp.dest(paths.css))
         .pipe(rename({suffix: '.min'}))
         .pipe(cssnano()) // Minifies the result
@@ -64,7 +62,6 @@ function styles() {
         }).on('error', sass.logError))
         .pipe(plumber())
         .pipe(autoprefixer())
-        .pipe(pixrem())
         .pipe(gulp.dest(paths.css))
         .pipe(rename({suffix: '.min'}))
         .pipe(cssnano())
@@ -79,7 +76,6 @@ function styles() {
         }).on('error', sass.logError))
         .pipe(plumber())
         .pipe(autoprefixer())
-        .pipe(pixrem())
         .pipe(gulp.dest(paths.css))
         .pipe(rename({suffix: '.min'}))
         .pipe(cssnano())

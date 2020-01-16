@@ -17528,7 +17528,6 @@ readers do not read off random characters that represent icons */
 
 [class^="remixicon-"], [class*=" remixicon-"] {
   font-family: 'remixicon' !important;
-  font-family: 'remixicon' !important;
   font-size: inherit;
   font-style: normal;
   -webkit-font-smoothing: antialiased;

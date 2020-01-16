@@ -419,7 +419,6 @@ Responsive Menu
       display: table-cell;
       vertical-align: middle; }
       .navbar-custom .app-search .app-search-box input::-webkit-input-placeholder {
-        font-size: 13px;
         font-size: 0.8125rem;
         color: rgba(255, 255, 255, 0.5); }
     .navbar-custom .app-search .form-control {
@@ -555,7 +554,6 @@ Responsive Menu
     color: #ced4da; }
 
 .page-title-box .page-title {
-  font-size: 17.6px;
   font-size: 1.1rem;
   margin: 0;
   line-height: 60px;
@@ -597,7 +595,6 @@ Responsive Menu
   box-shadow: 0 0 1px rgba(50, 58, 70, 0.1); }
   .footer .footer-links a {
     color: #98a6ad;
-    margin-left: 24px;
     margin-left: 1.5rem;
     -webkit-transition: all .4s;
     transition: all .4s; }
@@ -709,39 +706,27 @@ Responsive Menu
   min-width: 160px; }
 
 .avatar-xs {
-  height: 24px;
   height: 1.5rem;
-  width: 24px;
   width: 1.5rem; }
 
 .avatar-sm {
-  height: 36px;
   height: 2.25rem;
-  width: 36px;
   width: 2.25rem; }
 
 .avatar-md {
-  height: 56px;
   height: 3.5rem;
-  width: 56px;
   width: 3.5rem; }
 
 .avatar-lg {
-  height: 72px;
   height: 4.5rem;
-  width: 72px;
   width: 4.5rem; }
 
 .avatar-xl {
-  height: 96px;
   height: 6rem;
-  width: 96px;
   width: 6rem; }
 
 .avatar-xxl {
-  height: 120px;
   height: 7.5rem;
-  width: 120px;
   width: 7.5rem; }
 
 .avatar-title {
@@ -785,9 +770,7 @@ Responsive Menu
   -webkit-line-clamp: 4; }
 
 .social-list-item {
-  height: 32px;
   height: 2rem;
-  width: 32px;
   width: 2rem;
   line-height: calc(2rem - 4px);
   display: block;
@@ -840,7 +823,6 @@ Responsive Menu
 
 .inbox-widget .inbox-item {
   overflow: hidden;
-  padding: 11.2px 0;
   padding: 0.7rem 0;
   position: relative; }
   .inbox-widget .inbox-item:last-of-type {
@@ -860,13 +842,11 @@ Responsive Menu
   .inbox-widget .inbox-item .inbox-item-text {
     color: #98a6ad;
     display: block;
-    font-size: 13px;
     font-size: 0.8125rem;
     margin: 0;
     overflow: hidden; }
   .inbox-widget .inbox-item .inbox-item-date {
     color: #98a6ad;
-    font-size: 11px;
     font-size: 0.6875rem;
     position: absolute;
     right: 5px;

@@ -1,67 +1,66 @@
-// Components
-!function ($) {
-    "use strict";
+//
+// Init
+//
+(function ($) {
 
-    var Components = function () {
-    };
+    'use strict';
 
-    // Initialize tooltip
-    Components.prototype.initTooltipPlugin = function () {
-        $.fn.tooltip && $('[data-toggle="tooltip"]').tooltip()
-    },
+    function initComponents() {
+        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="popover"]').popover();
+        $(".slimscroll").slimScroll({
+            height: 'auto',
+            position: 'right',
+            size: "8px",
+            touchScrollStep: 20,
+            color: '#9ea5ab'
+        });
+    }
 
-        // Initialize popover
-        Components.prototype.initPopoverPlugin = function () {
-            $.fn.popover && $('[data-toggle="popover"]').popover()
-        },
+    function initToast() {
+        function toast(msg, type) {
+            // TODO
+        }
 
-        // Initialize toast
-        Components.prototype.initToastPlugin = function () {
-            $.fn.toast && $('[data-toggle="toast"]').toast()
-        },
-
-        // Initialize Slimscroll
-        Components.prototype.initSlimScrollPlugin = function () {
-            //You can change the color of scroll bar here
-            $.fn.slimScroll && $(".slimscroll").slimScroll({
-                height: 'auto',
-                position: 'right',
-                size: "8px",
-                touchScrollStep: 20,
-                color: '#9ea5ab'
-            });
-        },
-
-        // Initialize
-        Components.prototype.init = function () {
-            this.initTooltipPlugin(),
-                this.initPopoverPlugin(),
-                this.initToastPlugin(),
-                this.initSlimScrollPlugin();
-        }, $.Components = new Components, $.Components.Constructor = Components
-
-}(window.jQuery),
-
-    // App
-    function ($) {
-        'use strict';
-
-        var App = function () {
-            this.$body = $('body'), this.$window = $(window);
+        window.showError = function (msg) {
+            toast(msg, "danger");
         };
 
-        // Initialize
-        App.prototype.init = function () {
-            $.Components.init();
-        }, $.App = new App, $.App.Constructor = App
+        window.showInfo = function (msg) {
+            toast(msg, "info");
+        };
 
-    }(window.jQuery),
+        window.showSuccess = function (msg) {
+            toast(msg, "success");
+        };
 
-    // Initialize main application module
-    function ($) {
-        "use strict";
-        $.App.init();
-    }(window.jQuery);
+        window.coming = function () {
+            showInfo("Coming soon!");
+        };
+    }
 
-// Waves Effect
-Waves.init();
+    function initScroll2Top() {
+        $(window).scroll(function () {
+            ($(window).scrollTop() > 300) ? $("a#scroll-to-top").addClass('visible') : $("a#scroll-to-top").removeClass('visible');
+        });
+
+        $("a#scroll-to-top").click(function () {
+            $("html, body").animate({scrollTop: 0}, "slow");
+            return false;
+        });
+    }
+
+
+    function init() {
+        initComponents();
+
+        // Scroll to tup
+        initScroll2Top();
+
+        // Wave effects
+        Waves.init();
+    }
+
+    init();
+
+})(window.jQuery);

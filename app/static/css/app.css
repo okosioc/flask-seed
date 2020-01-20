@@ -132,6 +132,8 @@ body {
         vertical-align: middle; }
       .navigation-menu > li > a:hover, .navigation-menu > li > a:focus {
         background-color: transparent; }
+    .navigation-menu > li.active > a {
+      color: #3bafda; }
 
 /*
 Responsive Menu
@@ -1631,3 +1633,79 @@ Responsive Menu
 
 .slimScrollDiv {
   height: auto !important; }
+
+#scroll-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 40px;
+  width: 38px;
+  height: 38px;
+  line-height: 40px;
+  background: #7C7C7D;
+  color: #fff;
+  text-align: center;
+  -webkit-transition: all .3s;
+  transition: all .3s;
+  cursor: pointer;
+  opacity: 0; }
+
+#scroll-to-top.visible {
+  opacity: 1; }
+
+.text-error {
+  color: #3bafda;
+  text-shadow: rgba(59, 175, 218, 0.3) 5px 1px, rgba(59, 175, 218, 0.2) 10px 3px;
+  font-size: 84px;
+  line-height: 90px;
+  font-family: "Roboto", sans-serif; }
+
+.error-text-box {
+  font-size: 8rem;
+  font-family: "Roboto", sans-serif;
+  line-height: 1; }
+  .error-text-box .text {
+    fill: none;
+    stroke-width: 4;
+    stroke-linejoin: round;
+    stroke-dasharray: 30 100;
+    stroke-dashoffset: 0;
+    -webkit-animation: stroke 9s infinite linear;
+            animation: stroke 9s infinite linear; }
+  .error-text-box .text:nth-child(5n + 1) {
+    stroke: #f1556c;
+    -webkit-animation-delay: -1.2s;
+            animation-delay: -1.2s; }
+  .error-text-box .text:nth-child(5n + 2) {
+    stroke: #f7b84b;
+    -webkit-animation-delay: -2.4s;
+            animation-delay: -2.4s; }
+  .error-text-box .text:nth-child(5n + 3) {
+    stroke: #3bafda;
+    -webkit-animation-delay: -3.6s;
+            animation-delay: -3.6s; }
+  .error-text-box .text:nth-child(5n + 4) {
+    stroke: #37cde6;
+    -webkit-animation-delay: -4.8s;
+            animation-delay: -4.8s; }
+  .error-text-box .text:nth-child(5n + 5) {
+    stroke: #1abc9c;
+    -webkit-animation-delay: -6s;
+            animation-delay: -6s; }
+
+@-webkit-keyframes stroke {
+  100% {
+    stroke-dashoffset: -400; } }
+
+@keyframes stroke {
+  100% {
+    stroke-dashoffset: -400; } }
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  .error-text-box .text {
+    fill: #f1556c;
+    stroke: #f1556c;
+    stroke-width: 6;
+    stroke-dasharray: 0 0;
+    stroke-dashoffset: 0;
+    -webkit-animation: none;
+            animation: none; } }

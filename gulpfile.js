@@ -10,7 +10,6 @@ var gulp = require('gulp'),
     imagemin = require('gulp-imagemin'),
     lodash = require("lodash");
 
-
 // Relative paths
 var pathsConfig = function () {
     var appRoot = "./app", vendorsRoot = "./node_modules";
@@ -109,5 +108,8 @@ var generateAssets = gulp.parallel(
     imgCompression
 );
 
+// Commands
+exports["styles"] = styles;
+exports["scripts"] = scripts;
 // Default generate assets
 exports.default = generateAssets, exports["build"] = generateAssets;

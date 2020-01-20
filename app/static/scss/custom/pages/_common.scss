@@ -1,0 +1,23 @@
+//
+// Common elements' style
+//
+
+// Scroll to Top
+#scroll-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 40px;
+  width: 38px;
+  height: 38px;
+  line-height: 40px;
+  background: #7C7C7D;
+  color: #fff;
+  text-align: center;
+  transition: all .3s;
+  cursor: pointer;
+  opacity: 0;
+}
+
+#scroll-to-top.visible {
+  opacity: 1;
+}

@@ -106,7 +106,7 @@ class SignupForm(FlaskForm):
     email = StringField('email', validators=[DataRequired(), Email()])
     password = PasswordField('password', validators=[DataRequired()])
     repassword = PasswordField('repassword', validators=[DataRequired()])
-    agree = BooleanField('agree', validators=[DataRequired(_('Please agree our service policy!'))])
+    agree = BooleanField('agree', validators=[DataRequired(_('Please agree our terms and conditions!'))])
 
 
 @public.route('/signup', methods=('GET', 'POST'))
@@ -116,16 +116,19 @@ def signup():
 
     if form.validate_on_submit():
         if not form.password.data == form.repassword.data:
-            return render_template('public/signup.html', form=form, error=_('Password dismatch!'))
+            return render_template('public/signup.html', form=form, error=_('Password mismatched!'))
 
         em = form.email.data.strip().lower()
         u = User.find_one({'email': em})
         if u:
             return render_template('public/signup.html', form=form, error=_('This email has been registered!'))
 
+        # TODO: Password validation
+        pwd = form.password.data.strip()
+
         u = User()
         u.email = em
-        u.password = generate_password_hash(form.password.data.strip())
+        u.password = generate_password_hash(pwd)
         u.name = u.email.split('@')[0]
 
         count = User.count({})

@@ -6,8 +6,11 @@
     'use strict';
 
     function initComponents() {
+        // Bootstrap tooltip
         $('[data-toggle="tooltip"]').tooltip();
+        // Bootstrap popover
         $('[data-toggle="popover"]').popover();
+        // Slimscroll - scroll content within a container
         $(".slimscroll").slimScroll({
             height: 'auto',
             position: 'right',
@@ -15,11 +18,14 @@
             touchScrollStep: 20,
             color: '#9ea5ab'
         });
+        // Parsleyjs - form validation
+        $(".parsley-form").parsley();
     }
 
     function initToast() {
         function toast(msg, type) {
             // TODO
+            console.log(type, msg);
         }
 
         window.showError = function (msg) {
@@ -53,6 +59,9 @@
 
     function init() {
         initComponents();
+
+        // Toast
+        initToast();
 
         // Scroll to tup
         initScroll2Top();

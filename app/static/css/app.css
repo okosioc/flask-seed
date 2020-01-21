@@ -1634,6 +1634,28 @@ Responsive Menu
 .slimScrollDiv {
   height: auto !important; }
 
+.parsley-errors-list {
+  margin: 0;
+  padding: 0; }
+  .parsley-errors-list > li {
+    list-style: none;
+    color: #f1556c;
+    margin-top: 5px;
+    padding-left: 20px;
+    position: relative; }
+    .parsley-errors-list > li:before {
+      content: "\F159";
+      font-family: "Material Design Icons";
+      position: absolute;
+      left: 2px;
+      top: -1px; }
+
+.parsley-error {
+  border-color: #f1556c; }
+
+.parsley-success {
+  border-color: #1abc9c; }
+
 #scroll-to-top {
   position: fixed;
   right: 24px;

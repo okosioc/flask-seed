@@ -21,7 +21,8 @@ var pathsConfig = function () {
             vendorsRoot + "/bootstrap/dist/js/bootstrap.bundle.js",
             vendorsRoot + "/jquery-slimscroll/jquery.slimscroll.js",
             vendorsRoot + "/node-waves/dist/waves.js",
-            vendorsRoot + "/waypoints/lib/jquery.waypoints.js"
+            vendorsRoot + "/waypoints/lib/jquery.waypoints.js",
+            vendorsRoot + "/parsleyjs/dist/parsley.min.js"
         ],
         app: appRoot,
         templates: appRoot + '/templates',

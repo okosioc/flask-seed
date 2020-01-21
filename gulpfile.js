@@ -16,13 +16,14 @@ var pathsConfig = function () {
 
     return {
         bootstrapSass: vendorsRoot + "/bootstrap/scss",
-        vendorsJs: [
+        vendorsJs: [ // This vendors will be shared in the whole project
             vendorsRoot + "/jquery/dist/jquery.js",
             vendorsRoot + "/bootstrap/dist/js/bootstrap.bundle.js",
             vendorsRoot + "/jquery-slimscroll/jquery.slimscroll.js",
             vendorsRoot + "/node-waves/dist/waves.js",
             vendorsRoot + "/waypoints/lib/jquery.waypoints.js",
-            vendorsRoot + "/parsleyjs/dist/parsley.min.js"
+            vendorsRoot + "/parsleyjs/dist/parsley.js",
+            vendorsRoot + "/bootstrap4-notify/bootstrap-notify.js"
         ],
         app: appRoot,
         templates: appRoot + '/templates',

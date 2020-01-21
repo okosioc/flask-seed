@@ -26,12 +26,11 @@
 
 {% block header %}
     <header id="topnav">
+
         <div class="navbar-custom">
             <div class="container-fluid">
-
                 <!-- Right Menu -->
                 <ul class="list-unstyled topnav-menu float-right mb-0">
-
                     <li class="dropdown">
                         <a class="navbar-toggle nav-link">
                             <div class="lines">
@@ -41,7 +40,6 @@
                             </div>
                         </a>
                     </li>
-
                     <li class="dropdown d-none d-lg-block">
                         <a class="nav-link dropdown-toggle mr-0 waves-effect waves-light" data-toggle="dropdown"
                            href="#" role="button" aria-haspopup="false" aria-expanded="false">
@@ -59,7 +57,6 @@
                             </a>
                         </div>
                     </li>
-
                     {% if current_user.is_authenticated %}
                         <li class="dropdown">
                             <a class="nav-link dropdown-toggle nav-user mr-0 waves-effect waves-light"
@@ -72,7 +69,7 @@
                                 </span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right profile-dropdown ">
-                                <a href="javascript:void(0);" class="dropdown-item notify-item">
+                                <a href="javascript:coming();" class="dropdown-item notify-item">
                                     <i class="remixicon-settings-3-line"></i>
                                     <span>{{ _('Settings') }}</span>
                                 </a>
@@ -101,7 +98,6 @@
                         </li>
                     {% endif %}
                 </ul>
-
                 <!-- LOGO -->
                 <div class="logo-box">
                     <a href="/" class="logo text-center">
@@ -110,7 +106,6 @@
                         </span>
                     </a>
                 </div>
-
             </div>
         </div> <!-- /.navbar-custom -->
 
@@ -119,13 +114,22 @@
                 <div id="navigation">
                     <!-- Navigation Menu-->
                     <ul class="navigation-menu">
-
                         <li class="{{ 'active' if request.endpoint and request.endpoint == 'public.index' }}">
                             <a href="{{ url_for('public.index') }}">
                                 <i class="remixicon-home-2-line"></i>{{ _('Index') }}
                             </a>
                         </li>
-
+                        <li class="has-submenu {{ 'active' if request.endpoint and request.endpoint.startswith('blog') }}">
+                            <a href="{{ url_for('blog.index') }}">
+                                <i class="remixicon-article-line"></i>{{ _('Blog') }}
+                                <div class="arrow-down"></div>
+                            </a>
+                            <ul class="submenu">
+                                <li>
+                                    <a href="{{ url_for('blog.new') }}">{{ _('New Post') }}</a>
+                                </li>
+                            </ul>
+                        </li>
                         <li class="has-submenu">
                             <a href="javascript:;">
                                 <i class="remixicon-stack-line"></i>Menu Levels
@@ -151,7 +155,6 @@
                             </ul>
                         </li>
                     </ul>
-
                     <div class="clearfix"></div>
                 </div> <!-- /#navigation -->
             </div>
@@ -172,9 +175,8 @@
                 </div>
                 <div class="col-md-6">
                     <div class="text-md-right footer-links d-none d-sm-block">
-                        <a href="javascript:void(0);">About Us</a>
-                        <a href="javascript:void(0);">Help</a>
-                        <a href="javascript:void(0);">Contact Us</a>
+                        <a href="javascript:coming();">Help</a>
+                        <a href="javascript:coming();">Contact Us</a>
                     </div>
                 </div>
             </div>
@@ -186,7 +188,7 @@
     <i class="fa fa-angle-up"></i>
 </a>
 
-<script src="{{ base_url() }}/js/app.min.js"></script>
+<script src="{{ base_url() }}/js/app.min.js?1"></script>
 
 {% block script %}
 {% endblock %}

@@ -24,7 +24,10 @@
 // Plugins
 @import "custom/plugins/waves";
 @import "custom/plugins/slimscroll";
+@import "custom/plugins/parsley";
 // Pages
+@import "custom/pages/common";
+@import "custom/pages/error";
 // RTL
 @import "custom/rtl/general-rtl";
 @import "custom/rtl/bootstrap-rtl";

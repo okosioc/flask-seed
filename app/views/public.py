@@ -12,7 +12,6 @@
 from flask import Blueprint, render_template, current_app, session, redirect, request
 from flask_babel import gettext as _
 from flask_login import login_user, logout_user, login_required
-from flask_principal import identity_changed, Identity, AnonymousIdentity
 from flask_wtf import FlaskForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
@@ -73,9 +72,6 @@ def login():
         # Keep the user info in the session using Flask-Login
         login_user(u)
 
-        # Tell Flask-Principal the identity changed
-        identity_changed.send(current_app._get_current_object(), identity=Identity(u.get_id()))
-
         next_url = form.next_url.data
         if not next_url:
             next_url = '/'
@@ -95,9 +91,6 @@ def logout():
     # Remove session keys set by Flask-Principal
     for key in ('identity.name', 'identity.auth_type'):
         session.pop(key, None)
-
-    # Tell Flask-Principal the user is anonymous
-    identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
 
     return redirect("/")
 
@@ -146,9 +139,6 @@ def signup():
 
         # Keep the user info in the session using Flask-Login
         login_user(u)
-
-        # Tell Flask-Principal the identity changed
-        identity_changed.send(current_app._get_current_object(), identity=Identity(u.get_id()))
 
         return redirect('/')
 

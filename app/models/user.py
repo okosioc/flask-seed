@@ -12,7 +12,6 @@
 from datetime import datetime
 
 from flask_login import UserMixin
-from flask_principal import RoleNeed, UserNeed
 from werkzeug.utils import cached_property
 
 from app.core import Model, IN
@@ -48,19 +47,6 @@ class User(Model, UserMixin):
     required_fields = ['name', 'email', 'password', 'point', 'status', 'roles', 'createTime']
     default_values = {'point': 0, 'status': UserStatus.NORMAL, 'roles': [UserRole.MEMBER], 'createTime': datetime.now}
     indexes = [{'fields': ['email'], 'unique': True}]
-
-    @cached_property
-    def provides(self):
-        """
-        Provide user's identity
-        """
-        needs = [RoleNeed('authenticated'),
-                 UserNeed(self._id)]
-
-        if self.is_admin:
-            needs.append(RoleNeed('admin'))
-
-        return needs
 
     @cached_property
     def is_admin(self):

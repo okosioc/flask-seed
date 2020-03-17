@@ -15,6 +15,14 @@ var pathsConfig = function () {
     var appRoot = "./app", vendorsRoot = "./node_modules";
 
     return {
+        app: appRoot,
+        templates: appRoot + '/templates',
+        css: appRoot + '/static/css',
+        sass: appRoot + '/static/scss',
+        fonts: appRoot + '/static/fonts',
+        images: appRoot + '/static/img',
+        js: appRoot + '/static/js',
+        srcJs: appRoot + '/static/js/src',
         bootstrapSass: vendorsRoot + "/bootstrap/scss",
         vendorsJs: [ // This vendors will be shared in the whole project
             vendorsRoot + "/jquery/dist/jquery.js",
@@ -25,14 +33,6 @@ var pathsConfig = function () {
             vendorsRoot + "/parsleyjs/dist/parsley.js",
             vendorsRoot + "/bootstrap4-notify/bootstrap-notify.js"
         ],
-        app: appRoot,
-        templates: appRoot + '/templates',
-        css: appRoot + '/static/css',
-        sass: appRoot + '/static/scss',
-        fonts: appRoot + '/static/fonts',
-        images: appRoot + '/static/img',
-        js: appRoot + '/static/js',
-        srcJs: appRoot + '/static/js/src',
     }
 };
 

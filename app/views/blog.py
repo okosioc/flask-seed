@@ -20,7 +20,7 @@ from flask_login import current_user
 from app.jobs import post_view_times_counter
 from app.models import Post, Tag, User
 from app.core import Pagination, populate_model
-from app.tools import check_permission, send_support_email
+from app.tools import auth_permission, send_support_email
 
 blog = Blueprint('blog', __name__)
 
@@ -75,7 +75,7 @@ def post(post_id):
 
 @blog.route('/post/new', methods=('GET', 'POST'))
 @blog.route('/post/change/<ObjectId:post_id>', methods=('GET', 'POST'))
-@check_permission()
+@auth_permission
 def new(post_id=None):
     # Open page
     if request.method == 'GET':
@@ -120,7 +120,7 @@ def new(post_id=None):
 
 
 @blog.route('/comment/<ObjectId:post_id>', methods=('POST',))
-@check_permission()
+@auth_permission
 def comment(post_id):
     """
     评论博文.
@@ -157,7 +157,7 @@ def comment(post_id):
 
 
 @blog.route('/reply/<ObjectId:post_id>/<int:comment_id>', methods=('POST',))
-@check_permission()
+@auth_permission
 def reply(post_id, comment_id):
     """
     回复.

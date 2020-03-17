@@ -16,14 +16,12 @@ from flask import current_app
 from flask_mail import Message
 from pydash import retry
 
-from app.extensions import mail, cache
+from app.extensions import mail
 from app.tools.decorators import async_exec
 
 
 def send_support_email(type, body, **kwargs):
-    """
-    Send emails to system admin for easy supporting.
-    """
+    """ Send emails to system admin for easy supporting. """
     # flask.current_app is a proxy.
     # http://flask.pocoo.org/docs/0.11/reqcontext/#notes-on-proxies
     app = kwargs.get('app', None)
@@ -39,9 +37,7 @@ def send_support_email(type, body, **kwargs):
 
 
 def send_service_mail(subject, recipients, html, bcc=None, **kwargs):
-    """
-    Send emails to business user for notification.
-    """
+    """ Send emails to business user for notification. """
     app = kwargs.get('app', None)
     if not app:
         app = current_app._get_current_object()
@@ -52,11 +48,12 @@ def send_service_mail(subject, recipients, html, bcc=None, **kwargs):
 
 
 def _get_host_name():
-    """
-    Get current host name.
+    """ Get current host name.
+
     :return:
     """
     return socket.gethostname()
+
 
 @async_exec
 def send_async_email(app, subject, recipients, body):
@@ -78,7 +75,6 @@ def send_async_service_email(app, subject, recipients, html, bcc):
             app.logger.warn('Can not send service email %s to %s, %s' % (subject, recipients, e))
 
 
-# 遇到连接问题则触发重试, 默认重复3次
 # https://pydash.readthedocs.io/en/latest/api.html#pydash.utilities.retry
 @retry(delay=1, exceptions=(SMTPServerDisconnected,))
 def retry_send(msg):

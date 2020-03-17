@@ -1,6 +1,5 @@
 Flask
 Flask-Caching
-Flask-Principal
 Flask-Login
 Flask-WTF
 Flask-Mail
@@ -10,7 +9,7 @@ Flask-Uploads
 pytest
 pymongo
 blinker
-fabric<2.0
+fabric
 schedule
 requests
 lxml

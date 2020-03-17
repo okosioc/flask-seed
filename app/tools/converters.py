@@ -15,8 +15,7 @@ from werkzeug.routing import BaseConverter
 
 
 class ListConverter(BaseConverter):
-    """
-    自定义URL转换器, 允许传入列表.
+    """ Url converter for list
 
     /price/US+CN
     ->
@@ -39,8 +38,7 @@ class ListConverter(BaseConverter):
 
 
 class BSONObjectIdConverter(BaseConverter):
-    """
-    A simple converter for the RESTfull URL routing system of Flask.
+    """ A simple converter for the RESTfull URL routing system of Flask.
     It checks the validate of the id and converts it into a :class:`bson.objectid.ObjectId` object.
 
     @app.route('/<ObjectId:id>')

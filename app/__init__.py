@@ -17,10 +17,9 @@ from datetime import datetime
 from logging.handlers import SMTPHandler, TimedRotatingFileHandler
 
 from bson.objectid import ObjectId
-from flask import Flask, g, request, redirect, jsonify, url_for, render_template, session, has_request_context
+from flask import Flask, request, redirect, jsonify, url_for, render_template, session, has_request_context
 from flask_babel import Babel, gettext as _
-from flask_login import LoginManager, current_user
-from flask_principal import Principal, identity_loaded
+from flask_login import LoginManager
 from flask_uploads import patch_request_class, UploadConfiguration
 from werkzeug.urls import url_quote
 
@@ -66,7 +65,6 @@ def create_app(blueprints=None, pytest=False, runscripts=False):
     # Chain
     configure_extensions(app)
     configure_login(app)
-    configure_identity(app)
     configure_logging(app)
     configure_errorhandlers(app)
     configure_before_handlers(app)
@@ -97,19 +95,6 @@ def configure_login(app):
     def load_user(user_id):
         # Reload the user object from the user ID stored in the session
         return User.find_one({'_id': ObjectId(user_id)})
-
-
-def configure_identity(app):
-    Principal(app)
-
-    @identity_loaded.connect_via(app)
-    def on_identity_loaded(sender, identity):
-        # Set the identity user object
-        identity.user = current_user
-
-        # Add the UserNeed to the identity
-        if hasattr(current_user, 'provides'):
-            identity.provides.update(current_user.provides)
 
 
 def configure_uploads(app):
@@ -175,7 +160,7 @@ def configure_template_filters(app):
 
     @app.template_filter()
     def commas(value):
-        """Add commas to an number."""
+        """ Add commas to an number. """
         if type(value) is int:
             return '{:,d}'.format(value)
         else:
@@ -183,20 +168,14 @@ def configure_template_filters(app):
 
     @app.template_filter()
     def urlquote(value, charset='utf-8'):
-        """Url Quote."""
+        """ Url Quote. """
         return url_quote(value, charset)
 
 
 def configure_before_handlers(app):
     @app.before_request
-    def authenticate():
-        g.user = getattr(g.identity, 'user', None)
-
-    @app.before_request
     def set_device():
-        """
-        设置浏览的设备.
-        """
+        """ Set mobile device. """
         mobile_agents = re.compile('android|fennec|iemobile|iphone|opera (?:mini|mobi)|mobile')
         ua = request.user_agent.string.lower()
         platform = request.user_agent.platform

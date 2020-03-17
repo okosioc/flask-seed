@@ -17,7 +17,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.core import Pagination, populate_model, SeedConnectionError, SeedDataError, convert_from_string
 from app.extensions import mdb
-from app.tools import check_permission, permission_admin
+from app.tools import admin_permission
 
 crud = Blueprint('crud', __name__)
 
@@ -26,7 +26,7 @@ PAGE_COUNT = 30
 
 @crud.route('/index')
 @crud.route('/index/<string:model_name>')
-@check_permission(permission_admin)
+@admin_permission
 def index(model_name=None):
     """
     Index page.
@@ -94,7 +94,7 @@ def index(model_name=None):
 
 @crud.route('/new/<string:model_name>')
 @crud.route('/change/<string:model_name>/<ObjectId:record_id>', endpoint='change_model')
-@check_permission(permission_admin)
+@admin_permission
 def form(model_name, record_id=None):
     """
     Form page which is used to new/change a record.
@@ -115,7 +115,7 @@ def form(model_name, record_id=None):
 
 
 @crud.route('/json/<string:model_name>/<ObjectId:record_id>')
-@check_permission(permission_admin)
+@admin_permission
 def json(model_name, record_id):
     """
     Output a json string for specified record.
@@ -134,7 +134,7 @@ def json(model_name, record_id):
 
 @crud.route('/create/<string:model_name>', methods=('POST',))
 @crud.route('/save/<string:model_name>/<ObjectId:record_id>', methods=('POST',))
-@check_permission(permission_admin)
+@admin_permission
 def save(model_name, record_id=None):
     """
     Create a new record or save an existing record.
@@ -160,7 +160,7 @@ def save(model_name, record_id=None):
 
 
 @crud.route('/delete/<string:model_name>/<ObjectId:record_id>', methods=('GET', 'POST'))
-@check_permission(permission_admin)
+@admin_permission
 def delete(model_name, record_id):
     """
     Delete record.

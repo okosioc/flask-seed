@@ -9,38 +9,57 @@
     :date: 16/7/21
 """
 
-from fabric.api import *
+from fabric import task
 
-# The user to use for the remote commands
-env.user = ''
-env.password = ''
-# The servers where the commands are executed
-env.hosts = ['']
+# Multi hosts
+# host, e.g, root@129.168.0.1:9527
+hosts = [
+    {'host': '<FIXME>', 'connect_kwargs': {'password': '<FIXME>'}}
+]
 # www folder
 project_folder = '/appl/projects/seed/www'
 
 
-def deploy():
-    """
-    检测服务器上的版本, 用户确认后安装git上的最新版.
-    """
-    with cd(project_folder):
-        run('git fetch')
-        print('- 最新版本')
-        run('git log origin/master -1')
-        print('- 当前版本')
-        run('git log -1')
-        run('git status')
+@task(hosts=hosts)
+def deploy(ctx):
+    """ Check newest version and confirm if needed to deploy. """
+    with ctx.cd(project_folder):
+        ctx.run('git fetch')
+        print('\n- Newest Version:')
+        ctx.run('git log origin/master -1')
+        print('\n- Current Version:')
+        ctx.run('git log -1')
+        ctx.run('git status')
 
-        p = prompt('- 你确定要发布么？[y/n]', validate=r'^[yn]$')
-        if p == 'y':
-            run('git pull')
+        if confirm('\n- Are you sure to deploy?'):
+            ctx.run('git pull')
             # Restart unicorn
             # run('killall -9 gunicorn')
             # run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 -D --timeout 300 --log-file app/logs/gunicorn.log')
-            run('kill -HUP `cat wsgi.pid`')
+            ctx.run('kill -HUP `cat wsgi.pid`')
 
 
-def ustart():
-    with cd(project_folder):
-        run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 -D --timeout 300 --log-file app/logs/gunicorn.log')
+def confirm(question, assume_yes=True):
+    """ Ask user a yes/no question and return their response as a boolean. """
+    # Set up suffix
+    if assume_yes:
+        suffix = "Y/n"
+    else:
+        suffix = "y/N"
+    # Loop till we get something we like
+    while True:
+        # Ask
+        response = input("{0} [{1}] ".format(question, suffix))
+        response = response.lower().strip()  # Normalize
+        # Default
+        if not response:
+            return assume_yes
+        # Yes
+        if response in ["y", "yes"]:
+            return True
+        # No
+        if response in ["n", "no"]:
+            return False
+        # Didn't get empty, yes or no, so complain and loop
+        err = "I didn't understand you. Please specify '(y)es' or '(n)o'."
+        print(err)

@@ -15,11 +15,12 @@ from flask_babel import gettext, ngettext
 
 
 def timesince(dt, default=None):
-    """
-    Returns string representing "time since" e.g.
-    3 days ago, 5 hours ago etc.
-    """
+    """  Returns string representing "time since".
 
+    :param dt:
+    :param default:
+    :return: e.g. 3 days ago, 5 hours ago etc.
+    """
     if default is None:
         default = gettext("just now")
 
@@ -52,7 +53,5 @@ def timesince(dt, default=None):
 
 
 def date(dt):
-    """
-    在页面上显示日期.
-    """
+    """ Show date string in jinja2. """
     return dt.strftime('%Y/%m/%d')

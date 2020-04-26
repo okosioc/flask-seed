@@ -1,10 +1,10 @@
 {% set block = {
     'title': 'Flask-Seed is a seed project<br>for rapid development',
     'subtitle': 'Flask-Seed is built on top of awesome Flask and Bootstrap.',
-    'links': [{
-        'title': 'Get started with Flask-Seed',
-        'url': '#'
-    }]
+    'links': [
+        {'title': 'Get started with Flask-Seed', 'url': '#', 'class':'btn-light'},
+        {'title': 'GitHub', 'url': 'https://github.com/okosioc/flask-seed', 'class':'btn-purple'}
+    ]
 } %}
 <section class="bg-primary py-5">
     <div class="container">
@@ -15,7 +15,8 @@
                     <p class="text-white-50 mb-4">{{ block.subtitle }}</p>
                     <div>
                         {% for l in block.links %}
-                            <a href="{{ l.url }}" class="btn btn-light {{ 'mr-1' if not loop.last }}">{{ l.title }}</a>
+                            <a href="{{ l.url }}"
+                               class="btn {{ l.class }} {{ 'mr-1' if not loop.last }}">{{ l.title|safe }}</a>
                         {% endfor %}
                     </div>
                 </div>

@@ -11,26 +11,23 @@ var gulp = require('gulp'),
 
 // Paths
 const paths = {
-    base: './',
     node: './node_modules',
+    vendor: './static/assets/vendor',
     scss: {
         dir: './static/assets/scss',
         files: './static/assets/scss/**/*',
         main: './static/assets/scss/*.scss'
     },
     css: {
-        dir: './static/assets/css',
-        files: './static/assets/css/**/*'
+        dir: './static/assets/css'
     },
     js: {
-        dir: './static/assets/js',
-        files: './static/assets/js/**/*'
+        dir: './static/assets/js'
     },
     img: {
         dir: './static/assets/img',
         files: './static/assets/img/**/*',
-    },
-    vendor: './static/assets/vendor'
+    }
 };
 
 // Styles autoprefixing and minification
@@ -50,4 +47,33 @@ gulp.task('img', function () {
     return gulp.src(paths.img.files)
         .pipe(imagemin())
         .pipe(gulp.dest(paths.img.dir))
+});
+
+// Scripts
+gulp.task('scripts', function () {
+    // Copy libs from node_modules to vendor folder
+    gulp
+        .src(npmdist(), {base: paths.node})
+        .pipe(gulp.dest(paths.vendor));
+    // Merge core libs into vendor.min.js, which will be shared in all pages
+    gulp
+        .src([
+            paths.vendor + "/jquery/dist/jquery.min.js",
+            paths.vendor + "/bootstrap/dist/js/bootstrap.bundle.min.js",
+            paths.vendor + "/jquery-slimscroll/jquery.slimscroll.min.js",
+            paths.vendor + "/node-waves/dist/waves.min.js",
+            paths.vendor + "/waypoints/lib/jquery.waypoints.min.js",
+            paths.vendor + "/bootstrap4-notify/bootstrap-notify.min.js"
+
+        ])
+        .pipe(concat("vendor.min.js"))
+        .pipe(gulp.dest(paths.js.dir));
+    // Minify app.js
+    return gulp
+        .src([
+            paths.js.dir + "/app.js"
+        ])
+        .pipe(uglify())
+        .pipe(rename({suffix: '.min'}))
+        .pipe(gulp.dest(paths.js.dir));
 });

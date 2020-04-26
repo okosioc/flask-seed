@@ -23,6 +23,9 @@ app.use('/static', express.static('static'));
 app.get('/', function (req, res) {
     res.render('public/index.html');
 });
+app.get('/*', function (req, res) {
+    res.render('public/*.html');
+});
 
 // Errors
 app.use(function (req, res, next) {

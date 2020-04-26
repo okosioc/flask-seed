@@ -10,5 +10,4 @@
 """
 from .user import User, UserRole, UserStatus
 from .blog import Post, Tag
-from .seo import KeywordLevel, KeywordStatus, Keyword
 from .config import Config

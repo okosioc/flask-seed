@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('Signup') }}{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block main %}
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <div class="text-center w-75 m-auto">
+                                <a href="{{ url_for('public.index') }}"><span>{{ _('Flask-Seed') }}</span></a>
+                                <p class="text-muted mb-4 mt-3">{{ _('Don\'t have an account? Create your own account, it takes less than a minute') }}</p>
+                            </div>
+                            {% if error %}
+                                <div class="alert alert-danger" role="alert">
+                                    <i class="mdi mdi-block-helper mr-2"></i> {{ error }}
+                                </div>
+                            {% endif %}
+                            <form class="needs-validation" novalidate action="/signup" method="post">
+                                {{ form.csrf_token }}
+                                {{ form.next_url }}
+                                <div class="form-group mb-3">
+                                    <label for="email">{{ _('Email Address') }}</label>
+                                    {% if form.email.errors %}
+                                        {{ form.email(class='form-control is-invalid') }}
+                                        <div class="invalid-feedback">{{ form.email.errors[0] }}</div>
+                                    {% else %}
+                                        {{ form.email(class='form-control') }}
+                                    {% endif %}
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="password">{{ _('Password') }}</label>
+                                    {% if form.password.errors %}
+                                        {{ form.password(class='form-control is-invalid') }}
+                                        <div class="invalid-feedback">{{ form.password.errors[0] }}</div>
+                                    {% else %}
+                                        {{ form.password(class='form-control') }}
+                                    {% endif %}
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="password">{{ _('Password Confirm') }}</label>
+                                    {% if form.repassword.errors %}
+                                        {{ form.repassword(class='form-control is-invalid') }}
+                                        <div class="invalid-feedback">{{ form.repassword.errors[0] }}</div>
+                                    {% else %}
+                                        {{ form.repassword(class='form-control') }}
+                                    {% endif %}
+                                </div>
+                                <div class="form-group mb-3">
+                                    <div class="custom-control custom-checkbox">
+                                        {{ form.agree(checked='checked', class='custom-control-input') }}
+                                        <label class="custom-control-label" for="agree">
+                                            {{ _('I accept') }}
+                                            <a href="javascript:coming();"
+                                               class="text-dark">{{ _('Terms and Conditions') }}</a>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0 text-center">
+                                    <button class="btn btn-primary btn-block" type="submit">
+                                        {{ _('Sign Up') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div> <!-- /.card -->
+                </div>
+            </div> <!-- /.row -->
+            <div class="row mt-0">
+                <div class="col-12 text-center">
+                    <p class="text-muted">{{ _('Already have account?') }}
+                        <a href="{{ url_for('public.login') }}"
+                           class="text-primary font-weight-medium ml-1">{{ _('Login') }}</a>
+                    </p>
+                </div>
+            </div> <!-- /.row -->
+        </div> <!-- /.container -->
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <footer class="footer footer-alt">2020 &copy; {{ _('Flask-Seed') }}</footer>
+{% endblock %}

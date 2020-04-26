@@ -35,10 +35,8 @@ DEFAULT_APP_NAME = 'app'
 
 DEFAULT_BLUEPRINTS = (
     (views.public, ''),
-    (views.admin, '/admin'),
     (views.crud, '/crud'),
     (views.blog, '/blog'),
-    (views.seo, '/seo')
 )
 
 

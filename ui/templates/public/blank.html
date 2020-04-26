@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('Blank Page') }}{% endblock %}
+
+{% block main %}
+    <div class="wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-title-box">
+                        <div class="page-title-right">
+                            <ol class="breadcrumb m-0">
+                                <li class="breadcrumb-item">
+                                    <a href="{{ url_for('public.index') }}">{{ _('Index') }}</a>
+                                </li>
+                                <li class="breadcrumb-item active">{{ _('Blank Page') }}</li>
+                            </ol>
+                        </div>
+                        <h4 class="page-title">{{ _('Blank Page') }}</h4>
+                    </div>
+                </div>
+            </div> <!-- /page-title -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="header-title">{{ _('Title') }}</h4>
+                            <p class="sub-header">{{ _('Subtitle') }}</p>
+                        </div>
+                    </div> <!-- /.card -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        function action(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("action?");
+            if (!con) {
+                return false;
+            }
+
+            // Validation goes here.
+
+            // Set doing to prevent duplicate clicks
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            // Post
+            $.post("action", {"r": Math.random()}, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, 'json');
+        }
+    </script>
+{% endblock %}

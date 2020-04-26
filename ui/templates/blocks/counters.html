@@ -1,0 +1,27 @@
+{% set block = {
+    'counters': counters or [
+        {'icon':'ti-star', 'title':'Stars', 'count':9394},
+        {'icon':'ti-eye', 'title':'Forks', 'count':168},
+        {'icon':'ti-face-smile', 'title':'Projects', 'count':9527},
+        {'icon':'ti-user', 'title':'Contributors', 'count':13}
+    ]
+} %}
+<section class="bg-primary py-5">
+    <div class="container">
+        <div class="row">
+            {% for c in block.counters %}
+                <div class="col-lg-3 col-sm-6">
+                    <div class="counter-box text-center my-2 p-3">
+                        <div class="counter-icon text-white-50">
+                            <i class="{{ c.icon }} display-4"></i>
+                        </div>
+                        <div class="counter-content">
+                            <h2 class="counter-value text-white mt-0 mb-3" data-count="{{ c.count }}">{{ c.count }}</h2>
+                            <p class="text-white-50 mb-0">{{ c.title }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

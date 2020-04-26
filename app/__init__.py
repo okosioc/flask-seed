@@ -21,7 +21,7 @@ from flask import Flask, request, redirect, jsonify, url_for, render_template, s
 from flask_babel import Babel, gettext as _
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, UploadConfiguration
-from werkzeug.urls import url_quote
+from werkzeug.urls import url_quote, url_encode
 
 from app import views
 from app.core import SchemaJSONEncoder
@@ -69,6 +69,7 @@ def create_app(blueprints=None, pytest=False, runscripts=False):
     configure_errorhandlers(app)
     configure_before_handlers(app)
     configure_template_filters(app)
+    configure_template_functions(app)
     configure_context_processors(app)
     configure_i18n(app)
     if not pytest and not runscripts:  # Do not start schedules during testing
@@ -170,6 +171,16 @@ def configure_template_filters(app):
     def urlquote(value, charset='utf-8'):
         """ Url Quote. """
         return url_quote(value, charset)
+
+
+def configure_template_functions(app):
+    @app.template_global()
+    def update_query(**new_values):
+        """ Update query. """
+        args = request.args.copy()
+        for key, value in new_values.items():
+            args[key] = value
+        return '{}?{}'.format(request.path, url_encode(args))
 
 
 def configure_before_handlers(app):

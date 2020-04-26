@@ -1,0 +1,18 @@
+//
+// index.scss
+//
+
+.counter-box {
+    position: relative;
+    background-color: rgba($white, 0.1);
+    border: 2px solid rgba($white, 0.1);
+    overflow: hidden;
+    border-radius: 7px;
+    .counter-icon{
+        i{
+            position: absolute;
+            right: 14px;
+            bottom: -20px;
+        }
+    }
+}

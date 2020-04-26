@@ -1,0 +1,50 @@
+{% set block = {
+    'logo': base() + '/assets/images/logo-light.png',
+    'links': [
+        {'url': '/', 'title': _('Home')},
+        {'url': '/#features','title': _('Features')},
+        {'url': '/blog','title': _('Blog')},
+        {'url': '#', 'title': _('Pages'), 'links': [
+            {'url': '/blank', 'title': _('Blank Page')}
+        ]}
+    ]
+} %}
+<header>
+    <nav class="navbar navbar-expand-lg navbar-custom position-relative" id="navbar">
+        <div class="container">
+            <a class="logo text-uppercase" href="/">
+                <img src="{{ block.logo }}" alt="" class="logo-light" height="40">
+            </a>
+            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="mdi mdi-menu text-white"></i>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarCollapse" style="">
+                <ul class="navbar-nav topnav-menu ml-auto navbar-center">
+                    {% for l in block.links %}
+                        {% if l.links %}
+                            <li class="nav-item">
+                                <div class="dropdown">
+                                    <a class="nav-link dropdown-toggle arrow-none" href="{{ l.url }}" role="button"
+                                       data-toggle="dropdown"
+                                       aria-haspopup="true" aria-expanded="false">
+                                        {{ l.title }} <i class="mdi mdi-chevron-down ml-1"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        {% for sl in l.links %}
+                                            <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a href="{{ l.url }}" class="nav-link">{{ l.title }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

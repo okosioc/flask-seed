@@ -1,0 +1,107 @@
+//
+// blog.scss
+//
+
+.blog-content{
+    position: relative;
+    bottom: 14px;
+    background: $white;
+    border-radius: 4px;
+}
+
+.blog-right-sidebar{
+    .widget-search {
+        form {
+            position: relative;
+            .form-control{
+                font-size: 14px;
+            }
+            .search-button {
+                position: absolute;
+                top: 5px;
+                right: 4px;
+                background-color: $white;
+                border: none;
+                font-size: 18px;
+                transition: all .3s ease-out;
+                &:focus{
+                    outline: 0;
+                }
+            }
+        }
+    }
+
+    .widget{
+        ul{
+            li{
+                padding: 12px 0px;
+                &:last-child{
+                    padding-bottom: 0px;
+                }
+                a{
+                    color: $dark;
+                    display: block;
+                }
+            }
+        }
+
+        &.widget-popular-post{
+
+            .popular-post{
+                border-bottom: 1px solid lighten($dark, 4%);
+                padding: 15px 0px;
+                img{
+                    width: 64px;
+                }
+                &:last-of-type{
+                    border: none;
+                }
+            }
+        }
+        &.widget-tag-cloud{
+            .tagcloud {
+                    > a {
+                    display: inline-block;
+                    padding: 5px 10px;
+                    border: 1px solid rgba($dark, 0.1);
+                    border-radius: 2px;
+                    color: lighten($dark,10%);
+                    font-size: 12.4px;
+                    margin-top: 9px;
+                    margin-right: 6px;
+
+                    &:hover {
+                        background: $primary;
+                        border-color: $primary;
+                        color: $white;
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+.blog-details-box{
+    .post-meta{
+        .list-inline-item{
+            margin-right: 24px;
+            color: $text-muted;
+            a{
+                color: $text-muted;
+            }
+        }
+    }
+    .blockquote{
+        position: relative;
+
+        .blockquote-icon{
+            i{
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                color: rgba($dark, 0.1);
+            }
+        }
+    }
+}

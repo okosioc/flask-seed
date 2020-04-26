@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block main %}
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card bg-pattern">
+                        <div class="card-body p-4">
+                            <div class="text-center">
+                                <a href="{{ url_for('public.index') }}">
+                                    <span>{{ _('Flask-Seed') }}</span>
+                                </a>
+                            </div>
+                            {% block error_innder %}
+                            {% endblock %}
+                        </div>
+                    </div> <!-- /.card -->
+                </div>
+            </div> <!-- /.row -->
+        </div> <!-- /.container -->
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <footer class="footer footer-alt">2020 &copy; {{ _('Flask-Seed') }}</footer>
+{% endblock %}

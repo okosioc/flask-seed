@@ -6,8 +6,7 @@
         {'url': '/blog','title': _('Blog')},
         {'url': '#', 'title': _('Pages'), 'links': [
             {'url': '/blank', 'title': _('Blank Page')}
-        ]},
-        {'url': '/login','title': _('Login')}
+        ]}
     ]
 } %}
 <header>
@@ -44,6 +43,13 @@
                             </li>
                         {% endif %}
                     {% endfor %}
+                    <li class="nav-item">
+                        {% if current_user.is_authenticated %}
+                            <a href="/logout" class="nav-link">{{ _('Logout') }}</a>
+                        {% else %}
+                            <a href="/login" class="nav-link">{{ _('Login') }}</a>
+                        {% endif %}
+                    </li>
                 </ul>
             </div>
         </div>

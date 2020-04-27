@@ -2,29 +2,60 @@ const express = require('express');
 const nunjucks = require('nunjucks');
 const app = express();
 const port = 3000;
-
 // Use nunjucks as express template
 var env = nunjucks.configure('templates', {
     autoescape: true,
     express: app
 });
-// Compatible with jinja2's babel function
+
+//
+// Compatible with flask
+//
+
+// Jinja2's babel function
 env.addGlobal('_', function (str) {
     return str
 });
-env.addGlobal('current_user', {
+// flask-login
+var current_user = {
     is_authenticated: false,
-});
+};
+env.addGlobal('current_user', current_user);
 
 // Static
 app.use('/static', express.static('static'));
 
+//
 // Routers
+//
+
+// Index
 app.get('/', function (req, res) {
     res.render('public/index.html');
 });
-app.get('/*', function (req, res) {
-    res.render('public/*.html');
+
+// Login
+app.get('/login', function (req, res) {
+    res.render('public/login.html');
+});
+app.post('/login', function (req, res) {
+    current_user['is_authenticated'] = true;
+    res.redirect('/');
+});
+
+// Logout
+app.get('/logout', function (req, res) {
+    current_user['is_authenticated'] = false;
+    res.redirect('/');
+});
+
+// Signup
+app.get('/signup', function (req, res) {
+    res.render('public/signup.html');
+});
+app.post('/signup', function (req, res) {
+    current_user['is_authenticated'] = true;
+    res.redirect('/');
 });
 
 // Errors

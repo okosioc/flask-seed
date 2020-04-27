@@ -25,8 +25,9 @@ const paths = {
     }
 };
 
-// Styles autoprefixing and minification
+// Styles
 gulp.task('styles', function () {
+    // Scss -> autoprefixer -> cleancss
     return gulp
         .src(paths.scss.main)
         .pipe(sass().on('error', sass.logError))
@@ -69,7 +70,7 @@ gulp.task('scripts:merge', function () {
         .pipe(gulp.dest(paths.js.dir));
 });
 
-// Default build command
+// Build command
 gulp.task('build', gulp.parallel(
     'styles',
     gulp.series('scripts:copy', 'scripts:merge')

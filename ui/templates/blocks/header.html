@@ -1,11 +1,16 @@
 {% set block = {
     'logo': base() + '/assets/img/logo-light.png',
     'links': [
-        {'url': '/', 'title': _('Home')},
+        {'url': '/', 'title': _('Index')},
         {'url': '/#features','title': _('Features')},
         {'url': '/blog','title': _('Blog')},
         {'url': '#', 'title': _('Pages'), 'links': [
-            {'url': '/blank', 'title': _('Blank Page')}
+            {'url': '/blank', 'title': _('Blank Page')},
+            {'url': '', 'title': ''},
+            {'url': '/400', 'title': _('400')},
+            {'url': '/403', 'title': _('403')},
+            {'url': '/404', 'title': _('404')},
+            {'url': '/500', 'title': _('500')}
         ]}
     ]
 } %}
@@ -32,7 +37,11 @@
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right">
                                         {% for sl in l.links %}
-                                            <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
+                                            {% if sl.title %}
+                                                <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
+                                            {% else %}
+                                                <div class="dropdown-divider"></div>
+                                            {% endif %}
                                         {% endfor %}
                                     </div>
                                 </div>

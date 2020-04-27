@@ -58,13 +58,27 @@ app.post('/signup', function (req, res) {
     res.redirect('/');
 });
 
+// Blank
+app.get('/blank', function (req, res) {
+    res.render('public/blank.html');
+});
+
 // Errors
+app.get('/400', function (req, res) {
+    res.status(400).render('errors/400.html');
+});
+app.get('/403', function (req, res) {
+    res.status(403).render('errors/403.html');
+});
+app.get('/500', function (req, res) {
+    throw new Error()
+});
 app.use(function (req, res, next) {
-    res.status(404).send('404!');
+    res.status(404).render('errors/404.html');
 });
 app.use(function (err, req, res, next) {
     console.error(err.stack);
-    res.status(500).send('500!');
+    res.status(500).render('errors/500.html');
 });
 
 app.listen(port, () => console.log(`ui is listening on port ${port}!`));

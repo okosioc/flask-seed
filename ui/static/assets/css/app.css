@@ -3726,3 +3726,16 @@ div.hopscotch-bubble {
     right: 0;
     bottom: 0;
     color: rgba(50, 58, 70, 0.1); }
+
+.page-header-box {
+  color: #fff; }
+  .page-header-box .breadcrumb {
+    background: transparent;
+    -webkit-box-pack: center;
+            justify-content: center; }
+    .page-header-box .breadcrumb .breadcrumb-item a {
+      color: rgba(255, 255, 255, 0.6); }
+    .page-header-box .breadcrumb .breadcrumb-item.active {
+      color: #fff; }
+  .page-header-box .breadcrumb-item + .breadcrumb-item:before {
+    color: #fff; }

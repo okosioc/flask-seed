@@ -19,6 +19,9 @@ env.addGlobal('_', function (str) {
 // flask-login
 var current_user = {
     is_authenticated: false,
+    is_admin: true,
+    head: '/static/assets/img/blog/avt-1.jpg',
+    name: 'Admin',
 };
 env.addGlobal('current_user', current_user);
 
@@ -34,13 +37,21 @@ app.get('/', function (req, res) {
     res.render('public/index.html');
 });
 
+// Dashboard
+app.get('/dashboard/', function (req, res) {
+    res.render('dashboard/index.html');
+});
+app.get('/dashboard/blank', function (req, res) {
+    res.render('dashboard/blank.html');
+});
+
 // Login
 app.get('/login', function (req, res) {
     res.render('public/login.html');
 });
 app.post('/login', function (req, res) {
     current_user['is_authenticated'] = true;
-    res.redirect('/');
+    res.redirect('/dashboard/');
 });
 
 // Logout
@@ -55,7 +66,7 @@ app.get('/signup', function (req, res) {
 });
 app.post('/signup', function (req, res) {
     current_user['is_authenticated'] = true;
-    res.redirect('/');
+    res.redirect('/dashboard/');
 });
 
 // Blank
@@ -81,4 +92,8 @@ app.use(function (err, req, res, next) {
     res.status(500).render('errors/500.html');
 });
 
+
+//
+// Run
+//
 app.listen(port, () => console.log(`ui is listening on port ${port}!`));

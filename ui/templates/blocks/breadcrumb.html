@@ -1,8 +1,7 @@
-{% set block = {
+{% set block = breadcrumb or {
     'title': 'Blank Page',
     'links': [
-        {'url':'/', 'title': 'Index'},
-        {'url':'/', 'title': 'Pages'},
+        {'url':'/', 'title': 'Home'},
         {'url':'/blank', 'title': 'Blank Page'}
     ]
 } %}
@@ -14,8 +13,13 @@
                     <h3 class="page-header-title text-white">{{ block.title }}</h3>
                     <ol class="breadcrumb mb-0">
                         {% for l in block.links %}
-                            <li class="breadcrumb-item {{ 'active' if loop.last }}"><a
-                                    href="{{ l.url }}">{{ l.title }}</a></li>
+                            {% if loop.last %}
+                                <li class="breadcrumb-item active">{{ l.title }}</li>
+                            {% else %}
+                                <li class="breadcrumb-item">
+                                    <a href="{{ l.url }}">{{ l.title }}</a>
+                                </li>
+                            {% endif %}
                         {% endfor %}
                     </ol>
                 </div>

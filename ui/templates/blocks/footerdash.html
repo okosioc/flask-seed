@@ -1,0 +1,21 @@
+{% set block = {
+    'copyright': '2020 © flask-seed.com',
+    'links': [
+        {'title': 'About Us', 'url': 'javascript:coming();'},
+        {'title': 'Help', 'url': 'javascript:coming();'}
+    ]
+} %}
+<footer class="footer">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">{{ block.copyright }}</div>
+            <div class="col-md-6">
+                <div class="text-md-right footer-links d-none d-sm-block">
+                    {% for l in block.links %}
+                        <a href="{{ l.url }}">{{ l.title }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

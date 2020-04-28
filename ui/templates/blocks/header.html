@@ -1,12 +1,12 @@
 {% set block = {
     'logo': base() + '/assets/img/logo-light.png',
     'links': [
-        {'url': '/', 'title': _('Index')},
+        {'url': '/', 'title': _('Home')},
         {'url': '/#features','title': _('Features')},
         {'url': '/blog','title': _('Blog')},
         {'url': '#', 'title': _('Pages'), 'links': [
             {'url': '/blank', 'title': _('Blank Page')},
-            {'url': '', 'title': ''},
+            {'title': ''},
             {'url': '/400', 'title': _('400')},
             {'url': '/403', 'title': _('403')},
             {'url': '/404', 'title': _('404')},
@@ -54,7 +54,7 @@
                     {% endfor %}
                     <li class="nav-item">
                         {% if current_user.is_authenticated %}
-                            <a href="/logout" class="nav-link">{{ _('Logout') }}</a>
+                            <a href="/dashboard" class="nav-link">{{ _('Dashboard') }}</a>
                         {% else %}
                             <a href="/login" class="nav-link">{{ _('Login') }}</a>
                         {% endif %}

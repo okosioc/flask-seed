@@ -17,7 +17,7 @@ import pymongo
 from pymongo import MongoClient, uri_parser, ReadPreference, WriteConcern
 from pymongo.cursor import Cursor as PyMongoCursor
 
-from app.core import IN, DotDictProxy, DotListProxy, SchemaDict, SeedDataError
+from app.core import IN, ChoiceMeta, DotDictProxy, DotListProxy, SchemaDict, SeedDataError
 
 # Find the stack on which we want to store the database connection.
 # Starting with Flask 0.9, the _app_ctx_stack is the correct one,
@@ -72,6 +72,9 @@ class MongoSupport(object):
             def ms_is_operator_in(struct):
                 return isinstance(struct, IN)
 
+            def ms_is_choice(struct):
+                return isinstance(struct, ChoiceMeta)
+
             def ms_get_type(struct):
                 if type(struct) is type:
                     return struct.__name__
@@ -88,6 +91,7 @@ class MongoSupport(object):
             return dict(ms_is_simple=ms_is_simple,
                         ms_is_list=ms_is_list,
                         ms_is_dict=ms_is_dict,
+                        ms_is_choice=ms_is_choice,
                         ms_is_operator_in=ms_is_operator_in,
                         ms_get_type=ms_get_type,
                         ms_create_empty_dict_or_list=ms_create_empty_dict_or_list)

@@ -1,19 +1,33 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}Blank Page{% endblock %}
+{% block title %}Models{% endblock %}
 
 {% block main %}
     <section class="wrapper">
         <div class="container-fluid">
 
+            {% set breadcrumb = {
+                'title': 'Models',
+                'links': [
+                    {'url':'/', 'title':'Home'},
+                    {'url':'/dashboard/', 'title':'Dashboard'},
+                    {'url':'/crud/', 'title':'Models'}
+                ]
+            } %}
             {% include 'blocks/breadcrumbdash.html' %}
 
+            {% set models = models or [
+
+            ] %}
             <div class="row">
                 <div class="col-lg-8">
                     <div class="card">
                         <div class="card-body">
-                            <h4>Left</h4>
-                            <p class="text-muted">Subtitle</p>
+                            <h4>Registered Models</h4>
+                            <p class="text-muted">You can define you models in <code>/app/models</code> package in a
+                                very simple and natural way. We are currently using <code>mongoDB</code> because of its
+                                flexibility and performance, especially suitable for the projects in early stage. </p>
+
                         </div>
                     </div>
                 </div>

@@ -9,7 +9,7 @@ var env = nunjucks.configure('templates', {
 });
 
 //
-// Compatible with flask
+// Compatible with flask template
 //
 
 // Jinja2's babel function
@@ -24,6 +24,16 @@ var current_user = {
     name: 'Admin',
 };
 env.addGlobal('current_user', current_user);
+// Schema
+var schema_types = {
+    bool: 'bool',
+    int: 'int',
+    float: 'float',
+    str: 'str',
+    datetime: 'datetime',
+    ObjectId: 'ObjectId'
+};
+env.addGlobal('schema', current_user);
 
 // Static
 app.use('/static', express.static('static'));
@@ -36,6 +46,9 @@ app.use('/static', express.static('static'));
 app.get('/', function (req, res) {
     res.render('public/index.html');
 });
+app.get('/blank', function (req, res) {
+    res.render('public/blank.html');
+});
 
 // Dashboard
 app.get('/dashboard/', function (req, res) {
@@ -43,6 +56,11 @@ app.get('/dashboard/', function (req, res) {
 });
 app.get('/dashboard/blank', function (req, res) {
     res.render('dashboard/blank.html');
+});
+
+// CRUD
+app.get('/crud/', function (req, res) {
+    res.render('crud/index.html');
 });
 
 // Login
@@ -67,11 +85,6 @@ app.get('/signup', function (req, res) {
 app.post('/signup', function (req, res) {
     current_user['is_authenticated'] = true;
     res.redirect('/dashboard/');
-});
-
-// Blank
-app.get('/blank', function (req, res) {
-    res.render('public/blank.html');
 });
 
 // Errors

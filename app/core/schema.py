@@ -11,7 +11,7 @@
 
 import json
 import re
-from collections import MutableSequence, MutableMapping
+from collections.abc import MutableSequence, MutableMapping
 from copy import deepcopy
 from datetime import datetime
 
@@ -69,6 +69,61 @@ class IN(SchemaOperator):
                 if value == op and isinstance(value, type(op)):
                     return True
         return False
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Custom Types
+#
+
+class ChoiceMeta(type):
+    """ Metaclass for Choice. """
+
+    def __new__(mcs, name, bases, attrs):
+        choice_class = type.__new__(mcs, name, bases, attrs)
+        # Remove the attributes such as __module__, __qualname__
+        choice_class._member_dict_ = {k: attrs[k] for k in attrs if not k.startswith('_')}
+        # TODO: Check duilpliated names or values
+        return choice_class
+
+    def __getattr__(cls, name):
+        if name.startswith('_'):
+            raise AttributeError(name)
+        try:
+            return cls._member_dict_[name]
+        except KeyError:
+            raise AttributeError(name) from None
+
+    def __getitem__(cls, name):
+        return cls._member_dict_[name]
+
+    def __iter__(cls):
+        """ Returns all values. """
+        return (cls._member_dict_[name] for name in cls._member_dict_)
+
+    @property
+    def __members__(cls):
+        """ Returns all members name->value. """
+        return cls._member_dict_
+
+    def __len__(cls):
+        return len(cls._member_dict_)
+
+    def __repr__(cls):
+        return "<ChoiceMeta %r %s>" % (cls.__name__, list(cls))
+
+    @property
+    def type(cls):
+        """ Get type of members, All members should be the same type. """
+        return type(next(cls.__iter__(), None))
+
+    def validate(cls, value):
+        """ Validate if a value is defined in a choice class. """
+        return value in cls._member_dict_.values()
+
+
+class Choice(object, metaclass=ChoiceMeta):
+    """ Parent class for choice fields. """
+    pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -196,6 +251,17 @@ class SchemaMetaclass(type):
                     raise SeedSchemaError(
                         '%s: %s must not have more then one type' % (_name, _schema))
                 __validate_schema(_schema[0], _name)
+            # Choice
+            elif isinstance(_schema, ChoiceMeta):
+                types = set()
+                for member in _schema:
+                    types.add(type(member))
+                    if type(member) not in AUTHORIZED_TYPES:
+                        raise SeedSchemaError('%s: %s in %s is not an authorized type (%s found)' % (
+                            _name, member, _schema, type(member).__name__))
+                if len(types) > 1:
+                    raise SeedSchemaError('%s: %s can not have more than one type' % (_name, _schema))
+                attrs['_valid_paths'][_name] = list(types)[0]
             # SchemaOperator
             elif isinstance(_schema, SchemaOperator):
                 if len(_schema) == 0:
@@ -243,7 +309,7 @@ class SchemaMetaclass(type):
                 raise SeedSchemaError('%s: Error in required_fields: can\'t find %s in schema' % (name, rf))
         if attrs.get('required_fields', []):
             if len(attrs['required_fields']) != len(set(attrs['required_fields'])):
-                raise SeedSchemaError('%s: duplicate required_fields : %s' % (name, attrs['required_fields']))
+                raise SeedSchemaError('%s: Duplicate required_fields : %s' % (name, attrs['required_fields']))
 
         # validators
         for v in attrs.get('validators', {}):
@@ -331,6 +397,11 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                                       '%s must be an instance of list not %s' % (path, type(doc).__name__))
             for obj in doc:
                 self._validate_doc(obj, schema[0], path)
+        # Choice
+        elif isinstance(schema, ChoiceMeta):
+            if not schema.validate(doc):
+                self._raise_exception(SeedDataError, path,
+                                      '%s must be in %s not %s' % (path, list(schema), doc))
         # SchemaOperator
         elif isinstance(schema, SchemaOperator):
             if not schema.validate(doc):
@@ -440,6 +511,11 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                     if key not in doc or doc[key] is None:
                         doc[key] = [{}]
                     self._set_default_values(doc[key][0], schema[key][0], new_path)
+            # Choice
+            if isinstance(schema[key], ChoiceMeta):
+                if new_path in self.default_values and key not in doc:
+                    new_value = self.default_values[new_path]
+                    doc[key] = new_value
             # SchemaOperator
             if isinstance(schema[key], SchemaOperator):
                 if new_path in self.default_values and key not in doc:
@@ -509,7 +585,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 return type(value)
 
         def _convert_dict(doc, schema):
-            """Recursively convert specified type."""
+            """ Recursively convert specified type. """
             for key in schema:
                 s = schema[key]
                 if key not in doc:
@@ -526,6 +602,9 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 # []
                 elif isinstance(s, list):
                     _convert_list(old_value, s)
+                # Choice
+                elif isinstance(s, ChoiceMeta):
+                    doc[key] = json_decode(old_value, s.type)
                 # IN
                 elif isinstance(s, SchemaOperator):
                     doc[key] = json_decode(old_value, type(s.operands[0]))
@@ -545,6 +624,9 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 # []
                 elif isinstance(s, list):
                     _convert_list(old_value, s)
+                # Choice
+                elif isinstance(s, ChoiceMeta):
+                    doc[i] = json_decode(old_value, s.type)
                 # IN
                 elif isinstance(s, SchemaOperator):
                     doc[i] = json_decode(old_value, type(s.operands[0]))

@@ -12,20 +12,26 @@ from datetime import datetime
 
 import pytest
 
-from app.core import IN, SchemaDict, SeedDataError
+from app.core import Choice, SchemaDict, SeedDataError
 
 
-class TestStatus:
+class TestStatus(Choice):
     NORMAL = 'normal'
     REJECTED = 'rejected'
+
+
+class TestRole(Choice):
+    MEMBER = 1
+    EDITOR = 2
+    ADMIN = 9
 
 
 class UserDict(SchemaDict):
     schema = {
         'name': str,
         'point': int,
-        'status': IN(TestStatus.NORMAL, TestStatus.REJECTED),
-        'roles': [int],
+        'status': TestStatus,
+        'roles': [TestRole],
         'accounts': [{
             'id': str,
             'name': str,
@@ -37,7 +43,7 @@ class UserDict(SchemaDict):
     default_values = {
         'point': 0,
         'status': TestStatus.NORMAL,
-        'roles': [1],
+        'roles': [TestRole.MEMBER],
         'accounts.balance': 0.0,
         'createTime': datetime.now,
     }
@@ -50,7 +56,7 @@ def test_schema_dict(app):
     assert ud.point == 0
     assert ud['point'] == 0
     assert ud.status == TestStatus.NORMAL
-    assert ud.roles[0] == 1
+    assert ud.roles[0] == TestRole.MEMBER
     assert ud.accounts[0].balance == 0.0
 
     # Test validate

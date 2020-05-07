@@ -14,17 +14,18 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.utils import cached_property
 
-from app.core import Model, IN
+from app.core import Model, Choice
 from app.extensions import mdb
 
 
-class UserRole(object):
+class UserRole(Choice):
     """ User roles. """
     MEMBER = 1
+    EDITOR = 2
     ADMIN = 9
 
 
-class UserStatus(object):
+class UserStatus(Choice):
     """ User Status. """
     NORMAL = 'normal'
     REJECTED = 'rejected'
@@ -39,8 +40,8 @@ class User(Model, UserMixin):
         'password': str,
         'head': str,
         'point': int,
-        'status': IN(UserStatus.NORMAL, UserStatus.REJECTED),
-        'roles': [int],
+        'status': UserStatus,
+        'roles': [UserRole],
         'createTime': datetime,
         'updateTime': datetime
     }

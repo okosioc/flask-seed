@@ -14,18 +14,18 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.utils import cached_property
 
-from app.core import Model, Choice
+from app.core import Model, SimpleEnum
 from app.extensions import mdb
 
 
-class UserRole(Choice):
+class UserRole(SimpleEnum):
     """ User roles. """
     MEMBER = 1
     EDITOR = 2
     ADMIN = 9
 
 
-class UserStatus(Choice):
+class UserStatus(SimpleEnum):
     """ User Status. """
     NORMAL = 'normal'
     REJECTED = 'rejected'

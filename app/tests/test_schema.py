@@ -12,15 +12,15 @@ from datetime import datetime
 
 import pytest
 
-from app.core import Choice, SchemaDict, SeedDataError
+from app.core import SimpleEnum, SchemaDict, SeedDataError
 
 
-class TestStatus(Choice):
+class TestStatus(SimpleEnum):
     NORMAL = 'normal'
     REJECTED = 'rejected'
 
 
-class TestRole(Choice):
+class TestRole(SimpleEnum):
     MEMBER = 1
     EDITOR = 2
     ADMIN = 9
@@ -38,6 +38,7 @@ class UserDict(SchemaDict):
             'balance': float,
         }],
         'createTime': datetime,
+        'updateTime': datetime
     }
     required_fields = ['name', 'point', 'status', 'roles', 'createTime', 'accounts.id']
     default_values = {
@@ -45,7 +46,7 @@ class UserDict(SchemaDict):
         'status': TestStatus.NORMAL,
         'roles': [TestRole.MEMBER],
         'accounts.balance': 0.0,
-        'createTime': datetime.now,
+        'createTime': datetime.now
     }
 
 

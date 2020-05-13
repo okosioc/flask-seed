@@ -135,9 +135,7 @@ def configure_schedulers(app):
 
 
 def configure_context_processors(app):
-    """
-    Context processors run before the template is rendered and inject new values into the template context.
-    """
+    """ Context processors run before the template is rendered and inject new values into the template context. """
 
     @app.context_processor
     def inject_config():

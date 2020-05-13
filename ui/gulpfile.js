@@ -41,8 +41,14 @@ gulp.task('styles', function () {
 // Scripts
 gulp.task('scripts:copy', function () {
     // Copy libs from node_modules to vendor folder
-    return gulp
+    gulp
         .src(npmdist(), {base: paths.node})
+        .pipe(gulp.dest(paths.vendor));
+    // Copy special libs that gulp-npm-dist can not handle
+    return gulp
+        .src([
+            paths.node + "/moment/min/*",
+        ], {base: paths.node})
         .pipe(gulp.dest(paths.vendor));
 
 });
@@ -52,11 +58,10 @@ gulp.task('scripts:merge', function () {
         .src([
             paths.vendor + "/jquery/dist/jquery.min.js",
             paths.vendor + "/bootstrap/dist/js/bootstrap.bundle.min.js",
+            paths.vendor + "/bootstrap4-notify/bootstrap-notify.min.js",
             paths.vendor + "/jquery-slimscroll/jquery.slimscroll.min.js",
             paths.vendor + "/node-waves/dist/waves.min.js",
-            paths.vendor + "/waypoints/lib/jquery.waypoints.min.js",
-            paths.vendor + "/bootstrap4-notify/bootstrap-notify.min.js"
-
+            paths.vendor + "/waypoints/lib/jquery.waypoints.min.js"
         ])
         .pipe(concat("vendor.min.js"))
         .pipe(gulp.dest(paths.js.dir));
@@ -69,9 +74,10 @@ gulp.task('scripts:merge', function () {
         .pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest(paths.js.dir));
 });
+gulp.task('scripts', gulp.series('scripts:copy', 'scripts:merge'));
 
 // Build command
 gulp.task('build', gulp.parallel(
     'styles',
-    gulp.series('scripts:copy', 'scripts:merge')
+    'scripts'
 ));

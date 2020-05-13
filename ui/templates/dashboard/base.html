@@ -1,9 +1,29 @@
 {% extends 'layout.html' %}
 
-{% block header %}
-    {% include 'blocks/headerdash.html' %}
+{% block header %}{% include 'blocks/headerdash.html' %}{% endblock %}
+
+{% block main %}
+    <section class="wrapper">
+        <div class="container-fluid">
+            {% include 'blocks/breadcrumbdash.html' %}
+            <div class="row">
+                <div class="col-lg-9">
+                    <div class="card">
+                        <div class="card-body">
+                            {% block left %}{% endblock %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            {% block right %}{% endblock %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}
 
-{% block footer %}
-    {% include 'blocks/footerdash.html' %}
-{% endblock %}
+{% block footer %}{% include 'blocks/footerdash.html' %}{% endblock %}

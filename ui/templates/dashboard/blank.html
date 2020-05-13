@@ -2,34 +2,20 @@
 
 {% block title %}Blank Page{% endblock %}
 
-{% block main %}
-    <section class="wrapper">
-        <div class="container-fluid">
-
-            {% include 'blocks/breadcrumbdash.html' %}
-
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4>Left</h4>
-                            <p class="text-muted">Subtitle</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4>Right</h4>
-                            <p class="text-muted">Subtitle</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+{% block left %}
+    <section>
+        <h4>Left</h4>
+        <p class="text-muted">Subtitle</p>
     </section>
 {% endblock %}
+
+{% block right %}
+    <section>
+        <h4>Right</h4>
+        <p class="text-muted">Subtitle</p>
+    </section>
+{% endblock %}
+
 
 {% block script %}
     <script type="text/javascript">

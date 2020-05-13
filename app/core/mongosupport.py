@@ -17,7 +17,7 @@ import pymongo
 from pymongo import MongoClient, uri_parser, ReadPreference, WriteConcern
 from pymongo.cursor import Cursor as PyMongoCursor
 
-from app.core import IN, ChoiceMeta, DotDictProxy, DotListProxy, SchemaDict, SeedDataError
+from app.core import IN, SimpleEnumMeta, DotDictProxy, DotListProxy, SchemaDict, SeedDataError
 
 # Find the stack on which we want to store the database connection.
 # Starting with Flask 0.9, the _app_ctx_stack is the correct one,
@@ -72,8 +72,8 @@ class MongoSupport(object):
             def ms_is_operator_in(struct):
                 return isinstance(struct, IN)
 
-            def ms_is_choice(struct):
-                return isinstance(struct, ChoiceMeta)
+            def ms_is_enum(struct):
+                return isinstance(struct, SimpleEnumMeta)
 
             def ms_get_type(struct):
                 if type(struct) is type:
@@ -91,7 +91,7 @@ class MongoSupport(object):
             return dict(ms_is_simple=ms_is_simple,
                         ms_is_list=ms_is_list,
                         ms_is_dict=ms_is_dict,
-                        ms_is_choice=ms_is_choice,
+                        ms_is_enum=ms_is_enum,
                         ms_is_operator_in=ms_is_operator_in,
                         ms_get_type=ms_get_type,
                         ms_create_empty_dict_or_list=ms_create_empty_dict_or_list)
@@ -290,9 +290,18 @@ class Pagination(object):
         return self.page > 1
 
     @property
+    def prev(self):
+        return self.page - 1 if self.has_prev else None
+
+    @property
     def has_next(self):
         return self.page < self.pages
 
+    @property
+    def next(self):
+        return self.page + 1 if self.has_next else None
+
+    @property
     def iter_pages(self, left_edge=2, left_current=2, right_current=3, right_edge=2):
         last = 0
         for num in range(1, self.pages + 1):

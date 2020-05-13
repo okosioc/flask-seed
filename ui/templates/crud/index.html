@@ -1,79 +1,59 @@
 {% extends 'dashboard/base.html' %}
 
+{% set models = models or [
+    {
+        'name': 'User',
+        'schema': {}
+    }
+] %}
+{% set breadcrumb = {
+    'title': 'Models',
+    'links': [
+        {'url':'/', 'title':'Home'},
+        {'url':'/dashboard/', 'title':'Dashboard'},
+        {'url':'/crud/', 'title':'Models'}
+    ]
+} %}
+
 {% block title %}Models{% endblock %}
 
-{% block main %}
-    <section class="wrapper">
-        <div class="container-fluid">
-
-            {% set breadcrumb = {
-                'title': 'Models',
-                'links': [
-                    {'url':'/', 'title':'Home'},
-                    {'url':'/dashboard/', 'title':'Dashboard'},
-                    {'url':'/crud/', 'title':'Models'}
-                ]
-            } %}
-            {% include 'blocks/breadcrumbdash.html' %}
-
-            {% set models = models or [
-
-            ] %}
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4>Registered Models</h4>
-                            <p class="text-muted">You can define you models in <code>/app/models</code> package in a
-                                very simple and natural way. We are currently using <code>mongoDB</code> because of its
-                                flexibility and performance, especially suitable for the projects in early stage. </p>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4>Right</h4>
-                            <p class="text-muted">Subtitle</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+{% block left %}
+    <section>
+        <h4>Registered Models</h4>
+        <p class="mb-3 text-muted">You can define you models in <code>/app/models</code> package in
+            a very simple and natural way. We are currently using <code>mongoDB</code> because of
+            its flexibility and performance, especially suitable for the projects in early stage.
+        </p>
+        <table class="table table-sm">
+            <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>Models</th>
+                <th>Profile</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for m in models %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><a href="/crud/list/{{ m.name }}">{{ m.name }}</a></td>
+                    <td></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </section>
 {% endblock %}
 
-{% block script %}
-    <script type="text/javascript">
-        function action(btn) {
-            if (btn.is(".doing")) {
-                return;
-            }
-            var con = window.confirm("action?");
-            if (!con) {
-                return false;
-            }
-
-            // Validation goes here.
-
-            // Set doing to prevent duplicate clicks
-            btn.addClass("doing");
-            var method = btn.is("input") ? "val" : "text";
-            var oldLabel = btn[method]();
-            btn[method](oldLabel + "...");
-
-            // Post
-            $.post("action", {"r": Math.random()}, function (result) {
-                if (result.success) {
-                    showSuccess(result.message);
-                } else {
-                    showError(result.message);
-                }
-                btn.removeClass("doing");
-                btn[method](oldLabel);
-            }, 'json');
-        }
-    </script>
+{% block right %}
+    <section>
+        <h4>Note</h4>
+        <p class="text-muted"></p>
+        <ul class="list-unstyled">
+            <li>1. Model class names use the
+                <a href="https://www.python.org/dev/peps/pep-0008/#class-names" target="_blank">CapWords</a>
+                convention. Their names must be unique, regardless of case.
+            </li>
+        </ul>
+    </section>
 {% endblock %}

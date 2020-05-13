@@ -324,9 +324,9 @@
                     <p>{{ _('Please note record will be updated/created directly into database.') }}</p>
                     <a class="btn btn-primary btn-sm" onclick="save($(this));">{{ _('Save') }}</a>
                     {% if change %}
-                    <a class="btn btn-success btn-sm" onclick="save($(this), true);">{{ _('Copy') }}</a>
-                    <a class="btn btn-warning btn-sm" href="/crud/json/{{ model.__name__|lower }}/{{ record._id }}"
-                       target="_blank">{{ _('JSON') }}</a>
+                        <a class="btn btn-success btn-sm" onclick="save($(this), true);">{{ _('Copy') }}</a>
+                        <a class="btn btn-warning btn-sm" href="/crud/json/{{ model.__name__|lower }}/{{ record._id }}"
+                           target="_blank">{{ _('JSON') }}</a>
                     {% endif %}
                     <a class="btn btn-default btn-sm"
                        href="/crud/index/{{ model.__name__|lower }}">{{ _('Cancel') }}</a>
@@ -408,7 +408,7 @@
                 <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
             {% endif %}
         </div>
-    {% elif ms_is_choice(struct) %}
+    {% elif ms_is_enum(struct) %}
         <div class="inav">
             <div class="ikey">{{ name }}</div>
             {{- render_ivalue(name, struct, doc) }}
@@ -447,7 +447,7 @@
                 <span {{ 'class=active' if each==value }}>{{ each }}</span>
             {% endfor %}
         </div>
-    {%- elif ms_is_choice(type) -%}
+    {%- elif ms_is_enum(type) -%}
         <div class="ivalue choice" name="{{ name }}">
             {% for each in type %}
                 <span {{ 'class=active' if each==value }}>{{ each }}</span>

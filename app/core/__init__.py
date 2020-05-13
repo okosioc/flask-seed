@@ -9,5 +9,5 @@
     :date: 2019/8/8
 """
 
-from .schema import IN, Choice, ChoiceMeta, SchemaJSONEncoder, SchemaDict, SeedDataError, SeedSchemaError, DotDictProxy, DotListProxy
+from .schema import IN, SimpleEnum, SimpleEnumMeta, SchemaJSONEncoder, SchemaDict, SeedDataError, SeedSchemaError, DotDictProxy, DotListProxy
 from .mongosupport import MongoSupport, Pagination, Model, populate_model, convert_from_string, SeedConnectionError

@@ -75,15 +75,15 @@ class IN(SchemaOperator):
 # Custom Types
 #
 
-class ChoiceMeta(type):
-    """ Metaclass for Choice. """
+class SimpleEnumMeta(type):
+    """ Metaclass for SimpleEnum. """
 
     def __new__(mcs, name, bases, attrs):
-        choice_class = type.__new__(mcs, name, bases, attrs)
+        enum_class = type.__new__(mcs, name, bases, attrs)
         # Remove the attributes such as __module__, __qualname__
-        choice_class._member_dict_ = {k: attrs[k] for k in attrs if not k.startswith('_')}
-        # TODO: Check duilpliated names or values
-        return choice_class
+        enum_class._member_dict_ = {k: attrs[k] for k in attrs if not k.startswith('_')}
+        # TODO: Check repeated names or values
+        return enum_class
 
     def __getattr__(cls, name):
         if name.startswith('_'):
@@ -109,7 +109,8 @@ class ChoiceMeta(type):
         return len(cls._member_dict_)
 
     def __repr__(cls):
-        return "<ChoiceMeta %r %s>" % (cls.__name__, list(cls))
+        """ Return representation str. """
+        return "<SimpleEnumMeta %r %s>" % (cls.__name__, list(cls))
 
     @property
     def type(cls):
@@ -117,12 +118,12 @@ class ChoiceMeta(type):
         return type(next(cls.__iter__(), None))
 
     def validate(cls, value):
-        """ Validate if a value is defined in a choice class. """
+        """ Validate if a value is defined in a simple enum class. """
         return value in cls._member_dict_.values()
 
 
-class Choice(object, metaclass=ChoiceMeta):
-    """ Parent class for choice fields. """
+class SimpleEnum(object, metaclass=SimpleEnumMeta):
+    """ Parent class for simple enum fields. """
     pass
 
 
@@ -134,6 +135,7 @@ class Choice(object, metaclass=ChoiceMeta):
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 # Supported types for modal fields
+# NOTE: These types are also used in form generation.
 AUTHORIZED_TYPES = [
     bool,
     int,
@@ -251,8 +253,8 @@ class SchemaMetaclass(type):
                     raise SeedSchemaError(
                         '%s: %s must not have more then one type' % (_name, _schema))
                 __validate_schema(_schema[0], _name)
-            # Choice
-            elif isinstance(_schema, ChoiceMeta):
+            # SimpleEnum
+            elif isinstance(_schema, SimpleEnumMeta):
                 types = set()
                 for member in _schema:
                     types.add(type(member))
@@ -397,8 +399,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                                       '%s must be an instance of list not %s' % (path, type(doc).__name__))
             for obj in doc:
                 self._validate_doc(obj, schema[0], path)
-        # Choice
-        elif isinstance(schema, ChoiceMeta):
+        # SimpleEnum
+        elif isinstance(schema, SimpleEnumMeta):
             if not schema.validate(doc):
                 self._raise_exception(SeedDataError, path,
                                       '%s must be in %s not %s' % (path, list(schema), doc))
@@ -511,8 +513,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                     if key not in doc or doc[key] is None:
                         doc[key] = [{}]
                     self._set_default_values(doc[key][0], schema[key][0], new_path)
-            # Choice
-            if isinstance(schema[key], ChoiceMeta):
+            # SimpleEnum
+            if isinstance(schema[key], SimpleEnumMeta):
                 if new_path in self.default_values and key not in doc:
                     new_value = self.default_values[new_path]
                     doc[key] = new_value
@@ -602,8 +604,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 # []
                 elif isinstance(s, list):
                     _convert_list(old_value, s)
-                # Choice
-                elif isinstance(s, ChoiceMeta):
+                # SimpleEnum
+                elif isinstance(s, SimpleEnumMeta):
                     doc[key] = json_decode(old_value, s.type)
                 # IN
                 elif isinstance(s, SchemaOperator):
@@ -624,8 +626,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 # []
                 elif isinstance(s, list):
                     _convert_list(old_value, s)
-                # Choice
-                elif isinstance(s, ChoiceMeta):
+                # SimpleEnum
+                elif isinstance(s, SimpleEnumMeta):
                     doc[i] = json_decode(old_value, s.type)
                 # IN
                 elif isinstance(s, SchemaOperator):

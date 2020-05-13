@@ -1,0 +1,281 @@
+//
+// crud
+//
+
+#raw-editor {
+  font-size: 11pt;
+  font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+  min-height: 400px;
+  position: relative;
+  textarea {
+    font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+  }
+  .irow {
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding: 0px 0px 0px 15px;
+    border-left: 1px solid #ddd;
+    line-height: 1.3em;
+    position: relative;
+    &:before {
+      content: "";
+      position: absolute;
+      top: 15px;
+      left: 0;
+      width: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    &:last-child {
+      border: none;
+      &:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 15px;
+        border-left: 1px solid #ddd;
+      }
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.018);
+    }
+  }
+  .ikey {
+    width: 120px;
+    padding-right: 10px;
+    display: inline-block;
+    word-break: break-all;
+    font-size: 95%;
+    line-height: 1.1em;
+    opacity: 0.7;
+    overflow: hidden;
+    vertical-align: top;
+    margin: 0.15em 0 0.4em 0px;
+  }
+  .ilabel {
+    font-size: 80%;
+    padding: 0 5px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+    opacity: 0.9;
+    display: inline-block;
+    margin: -1px 5px 0 5px;
+  }
+  .ivalue {
+    word-break: break-all;
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    cursor: pointer;
+  }
+  .ilist {
+    word-break: break-all;
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+  }
+  .idesc {
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    cursor: pointer;
+  }
+  .imulti.ivalue {
+    cursor: inherit;
+  }
+  .iseditor {
+    .ivalue {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: pre;
+      padding: 0.2em 0.4em 0.4em 0.5em;
+      font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+      max-height: 400px;
+      overflow: auto;
+      outline: none;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      font-size: 90%;
+      border-radius: 2px;
+      margin: -4px 0 -3px 0;
+      tab-size: 2;
+      background-color: rgba(255, 255, 240, 0.8);
+      cursor: text;
+    }
+  }
+  .inav {
+    padding-left: 130px;
+    margin: 4px 0;
+    .ikey {
+      margin-left: -130px;
+    }
+    &:hover {
+      ~ {
+        .iact {
+          display: block;
+          opacity: 0.7;
+          background: rgba(255, 255, 255, 0.8);
+        }
+      }
+    }
+  }
+  .iact {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 3px;
+    &:hover {
+      display: block;
+      opacity: 1 !important;
+    }
+    a {
+      border-radius: 0;
+      margin-right: 2px;
+      padding: 0.25em 0.7em 0.15em 0.7em;
+      margin-top: 0;
+      margin-bottom: 0;
+      display: block;
+      border: 1px solid #E2E7EB;
+      background-color: #E2E7EB;
+      color: #3C5168;
+      &:hover {
+        border-color: #65A1D8;
+        background-color: #fff;
+      }
+      &:first-child {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+      }
+      &:last-child {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        margin-right: 0;
+      }
+    }
+    a.add-list-item {
+      border-color: #E5ECDF;
+      background-color: #E5ECDF;
+      color: #748A30;
+      &:hover {
+        border-color: #B4D865;
+      }
+    }
+    a.add-dict-item {
+      border-color: #E5ECDF;
+      background-color: #E5ECDF;
+      color: #748A30;
+      &:hover {
+        border-color: #B4D865;
+      }
+    }
+    a.del-list-item {
+      border-color: rgb(255, 217, 217);
+      background-color: rgb(255, 217, 217);
+      color: #D5445C;
+      &:hover {
+        border-color: #CF4D4D;
+      }
+    }
+  }
+  .inav.iseditor {
+    ~ {
+      .iact {
+        display: none;
+      }
+    }
+  }
+  #doc {
+    padding: 0;
+    border: none;
+    overflow: visible;
+    &:before {
+      display: none;
+    }
+    &:after {
+      display: none;
+    }
+    > .inav {
+      padding-left: 135px;
+      .ikey {
+        font-size: 1.1em;
+        font-weight: bold;
+        margin: 0 0 0 -135px;
+        width: 120px;
+      }
+    }
+    > .iact {
+      opacity: 0.3;
+      top: -4px;
+      right: 0;
+    }
+  }
+  .tag.active {
+    background-color: rgba(135, 212, 0, 0.17) !important;
+    color: rgb(65, 132, 0) !important;
+  }
+  .imulti {
+    .template {
+      display: none;
+    }
+  }
+  .bold {
+    font-weight: bold;
+  }
+  .number {
+    span {
+      color: #f76500 !important;
+    }
+  }
+  .bool {
+    span {
+      color: #82888E !important;
+      padding: 0 10px !important;
+      border-radius: 100px !important;
+    }
+    span.active {
+      background-color: rgba(135, 212, 0, 0.17) !important;
+      color: rgb(65, 132, 0) !important;
+    }
+  }
+  .choice {
+    span {
+      color: #82888E !important;
+      padding: 0 10px !important;
+      border-radius: 100px !important;
+    }
+    span.active {
+      background-color: rgba(135, 212, 0, 0.17) !important;
+      color: rgb(65, 132, 0) !important;
+    }
+  }
+  .datetime {
+    i {
+      color: #cccccc !important;
+    }
+  }
+  .null {
+    color: #A3293D !important;
+  }
+  .unsupported {
+    span {
+      color: #cccccc !important;
+    }
+  }
+  .imulti.list {
+    > .ilist {
+      > .irow {
+        > .inav {
+          > .ikey {
+            cursor: move;
+          }
+        }
+      }
+    }
+  }
+}

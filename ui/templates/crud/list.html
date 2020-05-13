@@ -1,0 +1,139 @@
+{% extends 'dashboard/base.html' %}
+
+{% set model = model or {
+    'name': 'User',
+    'jschema': {
+        'type': 'object',
+        'properties': {
+            '_id': {
+                'type': 'string',
+                'format': 'ObjectId'
+            },
+            'name': {
+                'type': 'string'
+            },
+            'email': {
+                'type': 'string'
+            },
+            'point': {
+                'type': 'integer'
+            },
+            'status': {
+                'type': 'integer',
+                'enum': [1, 2, 9]
+            },
+            'roles': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                    'enum': ['normal', 'rejected']
+                }
+            },
+            'accounts': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {
+                            'type': 'string'
+                        },
+                        'name': {
+                            'type': 'name'
+                        },
+                        'balance': {
+                            'type': 'number'
+                        }
+                    },
+                    'required': ['id']
+                }
+            },
+            'createTime': {
+                'type': 'string',
+                'format': 'date-time'
+            },
+            'updateTime': {
+                'type': 'string',
+                'format': 'date-time'
+            }
+        },
+        'required': ['name', 'point', 'status', 'roles', 'createTime']
+    }
+} %}
+{% set records = records or [
+    {
+        '_id': '1',
+        'name': 'admin',
+        'email': '',
+        'point': 0,
+        'status': 'normal',
+        'roles': [1, 9],
+        'accounts': [{
+            'id': 'act_admin',
+            'balance': 0
+        }],
+        'createTime': '2020-03-12 12:04:55.106000'
+    }
+] %}
+{% set title = model.name + 's' %}
+{% set breadcrumb = {
+    'title': title,
+    'links': [
+        {'url':'/', 'title':'Home'},
+        {'url':'/dashboard/', 'title':'Dashboard'},
+        {'url':'/crud/', 'title':'Models'},
+        {'url':'/crud/list/'+model.name, 'title': title}
+    ]
+} %}
+
+{% block title %}title{% endblock %}
+
+{% block left %}
+    <section>
+        <form>
+        </form>
+        <hr>
+        <table class="table">
+            <thead class="thead-light">
+            <tr>
+                {% for f in model.jschema.required %}
+                    <th>{{ f }}</th>
+                {% endfor %}
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for r in records %}
+                <tr>
+                    {% for f in model.jschema.required %}
+                        <td>{{ r[f] }}</td>
+                    {% endfor %}
+                    <td>
+                        <a href="/crud/form/{{ model.name }}/{{ r._id }}">Change</a>
+                        <a href="/crud/delete/{{ model.name }}/{{ r._id }}">Delete</a>
+                        {% if current_user.is_admin %}
+                            <a class="text-danger"
+                               href="/crud/raw/{{ model.name }}/{{ r._id }}">Raw</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% include 'blocks/pagination.html' %}
+    </section>
+{% endblock %}
+
+{% block right %}
+    <section>
+        <h4>Note</h4>
+        <p class="text-muted"></p>
+        <ul class="list-unstyled">
+            <li>1. Model's json schema is a subset of
+                <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object"
+                   target="_blank">Object Schema from OAS 3.0</a>.
+                We use this json schema for form generation and api doc generation(with <a
+                        href="https://swagger.io/tools/swagger-ui/" target="_blank">Swagger UI</a>).
+            </li>
+        </ul>
+    </section>
+{% endblock %}

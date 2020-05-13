@@ -3739,3 +3739,206 @@ div.hopscotch-bubble {
       color: #fff; }
   .page-header-box .breadcrumb-item + .breadcrumb-item:before {
     color: #fff; }
+
+#raw-editor {
+  font-size: 11pt;
+  font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+  min-height: 400px;
+  position: relative; }
+  #raw-editor textarea {
+    font-family: 'PT Mono', Monaco, 'Lucida Console', monospace; }
+  #raw-editor .irow {
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding: 0px 0px 0px 15px;
+    border-left: 1px solid #ddd;
+    line-height: 1.3em;
+    position: relative; }
+    #raw-editor .irow:before {
+      content: "";
+      position: absolute;
+      top: 15px;
+      left: 0;
+      width: 8px;
+      border-bottom: 1px solid #ddd; }
+    #raw-editor .irow:last-child {
+      border: none; }
+      #raw-editor .irow:last-child:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 15px;
+        border-left: 1px solid #ddd; }
+    #raw-editor .irow:hover {
+      background-color: rgba(0, 0, 0, 0.018); }
+  #raw-editor .ikey {
+    width: 120px;
+    padding-right: 10px;
+    display: inline-block;
+    word-break: break-all;
+    font-size: 95%;
+    line-height: 1.1em;
+    opacity: 0.7;
+    overflow: hidden;
+    vertical-align: top;
+    margin: 0.15em 0 0.4em 0px; }
+  #raw-editor .ilabel {
+    font-size: 80%;
+    padding: 0 5px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+    opacity: 0.9;
+    display: inline-block;
+    margin: -1px 5px 0 5px; }
+  #raw-editor .ivalue {
+    word-break: break-all;
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    cursor: pointer; }
+  #raw-editor .ilist {
+    word-break: break-all;
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top; }
+  #raw-editor .idesc {
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    cursor: pointer; }
+  #raw-editor .imulti.ivalue {
+    cursor: inherit; }
+  #raw-editor .iseditor .ivalue {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre;
+    padding: 0.2em 0.4em 0.4em 0.5em;
+    font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
+    max-height: 400px;
+    overflow: auto;
+    outline: none;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    font-size: 90%;
+    border-radius: 2px;
+    margin: -4px 0 -3px 0;
+    -moz-tab-size: 2;
+      -o-tab-size: 2;
+         tab-size: 2;
+    background-color: rgba(255, 255, 240, 0.8);
+    cursor: text; }
+  #raw-editor .inav {
+    padding-left: 130px;
+    margin: 4px 0; }
+    #raw-editor .inav .ikey {
+      margin-left: -130px; }
+    #raw-editor .inav:hover ~ .iact {
+      display: block;
+      opacity: 0.7;
+      background: rgba(255, 255, 255, 0.8); }
+  #raw-editor .iact {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    opacity: 0;
+    -webkit-transition: opacity 0.3s;
+    transition: opacity 0.3s;
+    border-radius: 3px; }
+    #raw-editor .iact:hover {
+      display: block;
+      opacity: 1 !important; }
+    #raw-editor .iact a {
+      border-radius: 0;
+      margin-right: 2px;
+      padding: 0.25em 0.7em 0.15em 0.7em;
+      margin-top: 0;
+      margin-bottom: 0;
+      display: block;
+      border: 1px solid #E2E7EB;
+      background-color: #E2E7EB;
+      color: #3C5168; }
+      #raw-editor .iact a:hover {
+        border-color: #65A1D8;
+        background-color: #fff; }
+      #raw-editor .iact a:first-child {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px; }
+      #raw-editor .iact a:last-child {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        margin-right: 0; }
+    #raw-editor .iact a.add-list-item {
+      border-color: #E5ECDF;
+      background-color: #E5ECDF;
+      color: #748A30; }
+      #raw-editor .iact a.add-list-item:hover {
+        border-color: #B4D865; }
+    #raw-editor .iact a.add-dict-item {
+      border-color: #E5ECDF;
+      background-color: #E5ECDF;
+      color: #748A30; }
+      #raw-editor .iact a.add-dict-item:hover {
+        border-color: #B4D865; }
+    #raw-editor .iact a.del-list-item {
+      border-color: #ffd9d9;
+      background-color: #ffd9d9;
+      color: #D5445C; }
+      #raw-editor .iact a.del-list-item:hover {
+        border-color: #CF4D4D; }
+  #raw-editor .inav.iseditor ~ .iact {
+    display: none; }
+  #raw-editor #doc {
+    padding: 0;
+    border: none;
+    overflow: visible; }
+    #raw-editor #doc:before {
+      display: none; }
+    #raw-editor #doc:after {
+      display: none; }
+    #raw-editor #doc > .inav {
+      padding-left: 135px; }
+      #raw-editor #doc > .inav .ikey {
+        font-size: 1.1em;
+        font-weight: bold;
+        margin: 0 0 0 -135px;
+        width: 120px; }
+    #raw-editor #doc > .iact {
+      opacity: 0.3;
+      top: -4px;
+      right: 0; }
+  #raw-editor .tag.active {
+    background-color: rgba(135, 212, 0, 0.17) !important;
+    color: #418400 !important; }
+  #raw-editor .imulti .template {
+    display: none; }
+  #raw-editor .bold {
+    font-weight: bold; }
+  #raw-editor .number span {
+    color: #f76500 !important; }
+  #raw-editor .bool span {
+    color: #82888E !important;
+    padding: 0 10px !important;
+    border-radius: 100px !important; }
+  #raw-editor .bool span.active {
+    background-color: rgba(135, 212, 0, 0.17) !important;
+    color: #418400 !important; }
+  #raw-editor .choice span {
+    color: #82888E !important;
+    padding: 0 10px !important;
+    border-radius: 100px !important; }
+  #raw-editor .choice span.active {
+    background-color: rgba(135, 212, 0, 0.17) !important;
+    color: #418400 !important; }
+  #raw-editor .datetime i {
+    color: #cccccc !important; }
+  #raw-editor .null {
+    color: #A3293D !important; }
+  #raw-editor .unsupported span {
+    color: #cccccc !important; }
+  #raw-editor .imulti.list > .ilist > .irow > .inav > .ikey {
+    cursor: move; }

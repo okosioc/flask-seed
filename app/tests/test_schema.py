@@ -33,7 +33,7 @@ class UserDict(SchemaDict):
         'status': TestStatus,
         'roles': [TestRole],
         'accounts': [{
-            'id': str,
+            'id': int,
             'name': str,
             'balance': float,
         }],
@@ -69,7 +69,7 @@ def test_schema_dict(app):
     with pytest.raises(SeedDataError, match='accounts\.id') as excinfo:
         ud.validate()
     # print(excinfo.value)
-    ud.accounts[0].id = 'test'
+    ud.accounts[0].id = 0
 
     ud.status = 'DELETED'
     with pytest.raises(SeedDataError, match='status') as excinfo:

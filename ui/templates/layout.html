@@ -25,14 +25,12 @@
 
 <body class="unsticky-header">
 
-{% block header %}
-{% endblock %}
+{% block header %}{% include 'blocks/header.html' %}{% endblock %}
 
 {% block main %}
 {% endblock %}
 
-{% block footer %}
-{% endblock %}
+{% block footer %}{% include 'blocks/footer.html' %}{% endblock %}
 
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/assets/js/app.min.js"></script>

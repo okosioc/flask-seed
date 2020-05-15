@@ -1,79 +1,5 @@
-{% extends 'dashboard/base.html' %}
+{% extends 'layoutdash.html' %}
 
-{% set model = model or {
-    'name': 'User',
-    'jschema': {
-        'type': 'object',
-        'properties': {
-            '_id': {
-                'type': 'string',
-                'format': 'ObjectId'
-            },
-            'name': {
-                'type': 'string'
-            },
-            'email': {
-                'type': 'string'
-            },
-            'point': {
-                'type': 'integer'
-            },
-            'status': {
-                'type': 'integer',
-                'enum': [1, 2, 9]
-            },
-            'roles': {
-                'type': 'array',
-                'items': {
-                    'type': 'string',
-                    'enum': ['normal', 'rejected']
-                }
-            },
-            'accounts': {
-                'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string'
-                        },
-                        'name': {
-                            'type': 'name'
-                        },
-                        'balance': {
-                            'type': 'number'
-                        }
-                    },
-                    'required': ['id']
-                }
-            },
-            'createTime': {
-                'type': 'string',
-                'format': 'date-time'
-            },
-            'updateTime': {
-                'type': 'string',
-                'format': 'date-time'
-            }
-        },
-        'required': ['name', 'point', 'status', 'roles', 'createTime']
-    }
-} %}
-{% set records = records or [
-    {
-        '_id': '1',
-        'name': 'admin',
-        'email': '',
-        'point': 0,
-        'status': 'normal',
-        'roles': [1, 9],
-        'accounts': [{
-            'id': 'act_admin',
-            'balance': 0
-        }],
-        'createTime': '2020-03-12 12:04:55.106000'
-    }
-] %}
 {% set title = model.name + 's' %}
 {% set breadcrumb = {
     'title': title,
@@ -85,7 +11,7 @@
     ]
 } %}
 
-{% block title %}title{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block left %}
     <section>
@@ -109,7 +35,7 @@
                     {% endfor %}
                     <td>
                         <a href="/crud/form/{{ model.name }}/{{ r._id }}">Change</a>
-                        <a href="/crud/delete/{{ model.name }}/{{ r._id }}">Delete</a>
+                        <a href="javascript:;" onclick="deleteRecord($(this))" rid="{{ r._id }}">Delete</a>
                         {% if current_user.is_admin %}
                             <a class="text-danger"
                                href="/crud/raw/{{ model.name }}/{{ r._id }}">Raw</a>
@@ -136,4 +62,29 @@
             </li>
         </ul>
     </section>
+{% endblock %}
+
+
+{% block script %}
+    <script type="text/javascript">
+        function deleteRecord(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var con = window.confirm("Are you sure to delete this record?");
+            if (!con) {
+                return false;
+            }
+            btn.addClass("doing");
+            $.post("/crud/delete/{{ model.name }}/" + btn.attr("rid"), {"r": Math.random()}, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    btn.closest("tr").remove();
+                } else {
+                    showError(result.message)
+                }
+                btn.removeClass("doing");
+            }, 'json');
+        }
+    </script>
 {% endblock %}

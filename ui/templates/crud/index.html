@@ -1,11 +1,5 @@
-{% extends 'dashboard/base.html' %}
+{% extends 'layoutdash.html' %}
 
-{% set models = models or [
-    {
-        'name': 'User',
-        'schema': {}
-    }
-] %}
 {% set breadcrumb = {
     'title': 'Models',
     'links': [

@@ -1,79 +1,7 @@
-{% extends 'dashboard/base.html' %}
+{% extends 'layoutdash.html' %}
 
-{% set model = model or {
-    'name': 'User',
-    'jschema': {
-        'type': 'object',
-        'properties': {
-            '_id': {
-                'type': 'string',
-                'format': 'ObjectId'
-            },
-            'name': {
-                'type': 'string'
-            },
-            'email': {
-                'type': 'string'
-            },
-            'point': {
-                'type': 'integer'
-            },
-            'status': {
-                'type': 'string',
-                'enum': ['normal', 'rejected']
-            },
-            'roles': {
-                'type': 'array',
-                'items': {
-                    'type': 'integer',
-                    'enum': [1, 2, 9]
-                }
-            },
-            'accounts': {
-                'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string'
-                        },
-                        'name': {
-                            'type': 'string'
-                        },
-                        'balance': {
-                            'type': 'number'
-                        }
-                    },
-                    'required': ['id']
-                }
-            },
-            'createTime': {
-                'type': 'string',
-                'format': 'date-time'
-            },
-            'updateTime': {
-                'type': 'string',
-                'format': 'date-time'
-            }
-        },
-        'required': ['name', 'point', 'status', 'roles', 'createTime']
-    }
-} %}
-{% set record = record or {
-    '_id': '1',
-    'name': 'admin',
-    'email': '',
-    'point': 0,
-    'status': 'normal',
-    'roles': [1, 9],
-    'accounts': [{
-        'id': 'act_admin',
-        'balance': 0
-    }],
-    'createTime': '2020-03-12 12:04:55.106000'
-} %}
-{% set change = true if record._id else false %}
-{% set title = ('Update' if change else 'Create') + ' ' + model.name %}
+{% set update = true if record._id else false %}
+{% set title = ('Update' if update else 'Create') + ' ' + model.name %}
 {% set breadcrumb = {
     'title': title,
     'links': [
@@ -100,7 +28,7 @@
 {% block right %}
     <section>
         <h4>Actions</h4>
-        {% if change %}
+        {% if update %}
             <p class="text-muted">You are updating {{ model.name }}: <code>{{ record._id }}</code></p>
             <a class="btn btn-primary btn-sm" href="javascript:;"
                onclick="save($(this));">Save</a>
@@ -431,17 +359,14 @@
                 console.log(param);
             }
 
-            {% if change %}
-                var url = copy ? "/crud/create/{{ model.name }}" : "/crud/save/{{ model.name }}/{{ record._id }}";
-            {% else %}
-                var url = "/crud/create/{{ model.name }}";
-            {% endif %}
+            var url = copy ? "/crud/save/{{ model.name }}/" : "/crud/save/{{ model.name }}/{{ record._id }}";
             $.post(url, param, function (result) {
                 if (result.success) {
                     showSuccess(result.message);
-                    if (copy) {
-                        location.href = "/crud/change/{{ model.name }}/" + result.rid;
-                    }
+                    showInfo('Refreshing...');
+                    setTimeout(function () {
+                        location.href = "/crud/raw/{{ model.name }}/" + result.rid;
+                    }, 2000);
                 } else {
                     showError(result.message);
                 }

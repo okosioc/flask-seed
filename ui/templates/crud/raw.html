@@ -19,7 +19,7 @@
     <section>
         <div id="raw-editor">
             <div id="doc">
-                {{ render('Root', model.jschema, record, true, false) }}
+                {{ render('Root', model.jschema, record) }}
             </div>
         </div>
     </section>
@@ -28,8 +28,16 @@
 {% block right %}
     <section>
         <h4>Actions</h4>
+        <p class="text-muted"></p>
+        <ul class="list-unstyled">
+            {% if update %}
+                <li>1. You are updating {{ model.name }}: <code>{{ record._id }}</code>.</li>
+            {% else %}
+                <li>1. You are creating {{ model.name }}.</li>
+            {% endif %}
+            <li>2. The whole record will be overwrited when updating, so only available for system admin.</li>
+        </ul>
         {% if update %}
-            <p class="text-muted">You are updating {{ model.name }}: <code>{{ record._id }}</code></p>
             <a class="btn btn-primary btn-sm" href="javascript:;"
                onclick="save($(this));">Save</a>
             <a class="btn btn-success btn-sm" href="javascript:;"
@@ -38,7 +46,6 @@
                target="_blank">Json</a>
             <a class="btn btn-light btn-sm" href="/crud/list/{{ model.name }}">Cancel</a>
         {% else %}
-            <p class="text-muted">You are creating {{ model.name }} </p>
             <a class="btn btn-primary btn-sm" href="javascript:;"
                onclick="save($(this));">Save</a>
             <a class="btn btn-light btn-sm" href="/crud/list/{{ model.name }}">Cancel</a>
@@ -46,7 +53,7 @@
     </section>
 {% endblock %}
 
-{% macro render(name, jschema, jvalue, is_root=false, is_in_list=false) %}
+{% macro render(name, jschema, jvalue, is_in_list=false) %}
     {% if jschema.type == 'object' %}
         <div class="inav">
             <div class="ikey">{{ name }}</div>
@@ -55,7 +62,7 @@
         <div class="ivalue imulti dict" name="{{ name }}">
             <div class="ilist">
                 {% for n,s in jschema.properties %}
-                    {% if is_root and n =='_id' %}
+                    {% if n =='_id' %}
                         {# skip #}
                     {% else %}
                         <div class="irow">
@@ -79,7 +86,7 @@
             <div class="ilist">
                 {% for r in jvalue %}
                     <div class="irow">
-                        {{ render(loop.index0, jschema.items, r, false, true) }}
+                        {{ render(loop.index0, jschema.items, r, true) }}
                     </div>
                 {% endfor %}
             </div>
@@ -91,7 +98,7 @@
                     {% elif jschema.items.type == 'array' %}
                         {% set init = [] %}
                     {% endif %}
-                    {{ render('-1', jschema.items, init, false, true) }}
+                    {{ render('-1', jschema.items, init, true) }}
                 </div>
             </div>
         </div>
@@ -111,7 +118,7 @@
                 <a class="del-list-item" href="javascript:;">x</a>
             {% endif %}
             {% if jschema.format == 'date-time' %}
-                <a class="get-current-time" href="javascript:;">datetime</a>
+                <a class="get-current-time" href="javascript:;">dt</a>
             {% endif %}
         </div>
     {% endif %}
@@ -284,7 +291,7 @@
                     clone.find("> .inav > .ikey").text(++max);
                     ilist.append(clone);
                     //
-                    inav.children(".idesc").html("Array [" + (++count) + "] <i class='fa fa-caret-down'></i>");
+                    inav.children(".idesc").html("Array [" + (++count) + "] <span>&gt;</span>");
                     imulti.show();
                 }
             });
@@ -296,7 +303,7 @@
                 var irow = $(this).closest(".irow");
                 var count = irow.siblings(".irow").length;
                 var parentInav = irow.parent().closest(".irow").children(".inav");
-                parentInav.children(".idesc").html("Array [" + count + "] <i class='fa fa-caret-down'></i>");
+                parentInav.children(".idesc").html("Array [" + count + "] <span>&gt;</span>");
                 irow.remove();
             });
 

@@ -3740,6 +3740,83 @@ div.hopscotch-bubble {
   .page-header-box .breadcrumb-item + .breadcrumb-item:before {
     color: #fff; }
 
+#form-editor {
+  font-size: 1rem;
+  min-height: 400px; }
+  #form-editor fieldset {
+    position: relative;
+    margin-bottom: 1rem; }
+    #form-editor fieldset legend {
+      font-size: 1.1rem;
+      border-bottom: 1px solid #98a6ad;
+      padding-bottom: 0.25rem;
+      text-transform: capitalize; }
+      #form-editor fieldset legend:hover ~ .act {
+        display: block;
+        opacity: 0.7; }
+    #form-editor fieldset .act {
+      font-size: 0.8rem;
+      position: absolute;
+      top: 1px;
+      right: 1px;
+      opacity: 0;
+      -webkit-transition: opacity 0.3s;
+      transition: opacity 0.3s;
+      border-radius: 3px; }
+      #form-editor fieldset .act:hover {
+        display: block;
+        opacity: 1 !important; }
+      #form-editor fieldset .act a {
+        border-radius: 0;
+        margin-right: 2px;
+        padding: 0.25em 0.7em 0.15em 0.7em;
+        margin-top: 0;
+        margin-bottom: 0;
+        border: 1px solid #E2E7EB;
+        background-color: #E2E7EB;
+        color: #3C5168; }
+        #form-editor fieldset .act a:hover {
+          border-color: #65A1D8;
+          background-color: #fff; }
+        #form-editor fieldset .act a:first-child {
+          border-top-left-radius: 4px;
+          border-bottom-left-radius: 4px; }
+        #form-editor fieldset .act a:last-child {
+          border-top-right-radius: 4px;
+          border-bottom-right-radius: 4px;
+          margin-right: 0; }
+        #form-editor fieldset .act a.add {
+          border-color: #E5ECDF;
+          background-color: #E5ECDF;
+          color: #748A30; }
+          #form-editor fieldset .act a.add:hover {
+            border-color: #B4D865; }
+        #form-editor fieldset .act a.del {
+          border-color: #ffd9d9;
+          background-color: #ffd9d9;
+          color: #D5445C; }
+          #form-editor fieldset .act a.del:hover {
+            border-color: #CF4D4D; }
+    #form-editor fieldset .form-group {
+      position: relative; }
+      #form-editor fieldset .form-group label {
+        text-transform: capitalize; }
+      #form-editor fieldset .form-group:hover > .act {
+        display: block;
+        opacity: 0.7; }
+    #form-editor fieldset .list-group-item:hover {
+      background-color: rgba(0, 0, 0, 0.018); }
+      #form-editor fieldset .list-group-item:hover > .act {
+        display: block;
+        opacity: 0.7; }
+    #form-editor fieldset .list-group-item-template {
+      display: none; }
+  #form-editor .radio-input-group.is-invalid .btn-group {
+    border-radius: 0.15rem;
+    border: 1px solid #f1556c; }
+  #form-editor .radio-input-group.is-invalid ~ .invalid-feedback {
+    display: block; }
+
 #raw-editor {
   font-size: 11pt;
   font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
@@ -3877,12 +3954,6 @@ div.hopscotch-bubble {
       background-color: #E5ECDF;
       color: #748A30; }
       #raw-editor .iact a.add-list-item:hover {
-        border-color: #B4D865; }
-    #raw-editor .iact a.add-dict-item {
-      border-color: #E5ECDF;
-      background-color: #E5ECDF;
-      color: #748A30; }
-      #raw-editor .iact a.add-dict-item:hover {
         border-color: #B4D865; }
     #raw-editor .iact a.del-list-item {
       border-color: #ffd9d9;

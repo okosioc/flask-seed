@@ -1,0 +1,286 @@
+{% extends 'layoutdash.html' %}
+
+{% set update = true if record._id else false %}
+{% set title = ('Update' if update else 'Create') + ' ' + model.name %}
+{% set breadcrumb = {
+    'title': title,
+    'links': [
+        {'url':'/', 'title':'Home'},
+        {'url':'/dashboard/', 'title':'Dashboard'},
+        {'url':'/crud/', 'title':'Models'},
+        {'url':'/crud/list/'+model.name, 'title': model.name+'s'},
+        {'url':'/crud/form/'+model.name+'/'+record._id, 'title': title}
+    ]
+} %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block left %}
+    <section>
+        <form id="form-editor" class="needs-validation" novalidate action="/login" method="post">
+            {{ render('Root', model.jschema, record) }}
+        </form>
+    </section>
+{% endblock %}
+
+{% block right %}
+    <section>
+        <h4>Actions</h4>
+        <p class="text-muted"></p>
+        <ul class="list-unstyled">
+            {% if update %}
+                <li>1. You are updating {{ model.name }}: <code>{{ record._id }}</code>.</li>
+            {% else %}
+                <li>1. You are creating {{ model.name }}.</li>
+            {% endif %}
+            <li>2. The whole record will be overwrited when updating, so only available for system admin.</li>
+            <li>3. By clicking the type on the top-right of each field, you can change its display format.
+            </li>
+        </ul>
+        {% if update %}
+            <a class="btn btn-primary btn-sm" href="javascript:;"
+               onclick="save($(this));">Save</a>
+            <a class="btn btn-success btn-sm" href="javascript:;"
+               onclick="save($(this), true);">Copy</a>
+            <a class="btn btn-warning btn-sm" href="/crud/json/{{ model.name }}/{{ record._id }}"
+               target="_blank">Json</a>
+            <a class="btn btn-light btn-sm" href="/crud/list/{{ model.name }}">Cancel</a>
+        {% else %}
+            <a class="btn btn-primary btn-sm" href="javascript:;"
+               onclick="save($(this));">Save</a>
+            <a class="btn btn-light btn-sm" href="/crud/list/{{ model.name }}">Cancel</a>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% macro render(name, jschema, jvalue, is_in_list=false, is_required=false) %}
+    {# Object #}
+    {% if jschema.type == 'object' %}
+        <fieldset class="object {{ 'mb-0' if is_in_list }}" name="{{ name }}">
+            <legend>
+                <span class="name">{{ name }}</span>
+                <span class="text-muted">{{ '*' if is_required }}</span>
+            </legend>
+            {% for n,s in jschema.properties %}
+                {% set required = n in jschema.required %}
+                {% if n =='_id' %}
+                    {# skip #}
+                {% else %}
+                    {{ render(n, s, jvalue[n], is_required=required) }}
+                {% endif %}
+            {% endfor %}
+            <div class="act">
+                <a class="format" href="javascript:;">Object {{ '{' }}{{ jschema.properties|length }}{{ '}' }}</a>
+                {% if is_in_list %}
+                    <a class="del" href="javascript:;">x</a>
+                {% endif %}
+            </div>
+        </fieldset>
+        {# Array #}
+    {% elif jschema.type == 'array' %}
+        <fieldset class="array {{ 'mb-0' if is_in_list }}" name="{{ name }}">
+            <legend>
+                <span class="name">{{ name }}</span>
+                <span class="text-muted">{{ '*' if is_required }}</span>
+            </legend>
+            <div class="list-group">
+                {% for r in jvalue %}
+                    <div class="list-group-item">
+                        {{ render(loop.index0, jschema.items, r, is_in_list=true) }}
+                    </div>
+                {% endfor %}
+                <div class="list-group-item">
+                    {% set init = none %}
+                    {% if jschema.items.type == 'object' %}
+                        {% set init = {} %}
+                    {% elif jschema.items.type == 'array' %}
+                        {% set init = [] %}
+                    {% endif %}
+                    {{ render(jvalue|length, jschema.items, init, is_in_list=true) }}
+                </div>
+            </div>
+            <div class="act">
+                <a class="format" href="javascript:;">array [{{ jvalue|length }}]</a>
+                <a class="add" href="javascript:;">+</a>
+                {% if is_in_list %}
+                    <a class="del" href="javascript:;">x</a>
+                {% endif %}
+            </div>
+        </fieldset>
+        {# Simple Types #}
+    {% else %}
+        <div class="form-group" name="{{ name }}">
+            {% set isNil = jvalue is none or jvalue is undefined %}
+            {% if jschema.enum %}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <div class="radio-input-group" {{ 'required' if is_required }}>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        {% for each in jschema.enum %}
+                            <label class="btn btn-light {{ 'active' if each==jvalue }}">
+                                <input type="radio" {{ 'checked' if each==jvalue }}
+                                       value="{{ each }}"> {{ each }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% elif jschema.type == 'integer' or jschema.type == 'number' %}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <input name="{{ name }}" type="number" class="form-control"
+                       value="{{ '' if isNil else jvalue }}" {{ 'required' if is_required }}>
+            {% elif jschema.type == 'boolean' %}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <div class="radio-input-group" {{ 'required' if is_required }}>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-light {{ 'active' if jvalue }}">
+                            <input type="radio" {{ 'checked' if jvalue }} value="true"> True
+                        </label>
+                        <label class="btn btn-light {{ 'active' if not jvalue }}">
+                            <input type="radio" {{ 'checked' if not jvalue }} value="false"> False
+                        </label>
+                    </div>
+                </div>
+            {% elif jschema.type == 'string' %}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <input name="{{ name }}" type="text"
+                       class="form-control {{ jschema.format }}" {{ 'required' if is_required }}
+                       value="{{ '' if isNil else jvalue }}">
+            {% endif %}
+            <div class="invalid-feedback">Please input valid {{ name }}!</div>
+            <div class="act">
+                <a class="format" href="javascript:;">
+                    {{ jschema.type }}{{ '|' + jschema.format if jschema.format }}</a>
+                {% if is_in_list %}
+                    <a class="del" href="javascript:;">x</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% block script %}
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/moment/dist/moment.min.js"></script>
+    <script type="text/javascript">
+        const DATE_FORMATS = ["YYYY-MM-DD HH:mm:ss.SSSSSS", "YYYY-MM-DD HH:mm:ss.SSS", "YYYY-MM-DD HH:mm:ss"];
+        $(document).ready(function () {
+            // Array add action
+            $(".act > .add").click(function () {
+                // Find the last .list-group-item and clone it
+                var list = $(this).parent().prev(".list-group"), last = list.children(".list-group-item:last"),
+                    clone = last.clone(true), inner = clone.children(), label = null;
+                if (inner.is(".form-group")) {
+                    label = inner.children("label");
+                } else {
+                    label = inner.children("legend").children(".name");
+                }
+                var index = new Number(label.text());
+                label.text(++index);
+                list.append(clone);
+            });
+            // Array delete action
+            $(".act > .del").click(function () {
+                var con = window.confirm("Are you sure to delete this item?");
+                if (!con) {
+                    return false;
+                }
+                if ($(this).closest(".list-group-item").siblings().addBack().length == 1) {
+                    showWarning("Please leave at least one item!");
+                    return false;
+                }
+                $(this).closest(".list-group-item").remove();
+            });
+        });
+
+        function save(btn, copy) {
+            copy = copy || false;
+            if (btn.is(".doing")) {
+                return;
+            }
+            var msg = copy ? "Are you sure to copy this record?" : "Are you sure to save this record?";
+            var con = window.confirm(msg);
+            if (!con) {
+                return false;
+            }
+
+            // Validate
+            var form = $("#form-editor"), invalid = false;
+            form.addClass("was-validated");
+            // Custom validate input-group
+            form.find(".radio-input-group[required]").each(function (i, n) {
+                if ($(n).find(":radio:checked").length == 0) {
+                    $(n).addClass("is-invalid");
+                    invalid = true;
+                }
+            });
+            if (form[0].checkValidity() === false) {
+                invalid = true;
+            }
+            if (invalid) {
+                showError('Some thing invalid, please check!');
+                return false;
+            }
+
+            // Process form
+            var param = {"r": Math.random()};
+            process(param, $("#form-editor > fieldset"), "{{ model.name }}");
+            if (console && console.log) {
+                console.log(param);
+            }
+
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+
+            var url = copy ? "/crud/save/{{ model.name }}/" : "/crud/save/{{ model.name }}/{{ record._id }}";
+            $.post(url, param, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    showInfo('Refreshing...');
+                    setTimeout(function () {
+                        location.href = "/crud/form/{{ model.name }}/" + result.rid;
+                    }, 2000);
+                } else {
+                    showError(result.message);
+                }
+                form.removeClass("was-validated");
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, "json");
+        }
+
+        function process(param, field, path) {
+            console.log("Try to process path " + path);
+            // object
+            if (field.is("fieldset.object")) {
+                field.find("> .form-group, > fieldset").each(function (i, n) {
+                    process(param, $(n), path + "." + $(n).attr("name"));
+                });
+            }
+            // array
+            else if (field.is("fieldset.array")) {
+                field.find("> .list-group > .list-group-item").each(function (i, n) {
+                    process(param, $(n).children(), path + "[" + i + "]");
+                });
+            }
+            // simple types
+            else {
+                if (field.children(".radio-input-group").length) {
+                    // If radio group is in array, they may share same name, so here use the active button to get checked value
+                    var active = field.children(".radio-input-group").find(".active");
+                    if (active.length) {
+                        param[path] = active.children(":radio").val().trim();
+                    }
+                } else if (field.children(":input[name]").length) {
+                    var val = field.children(":input[name]").val().trim();
+                    if (val.length) {
+                        param[path] = val;
+                    }
+                }
+            }
+        }
+    </script>
+{% endblock %}

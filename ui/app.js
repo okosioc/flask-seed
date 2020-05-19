@@ -81,7 +81,7 @@ env.addTest('defined', function (v) {
 // Compatible with flask-seed's model definition and related crud logic
 //
 
-// Mock model's json schema is a subset of Object Schema from OAS 3.0, it is converted from app.core.schema::SchemaDict
+// Mock model's jschema is a subset of Object Schema from OAS 3.0, it is converted from app.core.schema::SchemaDict
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
 // https://swagger.io/docs/specification/data-models/
 var mock_models = [
@@ -102,6 +102,9 @@ var mock_models = [
                 },
                 'point': {
                     'type': 'integer'
+                },
+                'vip': {
+                    'type': 'boolean'
                 },
                 'status': {
                     'type': 'string',
@@ -145,7 +148,7 @@ var mock_models = [
         }
     }
 ];
-var mock_model = mock_models[0], mock_model_dict = _.keyBy(mock_models, 'name');
+var mock_model = mock_models[0];
 // Mock records generation with pagination support
 // About mockjs's random, https://github.com/nuysoft/Mock/wiki/Mock.Random
 var mock_records = Mock.mock({
@@ -154,22 +157,23 @@ var mock_records = Mock.mock({
         'name': '@first',
         'email': '@email("flask-seed.com")',
         'point': '@integer(0, 100)',
+        'vip': '@boolean',
         'status': '@pick(["normal", "rejected"])',
-        'roles|2': ['@pick([1, 2, 9])'],
-        'accounts|3': [{
+        'roles': ['@pick([1, 2, 9])'],
+        'accounts|2-5': [{
             'id|+1': 1,
             'name': /act_\d{11}/,
             'balance': '@float(0, 10000, 0, 2)',
         }],
         'createTime': '@date("yyyy-MM-dd HH:mm:ss.S")'
     }]
-}).data;
-var mock_record_dict = _.keyBy(mock_records, '_id'), mock_page_count = 10;
+}).data, mock_page_count = 10;
 
 function init_mock_record() {
     return Mock.mock({
         'name': '@first',
         'point': 0,
+        'vip': false,
         'status': 'normal',
         'createTime': '@now("yyyy-MM-dd HH:mm:ss.S")'
     });
@@ -185,6 +189,30 @@ app.get('/', function (req, res) {
 });
 app.get('/blank', function (req, res) {
     res.render('public/blank.html');
+});
+
+// Login
+app.get('/login', function (req, res) {
+    res.render('public/login.html');
+});
+app.post('/login', function (req, res) {
+    current_user['is_authenticated'] = true;
+    res.redirect('/dashboard/');
+});
+
+// Logout
+app.get('/logout', function (req, res) {
+    current_user['is_authenticated'] = false;
+    res.redirect('/');
+});
+
+// Signup
+app.get('/signup', function (req, res) {
+    res.render('public/signup.html');
+});
+app.post('/signup', function (req, res) {
+    current_user['is_authenticated'] = true;
+    res.redirect('/dashboard/');
 });
 
 // Dashboard
@@ -217,7 +245,9 @@ app.get('/crud/form/:modelName/(*)', function (req, res) {
     var recordId = req.params[0],
         record = init_mock_record();
     if (recordId) {
-        record = _.get(mock_record_dict, recordId);
+        record = _.find(mock_records, function (n) {
+            return n._id == recordId
+        });
         if (!record) {
             res.redirect('/404');
             return;
@@ -229,7 +259,9 @@ app.get('/crud/raw/:modelName/(*)', function (req, res) {
     var recordId = req.params[0],
         record = init_mock_record();
     if (recordId) {
-        record = _.get(mock_record_dict, recordId);
+        record = _.find(mock_records, function (n) {
+            return n._id == recordId
+        });
         if (!record) {
             res.redirect('/404');
             return;
@@ -239,7 +271,9 @@ app.get('/crud/raw/:modelName/(*)', function (req, res) {
 });
 app.post('/crud/save/:modelName/(*)', function (req, res) {
     var modelName = req.params.modelName,
-        model = mock_model_dict[modelName],
+        model = _.find(mock_models, function (n) {
+            return n.name == modelName
+        }),
         recordId = req.params[0],
         record = init_mock_record();
     // Populate record
@@ -267,14 +301,16 @@ app.post('/crud/save/:modelName/(*)', function (req, res) {
             } else if (type == 'number') {
                 value = parseFloat(v);
             } else if (type == 'boolean') {
-                value = 'true' == v.lower() ? true : false;
+                value = ('true' == v.toLowerCase()) ? true : false;
             }
             _.set(record, segments, value);
             console.log(record);
         }
     });
     if (recordId) { // Update
-        var existing = _.get(mock_record_dict, recordId);
+        var existing = _.find(mock_records, function (n) {
+            return n._id == recordId
+        });
         if (!existing) {
             res.redirect('/404');
             return;
@@ -284,55 +320,31 @@ app.post('/crud/save/:modelName/(*)', function (req, res) {
         recordId = Mock.mock('@string("number", 24)');
         record._id = recordId;
         mock_records.push(record);
-        mock_record_dict[recordId] = record;
     }
     res.json({success: true, message: 'Save successfully.', rid: recordId});
 });
 app.post('/crud/delete/:modelName/:recordId', function (req, res) {
-    var record = _.get(mock_record_dict, req.params.recordId);
+    var record = _.find(mock_records, function (n) {
+        return n._id == req.params.recordId
+    });
     if (!record) {
         res.redirect('/404');
         return;
     }
-    // Remove from records
     _.remove(mock_records, function (n) {
         return n._id == record._id;
     });
-    // Remove from hash
-    _.unset(mock_record_dict, record._id);
     res.json({success: true, message: 'Delete successfully.'});
 });
 app.get('/crud/json/:modelName/:recordId', function (req, res) {
-    var record = _.get(mock_record_dict, req.params.recordId);
+    var record = _.find(mock_records, function (n) {
+        return n._id == req.params.recordId
+    });
     if (!record) {
         res.redirect('/404');
         return;
     }
     res.json(record);
-});
-
-// Login
-app.get('/login', function (req, res) {
-    res.render('public/login.html');
-});
-app.post('/login', function (req, res) {
-    current_user['is_authenticated'] = true;
-    res.redirect('/dashboard/');
-});
-
-// Logout
-app.get('/logout', function (req, res) {
-    current_user['is_authenticated'] = false;
-    res.redirect('/');
-});
-
-// Signup
-app.get('/signup', function (req, res) {
-    res.render('public/signup.html');
-});
-app.post('/signup', function (req, res) {
-    current_user['is_authenticated'] = true;
-    res.redirect('/dashboard/');
 });
 
 // Errors
@@ -366,7 +378,7 @@ app.get('/500', function (req, res) {
 app.use(function (req, res, next) {
     var error = {
         'status': 404,
-        'title': 'Page Not Found',
+        'title': 'Not Found',
         'content': 'The requested URL was not found on this server!'
     };
     if (req.xhr) {

@@ -20,7 +20,8 @@
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.1.0",
     "gulp-uglify": "^3.0.2",
-    "gulp-npm-dist": "^1.0.3"
+    "gulp-npm-dist": "^1.0.3",
+    "qiniu": "^7.3.1"
   },
   "dependencies": {
     "bootstrap": "~4.3.1",
@@ -31,6 +32,9 @@
     "node-waves": "^0.7.6",
     "waypoints": "^4.0.1",
     "sortablejs": "^1.10.2",
-    "moment": "^2.25.3"
+    "moment": "^2.25.3",
+    "flatpickr": "^4.6.3",
+    "select2": "^4.0.13",
+    "plupload": "^2.3.6"
   }
 }

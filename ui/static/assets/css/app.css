@@ -3809,13 +3809,60 @@ div.hopscotch-bubble {
       #form-editor fieldset .list-group-item:hover > .act {
         display: block;
         opacity: 0.7; }
-    #form-editor fieldset .list-group-item-template {
+    #form-editor fieldset .list-group-item.template {
       display: none; }
   #form-editor .radio-input-group.is-invalid .btn-group {
     border-radius: 0.15rem;
     border: 1px solid #f1556c; }
   #form-editor .radio-input-group.is-invalid ~ .invalid-feedback {
     display: block; }
+  #form-editor .image-input-group.is-invalid ~ .invalid-feedback {
+    display: block; }
+  #form-editor .image-input-group .image-input-result .image {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    padding: .25rem;
+    float: left;
+    margin-right: .5rem;
+    margin-bottom: .5rem; }
+    #form-editor .image-input-group .image-input-result .image .btns {
+      position: absolute;
+      top: 50%;
+      height: 20px;
+      margin-top: -10px;
+      width: 100%;
+      text-align: center;
+      display: none; }
+      #form-editor .image-input-group .image-input-result .image .btns a {
+        background-color: #f1f5f7;
+        border-radius: 20px;
+        line-height: 20px;
+        width: 20px;
+        height: 20px;
+        padding: 0 5px;
+        color: #323a46; }
+    #form-editor .image-input-group .image-input-result .image:hover .btns {
+      display: block;
+      opacity: 0.8; }
+    #form-editor .image-input-group .image-input-result .image.uploaded img {
+      height: 100%;
+      width: auto; }
+    #form-editor .image-input-group .image-input-result .image.error {
+      text-align: center;
+      display: table; }
+      #form-editor .image-input-group .image-input-result .image.error small {
+        display: table-cell;
+        vertical-align: middle;
+        color: #f1556c; }
+    #form-editor .image-input-group .image-input-result .image.uploading .progress {
+      position: absolute;
+      top: 50%;
+      width: 140px;
+      left: 50%;
+      margin-left: -70px; }
 
 #raw-editor {
   font-size: 11pt;

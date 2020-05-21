@@ -15,6 +15,11 @@
 
 {% block title %}{{ title }}{% endblock %}
 
+{% block style %}
+    <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ base() }}/assets/vendor/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
 {% block left %}
     <section>
         <form id="form-editor" class="needs-validation" novalidate action="/login" method="post">
@@ -54,7 +59,6 @@
 {% endblock %}
 
 {% macro render(name, jschema, jvalue, is_in_list=false, is_required=false) %}
-    {# Object #}
     {% if jschema.type == 'object' %}
         <fieldset class="object {{ 'mb-0' if is_in_list }}" name="{{ name }}">
             <legend>
@@ -76,7 +80,6 @@
                 {% endif %}
             </div>
         </fieldset>
-        {# Array #}
     {% elif jschema.type == 'array' %}
         <fieldset class="array {{ 'mb-0' if is_in_list }}" name="{{ name }}">
             <legend>
@@ -89,13 +92,18 @@
                         {{ render(loop.index0, jschema.items, r, is_in_list=true) }}
                     </div>
                 {% endfor %}
-                <div class="list-group-item">
-                    {% set init = none %}
-                    {% if jschema.items.type == 'object' %}
-                        {% set init = {} %}
-                    {% elif jschema.items.type == 'array' %}
-                        {% set init = [] %}
-                    {% endif %}
+                {% set init = none %}
+                {% if jschema.items.type == 'object' %}
+                    {% set init = {} %}
+                {% elif jschema.items.type == 'array' %}
+                    {% set init = [] %}
+                {% endif %}
+                {% if is_required %} {# Create a empty form for required array #}
+                    <div class="list-group-item">
+                        {{ render(jvalue|length, jschema.items, init, is_in_list=true) }}
+                    </div>
+                {% endif %}
+                <div class="list-group-item template"> {# Template form for adding elements to array #}
                     {{ render(jvalue|length, jschema.items, init, is_in_list=true) }}
                 </div>
             </div>
@@ -107,23 +115,31 @@
                 {% endif %}
             </div>
         </fieldset>
-        {# Simple Types #}
     {% else %}
         <div class="form-group" name="{{ name }}">
             {% set isNil = jvalue is none or jvalue is undefined %}
             {% if jschema.enum %}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
-                <div class="radio-input-group" {{ 'required' if is_required }}>
-                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                {% if jschema.format == 'select' %}
+                    <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}>
+                        <option value="">Choose...</option>
                         {% for each in jschema.enum %}
-                            <label class="btn btn-light {{ 'active' if each==jvalue }}">
-                                <input type="radio" {{ 'checked' if each==jvalue }}
-                                       value="{{ each }}"> {{ each }}
-                            </label>
+                            <option value="{{ each }}" {{ 'selected' if each == jvalue }}>{{ each }}</option>
                         {% endfor %}
+                    </select>
+                {% else %}
+                    <div class="radio-input-group" {{ 'required' if is_required }}>
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            {% for each in jschema.enum %}
+                                <label class="btn btn-light {{ 'active' if each==jvalue }}">
+                                    <input type="radio" {{ 'checked' if each==jvalue }}
+                                           value="{{ each }}"> {{ each }}
+                                </label>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             {% elif jschema.type == 'integer' or jschema.type == 'number' %}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
@@ -145,9 +161,22 @@
             {% elif jschema.type == 'string' %}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
-                <input name="{{ name }}" type="text"
-                       class="form-control {{ jschema.format }}" {{ 'required' if is_required }}
-                       value="{{ '' if isNil else jvalue }}">
+                {% if jschema.format == 'textarea' %}
+                    <textarea name="{{ name }}" rows="5"
+                              class="form-control" {{ 'required' if is_required }}>{{ '' if isNil else jvalue }}</textarea>
+                {% elif jschema.format == 'image' %}
+                    <div class="image-input-group" {{ 'required' if is_required }}>
+                        <a class="btn btn-primary plupload" href="javascript:;"
+                           data-exts="jpg,jpeg,png">Choose Image...</a>
+                        <small class="form-text">Support <code>jpg</code>, <code>jpeg</code> and <code>png</code>.
+                        </small>
+                        <div class="image-input-result mt-1 clearfix"></div>
+                    </div>
+                {% else %}
+                    <input name="{{ name }}" type="text"
+                           class="form-control {{ jschema.format }}" {{ 'required' if is_required }}
+                           value="{{ '' if isNil else jvalue }}">
+                {% endif %}
             {% endif %}
             <div class="invalid-feedback">Please input valid {{ name }}!</div>
             <div class="act">
@@ -162,15 +191,20 @@
 {% endmacro %}
 
 {% block script %}
-    <script type="text/javascript" src="{{ base() }}/assets/vendor/moment/dist/moment.min.js"></script>
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+    {# for format date-time & date #}
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/select2/dist/js/select2.min.js"></script>
+    {# for format select #}
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
+    {# for format image #}
     <script type="text/javascript">
-        const DATE_FORMATS = ["YYYY-MM-DD HH:mm:ss.SSSSSS", "YYYY-MM-DD HH:mm:ss.SSS", "YYYY-MM-DD HH:mm:ss"];
         $(document).ready(function () {
             // Array add action
             $(".act > .add").click(function () {
                 // Find the last .list-group-item and clone it
-                var list = $(this).parent().prev(".list-group"), last = list.children(".list-group-item:last"),
-                    clone = last.clone(true), inner = clone.children(), label = null;
+                var list = $(this).parent().prev(".list-group"), template = list.children(".list-group-item.template"),
+                    clone = template.clone(true), inner = clone.children(), label = null;
+                clone.removeClass("template");
                 if (inner.is(".form-group")) {
                     label = inner.children("label");
                 } else {
@@ -179,6 +213,11 @@
                 var index = new Number(label.text());
                 label.text(++index);
                 list.append(clone);
+
+                // Install
+                clone.find(".plupload:visible").each(function (i, n) {
+                    install_plupload($(n));
+                })
             });
             // Array delete action
             $(".act > .del").click(function () {
@@ -186,13 +225,113 @@
                 if (!con) {
                     return false;
                 }
-                if ($(this).closest(".list-group-item").siblings().addBack().length == 1) {
-                    showWarning("Please leave at least one item!");
-                    return false;
-                }
                 $(this).closest(".list-group-item").remove();
             });
+
+            //
+            // Install Components
+            //
+
+            // Flatpickr
+            // https://flatpickr.js.org/formatting/
+            $("input.date-time").flatpickr({
+                enableTime: true,
+                dateFormat: "Y-m-d H:i:S",
+                defaultHour: new Date().getHours(),
+                defaultMinute: new Date().getMinutes()
+            });
+            $("input.date").flatpickr({
+                dateFormat: "Y-m-d"
+            });
+
+            // Select2
+            // https://select2.org/
+            $("select.select2").select2();
+
+            // Image
+            // https://www.plupload.com/docs/v2/Getting-Started
+            // NOTE: Only install on the visible inputs, for dynamic created inputs, need to invoke install_plupload manually
+            $(".plupload:visible").each(function (i, n) {
+                install_plupload($(n));
+            });
         });
+
+        var global_pluploading = false;
+
+        function install_plupload(btn) {
+            var result = btn.closest(".image-input-group").find(".image-input-result"), multi = btn.is("[multiple]");
+            // Generate a unique id for button so it can work correctly
+            btn.attr("id", "plupload_" + Math.round(new Date() / 1000));
+            var uploader = new plupload.Uploader({
+                browse_button: btn[0],
+                url: "//upload.qiniup.com/",
+                max_file_size: "10mb",
+                filters: {
+                    mime_types: [
+                        {title: "Image files", extensions: btn.data("exts")}
+                    ]
+                },
+                multi_selection: multi,
+                multipart_params: {token: "{{ token }}"}
+            });
+            uploader.init(), result.html("");
+            uploader.bind('FilesAdded', function (up, files) {
+                var html = '';
+                plupload.each(files, function (file) {
+                    html += '<div id="' + file.id + '" class="image uploading"><div class="progress progress-sm"><div class="progress-bar" style="width:5%;"></div></div></div>';
+                });
+                if (multi) {
+                    result.append(html);
+                } else {
+                    result.html(html);
+                }
+                up.start();
+                global_pluploading = true;
+            });
+            uploader.bind('UploadProgress', function (up, file) {
+                $("#" + file.id).find(".progress-bar").css("width", file.percent + "%");
+            });
+            uploader.bind('Error', function (up, err) {
+                if (err.file) {
+                    var html = '<small class="text-danger">' + err.file.name + '<br>' + err.message + ' (' + err.code + ')</small>';
+                    // Errors may happen before FilesAdded event, e.g, "File size error.", so need to check if any wrap div here
+                    if ($("#" + err.file.id).length) {
+                        $("#" + err.file.id).removeClass("uploading").addClass("error").html(html);
+                    } else {
+                        html = '<div id="' + err.file.id + '" class="image error">' + html + '</div>';
+                        result.html(html);
+                    }
+                } else {
+                    showError("Failed when uploading, " + err.message + " (" + err.code + ")");
+                }
+            });
+            uploader.bind("FileUploaded", function (up, file, c) {
+                // Response from qiniu service
+                var d = jQuery.parseJSON(c.response);
+                // Service error, // https://developer.qiniu.com/kodo/manual/1651/simple-response
+                if (d.error) {
+                    var html = '<small class="text-danger">' + file.name + '<br>' + d.error + '</small>';
+                    $("#" + file.id).removeClass("uploading").addClass("error").html(html);
+                }
+                // Defined response, https://developer.qiniu.com/kodo/manual/1654/response-body
+                // d
+                //   name - upload file name
+                //   key - relative path from base domain
+                //   url - uploaded url = base + '/' + key
+                //   width - image width
+                //   height - image height
+                else {
+                    var img = $("<img>").one("load", function () {
+                        $(this).closest(".image").css("width", "auto");
+                    }).attr("src", d.url + "-prev").data(d); // Retrive the value from element's data after
+                    var html = '<div class="btns"><a href="javascript:;" onclick="$(this).closest(\'.image\').remove();">x</a></div>';
+                    $("#" + file.id).removeClass("uploading").addClass("uploaded").html(img).append(html);
+                }
+            });
+            uploader.bind("UploadComplete", function (up, files) {
+                global_pluploading = false;
+            });
+        }
 
         function save(btn, copy) {
             copy = copy || false;
@@ -205,30 +344,16 @@
                 return false;
             }
 
-            // Validate
-            var form = $("#form-editor"), invalid = false;
-            form.addClass("was-validated");
-            // Custom validate input-group
-            form.find(".radio-input-group[required]").each(function (i, n) {
-                if ($(n).find(":radio:checked").length == 0) {
-                    $(n).addClass("is-invalid");
-                    invalid = true;
-                }
-            });
-            if (form[0].checkValidity() === false) {
-                invalid = true;
-            }
-            if (invalid) {
-                showError('Some thing invalid, please check!');
+            // Recursively traverse the form to validate and create the param for post
+            var param = {"valid": true};
+            process(param, $("#form-editor > fieldset"), "{{ model.name }}");
+            debug(param);
+            if (!param["valid"]) {
+                showError('Something invalid, please check!');
                 return false;
             }
 
-            // Process form
-            var param = {"r": Math.random()};
-            process(param, $("#form-editor > fieldset"), "{{ model.name }}");
-            if (console && console.log) {
-                console.log(param);
-            }
+            return false;
 
             btn.addClass("doing");
             var method = btn.is("input") ? "val" : "text";
@@ -246,14 +371,13 @@
                 } else {
                     showError(result.message);
                 }
-                form.removeClass("was-validated");
                 btn.removeClass("doing");
                 btn[method](oldLabel);
             }, "json");
         }
 
         function process(param, field, path) {
-            console.log("Try to process path " + path);
+            debug("Try to process path " + path);
             // object
             if (field.is("fieldset.object")) {
                 field.find("> .form-group, > fieldset").each(function (i, n) {
@@ -262,23 +386,72 @@
             }
             // array
             else if (field.is("fieldset.array")) {
-                field.find("> .list-group > .list-group-item").each(function (i, n) {
+                field.find("> .list-group > .list-group-item").not(".template").each(function (i, n) {
                     process(param, $(n).children(), path + "[" + i + "]");
                 });
             }
             // simple types
             else {
-                if (field.children(".radio-input-group").length) {
+                var radioInputGroup = field.children(".radio-input-group"),
+                    imageInputGroup = field.children(".image-input-group"),
+                    simpleInput = field.children(":input[name]");
+                if (radioInputGroup.length) {
+                    radioInputGroup.removeClass("is-valid is-invalid");
                     // If radio group is in array, they may share same name, so here use the active button to get checked value
-                    var active = field.children(".radio-input-group").find(".active");
+                    var active = radioInputGroup.find(".active");
                     if (active.length) {
                         param[path] = active.children(":radio").val().trim();
+                    } else {
+                        // Manually validate required
+                        if (radioInputGroup.is("[required]")) {
+                            radioInputGroup.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
                     }
-                } else if (field.children(":input[name]").length) {
-                    var val = field.children(":input[name]").val().trim();
+                } else if (imageInputGroup.length) {
+                    imageInputGroup.removeClass("in-valid is-invalid");
+                    var image = imageInputGroup.find(".image.uploaded > img");
+                    if (image.length) {
+                        param[path] = image.data()['url'];
+                    } else {
+                        // Manually validate required
+                        if (imageInputGroup.is("[required]")) {
+                            imageInputGroup.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else if (simpleInput.length) {
+                    simpleInput.removeClass("is-invalid is-valid");
+                    var val = simpleInput.val().trim();
                     if (val.length) {
                         param[path] = val;
+                        // Invoke built-in validation for Non-empty value
+                        if (simpleInput[0].checkValidity) {
+                            if (simpleInput[0].checkValidity() === false) {
+                                simpleInput.addClass("is-invalid");
+                                param["valid"] = false;
+                            } else {
+                                simpleInput.addClass("is-valid");
+                            }
+                        }
+                    } else {
+                        // Manually validate required only for empty value
+                        if (simpleInput.is("[required]")) {
+                            simpleInput.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
                     }
+                }
+                debug("Parsed string is " + param[path]); // All values in form are string type
+            }
+        }
+
+        function debug(msg, more = null) {
+            if (console && console.log) {
+                if (more) {
+                    console.log(msg, more)
+                } else {
+                    console.log(msg);
                 }
             }
         }

@@ -16,6 +16,13 @@ from fabric import task
 hosts = [
     {'host': '<FIXME>', 'connect_kwargs': {'password': '<FIXME>'}}
 ]
+
+# Use instance package to overwrite hosts
+try:
+    from instance.fabenv import *
+except ImportError:
+    pass
+
 # www folder
 project_folder = '/appl/projects/seed/www'
 

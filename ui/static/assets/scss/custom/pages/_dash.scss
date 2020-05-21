@@ -101,10 +101,9 @@
           opacity: 0.7;
         }
       }
-    }
-
-    .list-group-item-template {
-      display: none;
+      &.template {
+        display: none;
+      }
     }
   }
 
@@ -115,6 +114,84 @@
     }
     ~ .invalid-feedback {
       display: block;
+    }
+  }
+
+  .image-input-group.is-invalid {
+    ~ .invalid-feedback {
+      display: block;
+    }
+  }
+
+  .image-input-group {
+    .image-input-result {
+      .image {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        border: $thumbnail-border-width solid $thumbnail-border-color;
+        border-radius: .25rem;
+        padding: .25rem;
+        float: left;
+        margin-right: .5rem;
+        margin-bottom: .5rem;
+
+        .btns {
+          position: absolute;
+          top: 50%;
+          height: 20px;
+          margin-top: -10px;
+          width: 100%;
+          text-align: center;
+          display: none;
+
+          a {
+            background-color: $light;
+            border-radius: 20px;
+            line-height: 20px;
+            width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            color: $dark;
+          }
+        }
+
+        &:hover {
+          .btns {
+            display: block;
+            opacity: 0.8;
+          }
+        }
+
+        &.uploaded {
+          img {
+            height: 100%;
+            width: auto;
+          }
+        }
+
+        &.error {
+          text-align: center;
+          display: table;
+
+          small {
+            display: table-cell;
+            vertical-align: middle;
+            color: $danger;
+          }
+        }
+
+        &.uploading {
+
+          .progress {
+            position: absolute;
+            top: 50%;
+            width: 140px;
+            left: 50%;
+            margin-left: -70px;
+          }
+        }
+      }
     }
   }
 }

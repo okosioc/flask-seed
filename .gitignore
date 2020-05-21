@@ -8,6 +8,7 @@ app/logs/*.log.*
 
 # LocalConfig
 instance/config.py
+ui/instance/ui.json
 
 # PyCharm
 .idea/

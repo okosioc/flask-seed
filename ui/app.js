@@ -3,6 +3,8 @@ const nunjucks = require('nunjucks');
 const _ = require('lodash');
 const Mock = require('mockjs');
 const querystring = require('querystring');
+const qiniu = require('qiniu');
+const config = require('./instance/ui.json');
 
 const app = express();
 const port = 3000;
@@ -100,6 +102,14 @@ var mock_models = [
                 'email': {
                     'type': 'string'
                 },
+                'avatar': {
+                    'type': 'string',
+                    'format': 'image'
+                },
+                'intro': {
+                    'type': 'string',
+                    'format': 'textarea'
+                },
                 'point': {
                     'type': 'integer'
                 },
@@ -108,7 +118,8 @@ var mock_models = [
                 },
                 'status': {
                     'type': 'string',
-                    'enum': ['normal', 'rejected']
+                    'enum': ['normal', 'rejected'],
+                    'format': 'select'
                 },
                 'roles': {
                     'type': 'array',
@@ -130,6 +141,10 @@ var mock_models = [
                             },
                             'balance': {
                                 'type': 'number'
+                            },
+                            'logo': {
+                                'type': 'string',
+                                'format': 'image'
                             }
                         },
                         'required': ['id']
@@ -144,7 +159,7 @@ var mock_models = [
                     'format': 'date-time'
                 }
             },
-            'required': ['name', 'point', 'status', 'roles', 'createTime']
+            'required': ['name', 'avatar', 'point', 'status', 'roles', 'createTime']
         }
     }
 ];
@@ -177,6 +192,20 @@ function init_mock_record() {
         'status': 'normal',
         'createTime': '@now("yyyy-MM-dd HH:mm:ss.S")'
     });
+}
+
+// Create qiniu put policy
+// https://developer.qiniu.com/kodo/manual/1206/put-policy
+// https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
+function gen_qiniu_token() {
+    var options = {
+        scope: config.qiniu.bucket,
+        mimeLimit: 'image/jpeg;image/png',
+        saveKey: '${year}${mon}${day}/${hour}${min}${sec}_${fsize}${ext}',
+        returnBody: '{"etag":"${etag}","name":"${fname}","key":"${key}","url":"' + config.qiniu.base + '/${key}","width":${imageInfo.width},"height":${imageInfo.height}}'
+    };
+    var pp = new qiniu.rs.PutPolicy(options), mac = new qiniu.auth.digest.Mac(config.qiniu.as, config.qiniu.sk);
+    return pp.uploadToken(mac);
 }
 
 //
@@ -253,7 +282,7 @@ app.get('/crud/form/:modelName/(*)', function (req, res) {
             return;
         }
     }
-    res.render('crud/form.html', {model: mock_model, record: record});
+    res.render('crud/form.html', {model: mock_model, record: record, token: gen_qiniu_token()});
 });
 app.get('/crud/raw/:modelName/(*)', function (req, res) {
     var recordId = req.params[0],

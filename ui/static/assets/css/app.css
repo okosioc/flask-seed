@@ -2267,6 +2267,9 @@ Responsive Menu
   .ql-toolbar span {
     outline: none !important; }
 
+.ql-editor > p {
+  margin-bottom: .25rem; }
+
 .dropzone {
   border: 2px dashed rgba(50, 58, 70, 0.3);
   background: #fff;
@@ -3817,6 +3820,8 @@ div.hopscotch-bubble {
   #form-editor .radio-input-group.is-invalid ~ .invalid-feedback {
     display: block; }
   #form-editor .image-input-group.is-invalid ~ .invalid-feedback {
+    display: block; }
+  #form-editor .rte-input-group.is-invalid ~ .invalid-feedback {
     display: block; }
   #form-editor .image-input-group .image-input-result .image {
     position: relative;

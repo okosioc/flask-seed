@@ -108,6 +108,14 @@ var mock_models = [
                 'email': {
                     'type': 'string'
                 },
+                'intro': {
+                    'type': 'string',
+                    'format': 'textarea'
+                },
+                'detail': {
+                    'type': 'string',
+                    'format': 'rte'
+                },
                 'avatar': {
                     'type': 'string',
                     'format': 'image'
@@ -127,9 +135,6 @@ var mock_models = [
                             'url': {
                                 'type': 'string'
                             },
-                            'prev': {
-                                'type': 'string'
-                            },
                             'key': {
                                 'type': 'string'
                             },
@@ -145,10 +150,6 @@ var mock_models = [
                         }
                     },
                     'format': 'image'
-                },
-                'intro': {
-                    'type': 'string',
-                    'format': 'textarea'
                 },
                 'point': {
                     'type': 'integer'
@@ -207,7 +208,7 @@ var mock_models = [
                     'format': 'date-time'
                 }
             },
-            'required': ['name', 'avatar', 'point', 'status', 'roles', 'createTime']
+            'required': ['name', 'intro', 'detail', 'avatar', 'point', 'status', 'roles', 'createTime']
         }
     }
 ];
@@ -238,6 +239,7 @@ function init_mock_record() {
         'point': 0,
         'vip': false,
         'status': 'normal',
+        'roles': [1],
         'createTime': '@now("yyyy-MM-dd HH:mm:ss.S")'
     });
 }

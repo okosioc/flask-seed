@@ -2267,6 +2267,9 @@ Responsive Menu
   .ql-toolbar span {
     outline: none !important; }
 
+.ql-editor > p {
+  margin-bottom: .25rem; }
+
 .dropzone {
   border: 2px dashed rgba(50, 58, 70, 0.3);
   background: #fff;

@@ -123,6 +123,12 @@
     }
   }
 
+  .rte-input-group.is-invalid {
+    ~ .invalid-feedback {
+      display: block;
+    }
+  }
+
   .image-input-group {
     .image-input-result {
       .image {

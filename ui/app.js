@@ -30,6 +30,12 @@ app.use('/static', express.static('static'));
 // Jinja2's tojson filter
 env.addFilter('tojson', env.dump);
 
+// We need to invoke dict method keys(), it is not supported in Nunjucks.
+// These filters should also be implemented in Jinja2.
+env.addFilter('keys', function (object) {
+    return _.keys(object);
+});
+
 //
 // Compatible with Jinja2's global variables
 //
@@ -106,6 +112,40 @@ var mock_models = [
                     'type': 'string',
                     'format': 'image'
                 },
+                'photos': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string'
+                    },
+                    'format': 'image'
+                },
+                'portfolios': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'url': {
+                                'type': 'string'
+                            },
+                            'prev': {
+                                'type': 'string'
+                            },
+                            'key': {
+                                'type': 'string'
+                            },
+                            'name': {
+                                'type': 'string'
+                            },
+                            'width': {
+                                'type': 'integer'
+                            },
+                            'height': {
+                                'type': 'integer'
+                            }
+                        }
+                    },
+                    'format': 'image'
+                },
                 'intro': {
                     'type': 'string',
                     'format': 'textarea'
@@ -121,12 +161,20 @@ var mock_models = [
                     'enum': ['normal', 'rejected'],
                     'format': 'select'
                 },
+                'tags': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string'
+                    },
+                    'format': 'select'
+                },
                 'roles': {
                     'type': 'array',
                     'items': {
                         'type': 'integer',
                         'enum': [1, 2, 9]
-                    }
+                    },
+                    'format': 'select'
                 },
                 'accounts': {
                     'type': 'array',
@@ -313,7 +361,7 @@ app.post('/crud/save/:modelName/(*)', function (req, res) {
             // Convert paths, e.g, user.accounts[0].id -> [accounts, 0, id]
             var segments = k.replace(/\[/, '.').replace(/\]/, '').split('.').slice(1);
             // Get schema of a path
-            // NOTE: We only support very simple keywords of json schema here as it is generated from app.core.schema::SchemaDict.
+            // NOTE: We only support very little keywords of json schema here as it is generated from app.core.schema::SchemaDict.
             // There should be no keywords such as oneOf, $ref, patternProperties, additionalProperties, etc.
             var sub = _.reduce(segments, function (result, segment) {
                 if (result.type == 'object') {

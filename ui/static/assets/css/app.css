@@ -3843,7 +3843,8 @@ div.hopscotch-bubble {
         width: 20px;
         height: 20px;
         padding: 0 5px;
-        color: #323a46; }
+        color: #323a46;
+        margin-right: .25rem; }
     #form-editor .image-input-group .image-input-result .image:hover .btns {
       display: block;
       opacity: 0.8; }

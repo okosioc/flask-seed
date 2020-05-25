@@ -12,6 +12,12 @@
         {'url':'/crud/form/'+model.name+'/'+record._id, 'title': title}
     ]
 } %}
+{% set plupload_config = {
+    'url': '//upload.qiniup.com/',
+    'max': '10mb',
+    'exts': 'jpg, jpeg, png',
+    'preview': '-prev'
+} %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -59,7 +65,7 @@
 {% endblock %}
 
 {% macro render(name, jschema, jvalue, is_in_list=false, is_required=false) %}
-    {% if jschema.type == 'object' %}
+    {% if jschema.type == 'object' %} {# Object #}
         <fieldset class="object {{ 'mb-0' if is_in_list }}" name="{{ name }}">
             <legend>
                 <span class="name">{{ name }}</span>
@@ -80,102 +86,189 @@
                 {% endif %}
             </div>
         </fieldset>
-    {% elif jschema.type == 'array' %}
-        <fieldset class="array {{ 'mb-0' if is_in_list }}" name="{{ name }}">
-            <legend>
-                <span class="name">{{ name }}</span>
-                <span class="text-muted">{{ '*' if is_required }}</span>
-            </legend>
-            <div class="list-group">
-                {% for r in jvalue %}
-                    <div class="list-group-item">
-                        {{ render(loop.index0, jschema.items, r, is_in_list=true) }}
-                    </div>
-                {% endfor %}
-                {% set init = none %}
-                {% if jschema.items.type == 'object' %}
-                    {% set init = {} %}
-                {% elif jschema.items.type == 'array' %}
-                    {% set init = [] %}
+    {% elif jschema.type == 'array' %} {# Array #}
+        {% set rvalue = [] if jvalue is none or jvalue is undefined else jvalue %}
+        {% if jschema.format == 'select' and jschema.items.type in ['integer','number','string'] %} {# select #}
+            <div class="form-group array" name="{{ name }}">
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                {% if jschema.items.enum %}{# inner is enum #}
+                    <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
+                            multiple>
+                        <option value="">Choose...</option>
+                        {% for each in jschema.items.enum %}
+                            <option value="{{ each }}" {{ 'selected' if each in rvalue }}>{{ each }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %} {# tags #}
+                    <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
+                            multiple tags>
+                        {% for r in rvalue %}
+                            <option value="{{ r }}" selected>{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text">You can select existing option or input a new option.</small>
                 {% endif %}
-                {% if is_required %} {# Create a empty form for required array #}
-                    <div class="list-group-item">
-                        {{ render(jvalue|length, jschema.items, init, is_in_list=true) }}
-                    </div>
-                {% endif %}
-                <div class="list-group-item template"> {# Template form for adding elements to array #}
-                    {{ render(jvalue|length, jschema.items, init, is_in_list=true) }}
+                <div class="invalid-feedback">Please input valid {{ name }}!</div>
+                <div class="act">
+                    <a class="format"
+                       href="javascript:;">{{ jschema.items.type }} {{ jschema.type }}|{{ jschema.format }}</a>
                 </div>
             </div>
-            <div class="act">
-                <a class="format" href="javascript:;">array [{{ jvalue|length }}]</a>
-                <a class="add" href="javascript:;">+</a>
-                {% if is_in_list %}
-                    <a class="del" href="javascript:;">x</a>
-                {% endif %}
+        {% elif jschema.format == 'image' and jschema.items.type in ['string', 'object'] %} {# image #}
+            {% set hiddens = jschema.items.properties|keys if jschema.items.type == 'object' else ['url'] %}
+            <div class="form-group array" name="{{ name }}">
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <div class="image-input-group" {{ 'required' if is_required }}>
+                    <a class="btn btn-primary plupload" href="javascript:;"
+                       hiddens="{{ hiddens|join(',') }}"
+                       multiple>Choose Images...</a>
+                    <small class="form-text">Support {{ plupload_config.exts }}.
+                    </small>
+                    <div class="image-input-result mt-1 clearfix">
+                        {% if jschema.items.type == 'object' %} {# object array #}
+                            {% for r in rvalue %}
+                                <div class="image uploaded">
+                                    <img src="{{ r.url }}{{ plupload_config.preview }}">
+                                    <div class="btns">
+                                        <a href="{{ r.url }}" target="_blank">i</a>
+                                        <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+                                    </div>
+                                    {# inner object properties should be url/key/name/width/height #}
+                                    {% for k in hiddens %}
+                                        <input type="hidden" name="{{ k }}" value="{{ r[k] }}">
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        {% else %} {# string array #}
+                            {% for r in rvalue %}
+                                <div class="image uploaded">
+                                    <img src="{{ r }}{{ plupload_config.preview }}">
+                                    <div class="btns">
+                                        <a href="{{ r }}" target="_blank">i</a>
+                                        <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+                                    </div>
+                                    <input type="hidden" name="url" value="{{ r }}">
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="invalid-feedback">Please input valid {{ name }}!</div>
+                <div class="act">
+                    <a class="format"
+                       href="javascript:;">{{ jschema.items.type }} {{ jschema.type }}|{{ jschema.format }}</a>
+                </div>
             </div>
-        </fieldset>
-    {% else %}
+        {% else %}
+            <fieldset class="array {{ 'mb-0' if is_in_list }}" name="{{ name }}">
+                <legend>
+                    <span class="name">{{ name }}</span>
+                    <span class="text-muted">{{ '*' if is_required }}</span>
+                </legend>
+                <div class="list-group">
+                    {% for r in rvalue %}
+                        <div class="list-group-item">
+                            {{ render(loop.index0, jschema.items, r, is_in_list=true) }}
+                        </div>
+                    {% endfor %}
+                    {% set init = none %}
+                    {% if jschema.items.type == 'object' %}
+                        {% set init = {} %}
+                    {% elif jschema.items.type == 'array' %}
+                        {% set init = [] %}
+                    {% endif %}
+                    {% if is_required and rvalue|length == 0 %} {# Create a empty form for required array #}
+                        <div class="list-group-item">
+                            {{ render(rvalue|length, jschema.items, init, is_in_list=true) }}
+                        </div>
+                    {% endif %}
+                    <div class="list-group-item template"> {# Template form for adding elements to array #}
+                        {{ render(rvalue|length, jschema.items, init, is_in_list=true) }}
+                    </div>
+                </div>
+                <div class="act">
+                    <a class="format" href="javascript:;">array [{{ rvalue|length }}]</a>
+                    <a class="add" href="javascript:;">+</a>
+                    {% if is_in_list %}
+                        <a class="del" href="javascript:;">x</a>
+                    {% endif %}
+                </div>
+            </fieldset>
+        {% endif %}
+    {% else %} {# Simple types #}
         <div class="form-group" name="{{ name }}">
-            {% set isNil = jvalue is none or jvalue is undefined %}
-            {% if jschema.enum %}
+            {% set rvalue = '' if jvalue is none or jvalue is undefined else jvalue %}
+            {% if jschema.enum %} {# enum -> select2/radios  #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 {% if jschema.format == 'select' %}
                     <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}>
                         <option value="">Choose...</option>
                         {% for each in jschema.enum %}
-                            <option value="{{ each }}" {{ 'selected' if each == jvalue }}>{{ each }}</option>
+                            <option value="{{ each }}" {{ 'selected' if each == rvalue }}>{{ each }}</option>
                         {% endfor %}
                     </select>
                 {% else %}
                     <div class="radio-input-group" {{ 'required' if is_required }}>
                         <div class="btn-group btn-group-toggle" data-toggle="buttons">
                             {% for each in jschema.enum %}
-                                <label class="btn btn-light {{ 'active' if each==jvalue }}">
-                                    <input type="radio" {{ 'checked' if each==jvalue }}
+                                <label class="btn btn-light {{ 'active' if each==rvalue }}">
+                                    <input type="radio" {{ 'checked' if each==rvalue }}
                                            value="{{ each }}"> {{ each }}
                                 </label>
                             {% endfor %}
                         </div>
                     </div>
                 {% endif %}
-            {% elif jschema.type == 'integer' or jschema.type == 'number' %}
+            {% elif jschema.type == 'integer' or jschema.type == 'number' %} {# integer & number -> input #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 <input name="{{ name }}" type="number" class="form-control"
-                       value="{{ '' if isNil else jvalue }}" {{ 'required' if is_required }}>
-            {% elif jschema.type == 'boolean' %}
+                       value="{{ rvalue }}" {{ 'required' if is_required }}>
+            {% elif jschema.type == 'boolean' %} {# boolean -> radios#}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 <div class="radio-input-group" {{ 'required' if is_required }}>
                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                        <label class="btn btn-light {{ 'active' if jvalue }}">
-                            <input type="radio" {{ 'checked' if jvalue }} value="true"> True
+                        <label class="btn btn-light {{ 'active' if rvalue }}">
+                            <input type="radio" {{ 'checked' if rvalue }} value="true"> True
                         </label>
-                        <label class="btn btn-light {{ 'active' if not jvalue }}">
-                            <input type="radio" {{ 'checked' if not jvalue }} value="false"> False
+                        <label class="btn btn-light {{ 'active' if not rvalue }}">
+                            <input type="radio" {{ 'checked' if not rvalue }} value="false"> False
                         </label>
                     </div>
                 </div>
-            {% elif jschema.type == 'string' %}
+            {% elif jschema.type == 'string' %} {# string -> textarea/rte/image/input/date-time/date #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 {% if jschema.format == 'textarea' %}
                     <textarea name="{{ name }}" rows="5"
-                              class="form-control" {{ 'required' if is_required }}>{{ '' if isNil else jvalue }}</textarea>
+                              class="form-control" {{ 'required' if is_required }}>{{ rvalue }}</textarea>
                 {% elif jschema.format == 'image' %}
                     <div class="image-input-group" {{ 'required' if is_required }}>
                         <a class="btn btn-primary plupload" href="javascript:;"
-                           data-exts="jpg,jpeg,png">Choose Image...</a>
-                        <small class="form-text">Support <code>jpg</code>, <code>jpeg</code> and <code>png</code>.
+                           hiddens="url">Choose Image...</a>
+                        <small class="form-text">Support {{ plupload_config.exts }}.
                         </small>
-                        <div class="image-input-result mt-1 clearfix"></div>
+                        <div class="image-input-result mt-1 clearfix">
+                            {% if rvalue|length %}
+                                <div class="image uploaded">
+                                    <img src="{{ rvalue }}{{ plupload_config.preview }}">
+                                    <div class="btns">
+                                        <a href="{{ rvalue }}" target="_blank">i</a>
+                                        <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+                                    </div>
+                                    <input type="hidden" name="url" value="{{ rvalue }}">
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 {% else %}
                     <input name="{{ name }}" type="text"
                            class="form-control {{ jschema.format }}" {{ 'required' if is_required }}
-                           value="{{ '' if isNil else jvalue }}">
+                           value="{{ rvalue }}">
                 {% endif %}
             {% endif %}
             <div class="invalid-feedback">Please input valid {{ name }}!</div>
@@ -246,7 +339,10 @@
 
             // Select2
             // https://select2.org/
-            $("select.select2").select2();
+            $("select.select2").each(function (i, n) {
+                var option = {tags: $(n).is("[tags]")};
+                $(n).select2(option)
+            });
 
             // Image
             // https://www.plupload.com/docs/v2/Getting-Started
@@ -259,22 +355,23 @@
         var global_pluploading = false;
 
         function install_plupload(btn) {
-            var result = btn.closest(".image-input-group").find(".image-input-result"), multi = btn.is("[multiple]");
+            var result = btn.closest(".image-input-group").find(".image-input-result"), multi = btn.is("[multiple]"),
+                hiddens = btn.attr("hiddens");
             // Generate a unique id for button so it can work correctly
             btn.attr("id", "plupload_" + Math.round(new Date() / 1000));
             var uploader = new plupload.Uploader({
                 browse_button: btn[0],
-                url: "//upload.qiniup.com/",
-                max_file_size: "10mb",
+                url: "{{ plupload_config.url }}",
+                max_file_size: "{{ plupload_config.max }}",
                 filters: {
                     mime_types: [
-                        {title: "Image files", extensions: btn.data("exts")}
+                        {title: "Image files", extensions: "{{ plupload_config.exts }}"}
                     ]
                 },
                 multi_selection: multi,
                 multipart_params: {token: "{{ token }}"}
             });
-            uploader.init(), result.html("");
+            uploader.init();
             uploader.bind('FilesAdded', function (up, files) {
                 var html = '';
                 plupload.each(files, function (file) {
@@ -315,17 +412,23 @@
                 }
                 // Defined response, https://developer.qiniu.com/kodo/manual/1654/response-body
                 // d
+                //   url - uploaded url = base + '/' + key, e.g, //cdn.flask-seed.com/20200521/183247_821388.jpg
+                //   key - relative path from base, e.g, 20200521/183247_821388.jpg
                 //   name - upload file name
-                //   key - relative path from base domain
-                //   url - uploaded url = base + '/' + key
-                //   width - image width
-                //   height - image height
+                //   width - image width, int
+                //   height - image height, int
                 else {
-                    var img = $("<img>").one("load", function () {
+                    var img = $('<img>').one("load", function () {
                         $(this).closest(".image").css("width", "auto");
-                    }).attr("src", d.url + "-prev").data(d); // Retrive the value from element's data after
-                    var html = '<div class="btns"><a href="javascript:;" onclick="$(this).closest(\'.image\').remove();">x</a></div>';
-                    $("#" + file.id).removeClass("uploading").addClass("uploaded").html(img).append(html);
+                    }).attr("src", d.url + "{{ plupload_config.preview }}");
+                    var image = $("#" + file.id).removeClass("uploading").addClass("uploaded").html(img);
+                    var btns = '<div class="btns"><a href="' + d.url + '" target="_blank">i</a><a href="javascript:;" onclick="$(this).closest(\'.image\').remove();">x</a></div>';
+                    image.append(btns);
+                    $.each(hiddens.split(','), function (i, k) {
+                        var v = k in d ? d[k] : "";
+                        var hidden = $('<input type="hidden" name="' + k + '">').val(v);
+                        image.append(hidden);
+                    });
                 }
             });
             uploader.bind("UploadComplete", function (up, files) {
@@ -353,8 +456,6 @@
                 return false;
             }
 
-            return false;
-
             btn.addClass("doing");
             var method = btn.is("input") ? "val" : "text";
             var oldLabel = btn[method]();
@@ -379,16 +480,54 @@
         function process(param, field, path) {
             debug("Try to process path " + path);
             // object
-            if (field.is("fieldset.object")) {
+            if (field.is(".object")) {
                 field.find("> .form-group, > fieldset").each(function (i, n) {
                     process(param, $(n), path + "." + $(n).attr("name"));
                 });
             }
             // array
-            else if (field.is("fieldset.array")) {
-                field.find("> .list-group > .list-group-item").not(".template").each(function (i, n) {
-                    process(param, $(n).children(), path + "[" + i + "]");
-                });
+            else if (field.is(".array")) {
+                var select = field.children("select"), imageInputGroup = field.children(".image-input-group");
+                if (select.length) { // array of integer/number/string
+                    select.removeClass("is-valid is-invalid");
+                    var vals = select.val();
+                    if (vals.length) {
+                        $.each(vals, function (i, n) {
+                            param[path + "[" + i + "]"] = n;
+                        });
+                    } else {
+                        // Manually validate required
+                        if (select.is("[required]")) {
+                            select.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else if (imageInputGroup.length) { // array of string/object
+                    imageInputGroup.removeClass("in-valid is-invalid");
+                    var images = imageInputGroup.find(".image.uploaded");
+                    if (images.length) {
+                        $.each(images, function (i, n) {
+                            var hiddens = $(n).find(":hidden[name]");
+                            if (hiddens.length == 1) {
+                                param[path + "[" + i + "]"] = hiddens.val();
+                            } else {
+                                $.each(hiddens, function (j, h) {
+                                    param[path + "[" + i + "]." + $(h).attr("name")] = $(h).val();
+                                });
+                            }
+                        });
+                    } else {
+                        // Manually validate required
+                        if (imageInputGroup.is("[required]")) {
+                            imageInputGroup.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else {
+                    field.find("> .list-group > .list-group-item").not(".template").each(function (i, n) {
+                        process(param, $(n).children(), path + "[" + i + "]");
+                    });
+                }
             }
             // simple types
             else {
@@ -410,9 +549,9 @@
                     }
                 } else if (imageInputGroup.length) {
                     imageInputGroup.removeClass("in-valid is-invalid");
-                    var image = imageInputGroup.find(".image.uploaded > img");
+                    var image = imageInputGroup.find(".image.uploaded");
                     if (image.length) {
-                        param[path] = image.data()['url'];
+                        param[path] = image.find(":hidden[name=url]").val();
                     } else {
                         // Manually validate required
                         if (imageInputGroup.is("[required]")) {

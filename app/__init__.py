@@ -168,6 +168,11 @@ def configure_template_filters(app):
         """ Url Quote. """
         return url_quote(value, charset)
 
+    @app.template_filter()
+    def keys(value):
+        """ Return keys of dict. """
+        return value.keys()
+
 
 def configure_template_functions(app):
     @app.template_global()

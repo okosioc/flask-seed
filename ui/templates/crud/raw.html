@@ -1,7 +1,7 @@
 {% extends 'layoutdash.html' %}
 
 {% set update = true if record._id else false %}
-{% set title = ('Update' if update else 'Create') + ' ' + model.name %}
+{% set title = ('Update' if update else 'Create') + ' ' + model.name|capitalize %}
 {% set breadcrumb = {
     'title': title,
     'links': [
@@ -17,7 +17,7 @@
 
 {% block left %}
     <section>
-        <div id="raw-editor">
+        <div id="raw-editor" class="raw-editor">
             <div id="doc">
                 {{ render('Root', model.jschema, record) }}
             </div>
@@ -27,7 +27,7 @@
 
 {% block right %}
     <section>
-        <h4>Actions</h4>
+        <h4>Note</h4>
         <p class="text-muted"></p>
         <ul class="list-unstyled">
             {% if update %}
@@ -35,7 +35,8 @@
             {% else %}
                 <li>1. You are creating {{ model.name }}.</li>
             {% endif %}
-            <li>2. The whole record will be overwrited when updating, so only available for system admin.</li>
+            <li>2. The whole record will be overwrited when updating.</li>
+            <li>3. This raw editor should be used by system admin only.</li>
         </ul>
         {% if update %}
             <a class="btn btn-primary btn-sm" href="javascript:;"

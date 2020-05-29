@@ -1,7 +1,7 @@
 {% extends 'layoutdash.html' %}
 
 {% set update = true if record._id else false %}
-{% set title = ('Update' if update else 'Create') + ' ' + model.name %}
+{% set title = ('Update' if update else 'Create') + ' ' + model.name|capitalize %}
 {% set breadcrumb = {
     'title': title,
     'links': [
@@ -19,26 +19,22 @@
     'preview': '-prev',
     'rte': '-rte'
 } %}
+{% set plural = model.name + 's' %}
+{% set initial = model.name|first %}
 
 {% block title %}{{ title }}{% endblock %}
 
 {% block style %}
-    <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
-    <link href="{{ base() }}/assets/vendor/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
-    <link href="{{ base() }}/assets/vendor/quill/dist/quill.snow.css" rel="stylesheet" type="text/css">
+    {{ render_style() }}
 {% endblock %}
 
 {% block left %}
-    <section>
-        <form id="form-editor" class="needs-validation" novalidate action="/login" method="post">
-            {{ render('Root', model.jschema, record) }}
-        </form>
-    </section>
+    {{ render_html() }}
 {% endblock %}
 
 {% block right %}
     <section>
-        <h4>Actions</h4>
+        <h4>Note</h4>
         <p class="text-muted"></p>
         <ul class="list-unstyled">
             {% if update %}
@@ -46,9 +42,12 @@
             {% else %}
                 <li>1. You are creating {{ model.name }}.</li>
             {% endif %}
-            <li>2. The whole record will be overwrited when updating, so only available for system admin.</li>
-            <li>3. By clicking the type on the top-right of each field, you can change its display format.
-            </li>
+            <li>2. The whole record will be overwrited when updating.</li>
+            {% if current_user.is_admin %}
+                <li>2. You can generate codes by clicking <a class="text-danger" href="#gen" data-toggle="modal">GEN</a>
+                    here.
+                </li>
+            {% endif %}
         </ul>
         {% if update %}
             <a class="btn btn-primary btn-sm" href="javascript:;"
@@ -66,8 +65,138 @@
     </section>
 {% endblock %}
 
-{% macro render(name, jschema, jvalue, is_in_list=false, is_required=false) %}
+{% block script %}
+    {% if current_user.is_admin %}
+        <div class="modal fade" id="gen" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Code Generation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Html</h5>
+                                    <p class="text-muted">Template name should be <code>form.html</code>, and variables
+                                        used in template are <code>{{ model.name }}</code> & <code>token</code>.
+                                    <div class="code html" style="height:600px;"></div>
+                                    <iframe style="display:none;">
+                                        <!-- STYLE -->{{ render_style() }}
+                                        <!-- HTML -->{{ render_html(true) }}
+                                        <!-- SCRIPT -->{{ render_script(true) }}
+                                    </iframe>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Python</h5>
+                                    <p class="text-muted">Default blueprint is <code>{{ plural }}</code>, please
+                                        change
+                                        it accordingly.</p>
+                                    <div class="code python" style="height:600px;"></div>
+                                    <textarea style="display:none;">
+from flask import Blueprint, render_template, current_app, request, jsonify, abort
+from flask_babel import gettext as _
+from app.core import populate_model, Pagination
+from app.models import {{ model.name|capitalize }}
+from app.tools import auth_permission
+
+{{ plural }} = Blueprint('{{ plural }}', __name__)
+
+@{{ plural }}.route('/save/&lt;ObjectId:{{ initial }}id&gt;', methods=('POST',))
+@{{ plural }}.route('/save', methods=('POST',))
+@auth_permission
+def save({{ initial }}id=None):
+    """ Create or Update a {{ model.name }}. """
+    try:
+        {{ model.name }} = populate_model(request.form, {{ model.name|capitalize }})
+
+        # TODO: Implement some validation logic here
+
+        # Create
+        if not {{ initial }}id:
+            {{ model.name }}.save()
+            {{ initial }}id = {{ model.name }}._id
+            current_app.logger.info('Successfully create {{ model.name }} %s' % {{ initial }}id)
+        # Update
+        else:
+            existing = {{ model.name|capitalize }}.find_one({{ initial }}id)
+            if not existing:
+                abort(404)
+            # TODO: Only update necessary fields,
+            # e.g,
+            # existing.status = {{ model.name }}.status
+            # existing.updateTime = datetime.now()
+            existing.save()
+            current_app.logger.info('Successfully update {{ model.name }} %s' % {{ initial }}id)
+    except:
+        current_app.logger.exception('Failed when saving {{ model.name }}')
+        return jsonify(success=False, message=_('Failed when saving {{ model.name }}, please try again later!'))
+
+    return jsonify(success=True, message=_('Save {{ model.name }} successfully.'), {{ initial }}id={{ initial }}id)
+                                    </textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Below libs are used for code generation only, so we do NOT include them in package.json #}
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ace.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/mode-html.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/mode-python.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ext-searchbox.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify.js"></script>
+        <script type="text/javascript"
+                src="//cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify-html.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("div.code").each(function (i, n) {
+                    var editor = ace.edit(n), session = editor.getSession(), code = "";
+                    session.setUseWorker(false);
+                    if ($(n).is(".html")) {
+                        session.setMode("ace/mode/html");
+                        // Find the html code in next textarea, so that we do need to perform html escape manually
+                        code = html_beautify($(n).next("iframe").html().trim(), {
+                            indent_size: "2",
+                            indent_char: " ",
+                            max_preserve_newlines: -1,
+                            preserve_newlines: false,
+                        });
+                    } else if ($(n).is(".python")) {
+                        session.setMode("ace/mode/python");
+                        code = $(n).next("textarea").val().trim();
+                    }
+                    session.setValue(code);
+                });
+            });
+        </script>
+    {% endif %}
+    {{ render_script() }}
+{% endblock %}
+
+{% macro render_html(gen=false) %}
+    <section>
+        <form id="form-editor" class="form-editor needs-validation {{ 'gen' if gen }}" novalidate method="post">
+            {% if gen %}
+                {{ render('Root', model.jschema, none, gen=true) }}
+            {% else %}
+                {{ render('Root', model.jschema, record) }}
+            {% endif %}
+        </form>
+    </section>
+{% endmacro %}
+
+{% macro render(name, jschema, jvalue, is_in_list=false, is_required=false, gen=false) %}
     {% if jschema.type == 'object' %} {# Object #}
+        {% set rvalue = {} if jvalue is none or jvalue is undefined else jvalue %}
         <fieldset class="object {{ 'mb-0' if is_in_list }}" name="{{ name }}">
             <legend>
                 <span class="name">{{ name }}</span>
@@ -78,7 +207,7 @@
                 {% if n =='_id' %}
                     {# skip #}
                 {% else %}
-                    {{ render(n, s, jvalue[n], is_required=required) }}
+                    {{ render(n, s, rvalue[n], is_required=required, gen=gen) }}
                 {% endif %}
             {% endfor %}
             <div class="act">
@@ -172,7 +301,7 @@
                 <div class="list-group">
                     {% for r in rvalue %}
                         <div class="list-group-item">
-                            {{ render(loop.index0, jschema.items, r, is_in_list=true) }}
+                            {{ render(loop.index0, jschema.items, r, is_in_list=true, gen=gen) }}
                         </div>
                     {% endfor %}
                     {% set init = none %}
@@ -183,11 +312,11 @@
                     {% endif %}
                     {% if is_required and rvalue|length == 0 %} {# Create a empty form for required array #}
                         <div class="list-group-item">
-                            {{ render(rvalue|length, jschema.items, init, is_in_list=true) }}
+                            {{ render(rvalue|length, jschema.items, init, is_in_list=true, gen=gen) }}
                         </div>
                     {% endif %}
                     <div class="list-group-item template"> {# Template form for adding elements to array #}
-                        {{ render(rvalue|length, jschema.items, init, is_in_list=true) }}
+                        {{ render(rvalue|length, jschema.items, init, is_in_list=true, gen=gen) }}
                     </div>
                 </div>
                 <div class="act">
@@ -200,8 +329,12 @@
             </fieldset>
         {% endif %}
     {% else %} {# Simple types #}
-        <div class="form-group" name="{{ name }}">
+        {% if gen %}
+            {% set rvalue = '{{ ' + model.name + '.'+ name + ' }}' %}
+        {% else %}
             {% set rvalue = '' if jvalue is none or jvalue is undefined else jvalue %}
+        {% endif %}
+        <div class="form-group" name="{{ name }}">
             {% if jschema.enum %} {# enum -> select2/radios  #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
@@ -224,12 +357,13 @@
                         </div>
                     </div>
                 {% endif %}
-            {% elif jschema.type == 'integer' or jschema.type == 'number' %} {# integer & number -> input #}
+            {% elif jschema.type == 'integer' or jschema.type == 'number' %} {# integer & number -> pattern input #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
-                <input name="{{ name }}" type="number" class="form-control"
+                <input name="{{ name }}" type="string" class="form-control"
+                       pattern="{{ '[0-9]*' if jschema.type == 'integer' else '[0-9\.]*' }}"
                        value="{{ rvalue }}" {{ 'required' if is_required }}>
-            {% elif jschema.type == 'boolean' %} {# boolean -> radios#}
+            {% elif jschema.type == 'boolean' %} {# boolean -> radios #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 <div class="radio-input-group" {{ 'required' if is_required }}>
@@ -292,7 +426,13 @@
     {% endif %}
 {% endmacro %}
 
-{% block script %}
+{% macro render_style() %}
+    <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ base() }}/assets/vendor/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ base() }}/assets/vendor/quill/dist/quill.snow.css" rel="stylesheet" type="text/css">
+{% endmacro %}
+
+{% macro render_script(gen=false) %}
     {# for format date-time & date #}
     <script type="text/javascript" src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
     {# for format select #}
@@ -303,8 +443,16 @@
     <script type="text/javascript" src="{{ base() }}/assets/vendor/quill/dist/quill.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            // Array add action
-            $(".act > .add").click(function () {
+            install($(".form-editor:not(.gen)"));
+        });
+
+        function install(container) {
+            //
+            // Install array add or delete action
+            //
+
+            // Array add
+            container.find(".act > .add").click(function () {
                 // Find the last .list-group-item and clone it
                 var list = $(this).parent().prev(".list-group"), template = list.children(".list-group-item.template"),
                     clone = template.clone(true), inner = clone.children(), label = null;
@@ -318,13 +466,16 @@
                 label.text(++index);
                 list.append(clone);
 
-                // Install
+                // Install complex components
                 clone.find(".plupload:visible").each(function (i, n) {
                     install_plupload($(n));
-                })
+                });
+                clone.find(".quill:visible").each(function (i, n) {
+                    install_quill($(n));
+                });
             });
-            // Array delete action
-            $(".act > .del").click(function () {
+            // Array delete
+            container.find(".act > .del").click(function () {
                 var con = window.confirm("Are you sure to delete this item?");
                 if (!con) {
                     return false;
@@ -333,24 +484,24 @@
             });
 
             //
-            // Install Components
+            // Install components
             //
 
             // Flatpickr
             // https://flatpickr.js.org/formatting/
-            $("input.date-time").flatpickr({
+            container.find("input.date-time").flatpickr({
                 enableTime: true,
                 dateFormat: "Y-m-d H:i:S",
                 defaultHour: new Date().getHours(),
                 defaultMinute: new Date().getMinutes()
             });
-            $("input.date").flatpickr({
+            container.find("input.date").flatpickr({
                 dateFormat: "Y-m-d"
             });
 
             // Select2
             // https://select2.org/
-            $("select.select2").each(function (i, n) {
+            container.find("select.select2").each(function (i, n) {
                 var option = {tags: $(n).is("[tags]")};
                 $(n).select2(option)
             });
@@ -358,18 +509,18 @@
             // Image
             // https://www.plupload.com/docs/v2/Getting-Started
             // NOTE: Only install on the visible inputs, for dynamic created inputs, need to invoke install_plupload manually
-            $(".plupload:visible").each(function (i, n) {
+            container.find(".plupload:visible").each(function (i, n) {
                 install_plupload($(n));
             });
 
             // Rte
             // https://github.com/quilljs/quill/
-            $(".quill:visible").each(function (i, n) {
+            container.find(".quill:visible").each(function (i, n) {
                 install_quill($(n));
             });
-        });
+        }
 
-        var global_pluploading = false;
+        var global_pluploading = false, global_token = "{{ '{{ token }}' if gen else token}}";
 
         function install_plupload(btn) {
             var result = btn.closest(".image-input-group").find(".image-input-result"), multi = btn.is("[multiple]"),
@@ -386,7 +537,7 @@
                     ]
                 },
                 multi_selection: multi,
-                multipart_params: {token: "{{ token }}"}
+                multipart_params: {token: global_token}
             });
             uploader.init();
             uploader.bind('FilesAdded', function (up, files) {
@@ -497,7 +648,7 @@
                     ]
                 },
                 multi_selection: true,
-                multipart_params: {token: "{{ token }}"}
+                multipart_params: {token: global_token}
             });
             uploader.init();
             uploader.bind('FilesAdded', function (up, files) {
@@ -533,7 +684,11 @@
             if (btn.is(".doing")) {
                 return;
             }
-            var msg = copy ? "Are you sure to copy this record?" : "Are you sure to save this record?";
+            {% if gen %}
+                var msg = "Are you sure to save this {{ model.name }}?";
+            {% else %}
+                var msg = copy ? "Are you sure to copy this record?" : "Are you sure to save this record?";
+            {% endif %}
             var con = window.confirm(msg);
             if (!con) {
                 return false;
@@ -553,13 +708,21 @@
             var oldLabel = btn[method]();
             btn[method](oldLabel + "...");
 
-            var url = copy ? "/crud/save/{{ model.name }}/" : "/crud/save/{{ model.name }}/{{ record._id }}";
+            {% if gen %}
+                var url = "/{{ plural }}/save/{{ '{{' }} {{ model.name }}.id {{ '}}' }}";
+            {% else %}
+                var url = copy ? "/crud/save/{{ model.name }}/" : "/crud/save/{{ model.name }}/{{ record._id }}";
+            {% endif %}
             $.post(url, param, function (result) {
                 if (result.success) {
                     showSuccess(result.message);
                     showInfo('Refreshing...');
                     setTimeout(function () {
-                        location.href = "/crud/form/{{ model.name }}/" + result.rid;
+                        {% if gen %}
+                            location.href = "/{{ plural }}/form/" + result.rid;
+                        {% else %}
+                            location.href = "/crud/form/{{ model.name }}/" + result.rid;
+                        {% endif %}
                     }, 2000);
                 } else {
                     showError(result.message);
@@ -701,4 +864,4 @@
             }
         }
     </script>
-{% endblock %}
+{% endmacro %}

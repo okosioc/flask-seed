@@ -10,6 +10,7 @@ const app = express();
 const port = 3000;
 // Use Nunjucks as express template
 var env = nunjucks.configure('templates', {
+    watch: true,
     autoescape: true,
     express: app
 });
@@ -208,7 +209,7 @@ var mock_models = [
                     'format': 'date-time'
                 }
             },
-            'required': ['name', 'intro', 'detail', 'avatar', 'point', 'status', 'roles', 'createTime']
+            'required': ['name', 'avatar', 'point', 'status', 'roles', 'createTime']
         }
     }
 ];

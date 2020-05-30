@@ -330,7 +330,7 @@ def save({{ initial }}id=None):
         {% endif %}
     {% else %} {# Simple types #}
         {% if gen %}
-            {% set rvalue = '{{ ' + model.name + '.'+ name + ' }}' %}
+            {% set rvalue = '{{ ' + model.name + '.' + name + ' }}' %}
         {% else %}
             {% set rvalue = '' if jvalue is none or jvalue is undefined else jvalue %}
         {% endif %}

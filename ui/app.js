@@ -29,13 +29,21 @@ app.use('/static', express.static('static'));
 //
 
 // Jinja2's tojson filter
-env.addFilter('tojson', env.dump);
+// Dumps a structure to JSON so that it’s safe to use in <script> tags
+env.addFilter('tojson', function (value, spaces) {
+    if (value instanceof nunjucks.runtime.SafeString) {
+        value = value.toString()
+    }
+    return nunjucks.runtime.markSafe(JSON.stringify(value, null, spaces));
+});
 
 // We need to invoke dict method keys(), it is not supported in Nunjucks.
 // These filters should also be implemented in Jinja2.
 env.addFilter('keys', function (object) {
     return _.keys(object);
 });
+
+// NOTE: Add filters here if you are using jinja2 filters like filesizeformat, etc.
 
 //
 // Compatible with Jinja2's global variables
@@ -85,6 +93,12 @@ env.addTest('undefined', function (v) {
 env.addTest('defined', function (v) {
     return !_.isUndefined(v);
 });
+env.addTest('string', function (v) {
+    if (v instanceof nunjucks.runtime.SafeString) {
+        return true;
+    }
+    return _.isString(v);
+});
 
 //
 // Compatible with flask-seed's model definition and related crud logic
@@ -93,6 +107,9 @@ env.addTest('defined', function (v) {
 // Mock model's jschema is a subset of Object Schema from OAS 3.0, it is converted from app.core.schema::SchemaDict
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
 // https://swagger.io/docs/specification/data-models/
+// However, we still add two grammars
+//   - Add format to array, so that we can gen a component for the whole array
+//   - Add indexes to root object, so that it can be used to generate search form
 var mock_models = [
     {
         'name': 'user',
@@ -209,7 +226,8 @@ var mock_models = [
                     'format': 'date-time'
                 }
             },
-            'required': ['name', 'avatar', 'point', 'status', 'roles', 'createTime']
+            'required': ['name', 'avatar', 'point', 'vip', 'status', 'roles', 'createTime'],
+            'indexes': ['name', 'email', 'point', 'vip', 'status']
         }
     }
 ];
@@ -257,6 +275,31 @@ function gen_qiniu_token() {
     };
     var pp = new qiniu.rs.PutPolicy(options), mac = new qiniu.auth.digest.Mac(config.qiniu.as, config.qiniu.sk);
     return pp.uploadToken(mac);
+}
+
+// Request values are all string, this helper function try to convert a string to a type, according the path in schema
+function convert_string_to_type(schema, segments, v) {
+    // Get sub schema of a path segment, e.g, [accounts, 0, id] or [name]
+    // NOTE: We only support very little keywords of json schema here as it is generated from app.core.schema::SchemaDict.
+    // There should be no keywords such as oneOf, $ref, patternProperties, additionalProperties, etc.
+    var sub = _.reduce(segments, function (result, segment) {
+        if (result.type == 'object') {
+            return _.get(result, 'properties.' + segment);
+        } else if (result.type == 'array') {
+            return _.get(result, 'items');
+        } else {
+            return result;
+        }
+    }, schema);
+    var type = sub.type, value = v;
+    if (type == 'integer') {
+        value = parseInt(v)
+    } else if (type == 'number') {
+        value = parseFloat(v);
+    } else if (type == 'boolean') {
+        value = ('true' == v.toLowerCase()) ? true : false;
+    }
+    return value;
 }
 
 //
@@ -308,10 +351,39 @@ app.get('/crud/', function (req, res) {
     res.render('crud/index.html', {models: mock_models});
 });
 app.get('/crud/list/:modelName', function (req, res) {
-    var p = parseInt(req.query.p) || 1,
-        offset = (p - 1) * mock_page_count,
-        mock_pages = _.ceil(mock_records.length / mock_page_count),
-        records = _.drop(mock_records, offset).slice(0, mock_page_count),
+    var modelName = req.params.modelName,
+        model = _.find(mock_models, function (n) {
+            return n.name == modelName
+        }),
+        schema = model.jschema,
+        p = parseInt(req.query.p) || 1,
+        offset = (p - 1) * mock_page_count;
+    // Perform search
+    var search = {};
+    _.forEach(req.query, function (v, k) {
+        if (_.isEmpty(v)) return true;
+        // Only check the params starts with search.
+        if (k.startsWith("search.")) {
+            k = k.replace("search.", ""); // Remove the search.
+            // Convert string path to segments, e.g, search.name -> [name]
+            var segments = k.replace(/\[/, '.').replace(/\]/, '').split('.');
+            search[k] = convert_string_to_type(schema, segments, v);
+        }
+    });
+    var matched_records = mock_records;
+    if (!_.isEmpty(search)) {
+        console.log(search);
+        // NOTE: Only support EQUALS match here, do not support LIKE or BETWEEN, etc
+        // If need to implement complex search, a simple way is to add comparison operators to the end of param name
+        // e.g,
+        //   search.name__like
+        //   search.status__in
+        //   search.point__gte
+        //   search.createDate__between
+        matched_records = _.filter(mock_records, search);
+    }
+    var mock_pages = _.ceil(matched_records.length / mock_page_count),
+        records = _.drop(matched_records, offset).slice(0, mock_page_count),
         pagination = {
             'page': p,
             'pages': mock_pages,
@@ -319,7 +391,7 @@ app.get('/crud/list/:modelName', function (req, res) {
             'next': p >= mock_pages ? null : p + 1,
             'iter_pages': _.range(1, mock_pages + 1)
         };
-    res.render('crud/list.html', {model: mock_model, records: records, pagination: pagination});
+    res.render('crud/list.html', {model: mock_model, search: search, records: records, pagination: pagination});
 });
 app.get('/crud/form/:modelName/(*)', function (req, res) {
     var recordId = req.params[0],
@@ -354,39 +426,20 @@ app.post('/crud/save/:modelName/(*)', function (req, res) {
         model = _.find(mock_models, function (n) {
             return n.name == modelName
         }),
+        schema = model.jschema,
         recordId = req.params[0],
         record = init_mock_record();
     // Populate record
-    var body = req.body, schema = model.jschema;
-    _.forEach(body, function (v, k) {
+    _.forEach(req.body, function (v, k) {
+        if (_.isEmpty(v)) return true;
         // Only check the params starts with model name
         if (k.startsWith(modelName)) {
-            // Convert paths, e.g, user.accounts[0].id -> [accounts, 0, id]
-            var segments = k.replace(/\[/, '.').replace(/\]/, '').split('.').slice(1);
-            // Get schema of a path
-            // NOTE: We only support very little keywords of json schema here as it is generated from app.core.schema::SchemaDict.
-            // There should be no keywords such as oneOf, $ref, patternProperties, additionalProperties, etc.
-            var sub = _.reduce(segments, function (result, segment) {
-                if (result.type == 'object') {
-                    return _.get(result, 'properties.' + segment);
-                } else if (result.type == 'array') {
-                    return _.get(result, 'items');
-                } else {
-                    return result;
-                }
-            }, schema);
-            var type = sub.type, value = v;
-            if (type == 'integer') {
-                value = parseInt(v)
-            } else if (type == 'number') {
-                value = parseFloat(v);
-            } else if (type == 'boolean') {
-                value = ('true' == v.toLowerCase()) ? true : false;
-            }
-            _.set(record, segments, value);
-            console.log(record);
+            // Convert string path to segments, e.g, user.accounts[0].id -> [accounts, 0, id]
+            var segments = k.replace(/\[/, '.').replace(/\]/, '').split('.').slice(1); // Remove the model name
+            _.set(record, segments, convert_string_to_type(schema, segments, v));
         }
     });
+    console.log(record);
     if (recordId) { // Update
         var existing = _.find(mock_records, function (n) {
             return n._id == recordId

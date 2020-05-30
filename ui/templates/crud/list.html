@@ -60,7 +60,7 @@
                                 <div class="col-md-6">
                                     <h5>Html</h5>
                                     <p class="text-muted">Template name should be <code>index.html</code>, and variables
-                                        used in template are <code>{{ plural }}</code> & <code>pagination</code>.
+                                        used in template are <code>search</code> & <code>{{ plural }}</code> & <code>pagination</code>.
                                     </p>
                                     <div class="code html" style="height:600px;"></div>
                                     <iframe style="display:none;">
@@ -89,10 +89,11 @@ MAX_PAGE = 20
 def index():
     """ {{ model.name|capitalize }} index view. """
     page = _parse_page()
-    condition = {}
+    # TODO: Parse search
+    search = {}
     sort = None
-    records, pagination = _get_records_and_pagination({{ model.name|capitalize }}, page, condition, sort)
-    return render_template('{{ plural }}/index.html', {{ plural }}=records, pagination=pagination)
+    records, pagination = _get_records_and_pagination({{ model.name|capitalize }}, page, search, sort)
+    return render_template('{{ plural }}/index.html', search=search, {{ plural }}=records, pagination=pagination)
 
 def _parse_page():
     """ Make sure page param is valid. """
@@ -175,13 +176,50 @@ def delete({{ initial }}id):
 
 {% macro render_html(gen=false) %}
     <section>
-        <form>
+        <form novalidate>
+            <div class="form-row justify-content-center">
+                {% for f in model.jschema.indexes %} {# Do not support nested field #}
+                    {% set fs = model.jschema.properties[f] %}
+                    {% set fn = 'search.' + f %}
+                    <div class="col-auto">
+                        <label class="sr-only">{{ f|capitalize }}</label>
+                        {% if fs.enum %}
+                            <select class="form-control " name="{{ fn }}">
+                                <option value="">Choose {{ f|capitalize }}...</option>
+                                {% for e in fs.enum %}
+                                    <option value="{{ e }}" {{ render_selected_value(fn, search[f], e, gen) }}>{{ e }}</option>
+                                {% endfor %}
+                            </select>
+                        {% elif fs.type == 'boolean' %}
+                            <select class="form-control" name="{{ fn }}">
+                                <option value="">Choose {{ f|capitalize }}...</option>
+                                <option value="true" {{ render_selected_value(fn, search[f], true, gen) }}>True
+                                </option>
+                                <option value="false" {{ render_selected_value(fn, search[f], false, gen) }}>
+                                    False
+                                </option>
+                            </select>
+                        {% else %}
+                            <input type="text" class="form-control"
+                                   style="{{ 'width:100px' if fs.type in ['integer', 'number'] }}"
+                                   placeholder="{{ f|capitalize }}" value="{{ render_input_value(fn, search[f], gen) }}"
+                                   name="{{ fn }}">
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">Search
+                    </button>
+                    <button type="button" class="btn btn-light btn-default" onclick="search_reset();">Reset</button>
+                </div>
+            </div>
         </form>
         <hr>
         <table class="table">
             <thead class="thead-light">
+            {% set fs = model.jschema.required %}
             <tr>
-                {% for f in model.jschema.required %}
+                {% for f in fs %}
                     <th>{{ f|capitalize }}</th>
                 {% endfor %}
                 <th></th>
@@ -191,30 +229,42 @@ def delete({{ initial }}id):
             {% if gen %}
                 {{ '{%' }} for {{ initial }} in {{ plural }} {{ '%}' }}
                 <tr>
-                    {% for f in model.jschema.required %}
+                    {% for f in fs %}
                         <td>{{ '{{' }} {{ initial }}.{{ f }} {{ '}}' }}</td>
                     {% endfor %}
                     <td>
                         <a href="/{{ plural }}/form/{{ '{{' }} {{ initial }}._id {{ '}}' }}">Change</a>
-                        <a href="javascript:;" onclick="deleteRecord($(this))"
+                        <a href="javascript:;" onclick="delete_record($(this))"
                            {{ initial }}id="{{ '{{' }} {{ initial }}._id {{ '}}' }}">Delete</a>
+                    </td>
+                </tr>
+                {{ '{%' }} else {{ '%}' }}
+                <tr>
+                    <td colspan="{{ 1+fs|length }}">
+                        <div class="alert alert-warning">Can not find any {{ plural }}!</div>
                     </td>
                 </tr>
                 {{ '{%' }} endfor {{ '%}' }}
             {% else %}
                 {% for r in records %}
                     <tr>
-                        {% for f in model.jschema.required %}
+                        {% for f in fs %}
                             <td>{{ r[f] }}</td>
                         {% endfor %}
                         <td>
                             <a href="/crud/form/{{ model.name }}/{{ r._id }}">Change</a>
-                            <a href="javascript:;" onclick="deleteRecord($(this))"
+                            <a href="javascript:;" onclick="delete_record($(this))"
                                {{ initial }}id="{{ r._id }}">Delete</a>
                             {% if current_user.is_admin %}
                                 <a class="text-danger"
                                    href="/crud/raw/{{ model.name }}/{{ r._id }}">Raw</a>
                             {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="{{ 1+fs|length }}">
+                            <div class="alert alert-warning">Can not find any {{ plural }}!</div>
                         </td>
                     </tr>
                 {% endfor %}
@@ -229,12 +279,39 @@ def delete({{ initial }}id):
     </section>
 {% endmacro %}
 
+{# Render selected snippet using field name, real value, check value #}
+{% macro render_selected_value(fn, rv, cv, gen=false) %}
+    {%- if gen -%}
+        {{ '{{' }} 'selected' if {{ ('\''+cv+'\'' if cv is string else cv)|safe }}=={{ fn }} {{ '}}' }}
+    {%- else -%}
+        {{ 'selected' if cv==rv }}
+    {%- endif -%}
+{% endmacro %}
+
+{# Render input value snippet using field name, real value #}
+{% macro render_input_value(fn, rv, gen=false) %}
+    {%- if gen -%}
+        {{ '{{' }} {{ fn }} {{ '}}' }}
+    {%- else -%}
+        {{ rv }}
+    {%- endif -%}
+{% endmacro %}
+
 {% macro render_style() %}
 {% endmacro %}
 
 {% macro render_script(gen=false) %}
     <script type="text/javascript">
-        function deleteRecord(btn) {
+        function search_do(btn) {
+            var form = btn.closest("form");
+            location.href = "{{ request.path }}?" + form.serialize();
+        }
+
+        function search_reset() {
+            location.href = "{{ request.path }}";
+        }
+
+        function delete_record(btn) {
             if (btn.is(".doing")) {
                 return;
             }

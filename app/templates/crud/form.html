@@ -1,672 +1,754 @@
-{% extends "layout.html" %}
+{% extends 'layoutdash.html' %}
 
-{% set change = 'change' in request.url %}
+{% set plural = model.name + 's' %}
+{% set initial = model.name|first %}
+{% set update = true if record._id else false %}
+{% set title = ('Update' if update else 'Create') + ' ' + model.name|capitalize %}
+{% set breadcrumb = {
+    'title': title,
+    'links': [
+        {'url':'/', 'title':'Home'},
+        {'url':'/dashboard/', 'title':'Dashboard'},
+        {'url':'/crud/', 'title':'Models'},
+        {'url':'/crud/query/'+model.name, 'title': plural|capitalize},
+        {'url':'/crud/form/'+model.name+'/'+record._id, 'title': title}
+    ]
+} %}
+{% set plupload_config = {
+    'url': '//upload.qiniup.com/',
+    'max': '10mb',
+    'exts': 'jpg, jpeg, png',
+    'preview': '-prev',
+    'rte': '-rte'
+} %}
 
-{% block title %}CRUD {{ 'Update' if change else 'New' }}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block style %}
-    <style>
-
-        .left h4 {
-            margin-top: 0;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #CCC;
-        }
-
-        #editor {
-            font-size: 11pt;
-            font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
-            min-height: 400px;
-            position: relative;
-        }
-
-        #editor textarea {
-            font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
-        }
-
-        #editor .irow {
-            width: 100%;
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: top;
-            padding: 0px 0px 0px 15px;
-            border-left: 1px solid #ddd;
-            line-height: 1.3em;
-            position: relative;
-        }
-
-        #editor .irow:before {
-            content: "";
-            position: absolute;
-            top: 15px;
-            left: 0;
-            width: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        #editor .irow:last-child {
-            border: none;
-        }
-
-        #editor .irow:last-child:after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 15px;
-            border-left: 1px solid #ddd;
-        }
-
-        #editor .irow:hover {
-            background-color: rgba(0, 0, 0, 0.018);
-        }
-
-        #editor .ikey {
-            width: 115px;
-            padding-right: 10px;
-            display: inline-block;
-            word-break: break-all;
-            font-size: 95%;
-            line-height: 1.1em;
-            opacity: 0.7;
-            overflow: hidden;
-            vertical-align: top;
-            margin: 0.15em 0 0.4em 0px;
-        }
-
-        #editor .ilabel {
-            font-size: 80%;
-            padding: 0 5px;
-            background-color: rgba(0, 0, 0, 0.05);
-            border-radius: 2px;
-            opacity: 0.9;
-            display: inline-block;
-            margin: -1px 5px 0 5px;
-        }
-
-        #editor .ivalue {
-            word-break: break-all;
-        }
-
-        #editor .ilist {
-            word-break: break-all;
-        }
-
-        #editor .ivalue {
-            width: 100%;
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: top;
-        }
-
-        #editor .ilist {
-            width: 100%;
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: top;
-        }
-
-        #editor .idesc {
-            width: 100%;
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: top;
-            cursor: pointer;
-        }
-
-        #editor .ivalue {
-            cursor: pointer;
-        }
-
-        #editor .imulti.ivalue {
-            cursor: inherit;
-        }
-
-        #editor .iseditor .ivalue {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: pre;
-            padding: 0.2em 0.4em 0.4em 0.5em;
-            font-family: 'PT Mono', Monaco, 'Lucida Console', monospace;
-            max-height: 400px;
-            overflow: auto;
-            outline: none;
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            font-size: 90%;
-            border-radius: 2px;
-            margin: -4px 0 -3px 0;
-            tab-size: 2;
-            background-color: rgba(255, 255, 240, 0.8);
-            cursor: text;
-        }
-
-        #editor .inav {
-            padding-left: 115px;
-            margin: 4px 0;
-        }
-
-        #editor .inav .ikey {
-            margin-left: -115px;
-        }
-
-        #editor .iact {
-            position: absolute;
-            top: 3px;
-            right: 3px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            border-radius: 3px;
-        }
-
-        #editor .iact:hover {
-            display: block;
-            opacity: 1 !important;
-        }
-
-        #editor .inav:hover ~ .iact {
-            display: block;
-            opacity: 0.7;
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        #editor .inav.iseditor ~ .iact {
-            display: none;
-        }
-
-        #editor #doc {
-            padding: 0;
-            border: none;
-            overflow: visible;
-        }
-
-        #editor #doc:before {
-            display: none;
-        }
-
-        #editor #doc:after {
-            display: none;
-        }
-
-        #editor #doc:hover {
-            /*background: white;*/
-        }
-
-        #editor #doc > .inav {
-            padding-left: 120px;
-        }
-
-        #editor #doc > .inav .ikey {
-            font-size: 105%;
-            font-weight: bold;
-            margin: 0 0 0 -120px;
-            width: 120px;
-        }
-
-        #editor #doc > .iact {
-            opacity: 0.3;
-            top: -4px;
-            right: 0;
-        }
-
-        #editor .tag.active {
-            background-color: rgba(135, 212, 0, 0.17) !important;
-            color: rgb(65, 132, 0) !important;
-        }
-
-        #editor .imulti .template {
-            display: none;
-        }
-
-        #editor .iact a {
-            border-radius: 0;
-            margin-right: 2px;
-            padding: 0.25em 0.7em 0.15em 0.7em;
-            margin-top: 0;
-            margin-bottom: 0;
-            display: block;
-            border: 1px solid #E2E7EB;
-            background-color: #E2E7EB;
-            color: #3C5168;
-        }
-
-        #editor .iact a:hover {
-            border-color: #65A1D8;
-            background-color: #fff;
-        }
-
-        #editor .iact a:first-child {
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
-        }
-
-        #editor .iact a:last-child {
-            border-top-right-radius: 4px;
-            border-bottom-right-radius: 4px;
-            margin-right: 0;
-        }
-
-        #editor .iact a.add-list-item,
-        #editor .iact a.add-dict-item {
-            border-color: #E5ECDF;
-            background-color: #E5ECDF;
-            color: #748A30;
-        }
-
-        #editor .iact a.add-list-item:hover,
-        #editor .iact a.add-dict-item:hover {
-            border-color: #B4D865;
-        }
-
-        #editor .iact a.del-list-item {
-            border-color: rgb(255, 217, 217);
-            background-color: rgb(255, 217, 217);
-            color: #D5445C;
-        }
-
-        #editor .iact a.del-list-item:hover {
-            border-color: #CF4D4D;
-        }
-
-        #editor .bold {
-            font-weight: bold;
-        }
-
-        #editor .number span {
-            color: #f76500 !important;
-        }
-
-        #editor .bool span,
-        #editor .choice span {
-            color: #82888E !important;
-            padding: 0 10px !important;
-            border-radius: 100px !important;
-        }
-
-        #editor .bool span.active,
-        #editor .choice span.active {
-            background-color: rgba(135, 212, 0, 0.17) !important;
-            color: rgb(65, 132, 0) !important;
-        }
-
-        #editor .datetime i {
-            color: #cccccc !important;
-        }
-
-        #editor .null {
-            color: #A3293D !important;
-        }
-
-        #editor .unsupported span {
-            color: #cccccc !important;
-        }
-
-        #editor .imulti.list > .ilist > .irow > .inav > .ikey {
-            cursor: move;
-        }
-
-        .ghost {
-            opacity: 0.2;
-        }
-
-        .chosen {
-            color: #fff;
-            background-color: #c00;
-        }
-    </style>
+    {{ render_style() }}
 {% endblock %}
 
-{% block main %}
-    <div class="container">
-        <div class="row">
-            <div class="left col-md-3">
-                <div class="well">
-                    <h4>{{ 'Update' if change else 'New' }} {{ model.__name__ }}</h4>
-                    <p>{{ _('Please note record will be updated/created directly into database.') }}</p>
-                    <a class="btn btn-primary btn-sm" onclick="save($(this));">{{ _('Save') }}</a>
-                    {% if change %}
-                        <a class="btn btn-success btn-sm" onclick="save($(this), true);">{{ _('Copy') }}</a>
-                        <a class="btn btn-warning btn-sm" href="/crud/json/{{ model.__name__|lower }}/{{ record._id }}"
-                           target="_blank">{{ _('JSON') }}</a>
-                    {% endif %}
-                    <a class="btn btn-default btn-sm"
-                       href="/crud/index/{{ model.__name__|lower }}">{{ _('Cancel') }}</a>
-                </div>
-            </div> <!-- /left -->
-            <div class="right col-md-9">
-                <div id="editor">
-                    <div id="doc">
-                        {{ render('Root', model.schema, record, True, False, model.use_schemaless) }}
+{% block left %}
+    {{ render_html() }}
+{% endblock %}
+
+{% block right %}
+    <section>
+        <h4>Note</h4>
+        <p class="text-muted"></p>
+        <ul class="list-unstyled">
+            {% if update %}
+                <li>1. You are updating {{ model.name }}: <code>{{ record._id }}</code>.</li>
+            {% else %}
+                <li>1. You are creating {{ model.name }}.</li>
+            {% endif %}
+            <li>2. The whole record will be overwrited when updating.</li>
+            {% if not update and current_user.is_admin %}
+                <li>3. You can generate codes by clicking <a class="text-danger" href="#gen" data-toggle="modal">GEN</a>
+                    here.
+                </li>
+            {% endif %}
+        </ul>
+        {% if update %}
+            <a class="btn btn-primary btn-sm" href="javascript:;"
+               onclick="save($(this));">Save</a>
+            <a class="btn btn-success btn-sm" href="javascript:;"
+               onclick="save($(this), true);">Copy</a>
+            <a class="btn btn-warning btn-sm" href="/crud/json/{{ model.name }}/{{ record._id }}"
+               target="_blank">Json</a>
+            <a class="btn btn-light btn-sm" href="/crud/query/{{ model.name }}">Cancel</a>
+        {% else %}
+            <a class="btn btn-primary btn-sm" href="javascript:;"
+               onclick="save($(this));">Save</a>
+            <a class="btn btn-light btn-sm" href="/crud/query/{{ model.name }}">Cancel</a>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block script %}
+    {% if current_user.is_admin %}
+        <div class="modal fade" id="gen" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Code Generation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Html</h5>
+                                    <p class="text-muted">Template name should be <code>form.html</code>, and variables
+                                        used in template are <code>{{ model.name }}</code> & <code>token</code>.
+                                    <div class="code html" style="height:600px;"></div>
+                                    <iframe style="display:none;">
+                                        <!-- STYLE -->{{ render_style() }}
+                                        <!-- HTML -->{{ render_html(true) }}
+                                        <!-- SCRIPT -->{{ render_script(true) }}
+                                    </iframe>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Python</h5>
+                                    <p class="text-muted">Default blueprint is <code>{{ plural }}</code>, please
+                                        change
+                                        it accordingly.</p>
+                                    <div class="code python" style="height:600px;"></div>
+                                    <textarea style="display:none;">
+from flask import Blueprint, render_template, current_app, request, jsonify, abort
+from flask_babel import gettext as _
+from app.core import populate_model, Pagination
+from app.models import {{ model.name|capitalize }}
+from app.tools import auth_permission
+
+{{ plural }} = Blueprint('{{ plural }}', __name__)
+
+@{{ plural }}.route('/save/&lt;ObjectId:{{ initial }}id&gt;', methods=('POST',))
+@{{ plural }}.route('/save', methods=('POST',))
+@auth_permission
+def save({{ initial }}id=None):
+    """ Create or Update a {{ model.name }}. """
+    try:
+        {{ model.name }} = populate_model(request.form, {{ model.name|capitalize }})
+
+        # TODO: Implement some validation logic here
+
+        # Create
+        if not {{ initial }}id:
+            {{ model.name }}.save()
+            {{ initial }}id = {{ model.name }}._id
+            current_app.logger.info('Successfully create {{ model.name }} %s' % {{ initial }}id)
+        # Update
+        else:
+            existing = {{ model.name|capitalize }}.find_one({{ initial }}id)
+            if not existing:
+                abort(404)
+            # TODO: Only update necessary fields
+            # e.g,
+            # existing.status = {{ model.name }}.status
+            # existing.updateTime = datetime.now()
+            existing.save()
+            current_app.logger.info('Successfully update {{ model.name }} %s' % {{ initial }}id)
+    except:
+        current_app.logger.exception('Failed when saving {{ model.name }}')
+        return jsonify(success=False, message=_('Failed when saving {{ model.name }}, please try again later!'))
+
+    return jsonify(success=True, message=_('Save {{ model.name }} successfully.'), {{ initial }}id={{ initial }}id)
+                                    </textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-            </div> <!-- /right -->
+            </div>
         </div>
-    </div>
+        {# Below libs are used for code generation only, so we do NOT include them in package.json #}
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ace.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/mode-html.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/mode-python.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ext-searchbox.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify.js"></script>
+        <script type="text/javascript"
+                src="//cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify-html.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("div.code").each(function (i, n) {
+                    var editor = ace.edit(n), session = editor.getSession(), code = "";
+                    session.setUseWorker(false);
+                    if ($(n).is(".html")) {
+                        session.setMode("ace/mode/html");
+                        // Find the html code in next textarea, so that we do need to perform html escape manually
+                        code = html_beautify($(n).next("iframe").html().trim(), {
+                            indent_size: "2",
+                            indent_char: " ",
+                            max_preserve_newlines: -1,
+                            preserve_newlines: false,
+                        });
+                    } else if ($(n).is(".python")) {
+                        session.setMode("ace/mode/python");
+                        code = $(n).next("textarea").val().trim();
+                    }
+                    session.setValue(code);
+                });
+            });
+        </script>
+    {% endif %}
+    {{ render_script() }}
 {% endblock %}
 
-{% macro render(name, struct, doc, is_root=False, is_in_list=False, use_schemaless=False) %}
-    {% if ms_is_simple(struct) %}
-        <div class="inav">
-            <div class="ikey">{{ name }}</div>
-            {{- render_ivalue(name, struct, doc) }}
-        </div>
-        <div class="iact">
-            {% if is_in_list %}
-                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
+{% macro render_html(gen=false) %}
+    <section>
+        <form id="form-editor" class="form-editor needs-validation {{ 'gen' if gen }}" novalidate method="post">
+            {% if gen %}
+                {{ render(model.name, model.jschema, none, gen=true) }}
+            {% else %}
+                {{ render(model.name, model.jschema, record) }}
             {% endif %}
-            {% if struct.__name__ == 'datetime' %}
-                <a class="get-current-time" href="javascript:;"><i class="fa fa-clock-o"></i></a>
+        </form>
+    </section>
+{% endmacro %}
+
+{% macro render(name, jschema, jvalue, parent=none, is_in_list=false, is_required=false, gen=false) %}
+    {% set path = parent + '.' + name %} {# Used only in code generation #}
+    {% if jschema.type == 'object' %} {# Object #}
+        <fieldset class="object {{ 'mb-0' if is_in_list }}" name="{{ name }}">
+            <legend>
+                <span class="name">{{ name if parent else 'Root' }}</span>
+                <span class="text-muted">{{ '*' if is_required }}</span>
+            </legend>
+            {% if gen %}
+                {% if parent %}
+                    {% if not is_in_list %}
+                        {# Inner level fields should define parent variable, so their sub fields\'s path can be access #}
+                        {{ '{%' }} set {{ name }} = {{ parent }}.{{ name }} {{ '%}' }}
+                    {% endif %}
+                {% endif %}
             {% endif %}
-        </div>
-    {% elif ms_is_dict(struct) %}
-        <div class="inav">
-            <div class="ikey">{{ name }}</div>
-            {{- render_idesc(struct, doc) }}
-        </div>
-        <div class="ivalue imulti dict" name="{{ name }}">
-            <div class="ilist">
-                {% for k,v in struct.items() %}
-                    {% if is_root and k =='_id' %}
-                        {# skip #}
+            {# If is_in_list, name is index, parent should be same #}
+            {% set pn = parent if is_in_list else name %}
+            {% for n,s in jschema.properties %}
+                {% set required = n in jschema.required|d([]) %}
+                {% if n =='_id' %}
+                    {# skip #}
+                {% else %}
+                    {{ render(n, s, jvalue[n], pn, is_required=required, gen=gen) }}
+                {% endif %}
+            {% endfor %}
+            <div class="act">
+                <a class="format" href="javascript:;">Object {{ '{' }}{{ jschema.properties|length }}{{ '}' }}</a>
+                {% if is_in_list %}
+                    <a class="del" href="javascript:;">x</a>
+                {% endif %}
+            </div>
+        </fieldset>
+    {% elif jschema.type == 'array' %} {# Array #}
+        {% if jschema.format == 'select' and jschema.items.type in ['integer','number','string'] %} {# select #}
+            <div class="form-group array" name="{{ name }}">
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                {% if jschema.items.enum %}{# inner is enum #}
+                    <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
+                            multiple>
+                        <option value="">Choose...</option>
+                        {% for e in jschema.items.enum %}
+                            <option value="{{ e }}" {{ render_selected_in(path, jvalue, e, gen) }}>{{ e }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %} {# tags #}
+                    <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
+                            multiple tags>
+                        {% if gen %}
+                            {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                            <option value="{{ '{{' }} e {{ '}}' }}" selected>{{ '{{' }} e {{ '}}' }}</option>
+                            {{ '{%' }} endfor {{ '%}' }}
+                        {% else %}
+                            {% for e in jvalue %}
+                                <option value="{{ e }}" selected>{{ e }}</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                    <small class="form-text">You can select existing option or input a new option.</small>
+                {% endif %}
+                <div class="invalid-feedback">Please input valid {{ name }}!</div>
+                <div class="act">
+                    <a class="format"
+                       href="javascript:;">{{ jschema.items.type }} {{ jschema.type }}|{{ jschema.format }}</a>
+                </div>
+            </div>
+        {% elif jschema.format == 'image' and jschema.items.type in ['string', 'object'] %} {# image #}
+            {% set hiddens = jschema.items.properties|keys if jschema.items.type == 'object' else ['url'] %}
+            <div class="form-group array" name="{{ name }}">
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <div class="image-input-group" {{ 'required' if is_required }}>
+                    <a class="btn btn-primary plupload" href="javascript:;"
+                       hiddens="{{ hiddens|join(',') }}"
+                       multiple>Choose Images...</a>
+                    <small class="form-text">Support {{ plupload_config.exts }}.
+                    </small>
+                    <div class="image-input-result mt-1 clearfix">
+                        {% if jschema.items.type == 'object' %} {# object array #}
+                            {% if gen %}
+                                {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                                {% call(k) render_image_object(hiddens) -%}
+                                    {{ '{{' }} e['{{ k }}'] {{ '}}' }}
+                                {%- endcall %}
+                                {{ '{%' }} endfor {{ '%}' }}
+                            {% else %}
+                                {% for e in jvalue %}
+                                    {% call(k) render_image_object(hiddens) -%}
+                                        {{ e[k] }}
+                                    {%- endcall %}
+                                {% endfor %}
+                            {% endif %}
+                        {% else %} {# string array #}
+                            {% if gen %}
+                                {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                                {{ render_image_string('{{ e }}') }}
+                                {{ '{%' }} endfor {{ '%}' }}
+                            {% else %}
+                                {% for e in jvalue %}
+                                    {{ render_image_string(e) }}
+                                {% endfor %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="invalid-feedback">Please input valid {{ name }}!</div>
+                <div class="act">
+                    <a class="format"
+                       href="javascript:;">{{ jschema.items.type }} {{ jschema.type }}|{{ jschema.format }}</a>
+                </div>
+            </div>
+        {% else %}
+            <fieldset class="array {{ 'mb-0' if is_in_list }}" name="{{ name }}">
+                <legend>
+                    <span class="name">{{ name }}</span>
+                    <span class="text-muted">{{ '*' if is_required }}</span>
+                </legend>
+                <div class="list-group">
+                    {% set init = none %}
+                    {% if jschema.items.type == 'object' %}
+                        {% set init = {} %}
+                    {% elif jschema.items.type == 'array' %}
+                        {% set init = [] %}
+                    {% endif %}
+                    {% if gen %}
+                        {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                        <div class="list-group-item">
+                            {{ render('{{ loop.index0 }}', jschema.items, init, 'e', is_in_list=true, gen=gen) }}
+                        </div>
+                        {{ '{%' }} endfor {{ '%}' }}
+                        TODO
                     {% else %}
-                        <div class="irow">
-                            {{ render(k, v, doc|attr(k)) }}
+                        {% for e in jvalue %}
+                            <div class="list-group-item">
+                                {{ render(loop.index0, jschema.items, e, name, is_in_list=true, gen=gen) }}
+                            </div>
+                        {% endfor %}
+                        {% if is_required and jvalue|length == 0 %} {# Create a empty form for required array #}
+                            <div class="list-group-item">
+                                {{ render(jvalue|length, jschema.items, init, name, is_in_list=true, gen=gen) }}
+                            </div>
+                        {% endif %}
+                        <div class="list-group-item template"> {# Template form for adding elements to array #}
+                            {{ render(jvalue|length, jschema.items, init, name, is_in_list=true, gen=gen) }}
                         </div>
                     {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <div class="iact">
-            {% if use_schemaless %}
-                <a class="add-dict-item" href="javascript:;"><i class="fa fa-plus"></i></a>
-            {% endif %}
-            {% if is_in_list %}
-                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
-            {% endif %}
-        </div>
-    {% elif ms_is_list(struct) %}
-        <div class="inav">
-            <div class="ikey">{{ name }}</div>
-            {{- render_idesc(struct, doc) }}
-        </div>
-        <div class="ivalue imulti list" name="{{ name }}" {{ 'style=display:none' if not doc }}>
-            <div class="ilist">
-                {% for each in doc %}
-                    <div class="irow">
-                        {{ render(loop.index0, struct[0], each, False, True) }}
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="template">
-                <div class="irow">
-                    {{ render('-1', struct[0], ms_create_empty_dict_or_list(struct[0]), False, True) }}
                 </div>
+                <div class="act">
+                    <a class="format" href="javascript:;">array [{{ jvalue|length }}]</a>
+                    <a class="add" href="javascript:;">+</a>
+                    {% if is_in_list %}
+                        <a class="del" href="javascript:;">x</a>
+                    {% endif %}
+                </div>
+            </fieldset>
+        {% endif %}
+    {% else %} {# Simple types #}
+        <div class="form-group" name="{{ name }}">
+            {% if jschema.enum %} {# enum -> select2/radios  #}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                {% if jschema.format == 'select' %}
+                    <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}>
+                        <option value="">Choose...</option>
+                        {% for each in jschema.enum %}
+                            <option value="{{ each }}" {{ render_selected(path, jvalue, each, gen) }}>{{ each }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <div class="radio-input-group" {{ 'required' if is_required }}>
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            {% for each in jschema.enum %}
+                                <label class="btn btn-light {{ render_selected(path, jvalue, each, gen, 'active') }}">
+                                    <input type="radio" {{ render_selected(path, jvalue, each, gen, 'checked') }}
+                                           value="{{ each }}"> {{ each }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% elif jschema.type == 'integer' or jschema.type == 'number' %} {# integer & number -> pattern input #}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <input name="{{ name }}" type="string" class="form-control"
+                       pattern="{{ '[0-9]*' if jschema.type == 'integer' else '[0-9\.]*' }}"
+                       value="{{ render_value(path, jvalue, gen) }}" {{ 'required' if is_required }}>
+            {% elif jschema.type == 'boolean' %} {# boolean -> radios #}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <div class="radio-input-group" {{ 'required' if is_required }}>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-light {{ render_selected(path, jvalue, true, gen, 'active') }}">
+                            <input type="radio" {{ render_selected(path, jvalue, true, gen, 'checked') }} value="true">
+                            True
+                        </label>
+                        <label class="btn btn-light {{ render_selected(path, jvalue, false, gen, 'active') }}">
+                            <input type="radio" {{ render_selected(path, jvalue, false, gen, 'checked') }}
+                                   value="false"> False
+                        </label>
+                    </div>
+                </div>
+            {% elif jschema.type == 'string' %} {# string -> textarea/rte/image/input/date-time/date #}
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                {% if jschema.format == 'textarea' %}
+                    <textarea name="{{ name }}" rows="3"
+                              class="form-control" {{ 'required' if is_required }}>{{ render_value(path, jvalue, gen) }}</textarea>
+                {% elif jschema.format == 'rte' %}
+                    <div class="rte-input-group" {{ 'required' if is_required }}>
+                        <div class="quill" name="{{ name }}">{{ render_value(path, jvalue|safe, gen) }}</div>
+                        <small class="form-text">You can upload images by clicking the image button in the boolbar,
+                            support {{ plupload_config.exts }}. <a class="quill-plupload">&nbsp;</a>
+                        </small>
+                    </div>
+                {% elif jschema.format == 'image' %}
+                    <div class="image-input-group" {{ 'required' if is_required }}>
+                        <a class="btn btn-primary plupload" href="javascript:;"
+                           hiddens="url">Choose Image...</a>
+                        <small class="form-text">Support {{ plupload_config.exts }}.
+                        </small>
+                        <div class="image-input-result mt-1 clearfix">
+                            {% if gen %}
+                                {{ '{%' }} if {{ path }} {{ '%}' }}
+                                {{ render_image_string('{{ '+path+' }}') }}
+                                {{ '{%' }} endif {{ '%}' }}
+                            {% else %}
+                                {% if jvalue %}
+                                    {{ render_image_string(jvalue) }}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <input name="{{ name }}" type="text"
+                           class="form-control {{ jschema.format }}" {{ 'required' if is_required }}
+                           value="{{ render_value(path, jvalue, gen) }}">
+                {% endif %}
+            {% endif %}
+            <div class="invalid-feedback">Please input valid {{ name }}!</div>
+            <div class="act">
+                <a class="format" href="javascript:;">
+                    {{ jschema.type }}{{ '|' + jschema.format if jschema.format }}</a>
+                {% if is_in_list %}
+                    <a class="del" href="javascript:;">x</a>
+                {% endif %}
             </div>
-        </div>
-        <div class="iact">
-            <a class="add-list-item" href="javascript:;"><i class="fa fa-plus"></i></a>
-            {% if is_in_list %}
-                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
-            {% endif %}
-        </div>
-    {% elif ms_is_enum(struct) %}
-        <div class="inav">
-            <div class="ikey">{{ name }}</div>
-            {{- render_ivalue(name, struct, doc) }}
-        </div>
-        <div class="iact">
-            {% if is_in_list %}
-                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
-            {% endif %}
-        </div>
-    {% elif ms_is_operator_in(struct) %}
-        <div class="inav">
-            <div class="ikey">{{ name }}</div>
-            {{- render_ivalue(name, struct, doc) }}
-        </div>
-        <div class="iact">
-            {% if is_in_list %}
-                <a class="del-list-item" href="javascript:;"><i class="fa fa-close"></i></a>
-            {% endif %}
         </div>
     {% endif %}
 {% endmacro %}
 
-{% macro render_idesc(type, value) %}
-    {%- if ms_is_dict(type) -%}
-        <div class="idesc">Object {{ '{' }}{{ type|length }}{{ '}' }} <i class="fa fa-caret-down"></i>
+{# Render image uploaded sinppet for image upload component, jvalue is string #}
+{% macro render_image_string(rv) %}
+    <div class="image uploaded">
+        <img src="{{ rv }}{{ plupload_config.preview }}">
+        <div class="btns">
+            <a href="{{ rv }}" target="_blank">i</a>
+            <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
         </div>
-    {%- elif ms_is_list(type) -%}
-        <div class="idesc">Array [{{ value|length }}] <i class="fa fa-caret-down"></i></div>
+        <input type="hidden" name="url" value="{{ rv }}">
+    </div>
+{% endmacro %}
+
+{# Render image uploaded sinppet for image upload component, jvalue is object #}
+{% macro render_image_object(hiddens) %}
+    <div class="image uploaded">
+        <img src="{{ caller('url') }}{{ plupload_config.preview }}">
+        <div class="btns">
+            <a href="{{ caller('url') }}" target="_blank">i</a>
+            <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+        </div>
+        {% for k in hiddens %}
+            <input type="hidden" name="{{ k }}" value="{{ caller(k) }}">
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{# Render selected/active/checked snippet using field relative path, by checking real value == check value #}
+{% macro render_selected(path, rv, cv, gen=false, attr='selected') %}
+    {%- if gen -%}
+        {{ '{{' }} '{{ attr }}' if {{ ('\''+cv+'\'' if cv is string else cv)|safe }}=={{ path }} {{ '}}' }}
+    {%- else -%}
+        {{ attr if cv==rv }}
     {%- endif -%}
 {% endmacro %}
 
-{% macro render_ivalue(name, type, value) %}
-    {%- if ms_is_operator_in(type) -%}
-        <div class="ivalue choice" name="{{ name }}">
-            {% for each in type %}
-                <span {{ 'class=active' if each==value }}>{{ each }}</span>
-            {% endfor %}
-        </div>
-    {%- elif ms_is_enum(type) -%}
-        <div class="ivalue choice" name="{{ name }}">
-            {% for each in type %}
-                <span {{ 'class=active' if each==value }}>{{ each }}</span>
-            {% endfor %}
-        </div>
-    {%- elif type.__name__ in ['int', 'long', 'float'] -%}
-        <div class="ivalue number" name="{{ name }}">
-            {% if value is none %}
-                <span class="null">Null</span>
-            {% else %}
-                <span>{{ value }}</span>
-            {% endif %}
-        </div>
-    {%- elif type.__name__ in ['bool'] -%}
-        <div class="ivalue bool" name="{{ name }}">
-            <span {{ 'class=active' if value }}>true</span>
-            <span {{ 'class=active' if not value }}>false</span>
-        </div>
-    {%- elif type.__name__ in ['datetime'] -%}
-        <div class="ivalue datetime" name="{{ name }}">
-            {% if value is none %}
-                <span class="null">Null</span>
-            {% else %}
-                <span>{{ value }}</span>
-            {% endif %}
-        </div>
-    {%- elif type.__name__ in ['str'] -%}
-        <div class="ivalue string" name="{{ name }}">
-            {% if value is none %}
-                <span class="null">Null</span>
-            {% else %}
-                {% if value|length > 200 %}
-                    <span>"{{ value[:200] }} ..."<i class='ilabel'>{{ value|length }} chars</i></span>
-                {% else %}
-                    <span>"{{ value }}"</span>
-                {% endif %}
-            {% endif %}
-        </div>
-    {%- elif type.__name__ in ['ObjectId'] -%}
-        <div class="ivalue objectid" name="{{ name }}">
-            {% if value is none %}
-                <span class="null">Null</span>
-            {% else %}
-                <span>{{ value }}</span>
-            {% endif %}
-        </div>
+{# Render selected/active/checked snippet using field relative path, by checking check value in real value #}
+{% macro render_selected_in(path, rv, cv, gen=false, attr='selected') %}
+    {%- if gen -%}
+        {{ '{{' }} '{{ attr }}' if {{ ('\''+cv+'\'' if cv is string else cv)|safe }} in {{ path }} {{ '}}' }}
     {%- else -%}
-        <div class="ivalue unsupported" name="{{ name }}">
-            <span>Unsupported type, {{ type }}</span>
-        </div>
-    {% endif %}
-    <input type="hidden" value="{{ '' if value is none else value }}" model-type="{{ ms_get_type(type) }}"/>
+        {{ attr if cv in rv }}
+    {%- endif -%}
 {% endmacro %}
 
-{% block script %}
+{# Render input value snippet using field relative path, real value #}
+{% macro render_value(path, rv, gen=false) %}
+    {%- if gen -%}
+        {{ '{{' }} {{ path }} {{ '}}' }}
+    {%- else -%}
+        {{ rv }}
+    {%- endif -%}
+{% endmacro %}
 
-    <script type="text/javascript" src="{{ base_url() }}/js/moment.min.js"></script>
-    <script type="text/javascript" src="{{ base_url() }}/js/Sortable.min.js"></script>
+{% macro render_style() %}
+    <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ base() }}/assets/vendor/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ base() }}/assets/vendor/quill/dist/quill.snow.css" rel="stylesheet" type="text/css">
+{% endmacro %}
+
+{% macro render_script(gen=false) %}
+    {# for format date-time & date #}
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+    {# for format select #}
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/select2/dist/js/select2.min.js"></script>
+    {# for format image & rte #}
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
+    {# for format rte #}
+    <script type="text/javascript" src="{{ base() }}/assets/vendor/quill/dist/quill.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            // idesc
-            $(".idesc").click(function () {
-                var caret = $(this).children(".fa");
-                var imulti = $(this).parent(".inav").next(".imulti");
-                if (caret.is(".fa-caret-down")) {
-                    caret.removeClass("fa-caret-down").addClass("fa-caret-right");
-                    imulti.hide();
+            install($(".form-editor:not(.gen)"));
+        });
+
+        function install(container) {
+            //
+            // Install array add or delete action
+            //
+
+            // Array add
+            container.find(".act > .add").click(function () {
+                // Find the last .list-group-item and clone it
+                var list = $(this).parent().prev(".list-group"), template = list.children(".list-group-item.template"),
+                    clone = template.clone(true), inner = clone.children(), label = null;
+                clone.removeClass("template");
+                if (inner.is(".form-group")) {
+                    label = inner.children("label");
                 } else {
-                    caret.removeClass("fa-caret-right").addClass("fa-caret-down");
-                    imulti.show();
+                    label = inner.children("legend").children(".name");
                 }
-            });
+                var index = new Number(label.text());
+                label.text(++index);
+                list.append(clone);
 
-            // ivalue
-            $(".ivalue").each(function (i, n) {
-                // number/string/datetime/objectid
-                if ($(n).is(".number") || $(n).is(".string") || $(n).is(".datetime") || $(n).is(".objectid")) {
-                    // Enter editing
-                    $(n).on("click", function () {
-                        var inav = $(this).parent(".inav");
-                        var hidden = $(this).next(":hidden");
-                        if (!inav.is(".iseditor")) {
-                            inav.addClass("iseditor");
-                            $(this).attr("contenteditable", true).attr("spellcheck", false);
-                            $(this).text(hidden.val()).focus();
-                        }
-                    });
-                    // Quit editing
-                    $(n).on("blur", function () {
-                        var inav = $(this).parent(".inav");
-                        var hidden = $(this).next(":hidden");
-                        if (inav.is(".iseditor")) {
-                            var type = hidden.attr("model-type");
-                            var val = $(this).text().trim();
-                            if (val.length > 0) {
-                                msg = validate(type, val);
-                                if (msg) {
-                                    showError(msg);
-                                    return;
-                                }
-                            }
-                            inav.removeClass("iseditor");
-                            hidden.val(val);
-                            $(this).attr("contenteditable", false);
-                            if (hidden.val()) {
-                                var v = hidden.val();
-                                var more = "";
-                                if ($(this).is(".string")) {
-                                    var length = v.length;
-                                    if (length > 200) {
-                                        v = v.substr(0, 200) + " ...";
-                                        more = "<i class='ilabel'>" + length + " chars</i>";
-                                    }
-                                    v = '"' + v + '"';
-                                }
-                                span = $("<span>").text(v);
-                                $(this).html(span);
-                                $(this).append(more)
-                            } else {
-                                $(this).html('<span class="null">Null</span>');
-                            }
-                        }
-                    });
-                }
-                // bool/choice
-                else if ($(n).is(".bool") || $(n).is(".choice")) {
-                    $(n).children("span").click(function () {
-                        var hidden = $(this).parent(".ivalue").next(":hidden");
-                        if ($(this).is(".active")) {
-                            $(this).removeClass("active");
-                            hidden.val("");
-                        } else {
-                            $(this).siblings(".active").removeClass("active");
-                            $(this).addClass("active");
-                            hidden.val($(this).text());
-                        }
-                    });
-                }
-            });
-
-            // list
-            $(".imulti.list > .ilist").each(function (i, n) {
-                Sortable.create(n, {
-                    handle: ".ikey",
-                    ghostClass: "ghost"
+                // Install complex components
+                clone.find(".plupload:visible").each(function (i, n) {
+                    install_plupload($(n));
+                });
+                clone.find(".quill:visible").each(function (i, n) {
+                    install_quill($(n));
                 });
             });
-            $(".add-list-item").click(function () {
-                var irow = $(this).closest(".irow");
-                var inav = irow.children(".inav");
-                var imulti = irow.children(".imulti");
-                var ilist = imulti.children(".ilist");
-                var irowTemplate = imulti.find("> .template > .irow");
-                if (irowTemplate) {
-                    var clone = irowTemplate.clone(true);
-                    var max = -1, count = 0;
-                    ilist.children(".irow").each(function (i, n) {
-                        var current = new Number($(n).find("> .inav > .ikey").text());
-                        if (current > max) {
-                            max = current;
-                        }
-                        count++;
-                    });
-                    clone.find("> .inav > .ikey").text(++max);
-                    ilist.append(clone);
-                    //
-                    inav.children(".idesc").html("Array [" + (++count) + "] <i class='fa fa-caret-down'></i>");
-                    imulti.show();
-                }
-            });
-            $(".del-list-item").click(function () {
-                var con = window.confirm('确定要删除此节点么？');
+            // Array delete
+            container.find(".act > .del").click(function () {
+                var con = window.confirm("Are you sure to delete this item?");
                 if (!con) {
                     return false;
                 }
-                var irow = $(this).closest(".irow");
-                var count = irow.siblings(".irow").length;
-                var parentInav = irow.parent().closest(".irow").children(".inav");
-                parentInav.children(".idesc").html("Array [" + count + "] <i class='fa fa-caret-down'></i>");
-                irow.remove();
+                $(this).closest(".list-group-item").remove();
             });
 
-            // datetime
-            $(".get-current-time").click(function () {
-                var irow = $(this).closest(".irow");
-                var ivalue = irow.find("> .inav > .ivalue");
-                var val = moment.utc().format("YYYY-MM-DD HH:mm:ss.SSSSSS");
-                ivalue.html("<span>" + val + "</span>");
-                ivalue.next(":hidden").val(val);
+            //
+            // Install components
+            //
+
+            // Flatpickr
+            // https://flatpickr.js.org/formatting/
+            container.find("input.date-time").flatpickr({
+                enableTime: true,
+                dateFormat: "Y-m-d H:i:S",
+                defaultHour: new Date().getHours(),
+                defaultMinute: new Date().getMinutes()
+            });
+            container.find("input.date").flatpickr({
+                dateFormat: "Y-m-d"
             });
 
-        });
+            // Select2
+            // https://select2.org/
+            container.find("select.select2").each(function (i, n) {
+                var option = {tags: $(n).is("[tags]")};
+                $(n).select2(option)
+            });
 
-        function validate(type, val) {
-            /* Type validation
-             - Build-in Type
-             bool,
-             int,
-             long,
-             float,
-             unicode,
-             datetime,
-             ObjectId,
-             - SchemaOperator
-             IN
-             */
-            var msg = null;
-            if ($.inArray(type, ["int", "long"]) >= 0) {
-                msg = val.match(/^\d+$/) ? null : "Invalid " + type + "!";
-            } else if ($.inArray(type, ["float"]) >= 0) {
-                msg = val.match(/^-?\d*(\.\d+)?$/) ? null : "Invalid " + type + "!";
-            } else if ($.inArray(type, ["unicode", "str"]) >= 0) {
-                //
-            } else if ($.inArray(type, ["datetime"]) >= 0) {
-                msg = moment(val, ["YYYY-MM-DD HH:mm:ss.SSSSSS", "YYYY-MM-DD HH:mm:ss.SSS", "YYYY-MM-DD HH:mm:ss"], true).isValid() ? null : "Invalid " + type + "!";
-            } else if ($.inArray(type, ["ObjectId"]) >= 0) {
-                msg = val.match(/^[0-9a-fA-F]{24}$/) ? null : "Invalid " + type + "!";
-            }
-            return msg;
+            // Image
+            // https://www.plupload.com/docs/v2/Getting-Started
+            // NOTE: Only install on the visible inputs, for dynamic created inputs, need to invoke install_plupload manually
+            container.find(".plupload:visible").each(function (i, n) {
+                install_plupload($(n));
+            });
+
+            // Rte
+            // https://github.com/quilljs/quill/
+            container.find(".quill:visible").each(function (i, n) {
+                install_quill($(n));
+            });
+        }
+
+        var global_pluploading = false, global_token = "{{ '{{ token }}' if gen else token}}";
+
+        function install_plupload(btn) {
+            var result = btn.closest(".image-input-group").find(".image-input-result"), multi = btn.is("[multiple]"),
+                hiddens = btn.attr("hiddens");
+            // Generate a unique id for button so it can work correctly
+            btn.attr("id", "plupload-" + Math.round(new Date() / 1000));
+            var uploader = new plupload.Uploader({
+                browse_button: btn[0],
+                url: "{{ plupload_config.url }}",
+                max_file_size: "{{ plupload_config.max }}",
+                filters: {
+                    mime_types: [
+                        {title: "Image files", extensions: "{{ plupload_config.exts }}"}
+                    ]
+                },
+                multi_selection: multi,
+                multipart_params: {token: global_token}
+            });
+            uploader.init();
+            uploader.bind('FilesAdded', function (up, files) {
+                var html = '';
+                plupload.each(files, function (file) {
+                    html += '<div id="' + file.id + '" class="image uploading"><div class="progress progress-sm"><div class="progress-bar" style="width:5%;"></div></div></div>';
+                });
+                if (multi) {
+                    result.append(html);
+                } else {
+                    result.html(html);
+                }
+                up.start();
+                global_pluploading = true;
+            });
+            uploader.bind('UploadProgress', function (up, file) {
+                $("#" + file.id).find(".progress-bar").css("width", file.percent + "%");
+            });
+            uploader.bind('Error', function (up, err) {
+                if (err.file) {
+                    var html = '<small class="text-danger">' + err.file.name + '<br>' + err.message + ' (' + err.code + ')</small>';
+                    // Errors may happen before FilesAdded event, e.g, "File size error.", so need to check if any wrap div here
+                    if ($("#" + err.file.id).length) {
+                        $("#" + err.file.id).removeClass("uploading").addClass("error").html(html);
+                    } else {
+                        html = '<div id="' + err.file.id + '" class="image error">' + html + '</div>';
+                        result.html(html);
+                    }
+                } else {
+                    showError("Failed when uploading, " + err.message + " (" + err.code + ")");
+                }
+            });
+            uploader.bind("FileUploaded", function (up, file, c) {
+                // Response from qiniu service
+                var d = jQuery.parseJSON(c.response);
+                // Service error, // https://developer.qiniu.com/kodo/manual/1651/simple-response
+                if (d.error) {
+                    var html = '<small class="text-danger">' + file.name + '<br>' + d.error + '</small>';
+                    $("#" + file.id).removeClass("uploading").addClass("error").html(html);
+                }
+                // Defined response, https://developer.qiniu.com/kodo/manual/1654/response-body
+                // d
+                //   url - uploaded url = base + '/' + key, e.g, //cdn.flask-seed.com/20200521/183247_821388.jpg
+                //   key - relative path from base, e.g, 20200521/183247_821388.jpg
+                //   name - upload file name
+                //   width - image width, int
+                //   height - image height, int
+                else {
+                    var img = $('<img>').one("load", function () {
+                        $(this).closest(".image").css("width", "auto");
+                    }).attr("src", d.url + "{{ plupload_config.preview }}");
+                    var image = $("#" + file.id).removeClass("uploading").addClass("uploaded").html(img);
+                    var btns = '<div class="btns"><a href="' + d.url + '" target="_blank">i</a><a href="javascript:;" onclick="$(this).closest(\'.image\').remove();">x</a></div>';
+                    image.append(btns);
+                    $.each(hiddens.split(','), function (i, k) {
+                        var v = k in d ? d[k] : "";
+                        var hidden = $('<input type="hidden" name="' + k + '">').val(v);
+                        image.append(hidden);
+                    });
+                }
+            });
+            uploader.bind("UploadComplete", function (up, files) {
+                global_pluploading = false;
+            });
+        }
+
+        function install_quill(div) {
+            var random = Math.round(new Date() / 1000);
+            div.attr("id", "quill-" + random);
+            // Install quill
+            var toolbarOptions = [
+                [{'header': [2, false]}],
+                ['bold', 'italic', 'underline'],
+                [{'list': 'ordered'}, {'list': 'bullet'}],
+                ['link', 'image'],
+                ['blockquote', 'code-block'],
+                ['clean']
+            ];
+            var quill = new Quill(div[0], {
+                    placeholder: 'Please input rich text here',
+                    theme: 'snow',
+                    modules: {
+                        toolbar: {
+                            container: toolbarOptions,
+                            handlers: {
+                                'image': function (value) {
+                                    if (value) {
+                                        $("#quill-plupload-" + random).next(".moxie-shim").children("input[type=file]").trigger('click');
+                                    } else {
+                                        this.quill.format('image', false);
+                                    }
+                                }
+                            }
+                        },
+                    }
+                }
+            );
+            // Install plupload for quill
+            var pluploaBtn = div.closest(".rte-input-group").find(".quill-plupload");
+            pluploaBtn.attr("id", "quill-plupload-" + random);
+            var uploader = new plupload.Uploader({
+                browse_button: pluploaBtn[0],
+                url: "{{ plupload_config.url }}",
+                max_file_size: "{{ plupload_config.max }}",
+                filters: {
+                    mime_types: [
+                        {title: "Image files", extensions: "{{ plupload_config.exts }}"}
+                    ]
+                },
+                multi_selection: true,
+                multipart_params: {token: global_token}
+            });
+            uploader.init();
+            uploader.bind('FilesAdded', function (up, files) {
+                up.start();
+                global_pluploading = true;
+            });
+            uploader.bind('Error', function (up, err) {
+                if (err.file) {
+                    showError("Failed when uploading file " + err.file.name + ", " + err.message + " (" + err.code + ")");
+                } else {
+                    showError("Failed when uploading, " + err.message + " (" + err.code + ")");
+                }
+            });
+            uploader.bind("FileUploaded", function (up, file, c) {
+                var d = jQuery.parseJSON(c.response);
+                if (d.error) {
+                    showError("Failed when uploading file " + file.name + ", " + d.error);
+                } else {
+                    var length = (quill.getSelection() || {}).index || quill.getLength();
+                    quill.insertEmbed(length, 'image', d.url + "{{ plupload_config.rte }}");
+                    quill.insertText(length + 1, '\n');
+                    quill.setSelection(length + 2);
+                }
+            });
+            uploader.bind("UploadComplete", function (up, files) {
+                global_pluploading = false;
+            });
+
         }
 
         function save(btn, copy) {
@@ -674,13 +756,22 @@
             if (btn.is(".doing")) {
                 return;
             }
-            if (isEditing()) {
-                showError("{{ _('Some fields are being editing, can not save!') }}");
-                return false;
-            }
-            var msg = copy ? "{{ _('Are you sure to copy this record?') }}" : "{{ _('Are you sure to save this record?') }}";
+            {% if gen %}
+                var msg = "Are you sure to save this {{ model.name }}?";
+            {% else %}
+                var msg = copy ? "Are you sure to copy this record?" : "Are you sure to save this record?";
+            {% endif %}
             var con = window.confirm(msg);
             if (!con) {
+                return false;
+            }
+
+            // Recursively traverse the form to validate and create the param for post
+            var param = {"valid": true};
+            process(param, $("#form-editor > fieldset"), "{{ model.name }}");
+            debug(param);
+            if (!param["valid"]) {
+                showError('Something invalid, please check!');
                 return false;
             }
 
@@ -689,23 +780,22 @@
             var oldLabel = btn[method]();
             btn[method](oldLabel + "...");
 
-            var param = {"r": Math.random()};
-            process(param, $("#doc > .ivalue"), "{{ model.__name__|lower }}");
-            if (console && console.log) {
-                console.log(param);
-            }
-
-            {% if change %}
-                var url = copy ? "/crud/create/{{ model.__name__|lower }}" : "/crud/save/{{ model.__name__|lower }}/{{ record._id|string }}";
+            {% if gen %}
+                var url = "/{{ plural }}/save/{{ '{{' }} {{ model.name }}.id {{ '}}' }}";
             {% else %}
-                var url = "/crud/create/{{ model.__name__|lower }}";
+                var url = copy ? "/crud/save/{{ model.name }}/" : "/crud/save/{{ model.name }}/{{ record._id }}";
             {% endif %}
             $.post(url, param, function (result) {
                 if (result.success) {
                     showSuccess(result.message);
-                    if (copy) {
-                        location.href = "/crud/change/{{ model.__name__|lower }}/" + result.rid;
-                    }
+                    showInfo('Refreshing...');
+                    setTimeout(function () {
+                        {% if gen %}
+                            location.href = "/{{ plural }}/form/" + result.rid;
+                        {% else %}
+                            location.href = "/crud/form/{{ model.name }}/" + result.rid;
+                        {% endif %}
+                    }, 2000);
                 } else {
                     showError(result.message);
                 }
@@ -714,31 +804,136 @@
             }, "json");
         }
 
-        function isEditing() {
-            return $("#doc .inav.iseditor").length > 0;
+        function process(param, field, path) {
+            debug("Try to process path " + path);
+            // object
+            if (field.is(".object")) {
+                field.find("> .form-group, > fieldset").each(function (i, n) {
+                    process(param, $(n), path + "." + $(n).attr("name"));
+                });
+            }
+            // array
+            else if (field.is(".array")) {
+                var select = field.children("select"), imageInputGroup = field.children(".image-input-group");
+                if (select.length) { // array of integer/number/string
+                    select.removeClass("is-valid is-invalid");
+                    var vals = select.val();
+                    if (vals.length) {
+                        $.each(vals, function (i, n) {
+                            param[path + "[" + i + "]"] = n;
+                        });
+                    } else {
+                        // Manually validate required
+                        if (select.is("[required]")) {
+                            select.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else if (imageInputGroup.length) { // array of string/object
+                    imageInputGroup.removeClass("in-valid is-invalid");
+                    var images = imageInputGroup.find(".image.uploaded");
+                    if (images.length) {
+                        $.each(images, function (i, n) {
+                            var hiddens = $(n).find(":hidden[name]");
+                            if (hiddens.length == 1) {
+                                param[path + "[" + i + "]"] = hiddens.val();
+                            } else {
+                                $.each(hiddens, function (j, h) {
+                                    param[path + "[" + i + "]." + $(h).attr("name")] = $(h).val();
+                                });
+                            }
+                        });
+                    } else {
+                        // Manually validate required
+                        if (imageInputGroup.is("[required]")) {
+                            imageInputGroup.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else {
+                    field.find("> .list-group > .list-group-item").not(".template").each(function (i, n) {
+                        process(param, $(n).children(), path + "[" + i + "]");
+                    });
+                }
+            }
+            // simple types
+            else {
+                var radioInputGroup = field.children(".radio-input-group"),
+                    imageInputGroup = field.children(".image-input-group"),
+                    rteInputGroup = field.children(".rte-input-group"),
+                    simpleInput = field.children(":input[name]");
+                if (radioInputGroup.length) {
+                    radioInputGroup.removeClass("is-valid is-invalid");
+                    // If radio group is in array, they may share same name, so here use the active button to get checked value
+                    var active = radioInputGroup.find(".active");
+                    if (active.length) {
+                        param[path] = active.children(":radio").val().trim();
+                    } else {
+                        // Manually validate required
+                        if (radioInputGroup.is("[required]")) {
+                            radioInputGroup.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else if (imageInputGroup.length) {
+                    imageInputGroup.removeClass("in-valid is-invalid");
+                    var image = imageInputGroup.find(".image.uploaded");
+                    if (image.length) {
+                        param[path] = image.find(":hidden[name=url]").val();
+                    } else {
+                        // Manually validate required
+                        if (imageInputGroup.is("[required]")) {
+                            imageInputGroup.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else if (rteInputGroup.length) {
+                    rteInputGroup.removeClass("in-valid is-invalid");
+                    var html = rteInputGroup.find(".ql-editor").html().trim(),
+                        text = rteInputGroup.find(".ql-editor").text().trim();
+                    if (text.length) {
+                        param[path] = html;
+                    } else {
+                        // Manually validate required
+                        if (rteInputGroup.is("[required]")) {
+                            rteInputGroup.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                } else if (simpleInput.length) {
+                    simpleInput.removeClass("is-invalid is-valid");
+                    var val = simpleInput.val().trim();
+                    if (val.length) {
+                        param[path] = val;
+                        // Invoke built-in validation for Non-empty value
+                        if (simpleInput[0].checkValidity) {
+                            if (simpleInput[0].checkValidity() === false) {
+                                simpleInput.addClass("is-invalid");
+                                param["valid"] = false;
+                            } else {
+                                simpleInput.addClass("is-valid");
+                            }
+                        }
+                    } else {
+                        // Manually validate required only for empty value
+                        if (simpleInput.is("[required]")) {
+                            simpleInput.addClass("is-invalid");
+                            param["valid"] = false;
+                        }
+                    }
+                }
+                debug("Parsed string is " + param[path]); // All values in form are string type
+            }
         }
 
-        function process(param, ivalue, path) {
-            // console.log("Try to process path " + path + " - " + ivalue.attr("class"));
-            if (ivalue.is(".imulti")) {
-                ivalue.find("> .ilist > .irow").each(function (i, n) {
-                    var iv = $(n).find("> .inav > .ivalue");
-                    if (iv.length == 0) {
-                        iv = $(n).find("> .ivalue.imulti");
-                    }
-                    if (ivalue.is(".dict")) {
-                        process(param, iv, path + "." + iv.attr("name"));
-                    } else if (ivalue.is(".list")) {
-                        process(param, iv, path + "[" + i + "]");
-                    }
-                });
-            } else {
-                var hidden = ivalue.next(":hidden");
-                var val = hidden.val();
-                if (val.length > 0) {
-                    param[path] = hidden.val();
+        function debug(msg, more = null) {
+            if (console && console.log) {
+                if (more) {
+                    console.log(msg, more)
+                } else {
+                    console.log(msg);
                 }
             }
         }
     </script>
-{% endblock %}
+{% endmacro %}

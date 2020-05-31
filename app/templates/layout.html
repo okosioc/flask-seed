@@ -1,6 +1,7 @@
-{% from "_macros.html" import base_url with context %}
+{% from "_macros.html" import base with context %}
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,187 +12,33 @@
         <meta name="author" content="">
     {% endblock %}
 
-    <title>{% block title %}{{ _('Flask-Seed') }}{% endblock %}</title>
-
-    <link rel="shortcut icon" href="{{ base_url() }}/img/favicon.ico">
-    <link href="{{ base_url() }}/css/icons.min.css" rel="stylesheet" type="text/css"/>
-    <link href="{{ base_url() }}/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="{{ base_url() }}/css/app.min.css" rel="stylesheet" type="text/css"/>
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon">
 
     {% block style %}
     {% endblock %}
+
+    <link href="{{ base() }}/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ base() }}/assets/css/icons.min.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ base() }}/assets/css/app.min.css" rel="stylesheet" type="text/css"/>
+
 </head>
 
 <body class="unsticky-header">
 
-{% block header %}
-    <header id="topnav">
-
-        <div class="navbar-custom">
-            <div class="container-fluid">
-                <!-- Right Menu -->
-                <ul class="list-unstyled topnav-menu float-right mb-0">
-                    <li class="dropdown">
-                        <a class="navbar-toggle nav-link">
-                            <div class="lines">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="dropdown d-none d-lg-block">
-                        <a class="nav-link dropdown-toggle mr-0 waves-effect waves-light" data-toggle="dropdown"
-                           href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                            <span class="align-middle">English <i class="mdi mdi-chevron-down"></i></span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a href="javascript:void(0);" class="dropdown-item notify-item">
-                                <span class="align-middle">English</span>
-                            </a>
-                            <a href="javascript:void(0);" class="dropdown-item notify-item">
-                                <span class="align-middle">中文</span>
-                            </a>
-                            <a href="javascript:void(0);" class="dropdown-item notify-item">
-                                <span class="align-middle">Spanish</span>
-                            </a>
-                        </div>
-                    </li>
-                    {% if current_user.is_authenticated %}
-                        <li class="dropdown">
-                            <a class="nav-link dropdown-toggle nav-user mr-0 waves-effect waves-light"
-                               data-toggle="dropdown"
-                               href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                                <img src="{{ current_user.head if user and user.head else '/static/img/avatar.png' }}"
-                                     alt="user-image" class="rounded-circle">
-                                <span class="pro-user-name ml-1">{{ current_user.name }}
-                                    <i class="mdi mdi-chevron-down"></i>
-                                </span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right profile-dropdown ">
-                                <a href="javascript:coming();" class="dropdown-item notify-item">
-                                    <i class="remixicon-settings-3-line"></i>
-                                    <span>{{ _('Settings') }}</span>
-                                </a>
-                                {% if current_user.is_admin %}
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{{ url_for('public.blank') }}" class="dropdown-item notify-item">
-                                        <i class="remixicon-checkbox-blank-line"></i>
-                                        <span>{{ _('Blank Page') }}</span>
-                                    </a>
-                                    <a href="{{ url_for('crud.index') }}" class="dropdown-item notify-item">
-                                        <i class="remixicon-database-line"></i>
-                                        <span>{{ _('CRUD') }}</span>
-                                    </a>
-                                {% endif %}
-                                <div class="dropdown-divider"></div>
-                                <a href="{{ url_for('public.logout') }}" class="dropdown-item notify-item">
-                                    <i class="remixicon-logout-box-line"></i>
-                                    <span>Logout</span>
-                                </a>
-                            </div>
-                        </li>
-                    {% else %}
-                        <li>
-                            <a class="nav-link mr-0 waves-effect waves-light"
-                               href="{{ url_for('public.login') }}">{{ _('Login') }}</a>
-                        </li>
-                    {% endif %}
-                </ul>
-                <!-- LOGO -->
-                <div class="logo-box">
-                    <a href="/" class="logo text-center">
-                        <span class="logo-lg-text-light">
-                            {{ _('Flask-Seed') }}
-                        </span>
-                    </a>
-                </div>
-            </div>
-        </div> <!-- /.navbar-custom -->
-
-        <div class="topbar-menu">
-            <div class="container-fluid">
-                <div id="navigation">
-                    <!-- Navigation Menu-->
-                    <ul class="navigation-menu">
-                        <li class="{{ 'active' if request.endpoint and request.endpoint == 'public.index' }}">
-                            <a href="{{ url_for('public.index') }}">
-                                <i class="remixicon-home-2-line"></i>{{ _('Index') }}
-                            </a>
-                        </li>
-                        <li class="has-submenu {{ 'active' if request.endpoint and request.endpoint.startswith('blog') }}">
-                            <a href="{{ url_for('blog.index') }}">
-                                <i class="remixicon-article-line"></i>{{ _('Blog') }}
-                                <div class="arrow-down"></div>
-                            </a>
-                            <ul class="submenu">
-                                <li>
-                                    <a href="{{ url_for('blog.new') }}">{{ _('New Post') }}</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="has-submenu">
-                            <a href="javascript:;">
-                                <i class="remixicon-stack-line"></i>Menu Levels
-                                <div class="arrow-down"></div>
-                            </a>
-                            <ul class="submenu">
-                                <li>
-                                    <a href="javascript:;">Level 1.1</a>
-                                </li>
-                                <li class="has-submenu">
-                                    <a href="javascript:;">Level 1.2
-                                        <div class="arrow-down"></div>
-                                    </a>
-                                    <ul class="submenu">
-                                        <li>
-                                            <a href="javascript:;">Level 2.1</a>
-                                        </li>
-                                        <li>
-                                            <a href="javascript:;">Level 2.2</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div> <!-- /#navigation -->
-            </div>
-        </div> <!-- /.topbar-menu -->
-
-    </header> <!-- /#topnav -->
-{% endblock %}
+{% block header %}{% include 'blocks/header.html' %}{% endblock %}
 
 {% block main %}
 {% endblock %}
 
-{% block footer %}
-    <footer class="footer">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-6">
-                    2020 &copy; {{ _('Flask-Seed') }}
-                </div>
-                <div class="col-md-6">
-                    <div class="text-md-right footer-links d-none d-sm-block">
-                        <a href="javascript:coming();">Help</a>
-                        <a href="javascript:coming();">Contact Us</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer> <!-- /.footer -->
-{% endblock %}
+{% block footer %}{% include 'blocks/footer.html' %}{% endblock %}
 
-<a id="scroll-to-top">
-    <i class="fa fa-angle-up"></i>
-</a>
-
-<script src="{{ base_url() }}/js/app.min.js?1"></script>
+<script src="{{ base() }}/assets/js/vendor.min.js"></script>
+<script src="{{ base() }}/assets/js/app.min.js"></script>
 
 {% block script %}
 {% endblock %}
 
 </body>
+
 </html>

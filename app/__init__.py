@@ -18,7 +18,7 @@ from logging.handlers import SMTPHandler, TimedRotatingFileHandler
 
 from bson.objectid import ObjectId
 from flask import Flask, request, redirect, jsonify, url_for, render_template, session, has_request_context
-from flask_babel import Babel, gettext as _
+from flask_babel import Babel
 from flask_login import LoginManager
 from flask_uploads import patch_request_class, UploadConfiguration
 from werkzeug.urls import url_quote, url_encode
@@ -35,6 +35,7 @@ DEFAULT_APP_NAME = 'app'
 
 DEFAULT_BLUEPRINTS = (
     (views.public, ''),
+    (views.dashboard, '/dashboard'),
     (views.crud, '/crud'),
     (views.blog, '/blog'),
 )
@@ -199,33 +200,58 @@ def configure_before_handlers(app):
 def configure_errorhandlers(app):
     @app.errorhandler(400)
     def server_error(error):
+        err = {
+            'status': 400,
+            'title': 'Invalid Request',
+            'content': 'Unexpected request received!'
+        }
         if request.is_xhr:
-            return jsonify(success=False, message=_('Bad request!'))
-        return render_template('errors/400.html', error=error), 400
+            return jsonify(success=False, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), 400
 
     @app.errorhandler(401)
     def unauthorized(error):
+        err = {
+            'status': 401,
+            'title': 'Please Login',
+            'content': 'Login required!'
+        }
         if request.is_xhr:
-            return jsonify(success=False, message=_('Login required!'))
+            return jsonify(success=False, message='{content}({status})'.format(**err))
         return redirect(url_for('public.login', next=request.path))
 
     @app.errorhandler(403)
     def forbidden(error):
+        err = {
+            'status': 403,
+            'title': 'Permission Denied',
+            'content': 'Not allowed or forbidden!'
+        }
         if request.is_xhr:
-            return jsonify(success=False, message=_('Sorry, Not allowed or forbidden!'))
-        return render_template('errors/403.html', error=error), 403
+            return jsonify(success=False, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), 403
 
     @app.errorhandler(404)
     def page_not_found(error):
+        err = {
+            'status': 404,
+            'title': 'Page Not Found',
+            'content': 'The requested URL was not found on this server!'
+        }
         if request.is_xhr:
-            return jsonify(success=False, message=_('Sorry, page not found!'))
-        return render_template('errors/404.html', error=error), 404
+            return jsonify(success=False, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), 404
 
     @app.errorhandler(500)
     def server_error(error):
+        err = {
+            'status': 500,
+            'title': 'Internal Server Error',
+            'content': 'Unexpected error occurred! Please try again later.'
+        }
         if request.is_xhr:
-            return jsonify(success=False, message=_('Sorry, an error has occurred!'))
-        return render_template('errors/500.html', error=error), 500
+            return jsonify(success=False, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), 500
 
 
 def configure_blueprints(app, blueprints):

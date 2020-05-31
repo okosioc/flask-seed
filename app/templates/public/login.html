@@ -1,10 +1,26 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 
 {% block title %}{{ _('Login') }}{% endblock %}
 
 {% block header %}{% endblock %}
 
 {% block main %}
+    {% set form = form or {
+        'csrf_token': '',
+        'next_url': '',
+        'email': {
+            'data': '',
+            'errors': ['Invalid email address!']
+        },
+        'password': {
+            'data': '',
+            'errors': None
+        },
+        'remember': {
+            'data': '',
+            'errors': None
+        }
+    } %}
     <div class="mt-5 mb-5">
         <div class="container">
             <div class="row justify-content-center">
@@ -12,38 +28,34 @@
                     <div class="card">
                         <div class="card-body p-4">
                             <div class="text-center w-75 m-auto">
-                                <a href="{{ url_for('public.index') }}"><span>{{ _('Flask-Seed') }}</span></a>
+                                <a href="/">
+                                    <span><img src="{{ base() }}/img/logo-dark.png" alt="" height="40"></span>
+                                </a>
                                 <p class="text-muted mb-4 mt-3">{{ _('Please enter your email address and password to login.') }}</p>
                             </div>
-                            {% if error %}
-                                <div class="alert alert-danger" role="alert">
-                                    <i class="mdi mdi-block-helper mr-2"></i> {{ error }}
-                                </div>
-                            {% endif %}
                             <form class="needs-validation" novalidate action="/login" method="post">
                                 {{ form.csrf_token }}
                                 {{ form.next_url }}
-                                <div class="form-group mb-3">
+                                <div class="form-group">
                                     <label for="email">{{ _('Email Address') }}</label>
+                                    <input type="text" class="form-control {{ 'is-invalid' if form.email.errors }}"
+                                           id="email" name="email" value="{{ form.email.data or '' }}">
                                     {% if form.email.errors %}
-                                        {{ form.email(class='form-control is-invalid') }}
-                                        <div class="invalid-feedback">{{ form.email.errors[0] }}</div>
-                                    {% else %}
-                                        {{ form.email(class='form-control') }}
+                                        <div class="invalid-feedback">{{ form.email.errors|join('/') }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="form-group mb-3">
+                                <div class="form-group">
                                     <label for="password">{{ _('Password') }}</label>
+                                    <input type="password" class="form-control {{ 'is-invalid' if form.password.errors }}"
+                                           id="password" name="password" value="{{ form.password.data or '' }}">
                                     {% if form.password.errors %}
-                                        {{ form.password(class='form-control is-invalid') }}
-                                        <div class="invalid-feedback">{{ form.password.errors[0] }}</div>
-                                    {% else %}
-                                        {{ form.password(class='form-control') }}
+                                        <div class="invalid-feedback">{{ form.password.errors|join('/') }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="form-group mb-3">
+                                <div class="form-group">
                                     <div class="custom-control custom-checkbox">
-                                        {{ form.remember(checked='checked', class='custom-control-input') }}
+                                        <input type="checkbox" class="custom-control-input"
+                                               id="remember" name="remember" value="{{ form.remember.data }}">
                                         <label class="custom-control-label" for="remember">
                                             {{ _('Remember me') }}
                                         </label>
@@ -63,7 +75,7 @@
                 <div class="col-12 text-center">
                     <p><a href="javascript:coming();" class="text-muted ml-1">{{ _('Forgot your password?') }}</a></p>
                     <p class="text-muted">{{ _('Don\'t have an account?') }}
-                        <a href="{{ url_for('public.signup') }}"
+                        <a href="/signup"
                            class="text-primary font-weight-medium ml-1">{{ _('Sign Up') }}</a>
                     </p>
                 </div>
@@ -72,6 +84,4 @@
     </div>
 {% endblock %}
 
-{% block footer %}
-    <footer class="footer footer-alt">2020 &copy; {{ _('Flask-Seed') }}</footer>
-{% endblock %}
+{% block footer %}{% include 'blocks/footerbottom.html' %}{% endblock %}

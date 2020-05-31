@@ -9,7 +9,7 @@
     :date: 16/5/12
 """
 
-from flask import Blueprint, render_template, current_app, redirect, request
+from flask import Blueprint, render_template, current_app, redirect, request, abort
 from flask_babel import gettext as _
 from flask_login import login_user, logout_user, login_required
 from flask_wtf import FlaskForm
@@ -33,6 +33,15 @@ def index():
 def blank():
     """ Blank page. """
     return render_template('public/blank.html')
+
+
+@public.route('/400')
+@public.route('/403')
+@public.route('/404')
+@public.route('/500')
+def error():
+    """ Demo error pages. """
+    abort(int(request.path.strip('/')))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

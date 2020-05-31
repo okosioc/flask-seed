@@ -17,7 +17,7 @@ import pymongo
 from pymongo import MongoClient, uri_parser, ReadPreference, WriteConcern
 from pymongo.cursor import Cursor as PyMongoCursor
 
-from app.core import IN, SimpleEnumMeta, DotDictProxy, DotListProxy, SchemaDict, SeedDataError
+from app.core import SimpleEnumMeta, DotDictProxy, DotListProxy, SchemaDict, SeedDataError
 
 # Find the stack on which we want to store the database connection.
 # Starting with Flask 0.9, the _app_ctx_stack is the correct one,

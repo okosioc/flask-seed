@@ -19,59 +19,6 @@ from bson import ObjectId
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Schema Operator
-#
-
-class SchemaOperator(object):
-    """ Customized operators which can be used to define a schema. """
-
-    repr = None
-
-    def __init__(self, *args):
-        assert self.repr is not None
-        self.operands = []
-        for arg in args:
-            if isinstance(arg, (list, tuple)):
-                self.operands = self.operands + arg
-            else:
-                self.operands.append(arg)
-
-    def __repr__(self):
-        return str(self)
-
-    def __iter__(self):
-        for operand in self.operands:
-            yield operand
-
-    def __len__(self):
-        return len(self.operands)
-
-    def __eq__(self, other):
-        return type(self) == type(other) and self.operands == other.operands
-
-    def validate(self, value):
-        raise NotImplementedError
-
-
-class IN(SchemaOperator):
-    """ Defined available values of a field. """
-    repr = 'in'
-
-    def __init__(self, *args):
-        super(IN, self).__init__(*args)
-
-    def __str__(self):
-        return '<%s ' % self.repr + ', '.join([repr(i) for i in self.operands]) + '>'
-
-    def validate(self, value):
-        if value in self.operands:
-            for op in self.operands:
-                if value == op and isinstance(value, type(op)):
-                    return True
-        return False
-
-
-# ----------------------------------------------------------------------------------------------------------------------
 # Custom Types
 #
 
@@ -264,27 +211,6 @@ class SchemaMetaclass(type):
                 if len(types) > 1:
                     raise SeedSchemaError('%s: %s can not have more than one type' % (_name, _schema))
                 attrs['_valid_paths'][_name] = list(types)[0]
-            # SchemaOperator
-            elif isinstance(_schema, SchemaOperator):
-                if len(_schema) == 0:
-                    raise SeedSchemaError('%s: %s can not be empty' % (_name, _schema))
-                if isinstance(_schema, IN):
-                    types = set()
-                    for operand in _schema:
-                        types.add(type(operand))
-                        if type(operand) not in AUTHORIZED_TYPES:
-                            raise SeedSchemaError('%s: %s in %s is not an authorized type (%s found)' % (
-                                _name, operand, _schema, type(operand).__name__))
-                    if len(types) > 1:
-                        raise SeedSchemaError('%s: %s can not have more than one type' % (_name, _schema))
-                    attrs['_valid_paths'][_name] = list(types)[0]
-                else:
-                    for operand in _schema:
-                        if operand not in AUTHORIZED_TYPES:
-                            raise SeedSchemaError('%s: %s in %s is not an authorized type (%s found)' % (
-                                _name, operand, _schema, type(operand).__name__))
-                    # Use tuple to represent many available types
-                    attrs['_valid_paths'][_name] = tuple(_schema)
             else:
                 raise SeedSchemaError(
                     '%s: %s is not a supported thing' % (_name, _schema))
@@ -404,15 +330,6 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
             if not schema.validate(doc):
                 self._raise_exception(SeedDataError, path,
                                       '%s must be in %s not %s' % (path, list(schema), doc))
-        # SchemaOperator
-        elif isinstance(schema, SchemaOperator):
-            if not schema.validate(doc):
-                if isinstance(schema, IN):
-                    self._raise_exception(SeedDataError, path,
-                                          '%s must be in %s not %s' % (path, schema.operands, doc))
-                else:
-                    self._raise_exception(SeedDataError, path,
-                                          '%s must be an instance of %s not %s' % (path, schema, type(doc).__name__))
         #
         else:
             self._raise_exception(SeedDataError, path,
@@ -518,11 +435,6 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 if new_path in self.default_values and key not in doc:
                     new_value = self.default_values[new_path]
                     doc[key] = new_value
-            # SchemaOperator
-            if isinstance(schema[key], SchemaOperator):
-                if new_path in self.default_values and key not in doc:
-                    new_value = self.default_values[new_path]
-                    doc[key] = new_value
 
     def __setattr__(self, key, value):
         """ Support dot notation. """
@@ -607,9 +519,6 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 # SimpleEnum
                 elif isinstance(s, SimpleEnumMeta):
                     doc[key] = json_decode(old_value, s.type)
-                # IN
-                elif isinstance(s, SchemaOperator):
-                    doc[key] = json_decode(old_value, type(s.operands[0]))
 
         def _convert_list(doc, schema):
             s = schema[0]
@@ -629,9 +538,6 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 # SimpleEnum
                 elif isinstance(s, SimpleEnumMeta):
                     doc[i] = json_decode(old_value, s.type)
-                # IN
-                elif isinstance(s, SchemaOperator):
-                    doc[i] = json_decode(old_value, type(s.operands[0]))
 
         d = json.loads(doc)
         _convert_dict(d, cls.schema)

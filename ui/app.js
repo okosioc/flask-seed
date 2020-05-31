@@ -217,6 +217,25 @@ var mock_models = [
                         'required': ['id']
                     }
                 },
+                'lastLogin': {
+                    'type': 'object',
+                    'properties': {
+                        'ip': {
+                            'type': 'string',
+                            'format': 'ipv4'
+                        },
+                        'location': {
+                            'type': 'string'
+                        },
+                        'device': {
+                            'type': 'string'
+                        },
+                        'dateTime': {
+                            'type': 'string',
+                            'format': 'date-time'
+                        }
+                    }
+                },
                 'createTime': {
                     'type': 'string',
                     'format': 'date-time'
@@ -356,10 +375,10 @@ app.get('/crud/list/:modelName', function (req, res) {
             return n.name == modelName
         }),
         schema = model.jschema,
+        search = {},
         p = parseInt(req.query.p) || 1,
         offset = (p - 1) * mock_page_count;
     // Perform search
-    var search = {};
     _.forEach(req.query, function (v, k) {
         if (_.isEmpty(v)) return true;
         // Only check the params starts with search.

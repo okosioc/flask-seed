@@ -1,6 +1,8 @@
 {% extends 'layoutdash.html' %}
 
-{% set title = model.name|capitalize + 's' %}
+{% set plural = model.name + 's' %}
+{% set initial = model.name|first %}
+{% set title = plural|capitalize %}
 {% set breadcrumb = {
     'title': title,
     'links': [
@@ -10,8 +12,6 @@
         {'url':'/crud/list/'+model.name, 'title': title}
     ]
 } %}
-{% set plural = model.name + 's' %}
-{% set initial = model.name|first %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -39,6 +39,8 @@
                 </li>
             {% endif %}
         </ul>
+        <a class="btn btn-primary btn-sm" href="/crud/form/{{ model.name }}/">New</a>
+        <a class="btn btn-light btn-sm" href="/crud/">Cancel</a>
     </section>
 {% endblock %}
 
@@ -180,30 +182,28 @@ def delete({{ initial }}id):
             <div class="form-row justify-content-center">
                 {% for f in model.jschema.indexes %} {# Do not support nested field #}
                     {% set fs = model.jschema.properties[f] %}
-                    {% set fn = 'search.' + f %}
+                    {% set path = 'search.' + f %}
+                    {% set rv = search[f] %}
                     <div class="col-auto">
                         <label class="sr-only">{{ f|capitalize }}</label>
                         {% if fs.enum %}
-                            <select class="form-control " name="{{ fn }}">
+                            <select class="form-control " name="{{ path }}">
                                 <option value="">Choose {{ f|capitalize }}...</option>
                                 {% for e in fs.enum %}
-                                    <option value="{{ e }}" {{ render_selected_value(fn, search[f], e, gen) }}>{{ e }}</option>
+                                    <option value="{{ e }}" {{ render_selected(path, rv, e, gen) }}>{{ e }}</option>
                                 {% endfor %}
                             </select>
                         {% elif fs.type == 'boolean' %}
-                            <select class="form-control" name="{{ fn }}">
+                            <select class="form-control" name="{{ path }}">
                                 <option value="">Choose {{ f|capitalize }}...</option>
-                                <option value="true" {{ render_selected_value(fn, search[f], true, gen) }}>True
-                                </option>
-                                <option value="false" {{ render_selected_value(fn, search[f], false, gen) }}>
-                                    False
-                                </option>
+                                <option value="true" {{ render_selected(path, rv, true, gen) }}>True</option>
+                                <option value="false" {{ render_selected(path, rv, false, gen) }}>False</option>
                             </select>
                         {% else %}
                             <input type="text" class="form-control"
                                    style="{{ 'width:100px' if fs.type in ['integer', 'number'] }}"
-                                   placeholder="{{ f|capitalize }}" value="{{ render_input_value(fn, search[f], gen) }}"
-                                   name="{{ fn }}">
+                                   placeholder="{{ f|capitalize }}" value="{{ render_value(path, rv, gen) }}"
+                                   name="{{ path }}">
                         {% endif %}
                     </div>
                 {% endfor %}
@@ -279,19 +279,19 @@ def delete({{ initial }}id):
     </section>
 {% endmacro %}
 
-{# Render selected snippet using field name, real value, check value #}
-{% macro render_selected_value(fn, rv, cv, gen=false) %}
+{# Render selected snippet using field path, real value, check value #}
+{% macro render_selected(path, rv, cv, gen=false) %}
     {%- if gen -%}
-        {{ '{{' }} 'selected' if {{ ('\''+cv+'\'' if cv is string else cv)|safe }}=={{ fn }} {{ '}}' }}
+        {{ '{{' }} 'selected' if {{ ('\''+cv+'\'' if cv is string else cv)|safe }}=={{ path }} {{ '}}' }}
     {%- else -%}
         {{ 'selected' if cv==rv }}
     {%- endif -%}
 {% endmacro %}
 
-{# Render input value snippet using field name, real value #}
-{% macro render_input_value(fn, rv, gen=false) %}
+{# Render input value snippet using field path, real value #}
+{% macro render_value(path, rv, gen=false) %}
     {%- if gen -%}
-        {{ '{{' }} {{ fn }} {{ '}}' }}
+        {{ '{{' }} {{ path }} {{ '}}' }}
     {%- else -%}
         {{ rv }}
     {%- endif -%}

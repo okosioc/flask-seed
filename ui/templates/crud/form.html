@@ -1,5 +1,7 @@
 {% extends 'layoutdash.html' %}
 
+{% set plural = model.name + 's' %}
+{% set initial = model.name|first %}
 {% set update = true if record._id else false %}
 {% set title = ('Update' if update else 'Create') + ' ' + model.name|capitalize %}
 {% set breadcrumb = {
@@ -8,7 +10,7 @@
         {'url':'/', 'title':'Home'},
         {'url':'/dashboard/', 'title':'Dashboard'},
         {'url':'/crud/', 'title':'Models'},
-        {'url':'/crud/list/'+model.name, 'title': model.name+'s'},
+        {'url':'/crud/list/'+model.name, 'title': plural|capitalize},
         {'url':'/crud/form/'+model.name+'/'+record._id, 'title': title}
     ]
 } %}
@@ -19,8 +21,6 @@
     'preview': '-prev',
     'rte': '-rte'
 } %}
-{% set plural = model.name + 's' %}
-{% set initial = model.name|first %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -43,8 +43,8 @@
                 <li>1. You are creating {{ model.name }}.</li>
             {% endif %}
             <li>2. The whole record will be overwrited when updating.</li>
-            {% if current_user.is_admin %}
-                <li>2. You can generate codes by clicking <a class="text-danger" href="#gen" data-toggle="modal">GEN</a>
+            {% if not update and current_user.is_admin %}
+                <li>3. You can generate codes by clicking <a class="text-danger" href="#gen" data-toggle="modal">GEN</a>
                     here.
                 </li>
             {% endif %}
@@ -126,7 +126,7 @@ def save({{ initial }}id=None):
             existing = {{ model.name|capitalize }}.find_one({{ initial }}id)
             if not existing:
                 abort(404)
-            # TODO: Only update necessary fields,
+            # TODO: Only update necessary fields
             # e.g,
             # existing.status = {{ model.name }}.status
             # existing.updateTime = datetime.now()
@@ -186,28 +186,38 @@ def save({{ initial }}id=None):
     <section>
         <form id="form-editor" class="form-editor needs-validation {{ 'gen' if gen }}" novalidate method="post">
             {% if gen %}
-                {{ render('Root', model.jschema, none, gen=true) }}
+                {{ render(model.name, model.jschema, none, gen=true) }}
             {% else %}
-                {{ render('Root', model.jschema, record) }}
+                {{ render(model.name, model.jschema, record) }}
             {% endif %}
         </form>
     </section>
 {% endmacro %}
 
-{% macro render(name, jschema, jvalue, is_in_list=false, is_required=false, gen=false) %}
+{% macro render(name, jschema, jvalue, parent=none, is_in_list=false, is_required=false, gen=false) %}
+    {% set path = parent + '.' + name %} {# Used only in code generation #}
     {% if jschema.type == 'object' %} {# Object #}
-        {% set rvalue = {} if jvalue is none or jvalue is undefined else jvalue %}
         <fieldset class="object {{ 'mb-0' if is_in_list }}" name="{{ name }}">
             <legend>
-                <span class="name">{{ name }}</span>
+                <span class="name">{{ name if parent else 'Root' }}</span>
                 <span class="text-muted">{{ '*' if is_required }}</span>
             </legend>
+            {% if gen %}
+                {% if parent %}
+                    {% if not is_in_list %}
+                        {# Inner level fields should define parent variable, so their sub fields\'s path can be access #}
+                        {{ '{%' }} set {{ name }} = {{ parent }}.{{ name }} {{ '%}' }}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            {# If is_in_list, name is index, parent should be same #}
+            {% set pn = parent if is_in_list else name %}
             {% for n,s in jschema.properties %}
-                {% set required = n in jschema.required %}
+                {% set required = n in jschema.required|d([]) %}
                 {% if n =='_id' %}
                     {# skip #}
                 {% else %}
-                    {{ render(n, s, rvalue[n], is_required=required, gen=gen) }}
+                    {{ render(n, s, jvalue[n], pn, is_required=required, gen=gen) }}
                 {% endif %}
             {% endfor %}
             <div class="act">
@@ -218,7 +228,6 @@ def save({{ initial }}id=None):
             </div>
         </fieldset>
     {% elif jschema.type == 'array' %} {# Array #}
-        {% set rvalue = [] if jvalue is none or jvalue is undefined else jvalue %}
         {% if jschema.format == 'select' and jschema.items.type in ['integer','number','string'] %} {# select #}
             <div class="form-group array" name="{{ name }}">
                 <label>{{ name }}</label>
@@ -227,16 +236,22 @@ def save({{ initial }}id=None):
                     <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
                             multiple>
                         <option value="">Choose...</option>
-                        {% for each in jschema.items.enum %}
-                            <option value="{{ each }}" {{ 'selected' if each in rvalue }}>{{ each }}</option>
+                        {% for e in jschema.items.enum %}
+                            <option value="{{ e }}" {{ render_selected_in(path, jvalue, e, gen) }}>{{ e }}</option>
                         {% endfor %}
                     </select>
                 {% else %} {# tags #}
                     <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
                             multiple tags>
-                        {% for r in rvalue %}
-                            <option value="{{ r }}" selected>{{ r }}</option>
-                        {% endfor %}
+                        {% if gen %}
+                            {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                            <option value="{{ '{{' }} e {{ '}}' }}" selected>{{ '{{' }} e {{ '}}' }}</option>
+                            {{ '{%' }} endfor {{ '%}' }}
+                        {% else %}
+                            {% for e in jvalue %}
+                                <option value="{{ e }}" selected>{{ e }}</option>
+                            {% endfor %}
+                        {% endif %}
                     </select>
                     <small class="form-text">You can select existing option or input a new option.</small>
                 {% endif %}
@@ -259,30 +274,29 @@ def save({{ initial }}id=None):
                     </small>
                     <div class="image-input-result mt-1 clearfix">
                         {% if jschema.items.type == 'object' %} {# object array #}
-                            {% for r in rvalue %}
-                                <div class="image uploaded">
-                                    <img src="{{ r.url }}{{ plupload_config.preview }}">
-                                    <div class="btns">
-                                        <a href="{{ r.url }}" target="_blank">i</a>
-                                        <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
-                                    </div>
-                                    {# inner object properties should be url/key/name/width/height #}
-                                    {% for k in hiddens %}
-                                        <input type="hidden" name="{{ k }}" value="{{ r[k] }}">
-                                    {% endfor %}
-                                </div>
-                            {% endfor %}
+                            {% if gen %}
+                                {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                                {% call(k) render_image_object(hiddens) -%}
+                                    {{ '{{' }} e['{{ k }}'] {{ '}}' }}
+                                {%- endcall %}
+                                {{ '{%' }} endfor {{ '%}' }}
+                            {% else %}
+                                {% for e in jvalue %}
+                                    {% call(k) render_image_object(hiddens) -%}
+                                        {{ e[k] }}
+                                    {%- endcall %}
+                                {% endfor %}
+                            {% endif %}
                         {% else %} {# string array #}
-                            {% for r in rvalue %}
-                                <div class="image uploaded">
-                                    <img src="{{ r }}{{ plupload_config.preview }}">
-                                    <div class="btns">
-                                        <a href="{{ r }}" target="_blank">i</a>
-                                        <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
-                                    </div>
-                                    <input type="hidden" name="url" value="{{ r }}">
-                                </div>
-                            {% endfor %}
+                            {% if gen %}
+                                {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                                {{ render_image_string('{{ e }}') }}
+                                {{ '{%' }} endfor {{ '%}' }}
+                            {% else %}
+                                {% for e in jvalue %}
+                                    {{ render_image_string(e) }}
+                                {% endfor %}
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -299,28 +313,37 @@ def save({{ initial }}id=None):
                     <span class="text-muted">{{ '*' if is_required }}</span>
                 </legend>
                 <div class="list-group">
-                    {% for r in rvalue %}
-                        <div class="list-group-item">
-                            {{ render(loop.index0, jschema.items, r, is_in_list=true, gen=gen) }}
-                        </div>
-                    {% endfor %}
                     {% set init = none %}
                     {% if jschema.items.type == 'object' %}
                         {% set init = {} %}
                     {% elif jschema.items.type == 'array' %}
                         {% set init = [] %}
                     {% endif %}
-                    {% if is_required and rvalue|length == 0 %} {# Create a empty form for required array #}
+                    {% if gen %}
+                        {{ '{%' }} for e in {{ path }} {{ '%}' }}
                         <div class="list-group-item">
-                            {{ render(rvalue|length, jschema.items, init, is_in_list=true, gen=gen) }}
+                            {{ render('{{ loop.index0 }}', jschema.items, init, 'e', is_in_list=true, gen=gen) }}
+                        </div>
+                        {{ '{%' }} endfor {{ '%}' }}
+                        TODO
+                    {% else %}
+                        {% for e in jvalue %}
+                            <div class="list-group-item">
+                                {{ render(loop.index0, jschema.items, e, name, is_in_list=true, gen=gen) }}
+                            </div>
+                        {% endfor %}
+                        {% if is_required and jvalue|length == 0 %} {# Create a empty form for required array #}
+                            <div class="list-group-item">
+                                {{ render(jvalue|length, jschema.items, init, name, is_in_list=true, gen=gen) }}
+                            </div>
+                        {% endif %}
+                        <div class="list-group-item template"> {# Template form for adding elements to array #}
+                            {{ render(jvalue|length, jschema.items, init, name, is_in_list=true, gen=gen) }}
                         </div>
                     {% endif %}
-                    <div class="list-group-item template"> {# Template form for adding elements to array #}
-                        {{ render(rvalue|length, jschema.items, init, is_in_list=true, gen=gen) }}
-                    </div>
                 </div>
                 <div class="act">
-                    <a class="format" href="javascript:;">array [{{ rvalue|length }}]</a>
+                    <a class="format" href="javascript:;">array [{{ jvalue|length }}]</a>
                     <a class="add" href="javascript:;">+</a>
                     {% if is_in_list %}
                         <a class="del" href="javascript:;">x</a>
@@ -329,11 +352,6 @@ def save({{ initial }}id=None):
             </fieldset>
         {% endif %}
     {% else %} {# Simple types #}
-        {% if gen %}
-            {% set rvalue = '{{ ' + model.name + '.' + name + ' }}' %}
-        {% else %}
-            {% set rvalue = '' if jvalue is none or jvalue is undefined else jvalue %}
-        {% endif %}
         <div class="form-group" name="{{ name }}">
             {% if jschema.enum %} {# enum -> select2/radios  #}
                 <label>{{ name }}</label>
@@ -342,15 +360,15 @@ def save({{ initial }}id=None):
                     <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}>
                         <option value="">Choose...</option>
                         {% for each in jschema.enum %}
-                            <option value="{{ each }}" {{ 'selected' if each == rvalue }}>{{ each }}</option>
+                            <option value="{{ each }}" {{ render_selected(path, jvalue, each, gen) }}>{{ each }}</option>
                         {% endfor %}
                     </select>
                 {% else %}
                     <div class="radio-input-group" {{ 'required' if is_required }}>
                         <div class="btn-group btn-group-toggle" data-toggle="buttons">
                             {% for each in jschema.enum %}
-                                <label class="btn btn-light {{ 'active' if each==rvalue }}">
-                                    <input type="radio" {{ 'checked' if each==rvalue }}
+                                <label class="btn btn-light {{ render_selected(path, jvalue, each, gen, 'active') }}">
+                                    <input type="radio" {{ render_selected(path, jvalue, each, gen, 'checked') }}
                                            value="{{ each }}"> {{ each }}
                                 </label>
                             {% endfor %}
@@ -362,17 +380,19 @@ def save({{ initial }}id=None):
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 <input name="{{ name }}" type="string" class="form-control"
                        pattern="{{ '[0-9]*' if jschema.type == 'integer' else '[0-9\.]*' }}"
-                       value="{{ rvalue }}" {{ 'required' if is_required }}>
+                       value="{{ render_value(path, jvalue, gen) }}" {{ 'required' if is_required }}>
             {% elif jschema.type == 'boolean' %} {# boolean -> radios #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 <div class="radio-input-group" {{ 'required' if is_required }}>
                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                        <label class="btn btn-light {{ 'active' if rvalue }}">
-                            <input type="radio" {{ 'checked' if rvalue }} value="true"> True
+                        <label class="btn btn-light {{ render_selected(path, jvalue, true, gen, 'active') }}">
+                            <input type="radio" {{ render_selected(path, jvalue, true, gen, 'checked') }} value="true">
+                            True
                         </label>
-                        <label class="btn btn-light {{ 'active' if not rvalue }}">
-                            <input type="radio" {{ 'checked' if not rvalue }} value="false"> False
+                        <label class="btn btn-light {{ render_selected(path, jvalue, false, gen, 'active') }}">
+                            <input type="radio" {{ render_selected(path, jvalue, false, gen, 'checked') }}
+                                   value="false"> False
                         </label>
                     </div>
                 </div>
@@ -381,10 +401,10 @@ def save({{ initial }}id=None):
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 {% if jschema.format == 'textarea' %}
                     <textarea name="{{ name }}" rows="3"
-                              class="form-control" {{ 'required' if is_required }}>{{ rvalue|safe }}</textarea>
+                              class="form-control" {{ 'required' if is_required }}>{{ render_value(path, jvalue, gen) }}</textarea>
                 {% elif jschema.format == 'rte' %}
                     <div class="rte-input-group" {{ 'required' if is_required }}>
-                        <div class="quill" name="{{ name }}">{{ rvalue|safe }}</div>
+                        <div class="quill" name="{{ name }}">{{ render_value(path, jvalue|safe, gen) }}</div>
                         <small class="form-text">You can upload images by clicking the image button in the boolbar,
                             support {{ plupload_config.exts }}. <a class="quill-plupload">&nbsp;</a>
                         </small>
@@ -396,22 +416,21 @@ def save({{ initial }}id=None):
                         <small class="form-text">Support {{ plupload_config.exts }}.
                         </small>
                         <div class="image-input-result mt-1 clearfix">
-                            {% if rvalue|length %}
-                                <div class="image uploaded">
-                                    <img src="{{ rvalue }}{{ plupload_config.preview }}">
-                                    <div class="btns">
-                                        <a href="{{ rvalue }}" target="_blank">i</a>
-                                        <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
-                                    </div>
-                                    <input type="hidden" name="url" value="{{ rvalue }}">
-                                </div>
+                            {% if gen %}
+                                {{ '{%' }} if {{ path }} {{ '%}' }}
+                                {{ render_image_string('{{ '+path+' }}') }}
+                                {{ '{%' }} endif {{ '%}' }}
+                            {% else %}
+                                {% if jvalue %}
+                                    {{ render_image_string(jvalue) }}
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
                 {% else %}
                     <input name="{{ name }}" type="text"
                            class="form-control {{ jschema.format }}" {{ 'required' if is_required }}
-                           value="{{ rvalue }}">
+                           value="{{ render_value(path, jvalue, gen) }}">
                 {% endif %}
             {% endif %}
             <div class="invalid-feedback">Please input valid {{ name }}!</div>
@@ -424,6 +443,59 @@ def save({{ initial }}id=None):
             </div>
         </div>
     {% endif %}
+{% endmacro %}
+
+{# Render image uploaded sinppet for image upload component, jvalue is string #}
+{% macro render_image_string(rv) %}
+    <div class="image uploaded">
+        <img src="{{ rv }}{{ plupload_config.preview }}">
+        <div class="btns">
+            <a href="{{ rv }}" target="_blank">i</a>
+            <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+        </div>
+        <input type="hidden" name="url" value="{{ rv }}">
+    </div>
+{% endmacro %}
+
+{# Render image uploaded sinppet for image upload component, jvalue is object #}
+{% macro render_image_object(hiddens) %}
+    <div class="image uploaded">
+        <img src="{{ caller('url') }}{{ plupload_config.preview }}">
+        <div class="btns">
+            <a href="{{ caller('url') }}" target="_blank">i</a>
+            <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+        </div>
+        {% for k in hiddens %}
+            <input type="hidden" name="{{ k }}" value="{{ caller(k) }}">
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{# Render selected/active/checked snippet using field relative path, by checking real value == check value #}
+{% macro render_selected(path, rv, cv, gen=false, attr='selected') %}
+    {%- if gen -%}
+        {{ '{{' }} '{{ attr }}' if {{ ('\''+cv+'\'' if cv is string else cv)|safe }}=={{ path }} {{ '}}' }}
+    {%- else -%}
+        {{ attr if cv==rv }}
+    {%- endif -%}
+{% endmacro %}
+
+{# Render selected/active/checked snippet using field relative path, by checking check value in real value #}
+{% macro render_selected_in(path, rv, cv, gen=false, attr='selected') %}
+    {%- if gen -%}
+        {{ '{{' }} '{{ attr }}' if {{ ('\''+cv+'\'' if cv is string else cv)|safe }} in {{ path }} {{ '}}' }}
+    {%- else -%}
+        {{ attr if cv in rv }}
+    {%- endif -%}
+{% endmacro %}
+
+{# Render input value snippet using field relative path, real value #}
+{% macro render_value(path, rv, gen=false) %}
+    {%- if gen -%}
+        {{ '{{' }} {{ path }} {{ '}}' }}
+    {%- else -%}
+        {{ rv }}
+    {%- endif -%}
 {% endmacro %}
 
 {% macro render_style() %}

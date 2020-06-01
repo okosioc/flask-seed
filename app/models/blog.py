@@ -15,7 +15,7 @@ from werkzeug.utils import cached_property
 
 from app.extensions import mdb
 from app.models import User
-from app.core import Model
+from app.core import Model, Comparator
 
 
 @mdb.register
@@ -29,6 +29,7 @@ class Tag(Model):
 
     required_fields = ['name', 'weight', 'createTime']
     default_values = {'weight': 0, 'createTime': datetime.now}
+    searchables = [('name', Comparator.LIKE)]
     indexes = [{'fields': ['name'], 'unique': True}]
 
 
@@ -59,6 +60,7 @@ class Post(Model):
 
     required_fields = ['uid', 'title', 'body', 'tids', 'createTime']
     default_values = {'createTime': datetime.now, 'viewTimes': 0}
+    searchables = [('title', Comparator.LIKE)]
     indexes = [{'fields': 'tids'}, {'fields': 'createTime'}]
 
     @cached_property

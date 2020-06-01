@@ -14,7 +14,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.utils import cached_property
 
-from app.core import Model, SimpleEnum
+from app.core import Model, SimpleEnum, Format
 from app.extensions import mdb
 
 
@@ -38,15 +38,17 @@ class User(Model, UserMixin):
         'name': str,
         'email': str,
         'password': str,
-        'head': str,
+        'avatar': str,
         'point': int,
         'status': UserStatus,
         'roles': [UserRole],
         'createTime': datetime,
         'updateTime': datetime
     }
-    required_fields = ['name', 'email', 'password', 'point', 'status', 'roles', 'createTime']
+    required_fields = ['name', 'email', 'point', 'status', 'roles', 'createTime']
     default_values = {'point': 0, 'status': UserStatus.NORMAL, 'roles': [UserRole.MEMBER], 'createTime': datetime.now}
+    formats = {'avatar': Format.IMAGE, 'roles': Format.SELECT}
+    searchables = ['name', 'email', 'point', 'status']
     indexes = [{'fields': ['email'], 'unique': True}]
 
     @cached_property

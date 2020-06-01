@@ -9,7 +9,7 @@
         {'url':'/dashboard/', 'title':'Dashboard'},
         {'url':'/crud/', 'title':'Models'},
         {'url':'/crud/query/'+model.name, 'title': model.name+'s'},
-        {'url':'/crud/raw/'+model.name+'/'+record._id, 'title': title}
+        {'url':'/crud/raw/'+model.name+'/'+(record._id|string if record._id else ''), 'title': title}
     ]
 } %}
 
@@ -62,7 +62,7 @@
         </div>
         <div class="ivalue imulti dict" name="{{ name }}">
             <div class="ilist">
-                {% for n,s in jschema.properties %}
+                {% for n,s in jschema.properties|items %}
                     {% if n =='_id' %}
                         {# skip #}
                     {% else %}
@@ -87,7 +87,7 @@
             <div class="ilist">
                 {% for r in jvalue %}
                     <div class="irow">
-                        {{ render(loop.index0, jschema.items, r, true) }}
+                        {{ render(loop.index0, jschema['items'], r, true) }}
                     </div>
                 {% endfor %}
             </div>
@@ -99,7 +99,7 @@
                     {% elif jschema.items.type == 'array' %}
                         {% set init = [] %}
                     {% endif %}
-                    {{ render('-1', jschema.items, init, true) }}
+                    {{ render('-1', jschema['items'], init, true) }}
                 </div>
             </div>
         </div>
@@ -183,7 +183,7 @@
     <script type="text/javascript" src="{{ base() }}/assets/vendor/sortablejs/Sortable.min.js"></script>
     <script type="text/javascript">
 
-        const DATE_FORMATS = ["YYYY-MM-DD HH:mm:ss.SSSSSS", "YYYY-MM-DD HH:mm:ss.SSS", "YYYY-MM-DD HH:mm:ss"];
+        const DATE_FORMATS = ["YYYY-MM-DD HH:mm:ss.SSS", "YYYY-MM-DD HH:mm:ss"];
 
         $(document).ready(function () {
             // idesc
@@ -367,7 +367,7 @@
                 console.log(param);
             }
 
-            var url = copy ? "/crud/save/{{ model.name }}/" : "/crud/save/{{ model.name }}/{{ record._id }}";
+            var url = copy ? "/crud/save/{{ model.name }}/" : "/crud/save/{{ model.name }}/{{ record._id or '' }}";
             $.post(url, param, function (result) {
                 if (result.success) {
                     showSuccess(result.message);

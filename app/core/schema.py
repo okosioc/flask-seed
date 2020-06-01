@@ -74,6 +74,48 @@ class SimpleEnum(object, metaclass=SimpleEnumMeta):
     pass
 
 
+class Format(SimpleEnum):
+    """ Predefined available formats, which should be used to control ui or api generation.
+
+    Below values are the same with OAS 3.0
+    https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#data-types
+    https://swagger.io/docs/specification/data-models/data-types/
+    """
+    DATETIME = 'date-time'
+    DATE = 'date'
+    PASSWORD = 'password'
+    BYTE = 'byte'
+    # Below values are self-defined
+    SELECT = 'select'
+    TEXTAREA = 'textarea'
+    RTE = 'rte'
+    MARKDOWN = 'markdown'
+    IMAGE = 'image'
+    IPV4 = 'ipv4'
+    IPV4 = 'ipv6'
+    CHART = 'chart'
+    LATLNG = 'latlng'
+    TABLE = 'table'
+    OBJECTID = 'objectid'
+
+
+class Comparator(SimpleEnum):
+    """ Predefined compartors, which should be used to control search conditions.
+
+    These comparators are referred to https://docs.mongodb.com/manual/reference/operator/query-comparison/
+    Just append $ to build a search.
+    """
+    EQ = 'eq'  # =
+    GT = 'gt'  # >
+    GTE = 'gte'  # >=
+    IN = 'in'
+    LT = 'lt'  # <
+    LTE = 'lte'  # <=
+    NE = 'ne'  # !=
+    NIN = 'nin'
+    LIKE = 'like'  # Need to convert this to regex
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
 #
@@ -145,14 +187,14 @@ class SchemaMetaclass(type):
         if '_id' not in attrs['schema']:
             attrs['schema']['_id'] = ObjectId
 
-        # Valid paths
+        # Validate paths
         attrs['_valid_paths'] = {}
         mcs._validate_schema(name, attrs)
         attrs['_valid_paths'] = {
             k.replace(name + '.', ''): v for k, v in attrs['_valid_paths'].items() if not k == name
         }
 
-        # Validate schema descriptors, e.g, default_values/required_fields/validators
+        # Validate schema descriptors
         mcs._validate_descriptors(name, attrs)
 
         return type.__new__(mcs, name, bases, attrs)
@@ -163,43 +205,43 @@ class SchemaMetaclass(type):
         schema = attrs['schema']
         protected = attrs['_protected_field_names']
 
-        def __validate_schema(_schema, _name):
+        def __validate_schema(_schema, path):
             # type
             if type(_schema) is type:
-                attrs['_valid_paths'][_name] = _schema
+                attrs['_valid_paths'][path] = _schema
                 if _schema not in AUTHORIZED_TYPES:
-                    raise SeedSchemaError('%s: %s is not an authorized type' % (_name, _schema))
+                    raise SeedSchemaError('%s: %s is not an authorized type' % (path, _schema))
             # {}
             elif isinstance(_schema, dict):
-                attrs['_valid_paths'][_name] = {}
+                attrs['_valid_paths'][path] = {}
                 if not len(_schema):
                     raise SeedSchemaError(
-                        '%s: %s can not be a empty dict' % (_name, _schema))
+                        '%s: %s can not be a empty dict' % (path, _schema))
                 for key in _schema:
                     # Check key type
                     if isinstance(key, str):
                         if not re.match('^[a-zA-Z0-9_]+$', key):
-                            raise SeedSchemaError('%s: %s can only contain letters, numbers or _' % (_name, key))
+                            raise SeedSchemaError('%s: %s can only contain letters, numbers or _' % (path, key))
                         if key[0].isdigit():
-                            raise SeedSchemaError('%s: %s must not start with digit' % (_name, key))
+                            raise SeedSchemaError('%s: %s must not start with digit' % (path, key))
                         if attrs.get('use_dot_notation', True) and key in protected:
                             raise SeedSchemaError(
                                 '%s: %s is a protected field name, please set use_dot_notation = False if you insist '
-                                'to use this field name; protected fields are %s.' % (_name, key, sorted(protected)))
+                                'to use this field name; protected fields are %s.' % (path, key, sorted(protected)))
                     else:
-                        raise SeedSchemaError('%s: %s must be a str' % (_name, key))
+                        raise SeedSchemaError('%s: %s must be a str' % (path, key))
 
-                    __validate_schema(_schema[key], '%s.%s' % (_name, key))
+                    __validate_schema(_schema[key], '%s.%s' % (path, key))
             # []
             elif isinstance(_schema, list):
-                attrs['_valid_paths'][_name] = []
+                attrs['_valid_paths'][path] = []
                 if not len(_schema):
                     raise SeedSchemaError(
-                        '%s: %s can not be a empty list' % (_name, _schema))
+                        '%s: %s can not be a empty list' % (path, _schema))
                 if len(_schema) > 1:
                     raise SeedSchemaError(
-                        '%s: %s must not have more then one type' % (_name, _schema))
-                __validate_schema(_schema[0], _name)
+                        '%s: %s must not have more then one type' % (path, _schema))
+                __validate_schema(_schema[0], '%s[]' % path)
             # SimpleEnum
             elif isinstance(_schema, SimpleEnumMeta):
                 types = set()
@@ -207,13 +249,13 @@ class SchemaMetaclass(type):
                     types.add(type(member))
                     if type(member) not in AUTHORIZED_TYPES:
                         raise SeedSchemaError('%s: %s in %s is not an authorized type (%s found)' % (
-                            _name, member, _schema, type(member).__name__))
+                            path, member, _schema, type(member).__name__))
                 if len(types) > 1:
-                    raise SeedSchemaError('%s: %s can not have more than one type' % (_name, _schema))
-                attrs['_valid_paths'][_name] = list(types)[0]
+                    raise SeedSchemaError('%s: %s can not have more than one type' % (path, _schema))
+                attrs['_valid_paths'][path] = list(types)[0]
             else:
                 raise SeedSchemaError(
-                    '%s: %s is not a supported thing' % (_name, _schema))
+                    '%s: %s is not a supported thing' % (path, _schema))
 
         if schema is None:
             raise SeedSchemaError('%s.schema must not be None' % name)
@@ -223,7 +265,7 @@ class SchemaMetaclass(type):
 
     @classmethod
     def _validate_descriptors(mcs, name, attrs):
-        """ Validate schema descriptors, e.g, default_values/required_fields/validators. """
+        """ Validate schema descriptors, e.g, default_values/required_fields/validators/formats/searchables. """
         valid_paths = attrs['_valid_paths']
 
         # default_values
@@ -244,6 +286,102 @@ class SchemaMetaclass(type):
             if v not in valid_paths:
                 raise SeedSchemaError('%s: Error in validators: can\'t find %s in schema' % (name, v))
 
+        # formats
+        for f, ff in attrs.get('formats', {}).items():
+            if f not in valid_paths:
+                raise SeedSchemaError('%s: Error in formats: can\'t find %s in schema' % (name, f))
+            if ff not in Format:
+                raise SeedSchemaError('%s: Error in formats: %s is not an authorized format' % (name, ff))
+
+        # searchables
+        for s in attrs.get('searchables', []):
+            # e.g, ('point', 'between'), the second item is comparator
+            if isinstance(s, tuple):
+                sf, sc = s
+                if sc not in Comparator:
+                    raise SeedSchemaError('%s: Error in searchables: %s is not an authorized comparator' % (name, sc))
+            else:
+                sf = s
+            if sf not in valid_paths:
+                raise SeedSchemaError('%s: Error in searchables: can\'t find %s in schema' % (name, sf))
+
+    def to_json_schema(cls):
+        """ Convert schema to json schema dict.
+
+        NOTE:
+        Return json schema is a subset of Object Schema from OAS 3.0.
+        In order to keep all the things simple, we do not use complex keywords such as oneOf, $ref, patternProperties, additionalProperties, etc.
+        https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
+        https://swagger.io/docs/specification/data-models/
+        """
+        schema = cls.schema
+
+        def _to_json_schema(_schema, path):
+            ret = {}
+            # type
+            if type(_schema) is type:
+                ret.update(_simple_to_json_schema(_schema))
+            # {}
+            elif isinstance(_schema, dict):
+                ret['type'] = 'object'
+                properties = {}
+                required = []
+                for key in _schema:
+                    sub_path = '%s.%s' % (path, key) if path else key
+                    properties[key] = _to_json_schema(_schema[key], sub_path)
+                    if sub_path in cls.required_fields:
+                        required.append(sub_path)
+                ret.update({
+                    'type': 'object',
+                    'properties': properties,
+                    'required': required
+                })
+            # []
+            elif isinstance(_schema, list):
+                ret.update({
+                    'type': 'array',
+                    'items': _to_json_schema(_schema[0], '%s[]' % path)
+                })
+            # SimpleEnum
+            elif isinstance(_schema, SimpleEnumMeta):
+                ret.update(_simple_to_json_schema(_schema.type))
+                ret.update({
+                    'enum': list(_schema)
+                })
+            else:
+                pass
+
+            fmt = cls.formats.get(path, None)
+            if fmt:
+                ret['format'] = fmt
+
+            return ret
+
+        def _simple_to_json_schema(_schema):
+            """ Convert simple type to json schema. """
+            if _schema is str:
+                return {'type': 'string'}
+            elif _schema is int:
+                return {'type': 'integer'}
+            elif _schema is float:
+                return {'type': 'number'}
+            elif _schema is bool:
+                return {'type': 'boolean'}
+            elif _schema is ObjectId:
+                return {'type': 'string', 'format': Format.OBJECTID}
+            elif _schema is datetime:
+                return {'type': 'string', 'format': Format.DATETIME}
+
+        jschema = _to_json_schema(schema, '')
+
+        # Root level properties
+        searchables = [('%s__%s' % s if isinstance(s, tuple) else s) for s in cls.searchables]
+        if searchables:
+            jschema['searchables'] = searchables
+        # print(json.dumps(jschema))
+
+        return jschema
+
 
 class SchemaDict(dict, metaclass=SchemaMetaclass):
     """ Schema dict = dict schema definition + dict content validation. """
@@ -252,6 +390,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
     required_fields = []
     default_values = {}
     validators = {}
+    formats = {}
+    searchables = []
     raise_validation_errors = True
     use_dot_notation = True
 
@@ -411,7 +551,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                         new_value = deepcopy(new_value)
                     doc[key] = new_value
                 # Recursively
-                if [i for i in self.default_values if i.startswith("%s." % new_path)]:
+                if [i for i in self.default_values if i.startswith('%s.' % new_path)]:
                     if key not in doc or doc[key] is None:
                         doc[key] = {}
                     self._set_default_values(doc[key], schema[key], new_path)
@@ -426,10 +566,10 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                         new_value = new_value[:]
                     doc[key] = new_value
                 # Recursively, Please note that the set default logic only occurs during object initialization
-                if [i for i in self.default_values if i.startswith("%s." % new_path)]:
+                if [i for i in self.default_values if i.startswith('%s[].' % new_path)]:
                     if key not in doc or doc[key] is None:
-                        doc[key] = [{}]
-                    self._set_default_values(doc[key][0], schema[key][0], new_path)
+                        doc[key] = [{}]  # Init 1-length list
+                    self._set_default_values(doc[key][0], schema[key][0], '%s[]' % new_path)
             # SimpleEnum
             if isinstance(schema[key], SimpleEnumMeta):
                 if new_path in self.default_values and key not in doc:

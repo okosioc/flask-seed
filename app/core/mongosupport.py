@@ -17,7 +17,7 @@ import pymongo
 from pymongo import MongoClient, uri_parser, ReadPreference, WriteConcern
 from pymongo.cursor import Cursor as PyMongoCursor
 
-from app.core import SimpleEnumMeta, DotDictProxy, DotListProxy, SchemaDict, SeedDataError
+from app.core import SchemaDict, SeedDataError, SimpleEnumMeta
 
 # Find the stack on which we want to store the database connection.
 # Starting with Flask 0.9, the _app_ctx_stack is the correct one,
@@ -57,45 +57,6 @@ class MongoSupport(object):
         app.extensions = getattr(app, 'extensions', {})
         app.extensions['mongosupport'] = self
 
-        # Register filters
-        @app.context_processor
-        def utility_processor():
-            def ms_is_simple(struct):
-                return type(struct) is type
-
-            def ms_is_list(struct):
-                return isinstance(struct, list)
-
-            def ms_is_dict(struct):
-                return isinstance(struct, dict)
-
-            def ms_is_operator_in(struct):
-                return isinstance(struct, IN)
-
-            def ms_is_enum(struct):
-                return isinstance(struct, SimpleEnumMeta)
-
-            def ms_get_type(struct):
-                if type(struct) is type:
-                    return struct.__name__
-                else:
-                    return struct.__class__.__name__
-
-            def ms_create_empty_dict_or_list(struct):
-                if isinstance(struct, dict):
-                    return DotDictProxy({}, struct)
-                if isinstance(struct, list):
-                    return DotListProxy([], struct)
-                return None
-
-            return dict(ms_is_simple=ms_is_simple,
-                        ms_is_list=ms_is_list,
-                        ms_is_dict=ms_is_dict,
-                        ms_is_enum=ms_is_enum,
-                        ms_is_operator_in=ms_is_operator_in,
-                        ms_get_type=ms_get_type,
-                        ms_create_empty_dict_or_list=ms_create_empty_dict_or_list)
-
         self.app = app
 
     def teardown(self, exception):
@@ -110,9 +71,10 @@ class MongoSupport(object):
 
             @ms.register
             class Task(Model):
-                structure = {
-                   'title': unicode,
-                   'text': unicode,
+                __collection__ = 'tasks'
+                schema = {
+                   'title': str,
+                   'text': str,
                    'creation': datetime,
                 }
 
@@ -423,10 +385,10 @@ def populate_model(multidict, model_cls, set_default=True):
         # Normalized the path, e.g, user.roles[0] -> user.roles-0
         path = _normalized_path(key)
         # Model valid paths do not contains list index, so remove them here
-        path = re.sub('\-[0-9]+', '', path)
+        path = re.sub('\-[0-9]+', '[]', path)
         if path in valid_paths:
             t = valid_paths[path]
-            # print "try to convert %s with value %s to type %s" % (path, value, t)
+            # print("try to convert %s with value %s to type %s" % (path, value, t))
             try:
                 if isinstance(value, list):  # Value should be instance of list
                     t = valid_paths[path]
@@ -488,6 +450,8 @@ type_converters = {
 
 
 def convert_from_string(string_value, t):
+    if isinstance(t, SimpleEnumMeta):
+        t = t.type
     if isinstance(string_value, t):
         return string_value
 

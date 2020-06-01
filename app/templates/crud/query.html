@@ -77,9 +77,10 @@
                                         it accordingly.</p>
                                     <div class="code python" style="height:600px;"></div>
                                     <textarea style="display:none;">
+import re
 from flask import Blueprint, render_template, current_app, request, jsonify, abort
 from flask_babel import gettext as _
-from app.core import Pagination
+from app.core import Pagination, convert_from_string, Comparator
 from app.models import {{ model.name|capitalize }}
 from app.tools import auth_permission
 
@@ -91,10 +92,9 @@ MAX_PAGE = 20
 def index():
     """ {{ model.name|capitalize }} index view. """
     page = _parse_page()
-    # TODO: Parse search
-    search = {}
+    search, condition = _parse_search()
     sort = None
-    records, pagination = _get_records_and_pagination({{ model.name|capitalize }}, page, search, sort)
+    records, pagination = _get_records_and_pagination({{ model.name|capitalize }}, page, condition, sort)
     return render_template('{{ plural }}/index.html', search=search, {{ plural }}=records, pagination=pagination)
 
 def _parse_page():
@@ -105,14 +105,42 @@ def _parse_page():
     else:
         return 1
 
-def _get_records_and_pagination(model, page, condition, sort):
+def _parse_search(model):
+    """ Parse search param. """
+    search, condition = {}, {}
+    # Used to get type from a path
+    valid_paths = {{ model.name|capitalize }}._valid_paths
+    for k, v in request.args.items():
+        if not k.startswith('search.') or not v:
+            continue
+        # Remove search. from k
+        k = k.replace('search.', '')
+        search[k] = v
+        # Parse Comparator
+        if '__' in k:
+            k, c = k.split('__')
+            t = valid_paths[k]
+            if Comparator.LIKE == c:
+                # In order to use index, we only support starting string search here
+                # https://docs.mongodb.com/manual/reference/operator/query/regex/#index-use
+                regx = re.compile('^%s' % re.escape(v))
+                condition[k] = {'$regex': regx}
+            else:
+                condition[k] = {'$%s' % c: convert_from_string(v, t)}
+        else:
+            t = valid_paths[k]
+            condition[k] = convert_from_string(v, t)
+    #
+    return search, condition if condition else None
+
+def _get_records_and_pagination(model, page, search, sort):
     """ Query records and generate pagination. """
-    count = model.count(condition)
+    count = model.count(search)
     limit = PAGE_COUNT * MAX_PAGE
     if count > limit:
         count = limit
     start = (page - 1) * PAGE_COUNT
-    records = list(model.find(condition, skip=start, limit=PAGE_COUNT, sort=sort))
+    records = list(model.find(search, skip=start, limit=PAGE_COUNT, sort=sort))
     pagination = Pagination(page, PAGE_COUNT, count)
     return records, pagination
 
@@ -180,29 +208,35 @@ def delete({{ initial }}id):
     <section>
         <form novalidate>
             <div class="form-row justify-content-center">
-                {% for f in model.jschema.indexes %} {# Do not support nested field #}
-                    {% set fs = model.jschema.properties[f] %}
+                {% for f in model.jschema.searchables %}
+                    {# Do not support nested field, and f may contains comparator #}
+                    {% set rf =  f %}
+                    {% if '__' in rf %}
+                        {% set rf = f|split('__') %}
+                        {% set rf = rf[0] %}
+                    {% endif %}
+                    {% set fs = model.jschema.properties[rf] %}
                     {% set path = 'search.' + f %}
                     {% set rv = search[f] %}
                     <div class="col-auto">
-                        <label class="sr-only">{{ f|capitalize }}</label>
+                        <label class="sr-only">{{ rf|capitalize }}</label>
                         {% if fs.enum %}
                             <select class="form-control " name="{{ path }}">
-                                <option value="">Choose {{ f|capitalize }}...</option>
+                                <option value="">Choose {{ rf|capitalize }}...</option>
                                 {% for e in fs.enum %}
                                     <option value="{{ e }}" {{ render_selected(path, rv, e, gen) }}>{{ e }}</option>
                                 {% endfor %}
                             </select>
                         {% elif fs.type == 'boolean' %}
                             <select class="form-control" name="{{ path }}">
-                                <option value="">Choose {{ f|capitalize }}...</option>
+                                <option value="">Choose {{ rf|capitalize }}...</option>
                                 <option value="true" {{ render_selected(path, rv, true, gen) }}>True</option>
                                 <option value="false" {{ render_selected(path, rv, false, gen) }}>False</option>
                             </select>
                         {% else %}
                             <input type="text" class="form-control"
                                    style="{{ 'width:100px' if fs.type in ['integer', 'number'] }}"
-                                   placeholder="{{ f|capitalize }}" value="{{ render_value(path, rv, gen) }}"
+                                   placeholder="{{ rf|capitalize }}" value="{{ render_value(path, rv, gen) }}"
                                    name="{{ path }}">
                         {% endif %}
                     </div>

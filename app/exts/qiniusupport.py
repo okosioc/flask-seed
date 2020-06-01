@@ -30,12 +30,24 @@ class QiniuSupport(object):
         self.base = app.config['QINIU_BASE_URL']
 
     def token(self, policy=None):
-        """ 生成token. """
-        # 上传策略, 可以设置持久化逻辑, 比如进行视频的预处理
-        # https://developer.qiniu.com/kodo/manual/1208/upload-token
+        """ Create upload token using policy
 
-        # 默认过期时间为3600秒
+        https://developer.qiniu.com/kodo/manual/1208/upload-token
+        """
         return self.auth.upload_token(self.bucket, policy=policy)
+
+    def image_token(self):
+        """ Create image upload token.
+
+        https://developer.qiniu.com/kodo/manual/1206/put-policy
+        https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
+        """
+        policy = {
+            'mimeLimit': 'image/jpeg;image/png',
+            'saveKey': '${year}${mon}${day}/${hour}${min}${sec}_${fsize}${ext}',
+            'returnBody': '{"etag":"${etag}","name":"${fname}","key":"${key}","url":"%s/${key}","width":${imageInfo.width},"height":${imageInfo.height}}' % self.base
+        }
+        return self.token(policy)
 
     def upload_data(self, key, data, **kwargs):
         """ 上传数据.

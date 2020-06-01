@@ -40,12 +40,12 @@ class UserDict(SchemaDict):
         'createTime': datetime,
         'updateTime': datetime
     }
-    required_fields = ['name', 'point', 'status', 'roles', 'createTime', 'accounts.id']
+    required_fields = ['name', 'point', 'status', 'roles', 'createTime', 'accounts[].id']
     default_values = {
         'point': 0,
         'status': TestStatus.NORMAL,
         'roles': [TestRole.MEMBER],
-        'accounts.balance': 0.0,
+        'accounts[].balance': 1.0,
         'createTime': datetime.now
     }
 
@@ -58,7 +58,7 @@ def test_schema_dict(app):
     assert ud['point'] == 0
     assert ud.status == TestStatus.NORMAL
     assert ud.roles[0] == TestRole.MEMBER
-    assert ud.accounts[0].balance == 0.0
+    assert ud.accounts[0].balance == 1.0
 
     # Test validate
     with pytest.raises(SeedDataError, match='name') as excinfo:
@@ -66,7 +66,7 @@ def test_schema_dict(app):
     # print(excinfo.value)
     ud.name = 'test'
 
-    with pytest.raises(SeedDataError, match='accounts\.id') as excinfo:
+    with pytest.raises(SeedDataError, match='accounts\[\]\.id') as excinfo:
         ud.validate()
     # print(excinfo.value)
     ud.accounts[0].id = 0

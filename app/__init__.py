@@ -174,6 +174,21 @@ def configure_template_filters(app):
         """ Return keys of dict. """
         return value.keys()
 
+    @app.template_filter()
+    def values(value):
+        """ Return values of dict. """
+        return value.values()
+
+    @app.template_filter()
+    def items(value):
+        """ Return key-value pairs of dict. """
+        return value.items()
+
+    @app.template_filter()
+    def split(value, separator):
+        """ Split a string. """
+        return value.split(separator)
+
 
 def configure_template_functions(app):
     @app.template_global()

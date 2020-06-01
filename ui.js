@@ -41,10 +41,20 @@ env.addFilter('tojson', function (value, spaces) {
     return nunjucks.runtime.markSafe(JSON.stringify(value, null, spaces));
 });
 
-// We need to invoke dict method keys(), it is not supported in Nunjucks.
-// These filters should also be implemented in Jinja2.
+// We need to invoke dict method keys()/values()/items(), it is not supported in Nunjucks
+// So we add below filters in both Nunjucks and Jinja2
 env.addFilter('keys', function (object) {
     return _.keys(object);
+});
+env.addFilter('values', function (object) {
+    return _.values(object);
+});
+env.addFilter('items', function (object) {
+    return _.toPairs(object);
+});
+// Add split filter in both Nunjucks and Jinja2
+env.addFilter('split', function (string, separator) {
+    return _.split(string, separator);
 });
 
 // NOTE: Add filters here if you are using jinja2 filters like filesizeformat, etc.
@@ -122,7 +132,7 @@ var mock_models = [
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'format': 'ObjectId'
+                    'format': 'objectid'
                 },
                 'name': {
                     'type': 'string'
@@ -250,7 +260,7 @@ var mock_models = [
                 }
             },
             'required': ['name', 'avatar', 'point', 'vip', 'status', 'roles', 'createTime'],
-            'indexes': ['name', 'email', 'point', 'vip', 'status']
+            'searchables': ['name', 'email', 'point', 'vip', 'status']
         }
     }
 ];
@@ -384,14 +394,12 @@ app.get('/crud/query/:modelName', function (req, res) {
         offset = (p - 1) * mock_page_count;
     // Perform search
     _.forEach(req.query, function (v, k) {
-        if (_.isEmpty(v)) return true;
-        // Only check the params starts with search.
-        if (k.startsWith("search.")) {
-            k = k.replace("search.", ""); // Remove the search.
-            // Convert string path to segments, e.g, search.name -> [name]
-            var segments = k.replace(/\[/, '.').replace(/\]/, '').split('.');
-            search[k] = convert_string_to_type(schema, segments, v);
-        }
+        // Only check the params starts with search and ignore empty value.
+        if (!k.startsWith("search.") || _.isEmpty(v)) return true;
+        k = k.replace("search.", ""); // Remove the search.
+        // Convert string path to segments, e.g, search.name -> [name]
+        var segments = k.replace(/\[/, '.').replace(/\]/, '').split('.');
+        search[k] = convert_string_to_type(schema, segments, v);
     });
     var matched_records = mock_records;
     if (!_.isEmpty(search)) {
@@ -402,7 +410,6 @@ app.get('/crud/query/:modelName', function (req, res) {
         //   search.name__like
         //   search.status__in
         //   search.point__gte
-        //   search.createDate__between
         matched_records = _.filter(mock_records, search);
     }
     var mock_pages = _.ceil(matched_records.length / mock_page_count),

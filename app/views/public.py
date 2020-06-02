@@ -15,7 +15,7 @@ from flask_login import login_user, logout_user, login_required
 from flask_wtf import FlaskForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
 from app.models import User, UserRole
 from app.tools import send_support_email
@@ -98,7 +98,11 @@ class SignupForm(FlaskForm):
         DataRequired(_('Email is required!')),
         Email(_('Invalid email address!'))
     ])
-    password = PasswordField('password', validators=[DataRequired(_('Password is required!'))])
+    password = PasswordField('password', validators=[
+        DataRequired(_('Password is required!')),
+        Regexp(r'^(?=.{8,16}$)(?=.*[a-zA-Z])(?=.*[0-9]).*', 0,
+               _('Password length should between 8 and 16, and should contains at least one letter and one number!'))
+    ])
     repassword = PasswordField('repassword', validators=[
         DataRequired(_('Password is required!')),
         EqualTo('password', _('Password mismatched!'))

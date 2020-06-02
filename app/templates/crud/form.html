@@ -589,7 +589,7 @@ def save({{ initial }}id=None):
                         {% else %}
                             location.href = "/crud/form/{{ model.name }}/" + result.rid;
                         {% endif %}
-                    }, 2000);
+                    }, 1000);
                 } else {
                     showError(result.message);
                 }

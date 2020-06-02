@@ -40,8 +40,9 @@
         <div class="tab-content">
             <div class="tab-pane active" id="settings">
                 <form id="basic-form" class="form-editor needs-validation" novalidate method="post">
-                    <h5 class="mb-3 bg-light p-2">
-                        <i class="remixicon-account-circle-line align-middle mr-1"></i>Basic Info</h5>
+                    <h5 class="mt-0 mb-3 bg-light p-2">
+                        <i class="remixicon-account-circle-line align-middle mr-1"></i>Basic Info
+                    </h5>
                     <fieldset class="object " name="user">
                         <div class="form-group" name="name">
                             <label>name</label>
@@ -88,14 +89,39 @@
                     <hr class="my-1">
                     <div class="text-right">
                         <button type="button" class="btn btn-primary waves-effect waves-light"
-                                onclick="save($(this));">Save
+                                onclick="save_basic($(this));">Save
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div class="tab-pane active" id="password">
-
+            <div class="tab-pane" id="password">
+                <form id="password-form" class="needs-validation" novalidate method="post">
+                    <div class="mb-3 alert alert-warning">
+                        <i class="remixicon-information-line align-middle mr-1"></i>Password length should between 8 and
+                        16, and should contains at least one letter and one number.
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label>Old Password</label>
+                            <input name="old_password" type="password" class="form-control" value="">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>New Password</label>
+                            <input name="new_password" type="password" class="form-control" value="">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>New Password Confirm</label>
+                            <input name="renew_password" type="password" class="form-control" value="">
+                        </div>
+                    </div>
+                    <hr class="my-1">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-primary waves-effect waves-light"
+                                onclick="save_password($(this));">Save
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </section>
@@ -109,7 +135,7 @@
             install_form();
         });
 
-        function save(btn) {
+        function save_basic(btn) {
             if (btn.is(".doing")) {
                 return;
             }
@@ -135,7 +161,37 @@
                     showInfo('Refreshing...');
                     setTimeout(function () {
                         location.href = "/dashboard/profile";
-                    }, 2000);
+                    }, 1000);
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, "json");
+        }
+
+        function save_password(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var msg = "Are you sure to change password?";
+            var con = window.confirm(msg);
+            if (!con) {
+                return false;
+            }
+            var form = btn.closest("form");
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+            var url = "/dashboard/save_password/{{ user._id }}";
+            $.post(url, form.serialize(), function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    showInfo('Refreshing...');
+                    setTimeout(function () {
+                        location.href = "/dashboard/profile";
+                    }, 1000);
                 } else {
                     showError(result.message);
                 }

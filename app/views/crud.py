@@ -16,7 +16,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.core import populate_model, SeedConnectionError, SeedDataError, Pagination, convert_from_string, Comparator
 from app.extensions import mdb, qiniu
-from app.tools import auth_permission
+from app.tools import editor_permission
 
 crud = Blueprint('crud', __name__)
 
@@ -25,7 +25,7 @@ MAX_PAGE = 20
 
 
 @crud.route('/')
-@auth_permission
+@editor_permission
 def index():
     """ Index page. """
     registered_models = mdb.registered_models
@@ -39,7 +39,7 @@ def index():
 
 
 @crud.route('/query/<string:model_name>')
-@auth_permission
+@editor_permission
 def query(model_name):
     """ Query. """
     registered_models = mdb.registered_models
@@ -111,7 +111,7 @@ def _get_records_and_pagination(model, page, search, sort):
 
 @crud.route('/form/<string:model_name>/')
 @crud.route('/form/<string:model_name>/<ObjectId:record_id>')
-@auth_permission
+@editor_permission
 def form(model_name, record_id=None):
     """ Form page which is used to new/change a record. """
     registered_models = mdb.registered_models
@@ -133,7 +133,7 @@ def form(model_name, record_id=None):
 
 @crud.route('/raw/<string:model_name>/')
 @crud.route('/raw/<string:model_name>/<ObjectId:record_id>')
-@auth_permission
+@editor_permission
 def raw(model_name, record_id=None):
     """ Form page which is used to new/change a record. """
     registered_models = mdb.registered_models
@@ -153,7 +153,7 @@ def raw(model_name, record_id=None):
 
 
 @crud.route('/json/<string:model_name>/<ObjectId:record_id>')
-@auth_permission
+@editor_permission
 def json(model_name, record_id):
     """ Output a json string for specified record. """
     registered_models = mdb.registered_models
@@ -170,7 +170,7 @@ def json(model_name, record_id):
 
 @crud.route('/save/<string:model_name>/', methods=('POST',))
 @crud.route('/save/<string:model_name>/<ObjectId:record_id>', methods=('POST',))
-@auth_permission
+@editor_permission
 def save(model_name, record_id=None):
     """ Create a new record or save an existing record. """
     registered_models = mdb.registered_models
@@ -194,7 +194,7 @@ def save(model_name, record_id=None):
 
 
 @crud.route('/delete/<string:model_name>/<ObjectId:record_id>', methods=('GET', 'POST'))
-@auth_permission
+@editor_permission
 def delete(model_name, record_id):
     """ Delete record. """
     registered_models = mdb.registered_models

@@ -5,7 +5,7 @@
         {'url':'javascript:coming()', 'title':'中文'}
     ],
     'commands': [
-        {'icon':'remixicon-account-circle-line', 'title':'Profile', 'url':'javascript:coming();'},
+        {'icon':'remixicon-account-circle-line', 'title':'Profile', 'url':'/dashboard/profile'},
         {'title':''},
         {'icon':'remixicon-logout-box-line', 'title':'Logout', 'url':'/logout'}
     ],
@@ -54,11 +54,11 @@
                                     <i class="mdi mdi-chevron-down"></i>
                                 </span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right profile-dropdown ">
+                    <div class="dropdown-menu dropdown-menu-right">
                         {% for l in block.commands %}
                             {% if l.title %}
                                 <a href="{{ l.url }}" class="dropdown-item notify-item">
-                                    <i class="{{ l.icon }}"></i>
+                                    <i class="{{ l.icon }} align-middle mr-1"></i>
                                     <span>{{ l.title }}</span>
                                 </a>
                             {% else %}

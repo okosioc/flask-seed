@@ -38,6 +38,7 @@ class User(Model, UserMixin):
         'name': str,
         'email': str,
         'password': str,
+        'intro': str,
         'avatar': str,
         'point': int,
         'status': UserStatus,
@@ -47,13 +48,17 @@ class User(Model, UserMixin):
     }
     required_fields = ['name', 'email', 'point', 'status', 'roles', 'createTime']
     default_values = {'point': 0, 'status': UserStatus.NORMAL, 'roles': [UserRole.MEMBER], 'createTime': datetime.now}
-    formats = {'avatar': Format.IMAGE, 'roles': Format.SELECT}
+    formats = {'intro': Format.TEXTAREA, 'avatar': Format.IMAGE, 'roles': Format.SELECT}
     searchables = ['name', 'email', 'point', 'status']
     indexes = [{'fields': ['email'], 'unique': True}]
 
     @cached_property
     def is_admin(self):
         return UserRole.ADMIN in self.roles
+
+    @cached_property
+    def is_editor(self):
+        return UserRole.EDITOR in self.roles
 
     @cached_property
     def is_rejected(self):

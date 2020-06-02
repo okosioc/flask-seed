@@ -46,6 +46,23 @@ def auth_permission(f):
     return wrapper
 
 
+def editor_permission(f):
+    """ Check editor permission and other business checking.
+
+    :return:
+    """
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if current_user.is_anonymous:
+            abort(401)
+        if current_user.is_rejected or (not current_user.is_admin and not current_user.is_editor):
+            abort(403)
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
 def admin_permission(f):
     """ Check admin permission and other business checking.
 

@@ -1,0 +1,147 @@
+{% extends 'layoutdash.html' %}
+
+{% set left_col, right_col = 3, 9 %}
+{% set breadcrumb = {
+    'title': 'Profile',
+    'links': [
+        {'url':'/', 'title': 'Home'},
+        {'url':'/dashboard/', 'title': 'Dashboard'},
+        {'url':'/dashboard/profile', 'title': 'Profile'}
+    ]
+} %}
+{% block title %}Profile{% endblock %}
+
+{% block left %}
+    <section class="text-center">
+        <img src="{{ user.avatar or base()+'/img/avatar.jpg' }}" class="rounded-circle avatar-xl img-thumbnail">
+        <h4 class="mb-1">{{ user.name }}</h4>
+        <p class="text-muted">
+            <span class="badge badge-{{ 'success' if user.status == 'normal' else 'danger' }}">{{ user.status|upper }}</span>
+        </p>
+        <div class="text-left mt-3">
+            <p class="text-muted mb-1"><strong>Email: </strong><span>{{ user.email }}</span></p>
+            <p class="text-muted mb-1"><strong>Create: </strong><span>{{ user.createTime }}</span></p>
+        </div>
+    </section>
+{% endblock %}
+
+{% block right %}
+    <section>
+        <ul class="nav nav-pills navtab-bg">
+            <li class="nav-item">
+                <a href="#settings" data-toggle="tab" aria-expanded="false" class="nav-link active ml-0">Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#password" data-toggle="tab" aria-expanded="false" class="nav-link">Change Password
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="settings">
+                <form id="basic-form" class="form-editor needs-validation" novalidate method="post">
+                    <h5 class="mb-3 bg-light p-2">
+                        <i class="remixicon-account-circle-line align-middle mr-1"></i>Basic Info</h5>
+                    <fieldset class="object " name="user">
+                        <div class="form-group" name="name">
+                            <label>name</label>
+                            <span class="text-muted font-weight-light">*</span>
+                            <input name="name" type="text" class="form-control " required value="{{ user.name or '' }}">
+                            <div class="invalid-feedback">Please input valid name!</div>
+                        </div>
+                        <div class="form-group" name="intro">
+                            <label>intro</label>
+                            <span class="text-muted font-weight-light"></span>
+                            <textarea name="intro" rows="3" class="form-control">{{ user.intro or '' }}</textarea>
+                            <div class="invalid-feedback">Please input valid intro!</div>
+                        </div>
+
+                        <div class="form-group" name="avatar">
+                            <label>avatar</label>
+                            <span class="text-muted font-weight-light"></span>
+                            <div class="image-input-group">
+                                <a class="btn btn-primary plupload" href="javascript:;"
+                                   data-token="{{ token }}"
+                                   data-upload="//upload.qiniup.com/"
+                                   data-max="10mb"
+                                   data-preview="-prev"
+                                   data-filters='{mime_types:[{title:"Image files",extensions:"jpg, jpeg, png"}]}'
+                                   data-hiddens="url">Choose Image...</a>
+                                <small class="form-text">Support jpg, jpeg, png.</small>
+                                <div class="image-input-result mt-1 clearfix">
+                                    {% if user.avatar %}
+                                        <div class="image uploaded">
+                                            <img src="{{ user.avatar }}-prev">
+                                            <div class="btns">
+                                                <a href="{{ user.avatar }}" target="_blank">i</a>
+                                                <a href="javascript:;"
+                                                   onclick="$(this).closest('.image').remove();">x</a>
+                                            </div>
+                                            <input type="hidden" name="url" value="{{ user.avatar }}">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="invalid-feedback">Please input valid avatar!</div>
+                        </div>
+                    </fieldset>
+                    <hr class="my-1">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-primary waves-effect waves-light"
+                                onclick="save($(this));">Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="tab-pane active" id="password">
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block script %}
+    <script src="/static/assets/vendor/plupload/js/plupload.full.min.js"></script>
+    <script src="{{ base() }}/assets/js/form.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            install_form();
+        });
+
+        function save(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var msg = "Are you sure to save this user?";
+            var con = window.confirm(msg);
+            if (!con) {
+                return false;
+            }
+            // Recursively traverse the form to validate and create the param for post
+            var param = process_form($("#basic-form"));
+            if (!param["valid"]) {
+                showError('Something invalid, please check!');
+                return false;
+            }
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+            var url = "/dashboard/save_basic/{{ user._id }}";
+            $.post(url, param, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    showInfo('Refreshing...');
+                    setTimeout(function () {
+                        location.href = "/dashboard/profile";
+                    }, 2000);
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, "json");
+        }
+    </script>
+{% endblock %}

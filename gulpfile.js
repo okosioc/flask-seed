@@ -68,7 +68,8 @@ gulp.task('scripts:merge', function () {
     // Minify app.js
     return gulp
         .src([
-            paths.js.dir + "/app.js"
+            paths.js.dir + "/app.js",
+            paths.js.dir + "/form.js"
         ])
         .pipe(uglify())
         .pipe(rename({suffix: '.min'}))

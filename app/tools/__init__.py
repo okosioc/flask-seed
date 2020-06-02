@@ -9,6 +9,6 @@
     :date: 16/6/24
 """
 
-from .decorators import async_exec, auth_permission, admin_permission
+from .decorators import async_exec, auth_permission, editor_permission, admin_permission
 from .notifier import send_support_email, send_service_mail
 from .sslsmtphandler import SSLSMTPHandler

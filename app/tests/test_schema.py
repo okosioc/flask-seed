@@ -37,15 +37,23 @@ class UserDict(SchemaDict):
             'name': str,
             'balance': float,
         }],
+        'logins': [{
+            'ip': str,
+            'time': datetime
+        }],
         'createTime': datetime,
         'updateTime': datetime
     }
-    required_fields = ['name', 'point', 'status', 'roles', 'createTime', 'accounts[].id']
+    required_fields = [
+        'name', 'point', 'status', 'roles', 'createTime',
+        'accounts', 'accounts[].id',
+        'logins[].ip', 'logins[].time'
+    ]
     default_values = {
         'point': 0,
         'status': TestStatus.NORMAL,
         'roles': [TestRole.MEMBER],
-        'accounts[].balance': 1.0,
+        'accounts[].balance': 0.0,
         'createTime': datetime.now
     }
 
@@ -58,7 +66,7 @@ def test_schema_dict(app):
     assert ud['point'] == 0
     assert ud.status == TestStatus.NORMAL
     assert ud.roles[0] == TestRole.MEMBER
-    assert ud.accounts[0].balance == 1.0
+    assert ud.accounts[0].balance == 0.0
 
     # Test validate
     with pytest.raises(SeedDataError, match='name') as excinfo:
@@ -76,6 +84,17 @@ def test_schema_dict(app):
         ud.validate()
     # print(excinfo.value)
     ud.status = TestStatus.NORMAL
+
+    # Because logins is empty, so the required rules for logins[].ip is not executed
+    assert ud.validate() is True
+
+    ud.logins = [{'ip': '127.0.0.1'}]
+    with pytest.raises(SeedDataError, match='logins\[\]\.time') as excinfo:
+        ud.validate()
+    # print(excinfo.value)
+    ud.logins[0].time = datetime.now()
+
+    assert ud.validate() is True
 
     # Test json
     td_json = ud.to_json()

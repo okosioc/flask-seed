@@ -12,180 +12,119 @@
 from datetime import datetime
 
 import pymongo
-from bson.objectid import ObjectId
 from flask import Blueprint, request, render_template, abort, jsonify, current_app
 from flask_babel import gettext as _
 from flask_login import current_user
 
+from app.core import populate_model, populate_search
+from app.extensions import qiniu, cache
 from app.jobs import post_view_times_counter
-from app.models import Post, Tag, User
-from app.core import Pagination, populate_model
-from app.tools import auth_permission, send_support_email
+from app.models import Post, Tag
+from app.tools import editor_permission, auth_permission
 
 blog = Blueprint('blog', __name__)
 
-PAGE_COUNT = 10
-
 
 @blog.route('/')
-@blog.route('/index')
 def index():
-    """
-    Index.
-    """
-    tid = request.args.get('t', None)
-    page = int(request.args.get('p', 1))
-    start = (page - 1) * PAGE_COUNT
-    condition = {}
-    if tid:
-        condition = {'tids': ObjectId(tid)}
-    count = Post.count(condition)
-    cursor = Post.find(condition, skip=start, limit=PAGE_COUNT, sort=[('createTime', pymongo.DESCENDING)])
-    pagination = Pagination(page, PAGE_COUNT, count)
-    return render_template('blog/index.html', posts=list(cursor), pagination=pagination, tags=all_tags())
+    """ Index. """
+    page = request.args.get('p', 1, lambda x: int(x) if x.isdigit() else 1)
+    search, condition = populate_search(request.args, Post)
+    sort = [('createTime', pymongo.DESCENDING)]
+    records, pagination = Post.search(condition, page, per_page=10,sort=sort)
+    tag = Tag.find_one(condition['tids']) if condition and 'tids' in condition else None  # The searched tag
+    return render_template('blog/index.html',
+                           search=search, tag=tag,
+                           tags=all_tags(),
+                           posts=records, pagination=pagination)
 
 
+@cache.memoize(900)
 def all_tags():
-    """
-    Fetch all tags.
-    """
+    """ Fetch all tags. """
     cursor = Tag.find({}, sort=[('weight', pymongo.DESCENDING)])
     return [t for t in cursor]
 
 
-@blog.route('/post/<ObjectId:post_id>')
-def post(post_id):
-    """
-    Post.
-    """
-    p = Post.find_one({'_id': post_id})
-    if not p:
-        abort(404)
-
-    post_view_times_counter[post_id] += 1
-
-    uids = set()
-    for c in p.comments:
-        uids.add(c.uid)
-        for r in c.replys:
-            uids.add(r.uid)
-    user_dict = {u._id: u for u in User.find({'_id': {'$in': list(uids)}})}
-    return render_template('blog/post.html', id=post_id, post=p, tags=all_tags(), user_dict=user_dict)
-
-
-@blog.route('/post/new', methods=('GET', 'POST'))
-@blog.route('/post/change/<ObjectId:post_id>', methods=('GET', 'POST'))
-@auth_permission
-def new(post_id=None):
-    # Open page
-    if request.method == 'GET':
-        p = None
-        # Change
-        if post_id:
-            p = Post.find_one({'_id': post_id})
-            if not p:
-                abort(404)
-
-        return render_template('blog/new.html', post=p, tags=all_tags())
-    # Handle post request
+@blog.route('/post/form/')
+@blog.route('/post/form/<ObjectId:pid>')
+@editor_permission
+def form(pid=None):
+    if pid:
+        post = Post.find_one(pid)
+        if not post:
+            abort(404)
     else:
-        try:
-            post = populate_model(request.form, Post)
-            if not post.title:
-                return jsonify(success=False, message=_('Post title can not be blank!'))
-            if not post.body:
-                return jsonify(success=False, message=_('Post body can not be blank!'))
-            if not post.tids:
-                return jsonify(success=False, message=_('Post must at least have a tag!'))
-
-            # New
-            if not post_id:
-                post.uid = current_user._id
-                post.save()
-                post_id = post._id
-                current_app.logger.info('Successfully new a post %s' % post._id)
-            # Change
-            else:
-                existing = Post.find_one({'_id': post_id})
-                existing.title = post.title
-                existing.tids = post.tids
-                existing.body = post.body
-                existing.save()
-                current_app.logger.info('Successfully change a post %s' % post._id)
-        except:
-            current_app.logger.exception('Failed when saving post')
-            return jsonify(success=False, message=_('Failed when saving the post, please try again later!'))
-
-        return jsonify(success=True, message=_('Save the post successfully.'), pid=str(post_id))
+        post = Post()
+    #
+    return render_template('blog/form.html', post=post, token=qiniu.image_token(), tags=all_tags())
 
 
-@blog.route('/comment/<ObjectId:post_id>', methods=('POST',))
+@blog.route('/post/save/', methods=('POST',))
+@blog.route('/post/save/<ObjectId:pid>', methods=('POST',))
+@editor_permission
+def save(pid=None):
+    """ Create or Update a post. """
+    try:
+        post = populate_model(request.form, Post)
+        # Create
+        if not pid:
+            post.uid = current_user._id
+            post.save()
+            pid = post._id
+            current_app.logger.info('Successfully create post %s' % pid)
+        # Update
+        else:
+            existing = Post.find_one(pid)
+            if not existing:
+                abort(404)
+            existing.title = post.title
+            existing.tids = post.tids
+            existing.abstract = post.abstract
+            existing.cover = post.cover
+            existing.body = post.body
+            existing.updateTime = datetime.now()
+            existing.save()
+            current_app.logger.info('Successfully update post %s' % pid)
+    except:
+        current_app.logger.exception('Failed when saving post')
+        return jsonify(success=False, message=_('Failed when saving post, please try again later!'))
+    #
+    return jsonify(success=True, message=_('Save post successfully.'), pid=pid)
+
+
+@blog.route('/post/<ObjectId:pid>')
+def post(pid):
+    """ Post. """
+    existing = Post.find_one(pid)
+    if not existing:
+        abort(404)
+    # Update view times counter, app::jobs will save it once in a while
+    post_view_times_counter[pid] += 1
+    return render_template('blog/post.html', post=existing, tags=all_tags())
+
+
+@blog.route('/post/comment/<ObjectId:pid>', methods=('POST',))
 @auth_permission
-def comment(post_id):
-    """
-    评论博文.
-    """
-    post = Post.find_one({'_id': post_id})
-    if not post:
+def comment(pid):
+    """ Comment on a post. """
+    existing = Post.find_one(pid)
+    if not existing:
         return jsonify(success=False, message=_('The post does not exist!'))
 
-    content = request.form.get('content', None)
-    if not content or not content.strip():
-        return jsonify(success=False, message=_('Comment content can not be blank!'))
+    content = request.form.get('content', '').strip()
+    if not content:
+        return jsonify(success=False, message=_('Comment can not be blank!'))
 
-    max = -1
-    for c in post.comments:
-        if max < c.id:
-            max = c.id
-
-    now = datetime.now()
-
+    idx = max([c.id for c in existing.comments] + [0])
     cmt = {
-        'id': max + 1,
+        'id': idx + 1,
         'uid': current_user._id,
+        'uname': current_user.name,
+        'uavatar': current_user.avatar,
         'content': content,
-        'time': now
+        'time': datetime.now()
     }
-
-    post.comments.insert(0, cmt)
-    post.save()
-
-    send_support_email('comment()',
-                       'New comment %s on post %s.' % (content, post._id))
-
+    existing.comments.insert(0, cmt)
+    existing.save()
     return jsonify(success=True, message=_('Save comment successfully.'))
-
-
-@blog.route('/reply/<ObjectId:post_id>/<int:comment_id>', methods=('POST',))
-@auth_permission
-def reply(post_id, comment_id):
-    """
-    回复.
-    """
-    post = Post.find_one({'_id': post_id})
-    if not post:
-        return jsonify(success=False, message=_('The post does not exist!'))
-
-    content = request.form.get('content', None)
-    if not content or not content.strip():
-        return jsonify(success=False, message=_('Reply content can not be blank!'))
-
-    cmt = next((c for c in post.comments if c.id == comment_id), -1)
-    if cmt == -1:
-        return jsonify(success=False, message=_('The comment you would like to reply does not exist!'))
-
-    now = datetime.now()
-
-    reply = {
-        'uid': current_user._id,
-        'rid': ObjectId(request.form.get('rid', None)),
-        'content': content,
-        'time': now
-    }
-
-    cmt.replys.append(reply)
-    post.save()
-
-    send_support_email('reply()', 'New reply %s on post %s.' % (content, post._id))
-
-    return jsonify(success=True, message=_('Save reply successfully.'))

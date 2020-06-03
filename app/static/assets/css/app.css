@@ -3622,38 +3622,7 @@ div.hopscotch-bubble {
   background: #fff;
   border-radius: 4px; }
 
-.blog-right-sidebar .widget-search form {
-  position: relative; }
-  .blog-right-sidebar .widget-search form .form-control {
-    font-size: 14px; }
-  .blog-right-sidebar .widget-search form .search-button {
-    position: absolute;
-    top: 5px;
-    right: 4px;
-    background-color: #fff;
-    border: none;
-    font-size: 18px;
-    transition: all .3s ease-out; }
-    .blog-right-sidebar .widget-search form .search-button:focus {
-      outline: 0; }
-
-.blog-right-sidebar .widget ul li {
-  padding: 12px 0px; }
-  .blog-right-sidebar .widget ul li:last-child {
-    padding-bottom: 0px; }
-  .blog-right-sidebar .widget ul li a {
-    color: #323a46;
-    display: block; }
-
-.blog-right-sidebar .widget.widget-popular-post .popular-post {
-  border-bottom: 1px solid #3b4452;
-  padding: 15px 0px; }
-  .blog-right-sidebar .widget.widget-popular-post .popular-post img {
-    width: 64px; }
-  .blog-right-sidebar .widget.widget-popular-post .popular-post:last-of-type {
-    border: none; }
-
-.blog-right-sidebar .widget.widget-tag-cloud .tagcloud > a {
+.blog-sidebar .tagcloud > a {
   display: inline-block;
   padding: 5px 10px;
   border: 1px solid rgba(50, 58, 70, 0.1);
@@ -3662,7 +3631,7 @@ div.hopscotch-bubble {
   font-size: 12.4px;
   margin-top: 9px;
   margin-right: 6px; }
-  .blog-right-sidebar .widget.widget-tag-cloud .tagcloud > a:hover {
+  .blog-sidebar .tagcloud > a:hover {
     background: #3bafda;
     border-color: #3bafda;
     color: #fff; }

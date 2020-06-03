@@ -178,7 +178,7 @@ class SchemaMetaclass(type):
             return type.__new__(mcs, name, bases, attrs)
 
         # Protected field names, when dot-mode enabled, can NOT use these names as schema's field names
-        attrs['_protected_field_names'] = {'_protected_field_names', '_valid_paths', 'validation_errors'}
+        attrs['_protected_field_names'] = {'_protected_field_names', 'valid_paths', 'validation_errors'}
         for mro in bases[0].__mro__:
             attrs['_protected_field_names'] = attrs['_protected_field_names'].union(set(mro.__dict__))
         attrs['_protected_field_names'] = list(attrs['_protected_field_names'])
@@ -188,10 +188,10 @@ class SchemaMetaclass(type):
             attrs['schema']['_id'] = ObjectId
 
         # Validate paths
-        attrs['_valid_paths'] = {}
+        attrs['valid_paths'] = {}
         mcs._validate_schema(name, attrs)
-        attrs['_valid_paths'] = {
-            k.replace(name + '.', ''): v for k, v in attrs['_valid_paths'].items() if not k == name
+        attrs['valid_paths'] = {
+            k.replace(name + '.', ''): v for k, v in attrs['valid_paths'].items() if not k == name
         }
 
         # Validate schema descriptors
@@ -208,12 +208,12 @@ class SchemaMetaclass(type):
         def __validate_schema(_schema, path):
             # type
             if type(_schema) is type:
-                attrs['_valid_paths'][path] = _schema
+                attrs['valid_paths'][path] = _schema
                 if _schema not in AUTHORIZED_TYPES:
                     raise SeedSchemaError('%s: %s is not an authorized type' % (path, _schema))
             # {}
             elif isinstance(_schema, dict):
-                attrs['_valid_paths'][path] = {}
+                attrs['valid_paths'][path] = {}
                 if not len(_schema):
                     raise SeedSchemaError(
                         '%s: %s can not be a empty dict' % (path, _schema))
@@ -234,7 +234,7 @@ class SchemaMetaclass(type):
                     __validate_schema(_schema[key], '%s.%s' % (path, key))
             # []
             elif isinstance(_schema, list):
-                attrs['_valid_paths'][path] = []
+                attrs['valid_paths'][path] = []
                 if not len(_schema):
                     raise SeedSchemaError(
                         '%s: %s can not be a empty list' % (path, _schema))
@@ -252,7 +252,7 @@ class SchemaMetaclass(type):
                             path, member, _schema, type(member).__name__))
                 if len(types) > 1:
                     raise SeedSchemaError('%s: %s can not have more than one type' % (path, _schema))
-                attrs['_valid_paths'][path] = list(types)[0]
+                attrs['valid_paths'][path] = list(types)[0]
             else:
                 raise SeedSchemaError(
                     '%s: %s is not a supported thing' % (path, _schema))
@@ -266,7 +266,7 @@ class SchemaMetaclass(type):
     @classmethod
     def _validate_descriptors(mcs, name, attrs):
         """ Validate schema descriptors, e.g, default_values/required_fields/validators/formats/searchables. """
-        valid_paths = attrs['_valid_paths']
+        valid_paths = attrs['valid_paths']
 
         # default_values
         for dv in attrs.get('default_values', {}):
@@ -295,7 +295,7 @@ class SchemaMetaclass(type):
 
         # searchables
         for s in attrs.get('searchables', []):
-            # e.g, ('point', 'between'), the second item is comparator
+            # e.g, [uid, (title, like), (point, lte), (point, gte)], the second item is comparator
             if isinstance(s, tuple):
                 sf, sc = s
                 if sc not in Comparator:
@@ -305,6 +305,20 @@ class SchemaMetaclass(type):
             if sf not in valid_paths:
                 raise SeedSchemaError('%s: Error in searchables: can\'t find %s in schema' % (name, sf))
 
+        # sortables
+        for s in attrs.get('sortables', []):
+            if '.' in s or '[' in s:
+                raise SeedSchemaError('%s: Error in sortables: nested field %s is not supported' % (name, s))
+            if s not in valid_paths:
+                raise SeedSchemaError('%s: Error in sortables: can\'t find %s in schema' % (name, s))
+
+        # columns
+        for c in attrs.get('columns', []):
+            if '.' in c or '[' in c:
+                raise SeedSchemaError('%s: Error in sortables: nested field %s is not supported' % (name, c))
+            if c not in valid_paths:
+                raise SeedSchemaError('%s: Error in sortables: can\'t find %s in schema' % (name, c))
+
     def to_json_schema(cls):
         """ Convert schema to json schema dict.
 
@@ -313,6 +327,12 @@ class SchemaMetaclass(type):
         In order to keep all the things simple, we do not use complex keywords such as oneOf, $ref, patternProperties, additionalProperties, etc.
         https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
         https://swagger.io/docs/specification/data-models/
+
+        However, we still some grammars
+          - Add format to array, so that we can gen a component for the whole array
+          - Add searchables to root object, so that it can be used to generate search form
+          - Add sortables to root object, so that it can be used to generate order drowpdown
+          - Add columns to root object, so that it can be used to generate columns for table
         """
         schema = cls.schema
 
@@ -378,6 +398,9 @@ class SchemaMetaclass(type):
         searchables = [('%s__%s' % s if isinstance(s, tuple) else s) for s in cls.searchables]
         if searchables:
             jschema['searchables'] = searchables
+        if cls.sortables:
+            jschema['sortables'] = cls.sortables
+        jschema['columns'] = cls.columns if cls.columns else cls.required_fields
         # print(json.dumps(jschema))
 
         return jschema
@@ -392,6 +415,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
     validators = {}
     formats = {}
     searchables = []
+    sortables = []
+    columns = []
     raise_validation_errors = True
     use_dot_notation = True
 
@@ -481,7 +506,18 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
         for rf in self.required_fields:
             vals = self._get_values_by_path(doc, rf)
             if not vals:
-                self._raise_exception(SeedDataError, rf, '%s is required' % rf)
+                # Check if its parent is empty
+                # e.g,
+                #   comments[].id -> comments[]
+                #   comments[].likes[].id -> comments[].likes[]
+                # Note that the ending [] will be removed by _get_values_by_path
+                parent_path = '.'.join(rf.split('.')[:-1])
+                if parent_path:
+                    parent_vals = self._get_values_by_path(doc, parent_path)
+                    if parent_vals:
+                        self._raise_exception(SeedDataError, rf, '%s is required' % rf)
+                else:
+                    self._raise_exception(SeedDataError, rf, '%s is required' % rf)
 
     def _process_validators(self, doc):
         """ Invoke validators. """
@@ -514,6 +550,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
             # print('getting values by path %s from %s' % (key, vals))
             new_vals = []
             for val in vals:
+                key = key.replace('[]', '')  # Remove [] syntax in other to get values by key
                 if val is None or key not in val:
                     continue
                 val = val[key]
@@ -525,7 +562,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 else:
                     new_vals.append(val)
             vals = new_vals
-
+        #
         return vals
 
     def _set_default_values(self, doc, schema, path=""):

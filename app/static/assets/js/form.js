@@ -268,6 +268,7 @@ function _process(param, field, path) {
                     param["valid"] = false;
                 }
             }
+            debug("Parsed array's length is " + vals.length);
         } else if (imageInputGroup.length) { // array of string/object
             imageInputGroup.removeClass("in-valid is-invalid");
             var images = imageInputGroup.find(".image.uploaded");
@@ -289,6 +290,7 @@ function _process(param, field, path) {
                     param["valid"] = false;
                 }
             }
+            debug("Parsed array's length is " + images.length);
         } else {
             field.find("> .list-group > .list-group-item").not(".template").each(function (i, n) {
                 _process(param, $(n).children(), path + "[" + i + "]");

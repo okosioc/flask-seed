@@ -70,6 +70,7 @@ env.addGlobal('_', function (str) {
 // User session of flask-login
 var current_user = {
     is_authenticated: false,
+    is_editor: true,
     is_admin: true,
     head: '/static/img/avatar.jpg',
     name: 'Admin',
@@ -121,9 +122,11 @@ env.addTest('string', function (v) {
 // Mock model's jschema is a subset of Object Schema from OAS 3.0, it is converted from app.core.schema::SchemaDict
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
 // https://swagger.io/docs/specification/data-models/
-// However, we still add two grammars
+// However, we still some grammars
 //   - Add format to array, so that we can gen a component for the whole array
-//   - Add indexes to root object, so that it can be used to generate search form
+//   - Add searchables to root object, so that it can be used to generate search form
+//   - Add sortables to root object, so that it can be used to generate order drowpdown
+//   - Add columns to root object, so that it can be used to generate columns for table
 var mock_models = [
     {
         'name': 'user',
@@ -260,7 +263,8 @@ var mock_models = [
                 }
             },
             'required': ['name', 'avatar', 'point', 'vip', 'status', 'roles', 'createTime'],
-            'searchables': ['name', 'email', 'point', 'vip', 'status']
+            'searchables': ['name', 'email', 'point', 'vip', 'status'],
+            'columns': ['avatar', 'name', 'email', 'point', 'vip', 'status', 'roles', 'createTime']
         }
     }
 ];
@@ -369,6 +373,11 @@ app.get('/signup', function (req, res) {
 app.post('/signup', function (req, res) {
     current_user['is_authenticated'] = true;
     res.redirect('/dashboard/');
+});
+
+// Blog
+app.get('/blog/', function (req, res) {
+    res.render('blog/index.html');
 });
 
 // Dashboard

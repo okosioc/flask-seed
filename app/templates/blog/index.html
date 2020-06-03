@@ -1,0 +1,119 @@
+{% extends 'layout.html' %}
+
+{% set title = 'Blog' %}
+{% set breadcrumb = {
+    'title': title,
+    'links': [
+        {'url':'/', 'title': 'Home'},
+        {'url':'/blog/', 'title': title}
+    ]
+} %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main %}
+    {% include 'blocks/breadcrumb.html' %}
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    {% if search.title__like %}
+                        <div class="alert alert-info">
+                            <i class="remixicon-information-line align-middle"></i>
+                            You are searching <i>{{ search.title__like }}</i>, click <a href="/blog/">here</a> to reset.
+                        </div>
+                    {% elif tag %}
+                        <div class="alert alert-info">
+                            <i class="remixicon-information-line align-middle"></i>
+                            You are viewing tag <i>{{ tag.name }}</i>, click <a href="/blog/">here</a> to reset.
+                        </div>
+                    {% endif %}
+                    <div class="row">
+                        {% for p in posts %}
+                            <div class="col-lg-6">
+                                <div class="card overflow-hidden mb-4">
+                                    <div class="blog-img">
+                                        <a href="/blog/post/{{ p._id }}">
+                                            <img src="{{ p.cover }}" alt="{{ p.title }}"
+                                                 class="img-fluid mx-auto d-block">
+                                        </a>
+                                    </div>
+                                    <div class="blog-content p-3 mx-3">
+                                        <h4 class="mt-0">
+                                            <a href="/blog/post/{{ p._id }}" class="text-dark">{{ p.title }}</a>
+                                        </h4>
+                                        <p class="text-muted mb-0">{{ p.abstract }}</p>
+                                    </div>
+                                    <div class="blog-meta px-4 pb-3">
+                                        <p class="float-right text-muted pt-1 mb-0">{{ p.createTime|timesince }}</p>
+                                        <div class="float-left mr-2">
+                                            <img src="{{ p.author.avatar }}" alt=""
+                                                 class="rounded-circle avatar-sm">
+                                        </div>
+                                        <h5 class="font-14 mt-0 pt-2">{{ p.author.name }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-lg-12">
+                                <div class="alert alert-warning">No posts!</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% include 'blocks/paginationcircle.html' %}
+                </div> <!-- /.left -->
+                <div class="col-lg-4 blog-sidebar">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <form id="search-form">
+                                <div class="input-group">
+                                    <input type="text" name="search.title__like" class="form-control border-right-0"
+                                           placeholder="Search..." onkeydown="search($(this))"
+                                           value="{{ search.title or '' }}">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-transparent">
+                                            <i class="remixicon-search-line"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body p-4">
+                            <h4 class="mt-0">Tags</h4>
+                            <hr>
+                            <div class="tagcloud">
+                                {% for t in tags %}
+                                    <a href="/blog/?search.tids={{ t._id }}">{{ t.name }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if current_user.is_editor %}
+                        <div class="card mb-4">
+                            <div class="card-body p-4">
+                                <h4 class="mt-0">Actions</h4>
+                                <hr>
+                                <a class="btn btn-primary btn-sm" href="/blog/post/form/">New</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div> <!-- /.right -->
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function search(btn) {
+            if (event.key === 'Enter') {
+                var val = btn.val().trim();
+                if (val.length) {
+                    location.href = "/blog/?" + $("#search-form").serialize();
+                }
+            }
+        }
+    </script>
+{% endblock %}

@@ -27,12 +27,12 @@ def timesince(dt, default=None):
     now = datetime.now()
     diff = now - dt
 
-    years = diff.days / 365
-    months = diff.days / 30
-    weeks = diff.days / 7
+    years = diff.days // 365
+    months = diff.days // 30
+    weeks = diff.days // 7
     days = diff.days
-    hours = diff.seconds / 3600
-    minutes = diff.seconds / 60
+    hours = diff.seconds // 3600
+    minutes = diff.seconds // 60
     seconds = diff.seconds
 
     periods = (

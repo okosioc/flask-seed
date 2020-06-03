@@ -46,10 +46,11 @@ class User(Model, UserMixin):
         'createTime': datetime,
         'updateTime': datetime
     }
-    required_fields = ['name', 'email', 'point', 'status', 'roles', 'createTime']
+    required_fields = ['name', 'email', 'avatar', 'point', 'status', 'roles', 'createTime']
     default_values = {'point': 0, 'status': UserStatus.NORMAL, 'roles': [UserRole.MEMBER], 'createTime': datetime.now}
     formats = {'intro': Format.TEXTAREA, 'avatar': Format.IMAGE, 'roles': Format.SELECT}
     searchables = ['name', 'email', 'point', 'status']
+    columns = ['avatar', 'name', 'email', 'status', 'roles', 'createTime']
     indexes = [{'fields': ['email'], 'unique': True}]
 
     @cached_property

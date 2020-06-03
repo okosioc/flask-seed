@@ -1,0 +1,176 @@
+{% extends 'layout.html' %}
+
+{% set update = true if post._id else false %}
+{% set title = 'Edit Post' if update else 'New Post' %}
+{% set breadcrumb = {
+    'title': title,
+    'links': [
+        {'url':'/', 'title': 'Home'},
+        {'url':'/blog/', 'title': 'Blog'},
+        {'url':'/blog/post/form/', 'title': title}
+    ]
+} %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block style %}
+    <link href="{{ base() }}/assets/vendor/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ base() }}/assets/vendor/quill/dist/quill.snow.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block main %}
+    {% include 'blocks/breadcrumb.html' %}
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="post-form" class="form-editor needs-validation" novalidate method="post">
+                                <fieldset class="object " name="post">
+                                    <div class="form-group" name="title">
+                                        <label>title</label>
+                                        <span class="text-muted font-weight-light">*</span>
+                                        <input name="title" type="text" class="form-control " required
+                                               value="{{ post.title or '' }}">
+                                        <div class="invalid-feedback">Please input valid title!</div>
+                                    </div>
+                                    <div class="form-group array" name="tids">
+                                        <label>Tags</label>
+                                        <span class="text-muted font-weight-light">*</span>
+                                        <select class="custom-select select2" name="tids" required multiple>
+                                            {% for t in tags %}
+                                                <option value="{{ t._id }}" {{ 'selected' if t._id in post.tids }}>{{ t.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="form-text">Please choose tags for the post.
+                                        </small>
+                                        <div class="invalid-feedback">Please choose tags!</div>
+                                    </div>
+                                    <div class="form-group" name="abstract">
+                                        <label>abstract</label>
+                                        <span class="text-muted font-weight-light">*</span>
+                                        <textarea name="abstract" rows="3" class="form-control"
+                                                  required>{{ post.abstract or '' }}</textarea>
+                                        <div class="invalid-feedback">Please input valid abstract!</div>
+                                    </div>
+                                    <div class="form-group" name="cover">
+                                        <label>cover</label>
+                                        <span class="text-muted font-weight-light">*</span>
+                                        <div class="image-input-group" required>
+                                            <a class="btn btn-primary plupload" href="javascript:;"
+                                               data-token="{{ token }}"
+                                               data-upload="//upload.qiniup.com/" data-max="10mb" data-preview="-prev"
+                                               data-filters='{mime_types:[{title:"Image files",extensions:"jpg, jpeg, png"}]}'
+                                               data-hiddens="url">Choose Image...</a>
+                                            <small class="form-text">Support jpg, jpeg, png.</small>
+                                            <div class="image-input-result mt-1 clearfix">
+                                                {% if post.cover %}
+                                                    <div class="image uploaded">
+                                                        <img src="{{ post.cover }}-prev">
+                                                        <div class="btns">
+                                                            <a href="{{ post.cover }}" target="_blank">i</a>
+                                                            <a href="javascript:;"
+                                                               onclick="$(this).closest('.image').remove();">x</a>
+                                                        </div>
+                                                        <input type="hidden" name="url" value="{{ post.cover }}">
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback">Please input valid cover!</div>
+                                    </div>
+                                    <div class="form-group" name="body">
+                                        <label>body</label>
+                                        <span class="text-muted font-weight-light">*</span>
+                                        <div class="rte-input-group" required>
+                                            <div class="quill" name="body" style="min-height:400px;"
+                                                 data-token="{{ token }}"
+                                                 data-upload="//upload.qiniup.com/" data-max="10mb" data-preview="-rte"
+                                                 data-filters='{mime_types:[{title:"Image files",extensions:"jpg, jpeg, png"}]}'>{{ post.body|safe if post.body is not none }}</div>
+                                            <small class="form-text">You can upload images by clicking the image button
+                                                in the toolbar, support jpg, jpeg, png. <a
+                                                        class="quill-plupload">&nbsp;</a>
+                                            </small>
+                                        </div>
+                                        <div class="invalid-feedback">Please input valid body!</div>
+                                    </div>
+                                </fieldset>
+                                <hr>
+                                <div class="text-right">
+                                    <button type="button" class="btn btn-primary waves-effect waves-light"
+                                            onclick="save($(this));">Save
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 blog-sidebar">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="mt-0">Note</h4>
+                            <hr>
+                            <ul class="list-unstyled">
+                                <li>1. Tags must be created firstly by <a href="/crud/query/tag">CRUD</a>.</li>
+                                <li>2. We are using <a href="https://github.com/quilljs/quill" target="_blank">Quill</a>
+                                    as the default rich text editor and
+                                    <a href="https://github.com/moxiecode/plupload" target="_blank">Plupload</a> for
+                                    image uploading.
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div> <!-- /.right -->
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ base() }}/assets/vendor/select2/dist/js/select2.min.js"></script>
+    <script src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
+    <script src="{{ base() }}/assets/vendor/quill/dist/quill.min.js"></script>
+    <script src="{{ base() }}/assets/js/form.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            install_form();
+        });
+
+        function save(btn) {
+            if (btn.is(".doing")) {
+                return;
+            }
+            var msg = "Are you sure to save this post?";
+            var con = window.confirm(msg);
+            if (!con) {
+                return false;
+            }
+            // Recursively traverse the form to validate and create the param for post
+            var param = process_form($("#post-form"));
+            if (!param["valid"]) {
+                showError('Something invalid, please check!');
+                return false;
+            }
+            btn.addClass("doing");
+            var method = btn.is("input") ? "val" : "text";
+            var oldLabel = btn[method]();
+            btn[method](oldLabel + "...");
+            var url = "/blog/post/save/{{ post._id or '' }}";
+            $.post(url, param, function (result) {
+                if (result.success) {
+                    showSuccess(result.message);
+                    showInfo('Refreshing...');
+                    setTimeout(function () {
+                        location.href = "/blog/post/" + result.pid;
+                    }, 1000);
+                } else {
+                    showError(result.message);
+                }
+                btn.removeClass("doing");
+                btn[method](oldLabel);
+            }, "json");
+        }
+    </script>
+{% endblock %}

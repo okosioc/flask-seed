@@ -86,7 +86,7 @@
                                         used in template are <code>{{ model.name }}</code> & <code>token</code>.
                                     <div class="code html" style="height:600px;"></div>
                                     <iframe style="display:none;">
-                                        <!-- STYLE -->{{ render_style() }}
+                                        <!-- STYLE -->{{ render_style(true) }}
                                         <!-- HTML -->{{ render_html(true) }}
                                         <!-- SCRIPT -->{{ render_script(true) }}
                                     </iframe>
@@ -106,8 +106,21 @@ from app.tools import auth_permission
 
 {{ plural }} = Blueprint('{{ plural }}', __name__)
 
-@{{ plural }}.route('/save/&lt;ObjectId:{{ initial }}id&gt;', methods=('POST',))
+@{{ plural }}.route('/form/')
+@{{ plural }}.route('/form/&lt;ObjectId:{{ initial }}id&gt;')
+@auth_permission
+def form({{ initial }}id=None):
+    if {{ initial }}id:
+        {{ model.name }} = {{ model.name|capitalize }}.find_one({{ initial }}id)
+        if not {{ model.name }}:
+            abort(404)
+    else:
+        {{ model.name }} = {{ model.name|capitalize }}()
+    #
+    return render_template('{{ plural }}/form.html', {{ model.name }}={{ model.name }}, token=qiniu.image_token())
+
 @{{ plural }}.route('/save', methods=('POST',))
+@{{ plural }}.route('/save/&lt;ObjectId:{{ initial }}id&gt;', methods=('POST',))
 @auth_permission
 def save({{ initial }}id=None):
     """ Create or Update a {{ model.name }}. """
@@ -418,8 +431,8 @@ def save({{ initial }}id=None):
                              data-upload="{{ plupload_config.url }}"
                              data-max="{{ plupload_config.max }}"
                              data-preview="{{ plupload_config.rte }}"
-                             data-filters='{mime_types:[{title:"Image files",extensions:"{{ plupload_config.exts }}"}]}'>{{ render_value(path, jvalue|safe, gen) }}</div>
-                        <small class="form-text">You can upload images by clicking the image button in the boolbar,
+                             data-filters='{mime_types:[{title:"Image files",extensions:"{{ plupload_config.exts }}"}]}'>{{ render_safe_value(path, jvalue, gen) }}</div>
+                        <small class="form-text">You can upload images by clicking the image button in the toolbar,
                             support {{ plupload_config.exts }}. <a class="quill-plupload">&nbsp;</a>
                         </small>
                     </div>
@@ -431,7 +444,7 @@ def save({{ initial }}id=None):
                            data-max="{{ plupload_config.max }}"
                            data-preview="{{ plupload_config.preview }}"
                            data-filters='{mime_types:[{title:"Image files",extensions:"{{ plupload_config.exts }}"}]}'
-                           data-hiddens="url">Choose Images...</a>
+                           data-hiddens="url">Choose Image...</a>
                         <small class="form-text">Support {{ plupload_config.exts }}.
                         </small>
                         <div class="image-input-result mt-1 clearfix">
@@ -525,23 +538,35 @@ def save({{ initial }}id=None):
     {%- endif -%}
 {% endmacro %}
 
-{% macro render_style() %}
-    <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
-    <link href="{{ base() }}/assets/vendor/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css">
-    <link href="{{ base() }}/assets/vendor/quill/dist/quill.snow.css" rel="stylesheet" type="text/css">
+{# Render string value snippet with safe filter using field relative path, real value #}
+{% macro render_safe_value(path, rv, gen=false) %}
+    {%- if gen -%}
+        {{ '{{' }} {{ path }}|safe if {{ path }} is not none {{ '}}' }}
+    {%- else -%}
+        {{ rv|safe if rv is not none }}
+    {%- endif -%}
+{% endmacro %}
+
+{% macro render_style(gen=false) %}
+    <link href="{{ '{{ base() }}' if gen else base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet"
+          type="text/css">
+    <link href="{{ '{{ base() }}' if gen else base() }}/assets/vendor/select2/dist/css/select2.min.css" rel="stylesheet"
+          type="text/css">
+    <link href="{{ '{{ base() }}' if gen else base() }}/assets/vendor/quill/dist/quill.snow.css" rel="stylesheet"
+          type="text/css">
 {% endmacro %}
 
 {% macro render_script(gen=false) %}
     {# For format date-time & date #}
-    <script src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
     {# For format select #}
-    <script src="{{ base() }}/assets/vendor/select2/dist/js/select2.min.js"></script>
+    <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/select2/dist/js/select2.min.js"></script>
     {# For format image & rte #}
-    <script src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
+    <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
     {# For format rte #}
-    <script src="{{ base() }}/assets/vendor/quill/dist/quill.min.js"></script>
+    <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/quill/dist/quill.min.js"></script>
     {# Form js functions #}
-    <script src="{{ base() }}/assets/js/form.min.js"></script>
+    <script src="{{ '{{ base() }}' if gen else base() }}/assets/js/form.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             install_form();
@@ -585,7 +610,7 @@ def save({{ initial }}id=None):
                     showInfo('Refreshing...');
                     setTimeout(function () {
                         {% if gen %}
-                            location.href = "/{{ plural }}/form/" + result.rid;
+                            location.href = "/{{ plural }}/form/" + result.{{ initial }}id;
                         {% else %}
                             location.href = "/crud/form/{{ model.name }}/" + result.rid;
                         {% endif %}

@@ -129,7 +129,7 @@ def signup():
         u.email = em
         u.password = generate_password_hash(pwd)
         u.name = u.email.split('@')[0]
-
+        u.avatar = '//cdn.flask-seed.com/avatar.jpg'
         count = User.count({})
         # Set first signup user to admin
         if count == 0:
@@ -137,7 +137,7 @@ def signup():
             current_app.logger.info('First user, set it to admin')
         else:
             current_app.logger.info('Current number of users is %s' % count)
-
+        #
         u.save()
 
         current_app.logger.info('A new user created, %s' % u)

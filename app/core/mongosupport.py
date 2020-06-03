@@ -17,7 +17,7 @@ import pymongo
 from pymongo import MongoClient, uri_parser, ReadPreference, WriteConcern
 from pymongo.cursor import Cursor as PyMongoCursor
 
-from app.core import SchemaDict, SeedDataError, SimpleEnumMeta
+from app.core import SchemaDict, SeedDataError, SimpleEnumMeta, Comparator
 
 # Find the stack on which we want to store the database connection.
 # Starting with Flask 0.9, the _app_ctx_stack is the correct one,
@@ -371,7 +371,7 @@ def populate_model(multidict, model_cls, set_default=True):
     http://flask.pocoo.org/docs/api/#incoming-request-data
     """
     d = {}
-    valid_paths = model_cls._valid_paths
+    valid_paths = model_cls.valid_paths
     model_prefix = model_cls.__name__.lower() + '.'
     for key, value in multidict.items():
         # NOTE: Blank string skipped
@@ -403,6 +403,42 @@ def populate_model(multidict, model_cls, set_default=True):
 
     d = _multidict_decode(d)
     return model_cls(d, set_default)
+
+
+def populate_search(multidict, model_cls):
+    """ Create a condition from search query.
+
+    :returns: search - return to page, condition - send to pymongo for search
+    """
+    search, condition = {}, {}
+    valid_paths = model_cls.valid_paths
+    for k, v in multidict.items():
+        if not k.startswith('search.') or not v:
+            continue
+        # Remove search. from k
+        k = k.replace('search.', '')
+        search[k] = v
+        # Set default comparator
+        c = Comparator.EQ
+        if '__' in k:
+            k, c = k.split('__')
+        # Get type of k, if type is list, use its item's type
+        if k not in valid_paths:
+            continue
+        t = valid_paths[k]
+        if isinstance(t, list):
+            t = valid_paths['%s[]' % k]
+        if Comparator.EQ == c:
+            condition[k] = convert_from_string(v, t)
+        elif Comparator.LIKE == c:
+            # In order to use index, we only support starting string search here
+            # https://docs.mongodb.com/manual/reference/operator/query/regex/#index-use
+            regx = re.compile('^%s' % re.escape(v))
+            condition[k] = {'$regex': regx}
+        else:
+            condition[k] = {'$%s' % c: convert_from_string(v, t)}
+    #
+    return search, condition if condition else None
 
 
 def _normalized_path(path, list_char='-'):
@@ -567,12 +603,25 @@ class Model(SchemaDict):
 
     @classmethod
     def find(cls, *args, **kwargs):
-        """ Find many models.
+        """ Find many models and return cursor.
 
         https://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.find
         """
         collection = cls.get_collection(**kwargs)
         return ModelCursor(cls, collection, *args, **kwargs)
+
+    @classmethod
+    def search(cls, filter=None, page=1, per_page=20, max_page=-1, **kwargs):
+        """ Search models and return records and pagination. """
+        count = cls.count(filter)
+        if max_page > 0:
+            limit = per_page * max_page
+            if count > limit:
+                count = limit
+        start = (page - 1) * per_page
+        records = list(cls.find(filter, skip=start, limit=per_page, **kwargs))
+        pagination = Pagination(page, per_page, count)
+        return records, pagination
 
     @classmethod
     def find_by_ids(cls, ids, *args, **kwargs):

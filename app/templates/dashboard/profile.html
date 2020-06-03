@@ -9,11 +9,12 @@
         {'url':'/dashboard/profile', 'title': 'Profile'}
     ]
 } %}
+
 {% block title %}Profile{% endblock %}
 
 {% block left %}
     <section class="text-center">
-        <img src="{{ user.avatar or base()+'/img/avatar.jpg' }}" class="rounded-circle avatar-xl img-thumbnail">
+        <img src="{{ user.avatar }}" class="rounded-circle avatar-xl img-thumbnail">
         <h4 class="mb-1">{{ user.name }}</h4>
         <p class="text-muted">
             <span class="badge badge-{{ 'success' if user.status == 'normal' else 'danger' }}">{{ user.status|upper }}</span>
@@ -86,7 +87,7 @@
                             <div class="invalid-feedback">Please input valid avatar!</div>
                         </div>
                     </fieldset>
-                    <hr class="my-1">
+                    <hr>
                     <div class="text-right">
                         <button type="button" class="btn btn-primary waves-effect waves-light"
                                 onclick="save_basic($(this));">Save
@@ -128,7 +129,7 @@
 {% endblock %}
 
 {% block script %}
-    <script src="/static/assets/vendor/plupload/js/plupload.full.min.js"></script>
+    <script src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
     <script src="{{ base() }}/assets/js/form.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {

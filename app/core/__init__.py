@@ -11,4 +11,5 @@
 
 from .schema import SimpleEnum, SimpleEnumMeta, Format, Comparator, SchemaJSONEncoder, SchemaDict, SeedDataError, \
     SeedSchemaError, DotDictProxy, DotListProxy
-from .mongosupport import MongoSupport, Pagination, Model, populate_model, convert_from_string, SeedConnectionError
+from .mongosupport import MongoSupport, Pagination, Model, populate_model, populate_search, convert_from_string, \
+    SeedConnectionError

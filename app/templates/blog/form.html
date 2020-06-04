@@ -157,7 +157,7 @@
             var method = btn.is("input") ? "val" : "text";
             var oldLabel = btn[method]();
             btn[method](oldLabel + "...");
-            var url = "/blog/post/save/{{ post._id or '' }}";
+            var url = "/blog/save/{{ post._id or '' }}";
             $.post(url, param, function (result) {
                 if (result.success) {
                     showSuccess(result.message);

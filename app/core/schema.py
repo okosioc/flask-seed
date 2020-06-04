@@ -106,12 +106,12 @@ class Comparator(SimpleEnum):
     Just append $ to build a search.
     """
     EQ = 'eq'  # =
+    NE = 'ne'  # !=
     GT = 'gt'  # >
     GTE = 'gte'  # >=
-    IN = 'in'
     LT = 'lt'  # <
     LTE = 'lte'  # <=
-    NE = 'ne'  # !=
+    IN = 'in'
     NIN = 'nin'
     LIKE = 'like'  # Need to convert this to regex
 
@@ -350,7 +350,7 @@ class SchemaMetaclass(type):
                     sub_path = '%s.%s' % (path, key) if path else key
                     properties[key] = _to_json_schema(_schema[key], sub_path)
                     if sub_path in cls.required_fields:
-                        required.append(sub_path)
+                        required.append(key)
                 ret.update({
                     'type': 'object',
                     'properties': properties,

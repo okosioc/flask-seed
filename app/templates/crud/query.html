@@ -37,6 +37,8 @@
                 <li>2. You can generate codes by clicking <a class="text-danger" href="#gen" data-toggle="modal">GEN</a>
                     here.
                 </li>
+                <li>3. Check <a href="/crud/schema/{{ model.name }}" target="_blank">JSON Schema</a> for {{ model.name|capitalize }}.
+                </li>
             {% endif %}
         </ul>
         <a class="btn btn-primary btn-sm" href="/crud/form/{{ model.name }}/">New</a>

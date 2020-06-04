@@ -430,6 +430,8 @@ def populate_search(multidict, model_cls):
             t = valid_paths['%s[]' % k]
         if Comparator.EQ == c:
             condition[k] = convert_from_string(v, t)
+        elif Comparator.IN == c or Comparator.NIN == c:
+            condition[k] = {'$%s' % c: [convert_from_string(vv, t) for vv in v]}
         elif Comparator.LIKE == c:
             # In order to use index, we only support starting string search here
             # https://docs.mongodb.com/manual/reference/operator/query/regex/#index-use

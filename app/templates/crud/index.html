@@ -53,6 +53,9 @@
                 <a href="https://www.python.org/dev/peps/pep-0008/#class-names" target="_blank">CapWords</a>
                 convention. Their names must be unique, regardless of case.
             </li>
+            {% if current_user.is_admin %}
+                <li>2. Check <a href="/crud/schemas" target="_blank">JSON Schema</a> for all models.</li>
+            {% endif %}
         </ul>
     </section>
 {% endblock %}

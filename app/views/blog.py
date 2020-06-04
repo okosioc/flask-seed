@@ -31,7 +31,7 @@ def index():
     page = request.args.get('p', 1, lambda x: int(x) if x.isdigit() else 1)
     search, condition = populate_search(request.args, Post)
     sort = [('createTime', pymongo.DESCENDING)]
-    records, pagination = Post.search(condition, page, per_page=10,sort=sort)
+    records, pagination = Post.search(condition, page, per_page=10, sort=sort)
     tag = Tag.find_one(condition['tids']) if condition and 'tids' in condition else None  # The searched tag
     return render_template('blog/index.html',
                            search=search, tag=tag,
@@ -46,8 +46,8 @@ def all_tags():
     return [t for t in cursor]
 
 
-@blog.route('/post/form/')
-@blog.route('/post/form/<ObjectId:pid>')
+@blog.route('/form/')
+@blog.route('/form/<ObjectId:pid>')
 @editor_permission
 def form(pid=None):
     if pid:
@@ -60,8 +60,8 @@ def form(pid=None):
     return render_template('blog/form.html', post=post, token=qiniu.image_token(), tags=all_tags())
 
 
-@blog.route('/post/save/', methods=('POST',))
-@blog.route('/post/save/<ObjectId:pid>', methods=('POST',))
+@blog.route('/save/', methods=('POST',))
+@blog.route('/save/<ObjectId:pid>', methods=('POST',))
 @editor_permission
 def save(pid=None):
     """ Create or Update a post. """
@@ -104,7 +104,7 @@ def post(pid):
     return render_template('blog/post.html', post=existing, tags=all_tags())
 
 
-@blog.route('/post/comment/<ObjectId:pid>', methods=('POST',))
+@blog.route('/comment/<ObjectId:pid>', methods=('POST',))
 @auth_permission
 def comment(pid):
     """ Comment on a post. """

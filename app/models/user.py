@@ -50,7 +50,7 @@ class User(Model, UserMixin):
     default_values = {'point': 0, 'status': UserStatus.NORMAL, 'roles': [UserRole.MEMBER], 'createTime': datetime.now}
     formats = {'intro': Format.TEXTAREA, 'avatar': Format.IMAGE, 'roles': Format.SELECT}
     searchables = ['name', 'email', 'point', 'status']
-    columns = ['avatar', 'name', 'email', 'status', 'roles', 'createTime']
+    columns = ['avatar', 'name', 'email', 'point', 'status', 'roles', 'createTime']
     indexes = [{'fields': ['email'], 'unique': True}]
 
     @cached_property

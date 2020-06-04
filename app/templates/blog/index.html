@@ -22,10 +22,11 @@
                             <i class="remixicon-information-line align-middle"></i>
                             You are searching <i>{{ search.title__like }}</i>, click <a href="/blog/">here</a> to reset.
                         </div>
-                    {% elif tag %}
+                    {% elif search.tids %}
                         <div class="alert alert-info">
                             <i class="remixicon-information-line align-middle"></i>
-                            You are viewing tag <i>{{ tag.name }}</i>, click <a href="/blog/">here</a> to reset.
+                            You are viewing tag{{ (' <i>' + tag.name + '</i>')|safe if tag }}, click <a href="/blog/">here</a>
+                            to reset.
                         </div>
                     {% endif %}
                     <div class="row">
@@ -69,7 +70,7 @@
                                 <div class="input-group">
                                     <input type="text" name="search.title__like" class="form-control border-right-0"
                                            placeholder="Search..." onkeydown="search($(this))"
-                                           value="{{ search.title or '' }}">
+                                           value="{{ search.title__like or '' }}">
                                     <div class="input-group-append">
                                         <span class="input-group-text bg-transparent">
                                             <i class="remixicon-search-line"></i>
@@ -95,7 +96,7 @@
                             <div class="card-body p-4">
                                 <h4 class="mt-0">Actions</h4>
                                 <hr>
-                                <a class="btn btn-primary btn-sm" href="/blog/post/form/">New</a>
+                                <a class="btn btn-primary btn-sm" href="/blog/form/">New</a>
                             </div>
                         </div>
                     {% endif %}

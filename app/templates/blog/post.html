@@ -130,7 +130,7 @@
                             <div class="card-body p-4">
                                 <h4 class="mt-0">Actions</h4>
                                 <hr>
-                                <a class="btn btn-primary btn-sm" href="/blog/post/form/{{ post._id }}">Edit</a>
+                                <a class="btn btn-primary btn-sm" href="/blog/form/{{ post._id }}">Edit</a>
                             </div>
                         </div>
                     {% endif %}
@@ -165,7 +165,7 @@
             var method = btn.is("input") ? "val" : "text";
             var oldLabel = btn[method]();
             btn[method](oldLabel + "...");
-            var url = "/blog/post/comment/{{ post._id }}";
+            var url = "/blog/comment/{{ post._id }}";
             $.post(url, param, function (result) {
                 if (result.success) {
                     showSuccess(result.message);

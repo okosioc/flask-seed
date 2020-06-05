@@ -36,7 +36,7 @@
                     y: 80
                 },
                 spacing: 10,
-                template: '<div data-notify="container" class="col-6 alert alert-{0}" role="alert">' +
+                template: '<div data-notify="container" class="alert alert-{0}" style="min-width:400px;" role="alert">' +
                 '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
                 '<span data-notify="icon"></span>' +
                 '<span data-notify="title">{1}</span>' +

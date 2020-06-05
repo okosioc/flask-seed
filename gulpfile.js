@@ -65,7 +65,7 @@ gulp.task('scripts:merge', function () {
         ])
         .pipe(concat("vendor.min.js"))
         .pipe(gulp.dest(paths.js.dir));
-    // Minify app.js
+    // Minify app.js & form.js
     return gulp
         .src([
             paths.js.dir + "/app.js",

@@ -21,7 +21,6 @@ from werkzeug.utils import secure_filename
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
-from app.extensions import qiniu
 from app.models import User, UserRole
 from app.tools import send_support_email, editor_permission
 
@@ -130,7 +129,7 @@ def signup():
         u.email = em
         u.password = generate_password_hash(pwd)
         u.name = u.email.split('@')[0]
-        u.avatar = qiniu.url('avatar.jpg')
+        u.avatar = url_for('static', filename='img/avatar.jpg')
         count = User.count({})
         # Set first signup user to admin
         if count == 0:

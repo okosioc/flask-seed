@@ -221,6 +221,11 @@ def configure_before_handlers(app):
         request.IPHONE = True if platform == 'iphone' else False
         request.ANDROID = True if platform == 'android' else False
 
+    @app.before_request
+    def set_is_xhr():
+        """ Set is_xhr. """
+        request.is_xhr = request.accept_mimetypes.best == 'application/json'
+
 
 def configure_errorhandlers(app):
     @app.errorhandler(400)

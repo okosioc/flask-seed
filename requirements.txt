@@ -2,6 +2,7 @@ Flask
 Flask-Caching
 Flask-Login
 Flask-WTF
+wtforms[email]
 Flask-Mail
 Flask-Script
 Flask-Babel
@@ -13,4 +14,3 @@ arrow
 qiniu
 pandas
 pydash
-email_validator

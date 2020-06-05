@@ -7,14 +7,10 @@ Flask-Script
 Flask-Babel
 pytest
 pymongo
-blinker
 fabric
 schedule
-requests
-lxml
-# mac: xcode-select --install
-# centos: yum install python-lxml libxml2-devel libxslt-devel
 arrow
 qiniu
 pandas
 pydash
+email_validator

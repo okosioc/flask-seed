@@ -24,7 +24,7 @@ from werkzeug.urls import url_quote, url_encode
 
 from app import views
 from app.core import SchemaJSONEncoder
-from app.extensions import mail, cache, mdb, uploads, qiniu
+from app.extensions import mail, cache, mdb, qiniu
 from app.jobs import init_schedule
 from app.models import User
 from app.tools import SSLSMTPHandler, helpers
@@ -84,9 +84,6 @@ def configure_extensions(app):
     mail.init_app(app)
     cache.init_app(app)
     mdb.init_app(app)
-    endpoint = app.config['UPLOAD_ENDPOINT']
-    if 'qiniup.com' in endpoint:
-        qiniu.init_app(app)
 
 
 def configure_login(app):
@@ -99,11 +96,29 @@ def configure_login(app):
 
 
 def configure_uploads(app):
-    """ Configure upload settings, e.g, the maximum file size
+    """ Configure upload settings. """
+    endpoint = app.config['UPLOAD_ENDPOINT']
+    is_local = re.match(r'^\/[a-z]+', endpoint)
+    is_qiniu = 'qiniu' in endpoint
 
-    https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/
-    """
-    app.config['MAX_CONTENT_LENGTH'] = app.config['UPLOAD_IMAGE_MAX'] * 1024 * 1024  # Config unit is megabyte
+    if is_local:
+        # https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/#improving-uploads
+        app.config['MAX_CONTENT_LENGTH'] = app.config['UPLOAD_IMAGE_MAX'] * 1024 * 1024  # Config unit is megabyte
+    elif is_qiniu:
+        qiniu.init_app(app)
+
+    @app.context_processor
+    def inject_upload_config():
+        token = qiniu.image_token() if is_qiniu else ''
+        uc = {
+            'endpoint': endpoint,
+            'image_exts': app.config['UPLOAD_IMAGE_EXTS'],
+            'image_max': '%smb' % app.config['UPLOAD_IMAGE_MAX'],  # Config unit is megabyte
+            'image_preview': app.config['UPLOAD_IMAGE_PREVIEW'],
+            'image_normal': app.config['UPLOAD_IMAGE_NORMAL'],
+            'image_token': token
+        }
+        return dict(upload_config=uc)
 
 
 def configure_i18n(app):
@@ -140,20 +155,6 @@ def configure_context_processors(app):
     @app.context_processor
     def inject_debug():
         return dict(debug=app.debug)
-
-    @app.context_processor
-    def inject_upload_config():
-        endpoint = app.config['UPLOAD_ENDPOINT']
-        is_local = re.match(r'^\/[a-z]+', endpoint)
-        uc = {
-            'endpoint': endpoint,
-            'image_exts': app.config['UPLOAD_IMAGE_EXTS'],
-            'image_max': '%smb' % app.config['UPLOAD_IMAGE_MAX'],  # Config unit is megabyte
-            'image_preview': app.config['UPLOAD_IMAGE_PREVIEW'],
-            'image_normal': app.config['UPLOAD_IMAGE_NORMAL'],
-            'image_token': '' if is_local else qiniu.image_token()
-        }
-        return dict(upload_config=uc)
 
 
 def configure_template_filters(app):

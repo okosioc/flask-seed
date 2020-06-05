@@ -1870,8 +1870,7 @@ Responsive Menu
     display: block; }
   .form-editor .image-input-group .image-input-result .image {
     position: relative;
-    max-width: 150px;
-    width: auto;
+    width: 150px;
     height: 150px;
     border: 1px solid #dee2e6;
     border-radius: .25rem;
@@ -1903,21 +1902,18 @@ Responsive Menu
       height: 100%;
       width: auto; }
     .form-editor .image-input-group .image-input-result .image.error {
-      width: 150px;
       text-align: center;
       display: table; }
       .form-editor .image-input-group .image-input-result .image.error small {
         display: table-cell;
         vertical-align: middle;
         color: #f1556c; }
-    .form-editor .image-input-group .image-input-result .image.uploading {
-      width: 150px; }
-      .form-editor .image-input-group .image-input-result .image.uploading .progress {
-        position: absolute;
-        top: 50%;
-        width: 140px;
-        left: 50%;
-        margin-left: -70px; }
+    .form-editor .image-input-group .image-input-result .image.uploading .progress {
+      position: absolute;
+      top: 50%;
+      width: 140px;
+      left: 50%;
+      margin-left: -70px; }
 
 #raw-editor {
   font-size: 11pt;

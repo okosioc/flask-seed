@@ -133,8 +133,7 @@
     .image-input-result {
       .image {
         position: relative;
-        max-width: 150px;
-        width: auto;
+        width: 150px;
         height: 150px;
         border: $thumbnail-border-width solid $thumbnail-border-color;
         border-radius: .25rem;
@@ -179,7 +178,6 @@
         }
 
         &.error {
-          width: 150px;
           text-align: center;
           display: table;
 
@@ -191,8 +189,6 @@
         }
 
         &.uploading {
-          width: 150px;
-
           .progress {
             position: absolute;
             top: 50%;

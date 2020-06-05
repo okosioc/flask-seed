@@ -20,7 +20,6 @@ from bson.objectid import ObjectId
 from flask import Flask, request, redirect, jsonify, url_for, render_template, session, has_request_context
 from flask_babel import Babel
 from flask_login import LoginManager
-from flask_uploads import patch_request_class, UploadConfiguration
 from werkzeug.urls import url_quote, url_encode
 
 from app import views
@@ -84,8 +83,10 @@ def create_app(blueprints=None, pytest=False, runscripts=False):
 def configure_extensions(app):
     mail.init_app(app)
     cache.init_app(app)
-    qiniu.init_app(app)
     mdb.init_app(app)
+    endpoint = app.config['UPLOAD_ENDPOINT']
+    if 'qiniup.com' in endpoint:
+        qiniu.init_app(app)
 
 
 def configure_login(app):
@@ -98,16 +99,11 @@ def configure_login(app):
 
 
 def configure_uploads(app):
+    """ Configure upload settings, e.g, the maximum file size
+
+    https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/
     """
-    文件上传支持.
-    将图片直接保存在static目录之下, 因此在生产环境中可以直接由nginx提供服务.
-    注意没有调用flask_uploads的configure_uploads(), 这个方法负责为每个uploadset生成UploadConfiguration, 并且注册一个blueprint用来生成上传后的url.
-    所以直接初始化UploadConfiguration, 注意在上传完文件后要使用url_for('static', filename=[])来生成url.
-    """
-    # 设置上传目标路径, 无需通过配置文件设置一个绝对路径
-    uploads._config = UploadConfiguration(os.path.join(app.root_path, 'static', 'uploads'))
-    # 限制上传文件大小
-    patch_request_class(app, 10 * 1024 * 1024)
+    app.config['MAX_CONTENT_LENGTH'] = app.config['UPLOAD_IMAGE_MAX'] * 1024 * 1024  # Config unit is megabyte
 
 
 def configure_i18n(app):
@@ -116,17 +112,16 @@ def configure_i18n(app):
     @babel.localeselector
     def get_locale():
         if has_request_context() and request:
-            # 某个请求加了此参数, 则保存到session中, 优先使用此locale
-            l = request.args.get('_locale', None)
-            if l:
+            # Request a locale and save to session
+            rl = request.args.get('_locale', None)
+            if rl:
                 accept_languages = app.config.get('ACCEPT_LANGUAGES')
-                if l not in accept_languages:
-                    l = request.accept_languages.best_match(accept_languages)
-                session['_locale'] = l
+                if rl not in accept_languages:
+                    rl = request.accept_languages.best_match(accept_languages)
+                session['_locale'] = rl
 
-            # 从Session中读取locale, 没有则读取默认值
-            sl = session.get('_locale', app.config.get('BABEL_DEFAULT_LOCALE'))
-            return sl
+            # Get locale from session, or return default locale
+            return session.get('_locale', app.config.get('BABEL_DEFAULT_LOCALE'))
         else:
             return None
 
@@ -148,13 +143,15 @@ def configure_context_processors(app):
 
     @app.context_processor
     def inject_upload_config():
+        endpoint = app.config['UPLOAD_ENDPOINT']
+        is_local = re.match(r'^\/[a-z]+', endpoint)
         uc = {
-            'endpoint': app.config['UPLOAD_ENDPOINT'],
+            'endpoint': endpoint,
             'image_exts': app.config['UPLOAD_IMAGE_EXTS'],
-            'image_max': app.config['UPLOAD_IMAGE_MAX'],
+            'image_max': '%smb' % app.config['UPLOAD_IMAGE_MAX'],  # Config unit is megabyte
             'image_preview': app.config['UPLOAD_IMAGE_PREVIEW'],
             'image_normal': app.config['UPLOAD_IMAGE_NORMAL'],
-            'image_token': qiniu.image_token()
+            'image_token': '' if is_local else qiniu.image_token()
         }
         return dict(upload_config=uc)
 
@@ -233,7 +230,7 @@ def configure_errorhandlers(app):
             'content': 'Unexpected request received!'
         }
         if request.is_xhr:
-            return jsonify(success=False, message='{content}({status})'.format(**err))
+            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), 400
 
     @app.errorhandler(401)
@@ -244,7 +241,7 @@ def configure_errorhandlers(app):
             'content': 'Login required!'
         }
         if request.is_xhr:
-            return jsonify(success=False, message='{content}({status})'.format(**err))
+            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
         return redirect(url_for('public.login', next=request.path))
 
     @app.errorhandler(403)
@@ -255,7 +252,7 @@ def configure_errorhandlers(app):
             'content': 'Not allowed or forbidden!'
         }
         if request.is_xhr:
-            return jsonify(success=False, message='{content}({status})'.format(**err))
+            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), 403
 
     @app.errorhandler(404)
@@ -266,7 +263,7 @@ def configure_errorhandlers(app):
             'content': 'The requested URL was not found on this server!'
         }
         if request.is_xhr:
-            return jsonify(success=False, message='{content}({status})'.format(**err))
+            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), 404
 
     @app.errorhandler(500)
@@ -277,7 +274,7 @@ def configure_errorhandlers(app):
             'content': 'Unexpected error occurred! Please try again later.'
         }
         if request.is_xhr:
-            return jsonify(success=False, message='{content}({status})'.format(**err))
+            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), 500
 
 
@@ -300,7 +297,7 @@ def configure_logging(app):
     else:
         mail_handler = SMTPHandler(*mail_config)
 
-    # 产品模式时才发送错误邮件
+    # Only send email in productio mode
     if not app.debug:
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
@@ -320,6 +317,6 @@ def configure_logging(app):
     error_file_handler.setFormatter(formatter)
     app.logger.addHandler(error_file_handler)
 
-    # Flask运行在产品模式时, 只会输出ERROR, 此处使之输入INFO
+    # Set logging level to info in production mode
     if not app.debug:
         app.logger.setLevel(logging.INFO)

@@ -28,12 +28,20 @@ MAIL_DEFAULT_SENDER = '<FIXME>'
 MONGODB_URI = 'mongodb://localhost:27017/flask-seed'
 MONGODB_URI_PYTEST = 'mongodb://localhost:27017/pytest'
 
+# Upload to Storage Service
 UPLOAD_ENDPOINT = '//upload.qiniup.com/'
 UPLOAD_BASE = '//cdn.flask-seed.com'
 UPLOAD_BUCKET = 'flask-seed'
 UPLOAD_AK = '<FIXME>'
 UPLOAD_SK = '<FIXME>'
 UPLOAD_IMAGE_EXTS = ['jpg', 'jpeg', 'png']
-UPLOAD_IMAGE_MAX = '10mb'
+UPLOAD_IMAGE_MAX = 10
 UPLOAD_IMAGE_PREVIEW = '?imageView2/1/w/300/h/300/q/75'
 UPLOAD_IMAGE_NORMAL = '?imageView2/1/w/600/q/75'
+# Upload to Local
+# UPLOAD_ENDPOINT = '/upload'
+# UPLOAD_FOLDER = 'uploads'
+# UPLOAD_IMAGE_EXTS = ['jpg', 'jpeg', 'png']
+# UPLOAD_IMAGE_MAX = 10
+# UPLOAD_IMAGE_PREVIEW = ''
+# UPLOAD_IMAGE_NORMAL = ''

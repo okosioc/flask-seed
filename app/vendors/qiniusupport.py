@@ -43,6 +43,7 @@ class QiniuSupport(object):
         https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
         """
         policy = {
+            'fsizeLimit': self.app.config['UPLOAD_IMAGE_MAX'] * 1024 * 1024,  # Config unit is megabyte
             'mimeLimit': 'image/jpeg;image/png',
             'saveKey': '${year}${mon}${day}/${hour}${min}${sec}_${fsize}${ext}',
             'returnBody': '{"etag":"${etag}","name":"${fname}","key":"${key}","url":"%s/${key}","width":${imageInfo.width},"height":${imageInfo.height}}' % self.base

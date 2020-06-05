@@ -14,13 +14,6 @@
         {'url':'/crud/form/'+model.name+'/'+(record._id|string if record._id else ''), 'title': title}
     ]
 } %}
-{% set plupload_config = {
-    'url': '//upload.qiniup.com/',
-    'max': '10mb',
-    'exts': 'jpg, jpeg, png',
-    'preview': '-prev',
-    'rte': '-rte'
-} %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -286,13 +279,13 @@ def save({{ initial }}id=None):
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
                 <div class="image-input-group" {{ 'required' if is_required }}>
                     <a class="btn btn-primary plupload" href="javascript:;" multiple
-                       data-token="{{ '{{ token }}' if gen else token }}"
-                       data-upload="{{ plupload_config.url }}"
-                       data-max="{{ plupload_config.max }}"
-                       data-preview="{{ plupload_config.preview }}"
-                       data-filters='{mime_types:[{title:"Image files",extensions:"{{ plupload_config.exts }}"}]}'
+                       data-token="{{ '{{ upload_config.image_token }}' if gen else upload_config.image_token }}"
+                       data-upload="{{ upload_config.endpoint }}"
+                       data-max="{{ upload_config.image_max }}"
+                       data-preview="{{ upload_config.image_preview }}"
+                       data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'
                        data-hiddens="{{ hiddens|join(',') }}">Choose Images...</a>
-                    <small class="form-text">Support {{ plupload_config.exts }}.
+                    <small class="form-text">Support {{ upload_config.image_exts|join(', ') }}.
                     </small>
                     <div class="image-input-result mt-1 clearfix">
                         {% if jschema['items'].type == 'object' %} {# object array #}
@@ -427,25 +420,25 @@ def save({{ initial }}id=None):
                 {% elif jschema.format == 'rte' %}
                     <div class="rte-input-group" {{ 'required' if is_required }}>
                         <div class="quill" name="{{ name }}"
-                             data-token="{{ '{{ token }}' if gen else token }}"
-                             data-upload="{{ plupload_config.url }}"
-                             data-max="{{ plupload_config.max }}"
-                             data-preview="{{ plupload_config.rte }}"
-                             data-filters='{mime_types:[{title:"Image files",extensions:"{{ plupload_config.exts }}"}]}'>{{ render_safe_value(path, jvalue, gen) }}</div>
+                             data-token="{{ '{{ upload_config.image_token }}' if gen else upload_config.image_token }}"
+                             data-upload="{{ upload_config.endpoint }}"
+                             data-max="{{ upload_config.image_max }}"
+                             data-preview="{{ upload_config.image_normal }}"
+                             data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'>{{ render_safe_value(path, jvalue, gen) }}</div>
                         <small class="form-text">You can upload images by clicking the image button in the toolbar,
-                            support {{ plupload_config.exts }}. <a class="quill-plupload">&nbsp;</a>
+                            support {{ upload_config.image_exts|join(', ') }}. <a class="quill-plupload">&nbsp;</a>
                         </small>
                     </div>
                 {% elif jschema.format == 'image' %}
                     <div class="image-input-group" {{ 'required' if is_required }}>
                         <a class="btn btn-primary plupload" href="javascript:;"
-                           data-token="{{ '{{ token }}' if gen else token }}"
-                           data-upload="{{ plupload_config.url }}"
-                           data-max="{{ plupload_config.max }}"
-                           data-preview="{{ plupload_config.preview }}"
-                           data-filters='{mime_types:[{title:"Image files",extensions:"{{ plupload_config.exts }}"}]}'
+                           data-token="{{ '{{ upload_config.image_token }}' if gen else upload_config.image_token }}"
+                           data-upload="{{ upload_config.endpoint }}"
+                           data-max="{{ upload_config.image_max }}"
+                           data-preview="{{ upload_config.image_preview }}"
+                           data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'
                            data-hiddens="url">Choose Image...</a>
-                        <small class="form-text">Support {{ plupload_config.exts }}.
+                        <small class="form-text">Support {{ upload_config.image_exts|join(', ') }}.
                         </small>
                         <div class="image-input-result mt-1 clearfix">
                             {% if gen %}
@@ -480,7 +473,7 @@ def save({{ initial }}id=None):
 {# Render image uploaded sinppet for image upload component, jvalue is string #}
 {% macro render_image_string(rv) %}
     <div class="image uploaded">
-        <img src="{{ rv }}{{ plupload_config.preview }}">
+        <img src="{{ rv }}{{ upload_config.image_preview }}">
         <div class="btns">
             <a href="{{ rv }}" target="_blank">i</a>
             <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
@@ -492,7 +485,7 @@ def save({{ initial }}id=None):
 {# Render image uploaded sinppet for image upload component, jvalue is object #}
 {% macro render_image_object(hiddens) %}
     <div class="image uploaded">
-        <img src="{{ caller('url') }}{{ plupload_config.preview }}">
+        <img src="{{ caller('url') }}{{ upload_config.image_preview }}">
         <div class="btns">
             <a href="{{ caller('url') }}" target="_blank">i</a>
             <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>

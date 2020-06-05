@@ -16,7 +16,7 @@ from flask import Blueprint, render_template, abort, current_app, request, jsoni
 from pymongo.errors import DuplicateKeyError
 
 from app.core import populate_model, SeedConnectionError, SeedDataError, populate_search
-from app.extensions import mdb, qiniu
+from app.extensions import mdb
 from app.tools import editor_permission
 
 crud = Blueprint('crud', __name__)
@@ -79,8 +79,7 @@ def form(model_name, record_id=None):
                                'name': model_name.lower(),
                                'jschema': model.to_json_schema()
                            },
-                           record=record,
-                           token=qiniu.image_token())
+                           record=record)
 
 
 @crud.route('/raw/<string:model_name>/')

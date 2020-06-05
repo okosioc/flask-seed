@@ -25,12 +25,12 @@ class QiniuSupport(object):
 
     def init_app(self, app):
         self.app = app
-        self.auth = qiniu.Auth(app.config['QINIU_AK'], app.config['QINIU_SK'])
-        self.bucket = app.config['QINIU_BUCKET']
-        self.base = app.config['QINIU_BASE_URL']
+        self.auth = qiniu.Auth(app.config['UPLOAD_AK'], app.config['UPLOAD_SK'])
+        self.bucket = app.config['UPLOAD_BUCKET']
+        self.base = app.config['UPLOAD_BASE']
 
     def token(self, policy=None):
-        """ Create upload token using policy
+        """ Create upload token using policy.
 
         https://developer.qiniu.com/kodo/manual/1208/upload-token
         """
@@ -50,9 +50,9 @@ class QiniuSupport(object):
         return self.token(policy)
 
     def upload_data(self, key, data, **kwargs):
-        """ 上传数据.
+        """ Upload data.
 
-        注: 七牛没有文件夹的概念, 其自身定位是对象存储, 所以只有key这个字段.
+        NOTE: Qiniu is a key-value store
         """
         ret, info = qiniu.put_data(self.token(), key, data, **kwargs)
         if ret:
@@ -62,7 +62,7 @@ class QiniuSupport(object):
             return None
 
     def upload_stream(self, key, input_stream, file_name, data_size, **kwargs):
-        """ 上传本地的文件. """
+        """ Upload stream. """
         ret, info = qiniu.put_stream(self.token(), key, input_stream, file_name, data_size, **kwargs)
         if ret:
             return self.url(ret['key'])
@@ -71,7 +71,7 @@ class QiniuSupport(object):
             return None
 
     def upload_file(self, key, file, **kwargs):
-        """ 上传本地的文件. """
+        """ Upload file. """
         ret, info = qiniu.put_file(self.token(), key, file, **kwargs)
         if ret:
             return self.url(ret['key'])
@@ -80,5 +80,5 @@ class QiniuSupport(object):
             return None
 
     def url(self, key):
-        """ 生成完整路径."""
+        """ Get full path of a qiniu key. """
         return '%s/%s' % (self.base, key)

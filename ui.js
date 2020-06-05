@@ -76,8 +76,8 @@ var current_user = {
     is_authenticated: false,
     is_editor: true,
     is_admin: true,
-    _id: '9394',
-    avatar: '/static/img/avatar.jpg',
+    _id: '709394',
+    avatar: config.upload.base + '/avatar.jpg',
     name: 'Admin',
 };
 env.addGlobal('current_user', current_user);
@@ -94,6 +94,17 @@ app.use(function (req, res, next) {
         _.unset(kwargs, '__keywords');
         // Update current query, http://expressjs.com/en/api.html#req.query
         return req.path + '?' + querystring.stringify(_.assign(req.query, kwargs));
+    });
+
+    // Upload config
+    // The upload token will be outdated, so we set this varible at request level
+    env.addGlobal('upload_config', {
+        'endpoint': config.upload.endpoint,
+        'image_exts': config.upload.image_exts,
+        'image_max': config.upload.image_max,
+        'image_preview': config.upload.image_preview,
+        'image_normal': config.upload.image_normal,
+        'image_token': gen_qiniu_token()
     });
 
     next();
@@ -279,12 +290,12 @@ var mock_records_dict = function () {
     });
     // Manually update records fields and relationship
     _.forEach(ret['user'], function (u) {
-        u.avatar = '//cdn.flask-seed.com/avatar.jpg'
+        u.avatar = config.upload.base + '/avatar.jpg'
     });
     _.forEach(ret['post'], function (p) {
         p.uid = _.sample(ret['user'])._id;
         p.tids = [_.sample(ret['tag'])._id];
-        p.cover = '//cdn.flask-seed.com/' + '800x533-' + _.sample(_.range(1, 6)) + '.jpg' // Pre-uploaded 3:2 images
+        p.cover = config.upload.base + '/800x533-' + _.sample(_.range(1, 6)) + '.jpg' // Pre-uploaded 3:2 images
     });
     return ret;
 }(), mock_per_page = 10;
@@ -301,12 +312,12 @@ function init_mock_record(modelName) {
 // https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
 function gen_qiniu_token() {
     var options = {
-        scope: config.qiniu.bucket,
+        scope: config.upload.bucket,
         mimeLimit: 'image/jpeg;image/png',
         saveKey: '${year}${mon}${day}/${hour}${min}${sec}_${fsize}${ext}',
-        returnBody: '{"etag":"${etag}","name":"${fname}","key":"${key}","url":"' + config.qiniu.base + '/${key}","width":${imageInfo.width},"height":${imageInfo.height}}'
+        returnBody: '{"etag":"${etag}","name":"${fname}","key":"${key}","url":"' + config.upload.base + '/${key}","width":${imageInfo.width},"height":${imageInfo.height}}'
     };
-    var pp = new qiniu.rs.PutPolicy(options), mac = new qiniu.auth.digest.Mac(config.qiniu.ak, config.qiniu.sk);
+    var pp = new qiniu.rs.PutPolicy(options), mac = new qiniu.auth.digest.Mac(config.upload.ak, config.upload.sk);
     return pp.uploadToken(mac);
 }
 
@@ -510,7 +521,7 @@ app.get('/blog/form/(*)', function (req, res) {
             return;
         }
     }
-    res.render('blog/form.html', {post: decorate_post(post), tags: mock_records_dict['tag'], token: gen_qiniu_token()});
+    res.render('blog/form.html', {post: decorate_post(post), tags: mock_records_dict['tag']});
 });
 app.post('/blog/save/(*)', function (req, res) {
     var postId = req.params[0],
@@ -588,6 +599,10 @@ app.get('/dashboard/', function (req, res) {
 app.get('/dashboard/blank', function (req, res) {
     res.render('dashboard/blank.html');
 });
+app.get('/dashboard/profile', function (req, res) {
+    res.render('dashboard/profile.html', {user: current_user});
+});
+// TODO: save_basic & save_password
 
 // CRUD
 app.get('/crud/', function (req, res) {
@@ -615,7 +630,7 @@ app.get('/crud/form/:modelName/(*)', function (req, res) {
             return;
         }
     }
-    res.render('crud/form.html', {model: model, record: record, token: gen_qiniu_token()});
+    res.render('crud/form.html', {model: model, record: record});
 });
 app.get('/crud/raw/:modelName/(*)', function (req, res) {
     var modelName = req.params.modelName,

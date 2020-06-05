@@ -17,6 +17,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
+from app.extensions import qiniu
 from app.models import User, UserRole
 from app.tools import send_support_email
 
@@ -117,19 +118,17 @@ def signup():
 
     if form.validate_on_submit():
         em = form.email.data.strip().lower()
+        pwd = form.password.data.strip()
         u = User.find_one({'email': em})
         if u:
             form.email.erros.append(_('This email has been registered!'))
             return render_template('public/signup.html', form=form)
-
-        # TODO: Password validation
-        pwd = form.password.data.strip()
-
+        # Create user
         u = User()
         u.email = em
         u.password = generate_password_hash(pwd)
         u.name = u.email.split('@')[0]
-        u.avatar = '//cdn.flask-seed.com/avatar.jpg'
+        u.avatar = qiniu.url('avatar.jpg')
         count = User.count({})
         # Set first signup user to admin
         if count == 0:
@@ -149,3 +148,5 @@ def signup():
         return redirect('/')
 
     return render_template('public/signup.html', form=form)
+
+# TODO: Forget password?

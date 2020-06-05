@@ -1,6 +1,7 @@
 {% extends 'layoutdash.html' %}
 
-{% set left_col, right_col = 3, 9 %}
+{% set left_col = 3 %}
+{% set right_col = 9 %}
 {% set breadcrumb = {
     'title': 'Profile',
     'links': [
@@ -63,17 +64,17 @@
                             <span class="text-muted font-weight-light"></span>
                             <div class="image-input-group">
                                 <a class="btn btn-primary plupload" href="javascript:;"
-                                   data-token="{{ token }}"
-                                   data-upload="//upload.qiniup.com/"
-                                   data-max="10mb"
-                                   data-preview="-prev"
-                                   data-filters='{mime_types:[{title:"Image files",extensions:"jpg, jpeg, png"}]}'
+                                   data-token="{{ upload_config.image_token }}"
+                                   data-upload="{{ upload_config.endpoint }}"
+                                   data-max="{{ upload_config.image_max }}"
+                                   data-preview="{{ upload_config.image_preview }}"
+                                   data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'
                                    data-hiddens="url">Choose Image...</a>
-                                <small class="form-text">Support jpg, jpeg, png.</small>
+                                <small class="form-text">Support {{ upload_config.image_exts|join(', ') }}.</small>
                                 <div class="image-input-result mt-1 clearfix">
                                     {% if user.avatar %}
                                         <div class="image uploaded">
-                                            <img src="{{ user.avatar }}-prev">
+                                            <img src="{{ user.avatar }}{{ upload_config.image_preview }}">
                                             <div class="btns">
                                                 <a href="{{ user.avatar }}" target="_blank">i</a>
                                                 <a href="javascript:;"

@@ -17,7 +17,7 @@ from flask_babel import gettext as _
 from flask_login import current_user
 
 from app.core import populate_model, populate_search
-from app.extensions import qiniu, cache
+from app.extensions import cache
 from app.jobs import post_view_times_counter
 from app.models import Post, Tag
 from app.tools import editor_permission, auth_permission
@@ -57,7 +57,7 @@ def form(pid=None):
     else:
         post = Post()
     #
-    return render_template('blog/form.html', post=post, token=qiniu.image_token(), tags=all_tags())
+    return render_template('blog/form.html', post=post, tags=all_tags())
 
 
 @blog.route('/save/', methods=('POST',))

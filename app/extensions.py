@@ -13,7 +13,7 @@ from flask_caching import Cache
 from flask_mail import Mail
 from flask_uploads import UploadSet, IMAGES
 
-from app.exts import QiniuSupport
+from app.vendors import QiniuSupport
 from app.core import MongoSupport
 
 __all__ = ['mail', 'cache', 'mdb', 'uploads', 'qiniu']

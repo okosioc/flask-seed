@@ -59,15 +59,19 @@
                                         <span class="text-muted font-weight-light">*</span>
                                         <div class="image-input-group" required>
                                             <a class="btn btn-primary plupload" href="javascript:;"
-                                               data-token="{{ token }}"
-                                               data-upload="//upload.qiniup.com/" data-max="10mb" data-preview="-prev"
-                                               data-filters='{mime_types:[{title:"Image files",extensions:"jpg, jpeg, png"}]}'
+                                               data-token="{{ upload_config.image_token }}"
+                                               data-upload="{{ upload_config.endpoint }}"
+                                               data-max="{{ upload_config.image_max }}"
+                                               data-preview="{{ upload_config.image_preview }}"
+                                               data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'
                                                data-hiddens="url">Choose Image...</a>
-                                            <small class="form-text">Support jpg, jpeg, png.</small>
+                                            <small class="form-text">
+                                                Support {{ upload_config.image_exts|join(', ') }}.
+                                            </small>
                                             <div class="image-input-result mt-1 clearfix">
                                                 {% if post.cover %}
                                                     <div class="image uploaded">
-                                                        <img src="{{ post.cover }}-prev">
+                                                        <img src="{{ post.cover }}{{ upload_config.image_preview }}">
                                                         <div class="btns">
                                                             <a href="{{ post.cover }}" target="_blank">i</a>
                                                             <a href="javascript:;"
@@ -85,12 +89,14 @@
                                         <span class="text-muted font-weight-light">*</span>
                                         <div class="rte-input-group" required>
                                             <div class="quill" name="body" style="min-height:400px;"
-                                                 data-token="{{ token }}"
-                                                 data-upload="//upload.qiniup.com/" data-max="10mb" data-preview="-rte"
-                                                 data-filters='{mime_types:[{title:"Image files",extensions:"jpg, jpeg, png"}]}'>{{ post.body|safe if post.body is not none }}</div>
+                                                 data-token="{{ upload_config.image_token }}"
+                                                 data-upload="{{ upload_config.endpoint }}"
+                                                 data-max="{{ upload_config.image_max }}"
+                                                 data-preview="{{ upload_config.image_normal }}"
+                                                 data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'>{{ post.body|safe if post.body is not none }}</div>
                                             <small class="form-text">You can upload images by clicking the image button
-                                                in the toolbar, support jpg, jpeg, png. <a
-                                                        class="quill-plupload">&nbsp;</a>
+                                                in the toolbar, support {{ upload_config.image_exts|join(', ') }}.
+                                                <a class="quill-plupload"></a>
                                             </small>
                                         </div>
                                         <div class="invalid-feedback">Please input valid body!</div>

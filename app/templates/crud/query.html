@@ -37,7 +37,8 @@
                 <li>2. You can generate codes by clicking <a class="text-danger" href="#gen" data-toggle="modal">GEN</a>
                     here.
                 </li>
-                <li>3. Check <a href="/crud/schema/{{ model.name }}" target="_blank">JSON Schema</a> for {{ model.name|capitalize }}.
+                <li>3. Check <a href="/crud/schema/{{ model.name }}" target="_blank">JSON Schema</a>
+                    for {{ model.name|capitalize }}.
                 </li>
             {% endif %}
         </ul>
@@ -240,7 +241,8 @@ def delete({{ initial }}id):
                                 {% if r[f] is not none and r[f] is not undefined %}
                                     {% set fs = model.jschema.properties[f] %}
                                     {% if fs.format == 'image' %}
-                                        <img class="img-thumbnail" style="max-height:100px;" src="{{ r[f] }}-prev">
+                                        <img class="img-thumbnail" style="max-height:100px;"
+                                             src="{{ r[f] }}{{ upload_config.image_preview }}">
                                     {% elif fs.type == 'array' %}
                                         {% for e in r[f] %}
                                             {{ e }}{{ ',' if not loop.last }}

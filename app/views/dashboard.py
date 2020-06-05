@@ -16,7 +16,6 @@ from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.core import populate_model
-from app.extensions import qiniu
 from app.models import User
 from app.tools import auth_permission
 
@@ -43,7 +42,7 @@ def blank():
 @auth_permission
 def profile():
     """ Profile page. """
-    return render_template('dashboard/profile.html', user=current_user, token=qiniu.image_token())
+    return render_template('dashboard/profile.html', user=current_user)
 
 
 @dashboard.route('/save_basic/<ObjectId:uid>', methods=('POST',))

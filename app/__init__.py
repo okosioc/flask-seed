@@ -146,6 +146,18 @@ def configure_context_processors(app):
     def inject_debug():
         return dict(debug=app.debug)
 
+    @app.context_processor
+    def inject_upload_config():
+        uc = {
+            'endpoint': app.config['UPLOAD_ENDPOINT'],
+            'image_exts': app.config['UPLOAD_IMAGE_EXTS'],
+            'image_max': app.config['UPLOAD_IMAGE_MAX'],
+            'image_preview': app.config['UPLOAD_IMAGE_PREVIEW'],
+            'image_normal': app.config['UPLOAD_IMAGE_NORMAL'],
+            'image_token': qiniu.image_token()
+        }
+        return dict(upload_config=uc)
+
 
 def configure_template_filters(app):
     @app.template_filter()

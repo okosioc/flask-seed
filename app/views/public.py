@@ -67,7 +67,6 @@ class LoginForm(FlaskForm):
 def login():
     """ Login. """
     form = LoginForm()
-
     if form.validate_on_submit():
         em = form.email.data.strip().lower()
         u = User.find_one({'email': em})
@@ -83,7 +82,7 @@ def login():
         if not next_url:
             next_url = '/'
         return redirect(next_url)
-
+    #
     next_url = request.args.get('next', '')
     form.next_url.data = next_url
     return render_template('public/login.html', form=form)
@@ -94,7 +93,6 @@ def login():
 def logout():
     """ Logout. """
     logout_user()
-
     return redirect("/")
 
 
@@ -142,15 +140,12 @@ def signup():
             current_app.logger.info('Current number of users is %s' % count)
         #
         u.save()
-
         current_app.logger.info('A new user created, %s' % u)
         send_support_email('signup()', 'New user %s with id %s.' % (u.email, u._id))
-
         # Keep the user info in the session using Flask-Login
         login_user(u)
-
         return redirect('/')
-
+    #
     return render_template('public/signup.html', form=form)
 
 
@@ -162,11 +157,10 @@ def signup():
 def upload_file():
     """ Create a simple upload service.
 
-    NOTE: In production settings we always use nginx to serve the static folder,
-    you should not use python web server to serve static files directly,
-    so simply use its sub folder to store upload files.
+    In production env we should not use python web server to serve static files directly,
+    and we alwasys use nginx to serve the static folder, so simply use its sub folder to store upload files.
 
-    It is also suggested to use a storage service to store your files, such us aws s3 or qiniu.com.
+    It is also suggested to use a storage service to store your files, such us aws s3.
     """
     if 'file' not in request.files:
         abort(400)
@@ -182,5 +176,6 @@ def upload_file():
     parent = os.path.dirname(path)
     if not os.path.exists(parent):
         os.makedirs(parent)
+    #
     file.save(path)
     return jsonify(key=key, url=url_for('static', filename=key), name=filename)

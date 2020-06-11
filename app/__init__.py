@@ -231,57 +231,57 @@ def configure_errorhandlers(app):
     @app.errorhandler(400)
     def server_error(error):
         err = {
-            'status': 400,
+            'status': error.code,
             'title': 'Invalid Request',
             'content': 'Unexpected request received!'
         }
         if request.is_xhr:
-            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
-        return render_template('public/error.html', error=err), 400
+            return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), error.code
 
     @app.errorhandler(401)
     def unauthorized(error):
         err = {
-            'status': 401,
+            'status': error.code,
             'title': 'Please Login',
             'content': 'Login required!'
         }
         if request.is_xhr:
-            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
+            return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
         return redirect(url_for('public.login', next=request.path))
 
     @app.errorhandler(403)
     def forbidden(error):
         err = {
-            'status': 403,
+            'status': error.code,
             'title': 'Permission Denied',
             'content': 'Not allowed or forbidden!'
         }
         if request.is_xhr:
-            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
-        return render_template('public/error.html', error=err), 403
+            return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), error.code
 
     @app.errorhandler(404)
     def page_not_found(error):
         err = {
-            'status': 404,
+            'status': error.code,
             'title': 'Page Not Found',
             'content': 'The requested URL was not found on this server!'
         }
         if request.is_xhr:
-            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
-        return render_template('public/error.html', error=err), 404
+            return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), error.code
 
     @app.errorhandler(500)
     def server_error(error):
         err = {
-            'status': 500,
+            'status': error.code,
             'title': 'Internal Server Error',
             'content': 'Unexpected error occurred! Please try again later.'
         }
         if request.is_xhr:
-            return jsonify(success=False, code=error.status, message='{content}({status})'.format(**err))
-        return render_template('public/error.html', error=err), 500
+            return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
+        return render_template('public/error.html', error=err), error.code
 
 
 def configure_blueprints(app, blueprints):

@@ -70,7 +70,7 @@ def login():
         em = form.email.data.strip().lower()
         u = User.find_one({'email': em})
         if not u or not check_password_hash(u.password, form.password.data):
-            form.email.erros.append(_('User name or password incorrect!'))
+            form.email.errors.append(_('User name or password incorrect!'))
             return render_template('public/login.html', form=form)
 
         # Keep the user info in the session using Flask-Login
@@ -122,7 +122,7 @@ def signup():
         pwd = form.password.data.strip()
         u = User.find_one({'email': em})
         if u:
-            form.email.erros.append(_('This email has been registered!'))
+            form.email.errors.append(_('This email has been registered!'))
             return render_template('public/signup.html', form=form)
         # Create user
         u = User()

@@ -172,7 +172,7 @@ def delete({{ initial }}id):
                     {% set fs = model.jschema.properties[rf] %}
                     {% set path = 'search.' + f %}
                     {% set rv = search[f] %}
-                    <div class="col-auto">
+                    <div class="col-auto mb-1">
                         <label class="sr-only">{{ rf|capitalize }}</label>
                         {% if fs.enum %}
                             <select class="form-control " name="{{ path }}">
@@ -195,14 +195,14 @@ def delete({{ initial }}id):
                         {% endif %}
                     </div>
                 {% endfor %}
-                <div class="col-auto">
+                <div class="col-auto mb-1">
                     <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">Search
                     </button>
                     <button type="button" class="btn btn-light btn-default" onclick="search_reset();">Reset</button>
                 </div>
             </div>
         </form>
-        <hr>
+        <hr class="mt-1 mb-2">
         <table class="table">
             <thead class="thead-light">
             {% set columns = model.jschema.columns %}

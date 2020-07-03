@@ -77,7 +77,7 @@ var current_user = {
     is_editor: true,
     is_admin: true,
     _id: '709394',
-    avatar: config.upload.base + '/avatar.jpg',
+    avatar: '/static/img/avatar.jpg',
     name: 'Admin',
 };
 env.addGlobal('current_user', current_user);
@@ -290,12 +290,12 @@ var mock_records_dict = function () {
     });
     // Manually update records fields and relationship
     _.forEach(ret['user'], function (u) {
-        u.avatar = config.upload.base + '/avatar.jpg'
+        u.avatar = '/static/img/avatar.jpg'
     });
     _.forEach(ret['post'], function (p) {
         p.uid = _.sample(ret['user'])._id;
         p.tids = [_.sample(ret['tag'])._id];
-        p.cover = config.upload.base + '/800x533-' + _.sample(_.range(1, 6)) + '.jpg' // Pre-uploaded 3:2 images
+        p.cover = '/static/img/post-' + _.sample(_.range(1, 6)) + '.jpg' // Pre-uploaded 3:2 images
     });
     return ret;
 }(), mock_per_page = 10;
@@ -347,7 +347,7 @@ function convert_string_to_type(schema, segments, v) {
 }
 
 // Create a record by http post
-function polulate_record(modelName, body) {
+function populate_record(modelName, body) {
     var model = _.find(mock_models, function (n) {
             return n.name == modelName;
         }),
@@ -525,7 +525,7 @@ app.get('/blog/form/(*)', function (req, res) {
 });
 app.post('/blog/save/(*)', function (req, res) {
     var postId = req.params[0],
-        post = polulate_record('post', req.body);
+        post = populate_record('post', req.body);
     if (postId) { // Update
         var existing = find_mock_record_by_id('post', postId);
         if (!existing) {
@@ -652,7 +652,7 @@ app.post('/crud/save/:modelName/(*)', function (req, res) {
     var modelName = req.params.modelName,
         mock_records = mock_records_dict[modelName],
         recordId = req.params[0],
-        record = polulate_record(modelName, req.body);
+        record = populate_record(modelName, req.body);
     if (recordId) { // Update
         var existing = find_mock_record_by_id(modelName, recordId);
         if (!existing) {

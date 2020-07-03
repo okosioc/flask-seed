@@ -22,7 +22,7 @@
             </a>
             <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarCollapse"
                     aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="mdi mdi-menu text-white"></i>
+                <i class="remixicon-menu-line text-white"></i>
             </button>
             <div class="navbar-collapse collapse" id="navbarCollapse" style="">
                 <ul class="navbar-nav topnav-menu ml-auto navbar-center">
@@ -30,10 +30,10 @@
                         {% if l.links %}
                             <li class="nav-item">
                                 <div class="dropdown">
-                                    <a class="nav-link dropdown-toggle arrow-none" href="{{ l.url }}" role="button"
+                                    <a class="nav-link dropdown-toggle" href="{{ l.url }}" role="button"
                                        data-toggle="dropdown"
                                        aria-haspopup="true" aria-expanded="false">
-                                        {{ l.title }} <i class="mdi mdi-chevron-down ml-1"></i>
+                                        {{ l.title }}
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right">
                                         {% for sl in l.links %}

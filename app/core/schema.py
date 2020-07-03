@@ -638,7 +638,7 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
                 else:
                     found = None
                 self[key] = found
-
+            #
             return proxywrapper(found, s)
         else:
             return dict.__getattribute__(self, key)
@@ -646,7 +646,8 @@ class SchemaDict(dict, metaclass=SchemaMetaclass):
     def __delattr__(self, key):
         """ Support dot notation. """
         if self.use_dot_notation and key not in self._protected_field_names and key in self.schema:
-            del self[key]
+            if key in self:
+                dict.__delitem__(self, key)
         else:
             dict.__delattr__(self, key)
 

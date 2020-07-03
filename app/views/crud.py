@@ -163,7 +163,7 @@ def schemas():
     """ Output json schemas for all models. """
     registered_models = mdb.registered_models
     ret = [{'name': m.__name__.lower(), 'jschema': m.to_json_schema()} for m in registered_models]
-    r = make_response(json.dumps(ret, indent=2))
+    r = make_response(json.dumps(ret))
     r.mimetype = 'application/json'
     return r
 
@@ -174,6 +174,6 @@ def schema(model_name):
     """ Output a json schema string for specified model. """
     registered_models = mdb.registered_models
     model = next((m for m in registered_models if m.__name__.lower() == model_name.lower()), None)
-    r = make_response(json.dumps(model.to_json_schema(), indent=2))
+    r = make_response(json.dumps(model.to_json_schema()))
     r.mimetype = 'application/json'
     return r

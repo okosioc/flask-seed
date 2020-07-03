@@ -642,7 +642,10 @@ class Model(SchemaDict):
     @classmethod
     def count(cls, filter=None, **kwargs):
         collection = cls.get_collection(**kwargs)
-        return collection.count(filter, **kwargs)
+        if filter:
+            return collection.count_documents(filter, **kwargs)
+        else:
+            return collection.estimated_document_count(**kwargs)
 
     @classmethod
     def replace_one(cls, filter, replacement, *args, **kwargs):

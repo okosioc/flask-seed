@@ -14,7 +14,6 @@ const paths = {
     vendor: './app/static/assets/vendor',
     scss: {
         dir: './app/static/assets/scss',
-        files: './app/static/assets/scss/**/*',
         main: './app/static/assets/scss/*.scss'
     },
     css: {
@@ -22,12 +21,15 @@ const paths = {
     },
     js: {
         dir: './app/static/assets/js'
+    },
+    appjs: {
+        dir: './app/static/js'
     }
 };
 
 // Styles
 gulp.task('styles', function () {
-    // Scss -> autoprefixer -> cleancss
+    // Scss -> autoprefixer -> cleancss -> min
     return gulp
         .src(paths.scss.main)
         .pipe(sass().on('error', sass.logError))
@@ -68,12 +70,12 @@ gulp.task('scripts:merge', function () {
     // Minify app.js & form.js
     return gulp
         .src([
-            paths.js.dir + "/app.js",
-            paths.js.dir + "/form.js"
+            paths.appjs.dir + "/app.js",
+            paths.appjs.dir + "/form.js"
         ])
         .pipe(uglify())
         .pipe(rename({suffix: '.min'}))
-        .pipe(gulp.dest(paths.js.dir));
+        .pipe(gulp.dest(paths.appjs.dir));
 });
 gulp.task('scripts', gulp.series('scripts:copy', 'scripts:merge'));
 

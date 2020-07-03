@@ -21,11 +21,9 @@ from app.models import Post
 post_view_times_counter = Counter()
 
 
-def update_view_times(app):
-    """
-    Update view times for posts.
-    """
-    app.logger.info('Scheduler update_view_times running: %s' % post_view_times_counter)
+def update_view_times(app, hm):
+    """ Update view times for posts. """
+    app.logger.info('Scheduler update_view_times running: %s' % hm)
     d = dict(post_view_times_counter)
     post_view_times_counter.clear()
     for k, v in d.items():
@@ -36,14 +34,18 @@ def update_view_times(app):
                 p.save()
             except:
                 app.logger.exception('Failed when updating the viewTime for album %s' % p._id)
+    #
+    app.logger.info('Scheduler update_view_times finished')
 
 
 def run_schedule(app):
-    """
-    Invoke schedule.
-    """
+    """ Invoke schedule. """
     # For schedule rules please refer to https://github.com/dbader/schedule
-    schedule.every(20).minutes.do(update_view_times, app)
+    # Invoke update_view_times every 30 mins
+    for hour in range(24):
+        for minutes in [0, 30]:
+            hm = '{:02d}:{:02d}'.format(hour, minutes)
+            schedule.every().day.at(hm).do(update_view_times, app, hm)
 
     while True:
         schedule.run_pending()
@@ -51,9 +53,7 @@ def run_schedule(app):
 
 
 def init_schedule(app):
-    """
-    Init.
-    """
+    """ Init. """
     # http://stackoverflow.com/questions/9449101/how-to-stop-flask-from-initialising-twice-in-debug-mode/
     app.logger.info('Try to init schedule, current app status is %s/%s/%s' % (
         app.debug, app.env, os.environ.get('WERKZEUG_RUN_MAIN')))

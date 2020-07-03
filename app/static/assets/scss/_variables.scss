@@ -142,7 +142,7 @@ $yiq-text-light:            $white;
 //
 // Quickly modify global styling by enabling or disabling optional features.
 
-$enable-caret:              false;
+$enable-caret:              true;
 
 
 // Spacing
@@ -564,7 +564,7 @@ $breadcrumb-padding-x:              0;
 $breadcrumb-item-padding:           .5rem;
 
 $breadcrumb-bg:                     transparent;
-$breadcrumb-divider:                quote("\F142");
+$breadcrumb-divider:                quote(">");
 $breadcrumb-divider-color:          $gray-400;
 $breadcrumb-active-color:           $gray-500;
 

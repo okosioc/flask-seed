@@ -34,12 +34,12 @@
                 <li class="dropdown d-none d-lg-block">
                     <a class="nav-link dropdown-toggle mr-0 waves-effect waves-light" data-toggle="dropdown"
                        href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                        <span class="align-middle">English <i class="mdi mdi-chevron-down"></i></span>
+                        <span class="align-middle">English</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
                         {% for l in block.langs %}
                             <a href="{{ l.url }}" class="dropdown-item notify-item">
-                                <span class="align-middle">{{ l.title }}</span>
+                                <span class="">{{ l.title }}</span>
                             </a>
                         {% endfor %}
                     </div>
@@ -50,9 +50,7 @@
                        href="#" role="button" aria-haspopup="false" aria-expanded="false">
                         <img src="{{ current_user.avatar }}"
                              alt="user-image" class="rounded-circle">
-                        <span class="pro-user-name ml-1">{{ current_user.name }}
-                                    <i class="mdi mdi-chevron-down"></i>
-                                </span>
+                        <span class="pro-user-name ml-1">{{ current_user.name }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
                         {% for l in block.commands %}

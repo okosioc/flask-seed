@@ -44,6 +44,7 @@ def test_crud(app):
     user.name = 'test'
     user.email = 'test@test.com'
     user.password = 'test'
+    user.avatar = '/static/img/avatar.jpg'
     user.save()
     assert User.count({}) == 1
     # R

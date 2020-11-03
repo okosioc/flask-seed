@@ -112,11 +112,16 @@ def save(model_name, record_id=None):
     registered_models = mdb.registered_models
     model = next((m for m in registered_models if m.__name__.lower() == model_name.lower()), None)
     try:
-        record = populate_model(request.form, model, False)
         if record_id:
-            record._id = record_id
-            record.save()
+            record = populate_model(request.form, model, False)
+            existing = model.find_one(record_id)
+            if not existing:
+                abort(404)
+            for k, v in record.items():  # Not recursive and only update fields in request
+                existing[k] = v
+            existing.save()
         else:
+            record = populate_model(request.form, model, True)
             record._id = ObjectId()
             record.save(True)
     except (SeedConnectionError, SeedDataError, DuplicateKeyError) as err:

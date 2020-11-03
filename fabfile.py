@@ -40,6 +40,7 @@ def deploy(ctx):
 
         if confirm('\n- Are you sure to deploy?'):
             ctx.run('git pull')
+            ctx.run('. venv/bin/activate')
             # Restart unicorn
             # run('killall -9 gunicorn')
             # run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 -D --timeout 300 --log-file app/logs/gunicorn.log')

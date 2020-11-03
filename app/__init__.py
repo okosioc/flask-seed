@@ -224,7 +224,7 @@ def configure_before_handlers(app):
     @app.before_request
     def set_is_xhr():
         """ Set is_xhr. """
-        request.is_xhr = request.accept_mimetypes.best == 'application/json'
+        request.XHR = request.accept_mimetypes.best == 'application/json'
 
 
 def configure_errorhandlers(app):
@@ -235,7 +235,7 @@ def configure_errorhandlers(app):
             'title': 'Invalid Request',
             'content': 'Unexpected request received!'
         }
-        if request.is_xhr:
+        if request.XHR:
             return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), error.code
 
@@ -246,7 +246,7 @@ def configure_errorhandlers(app):
             'title': 'Please Login',
             'content': 'Login required!'
         }
-        if request.is_xhr:
+        if request.XHR:
             return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
         return redirect(url_for('public.login', next=request.path))
 
@@ -257,7 +257,7 @@ def configure_errorhandlers(app):
             'title': 'Permission Denied',
             'content': 'Not allowed or forbidden!'
         }
-        if request.is_xhr:
+        if request.XHR:
             return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), error.code
 
@@ -268,7 +268,7 @@ def configure_errorhandlers(app):
             'title': 'Page Not Found',
             'content': 'The requested URL was not found on this server!'
         }
-        if request.is_xhr:
+        if request.XHR:
             return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), error.code
 
@@ -279,7 +279,7 @@ def configure_errorhandlers(app):
             'title': 'Internal Server Error',
             'content': 'Unexpected error occurred! Please try again later.'
         }
-        if request.is_xhr:
+        if request.XHR:
             return jsonify(success=False, code=error.code, message='{content}({status})'.format(**err))
         return render_template('public/error.html', error=err), error.code
 

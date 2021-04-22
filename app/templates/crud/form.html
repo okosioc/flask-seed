@@ -94,6 +94,7 @@
 from flask import Blueprint, render_template, current_app, request, jsonify, abort
 from flask_babel import gettext as _
 from app.core import populate_model, Pagination
+from app.extensions import qiniu
 from app.models import {{ model.name|capitalize }}
 from app.tools import auth_permission
 
@@ -110,7 +111,7 @@ def form({{ initial }}id=None):
     else:
         {{ model.name }} = {{ model.name|capitalize }}()
     #
-    return render_template('{{ plural }}/form.html', {{ model.name }}={{ model.name }}, token=qiniu.image_token())
+    return render_template('{{ plural }}/form.html', {{ model.name }}={{ model.name }}, token=qiniu.gen_token())
 
 @{{ plural }}.route('/save', methods=('POST',))
 @{{ plural }}.route('/save/&lt;ObjectId:{{ initial }}id&gt;', methods=('POST',))
@@ -228,7 +229,7 @@ def save({{ initial }}id=None):
                 {% if n =='_id' %}
                     {# skip #}
                 {% else %}
-                    {{ render(n, s, jvalue[n], pn, is_required=required, gen=gen) }}
+                    {{ render(n, s, none if gen else jvalue[n], pn, is_required=required, gen=gen) }}
                 {% endif %}
             {% endfor %}
             <div class="act">
@@ -277,27 +278,27 @@ def save({{ initial }}id=None):
             <div class="form-group array" name="{{ name }}">
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
-                <div class="image-input-group" {{ 'required' if is_required }}>
+                <div class="plupload-input-group image-input-group" {{ 'required' if is_required }}>
                     <a class="btn btn-primary plupload" href="javascript:;" multiple
-                       data-token="{{ '{{ upload_config.image_token }}' if gen else upload_config.image_token }}"
-                       data-upload="{{ upload_config.endpoint }}"
-                       data-max="{{ upload_config.image_max }}"
-                       data-preview="{{ upload_config.image_preview }}"
-                       data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'
+                       data-token="{{ '{{ upload_config.token }}' if gen else upload_config.token }}"
+                       data-upload="{{ '{{ upload_config.endpoint }}' if gen else upload_config.endpoint }}"
+                       data-max="{{ '{{ upload_config.max }}' if gen else upload_config.max }}"
+                       data-preview='{"image":"{{ upload_config.image_preview_sm }}","video":"{{ upload_config.video_poster_sm }}"}'
+                       data-filters='{"mime_types":"{{ upload_config.mimes_image|join(',') }}"}'
                        data-hiddens="{{ hiddens|join(',') }}">Choose Images...</a>
-                    <small class="form-text">Support {{ upload_config.image_exts|join(', ') }}.
+                    <small class="form-text">Support {{ upload_config.mimes_image|join(', ') }}.
                     </small>
-                    <div class="image-input-result mt-1 clearfix">
+                    <div class="plupload-input-result image-input-result mt-1 clearfix">
                         {% if jschema['items'].type == 'object' %} {# object array #}
                             {% if gen %}
                                 {{ '{%' }} for e in {{ path }} {{ '%}' }}
-                                {% call(k) render_image_object(hiddens) -%}
+                                {% call(k) render_image(hiddens) -%}
                                     {{ '{{' }} e['{{ k }}'] {{ '}}' }}
                                 {%- endcall %}
                                 {{ '{%' }} endfor {{ '%}' }}
                             {% else %}
                                 {% for e in jvalue %}
-                                    {% call(k) render_image_object(hiddens) -%}
+                                    {% call(k) render_image(hiddens) -%}
                                         {{ e[k] }}
                                     {%- endcall %}
                                 {% endfor %}
@@ -305,11 +306,72 @@ def save({{ initial }}id=None):
                         {% else %} {# string array #}
                             {% if gen %}
                                 {{ '{%' }} for e in {{ path }} {{ '%}' }}
-                                {{ render_image_string('{{ e }}') }}
+                                {{ '{%' }} set image_obj = {'url': e } {{ '%}' }}
+                                {% call(k) render_image(hiddens) -%}
+                                    {{ '{{' }} image_obj['{{ k }}'] {{ '}}' }}
+                                {%- endcall %}
                                 {{ '{%' }} endfor {{ '%}' }}
                             {% else %}
                                 {% for e in jvalue %}
-                                    {{ render_image_string(e) }}
+                                    {% set image_obj = {'url': e } %}
+                                    {% call(k) render_image(hiddens) -%}
+                                        {{ image_obj[k] }}
+                                    {%- endcall %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="invalid-feedback">Please input valid {{ name }}!</div>
+                <div class="act">
+                    <a class="format"
+                       href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
+                </div>
+            </div>
+        {% elif jschema.format == 'file' and jschema['items'].type in ['string', 'object'] %} {# image #}
+            {% set hiddens = jschema['items'].properties|keys if jschema['items'].type == 'object' else ['url'] %}
+            <div class="form-group array" name="{{ name }}">
+                <label>{{ name }}</label>
+                <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+                <div class="plupload-input-group file-input-group" {{ 'required' if is_required }}>
+                    <a class="btn btn-primary plupload" href="javascript:;" multiple
+                       data-token="{{ '{{ upload_config.token }}' if gen else upload_config.token }}"
+                       data-upload="{{ '{{ upload_config.endpoint }}' if gen else upload_config.endpoint }}"
+                       data-max="{{ '{{ upload_config.max }}' if gen else upload_config.max }}"
+                       data-preview=""
+                       data-filters='{"mime_types":"{{ upload_config.mimes|join(',') }}"}'
+                       data-hiddens="{{ hiddens|join(',') }}">Choose Files...</a>
+                    <small class="form-text">Support {{ upload_config.mimes|join(', ') }}.
+                    </small>
+                    <div class="plupload-input-result file-input-result mt-1 clearfix">
+                        {% if jschema['items'].type == 'object' %} {# object array #}
+                            {% if gen %}
+                                {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                                {% call(k) render_file(hiddens) -%}
+                                    {{ '{{' }} e['{{ k }}'] {{ '}}' }}
+                                {%- endcall %}
+                                {{ '{%' }} endfor {{ '%}' }}
+                            {% else %}
+                                {% for e in jvalue %}
+                                    {% call(k) render_file(hiddens) -%}
+                                        {{ e[k] }}
+                                    {%- endcall %}
+                                {% endfor %}
+                            {% endif %}
+                        {% else %} {# string array #}
+                            {% if gen %}
+                                {{ '{%' }} for e in {{ path }} {{ '%}' }}
+                                {{ '{%' }} set file_obj = {'name': e|basename, 'url': {{ e }} } {{ '%}' }}
+                                {% call(k) render_file(hiddens) -%}
+                                    {{ '{{' }} file_obj['{{ k }}'] {{ '}}' }}
+                                {%- endcall %}
+                                {{ '{%' }} endfor {{ '%}' }}
+                            {% else %}
+                                {% for e in jvalue %}
+                                    {% set file_obj = {'name': e|basename, 'url': e } %}
+                                    {% call(k) render_file(hiddens) -%}
+                                        {{ file_obj[k] }}
+                                    {%- endcall %}
                                 {% endfor %}
                             {% endif %}
                         {% endif %}
@@ -399,18 +461,28 @@ def save({{ initial }}id=None):
             {% elif jschema.type == 'boolean' %} {# boolean -> radios #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
-                <div class="radio-input-group" {{ 'required' if is_required }}>
-                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                        <label class="btn btn-light {{ render_selected(path, jvalue, true, gen, 'active') }}">
-                            <input type="radio" {{ render_selected(path, jvalue, true, gen, 'checked') }} value="true">
-                            True
-                        </label>
-                        <label class="btn btn-light {{ render_selected(path, jvalue, false, gen, 'active') }}">
-                            <input type="radio" {{ render_selected(path, jvalue, false, gen, 'checked') }}
-                                   value="false"> False
-                        </label>
+                {% if jschema.format == 'switch' %}
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" name="{{ name }}"
+                                {{ render_selected(path, jvalue, true, gen, 'checked') }}
+                                {{ 'required' if is_required }}>
+                        <label class="custom-control-label"></label>
                     </div>
-                </div>
+                {% else %}
+                    <div class="radio-input-group" {{ 'required' if is_required }}>
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-light {{ render_selected(path, jvalue, true, gen, 'active') }}">
+                                <input type="radio" {{ render_selected(path, jvalue, true, gen, 'checked') }}
+                                       value="true">
+                                True
+                            </label>
+                            <label class="btn btn-light {{ render_selected(path, jvalue, false, gen, 'active') }}">
+                                <input type="radio" {{ render_selected(path, jvalue, false, gen, 'checked') }}
+                                       value="false"> False
+                            </label>
+                        </div>
+                    </div>
+                {% endif %}
             {% elif jschema.type == 'string' %} {# string -> textarea/rte/image/input/date-time/date #}
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
@@ -420,34 +492,71 @@ def save({{ initial }}id=None):
                 {% elif jschema.format == 'rte' %}
                     <div class="rte-input-group" {{ 'required' if is_required }}>
                         <div class="quill" name="{{ name }}"
-                             data-token="{{ '{{ upload_config.image_token }}' if gen else upload_config.image_token }}"
-                             data-upload="{{ upload_config.endpoint }}"
-                             data-max="{{ upload_config.image_max }}"
-                             data-preview="{{ upload_config.image_normal }}"
-                             data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'>{{ render_safe_value(path, jvalue, gen) }}</div>
+                             data-token="{{ '{{ upload_config.token }}' if gen else upload_config.token }}"
+                             data-upload="{{ '{{ upload_config.endpoint }}' if gen else upload_config.endpoint }}"
+                             data-max="{{ '{{ upload_config.max }}' if gen else upload_config.max }}"
+                             data-preview='{"image":"{{ upload_config.image_preview_sm }}","video":"{{ upload_config.video_poster_sm }}"}'
+                             data-filters='{"mime_types":"{{ upload_config.mimes_image|join(',') }}"}'>{{ render_safe_value(path, jvalue, gen) }}</div>
                         <small class="form-text">You can upload images by clicking the image button in the toolbar,
-                            support {{ upload_config.image_exts|join(', ') }}. <a class="quill-plupload">&nbsp;</a>
+                            support {{ upload_config.mimes_image|join(', ') }}. <a class="quill-plupload">&nbsp;</a>
                         </small>
                     </div>
                 {% elif jschema.format == 'image' %}
-                    <div class="image-input-group" {{ 'required' if is_required }}>
+                    {% set hiddens = ['url'] %}
+                    <div class="plupload-input-group image-input-group" {{ 'required' if is_required }}>
                         <a class="btn btn-primary plupload" href="javascript:;"
-                           data-token="{{ '{{ upload_config.image_token }}' if gen else upload_config.image_token }}"
-                           data-upload="{{ upload_config.endpoint }}"
-                           data-max="{{ upload_config.image_max }}"
-                           data-preview="{{ upload_config.image_preview }}"
-                           data-filters='{mime_types:[{title:"Image files",extensions:"{{ upload_config.image_exts|join(',') }}"}]}'
-                           data-hiddens="url">Choose Image...</a>
-                        <small class="form-text">Support {{ upload_config.image_exts|join(', ') }}.
+                           data-token="{{ '{{ upload_config.token }}' if gen else upload_config.token }}"
+                           data-upload="{{ '{{ upload_config.endpoint }}' if gen else upload_config.endpoint }}"
+                           data-max="{{ '{{ upload_config.max }}' if gen else upload_config.max }}"
+                           data-preview='{"image":"{{ upload_config.image_preview_sm }}","video":"{{ upload_config.video_poster_sm }}"}'
+                           data-filters='{"mime_types":"{{ upload_config.mimes_image|join(',') }}"}'
+                           data-hiddens="{{ hiddens|join(',') }}">Choose Image...</a>
+                        <small class="form-text">Support {{ upload_config.mimes_image|join(', ') }}.
                         </small>
-                        <div class="image-input-result mt-1 clearfix">
+                        <div class="plupload-input-result image-input-result mt-1 clearfix">
                             {% if gen %}
                                 {{ '{%' }} if {{ path }} {{ '%}' }}
-                                {{ render_image_string('{{ '+path+' }}') }}
+                                {{ '{%' }} set image_obj = {'url': {{ path }} } {{ '%}' }}
+                                {% call(k) render_image(hiddens) -%}
+                                    {{ '{{' }} image_obj['{{ k }}'] {{ '}}' }}
+                                {%- endcall %}
                                 {{ '{%' }} endif {{ '%}' }}
                             {% else %}
                                 {% if jvalue %}
-                                    {{ render_image_string(jvalue) }}
+                                    {% set image_obj = {'url': jvalue } %}
+                                    {% call(k) render_image(hiddens) -%}
+                                        {{ image_obj[k] }}
+                                    {%- endcall %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% elif jschema.format == 'file' %}
+                    {% set hiddens = ['url'] %}
+                    <div class="plupload-input-group file-input-group" {{ 'required' if is_required }}>
+                        <a class="btn btn-primary plupload" href="javascript:;"
+                           data-token="{{ '{{ upload_config.token }}' if gen else upload_config.token }}"
+                           data-upload="{{ '{{ upload_config.endpoint }}' if gen else upload_config.endpoint }}"
+                           data-max="{{ '{{ upload_config.max }}' if gen else upload_config.max }}"
+                           data-preview=""
+                           data-filters='{"mime_types":"{{ upload_config.mimes|join(',') }}"}'
+                           data-hiddens="{{ hiddens|join(',') }}">Choose File...</a>
+                        <small class="form-text">Support {{ upload_config.mimes|join(', ') }}.
+                        </small>
+                        <div class="plupload-input-result file-input-result mt-1 clearfix">
+                            {% if gen %}
+                                {{ '{%' }} if {{ path }} {{ '%}' }}
+                                {{ '{%' }} set file_obj = {'name': {{ path }}|basename, 'url': {{ path }} } {{ '%}' }}
+                                {% call(k) render_file(hiddens) -%}
+                                    {{ '{{' }} file_obj['{{ k }}'] {{ '}}' }}
+                                {%- endcall %}
+                                {{ '{%' }} endif {{ '%}' }}
+                            {% else %}
+                                {% if jvalue %}
+                                    {% set file_obj = {'name': jvalue|basename, 'url': jvalue } %}
+                                    {% call(k) render_file(hiddens) -%}
+                                        {{ file_obj[k] }}
+                                    {%- endcall %}
                                 {% endif %}
                             {% endif %}
                         </div>
@@ -470,26 +579,23 @@ def save({{ initial }}id=None):
     {% endif %}
 {% endmacro %}
 
-{# Render image uploaded sinppet for image upload component, jvalue is string #}
-{% macro render_image_string(rv) %}
-    <div class="image uploaded">
-        <img src="{{ rv }}{{ upload_config.image_preview }}">
-        <div class="btns">
-            <a href="{{ rv }}" target="_blank">i</a>
-            <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
-        </div>
-        <input type="hidden" name="url" value="{{ rv }}">
-    </div>
-{% endmacro %}
-
-{# Render image uploaded sinppet for image upload component, jvalue is object #}
-{% macro render_image_object(hiddens) %}
-    <div class="image uploaded">
-        <img src="{{ caller('url') }}{{ upload_config.image_preview }}">
+{% macro render_image(hiddens) %}
+    <div class="image uploaded" style="width: auto">
+        <img data-src="{{ caller('url') }}">
         <div class="btns">
             <a href="{{ caller('url') }}" target="_blank">i</a>
             <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
         </div>
+        {% for k in hiddens %}
+            <input type="hidden" name="{{ k }}" value="{{ caller(k) }}">
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro render_file(hiddens) %}
+    <div class="file uploaded d-flex justify-content-start align-items-center">
+        <div class="mr-3">{{ caller('name') }}</div>
+        <div><a href="javascript:;" onclick="$(this).closest('.file').remove();">x</a></div>
         {% for k in hiddens %}
             <input type="hidden" name="{{ k }}" value="{{ caller(k) }}">
         {% endfor %}
@@ -553,7 +659,7 @@ def save({{ initial }}id=None):
     {# For format date-time & date #}
     <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
     {# For format select #}
-    <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/select2/dist/js/select2.min.js"></script>
+    <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
     {# For format image & rte #}
     <script src="{{ '{{ base() }}' if gen else base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
     {# For format rte #}

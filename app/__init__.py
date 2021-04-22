@@ -100,28 +100,33 @@ def configure_uploads(app):
     endpoint = app.config['UPLOAD_ENDPOINT']
     is_local = re.match(r'^\/[a-z]+', endpoint)
     is_qiniu = 'qiniu' in endpoint
+    upload_max = app.config['UPLOAD_MAX']
 
     if is_local:
         # https://flask.palletsprojects.com/en/1.1.x/patterns/fileuploads/#improving-uploads
-        app.config['MAX_CONTENT_LENGTH'] = app.config['UPLOAD_IMAGE_MAX'] * 1024 * 1024  # Config unit is megabyte
+        app.config['MAX_CONTENT_LENGTH'] = upload_max * 1024 * 1024  # Config unit is megabyte
     elif is_qiniu:
         qiniu.init_app(app)
 
     @app.context_processor
     def inject_upload_config():
-        token = qiniu.image_token() if is_qiniu else ''
+        token = qiniu.gen_token() if is_qiniu else ''
+        mimes = app.config['UPLOAD_MIMES']
         uc = {
             'endpoint': endpoint,
-            'image_exts': app.config['UPLOAD_IMAGE_EXTS'],
-            'image_max': '%smb' % app.config['UPLOAD_IMAGE_MAX'],  # Config unit is megabyte
-            'image_preview': app.config['UPLOAD_IMAGE_PREVIEW'],
-            'image_normal': app.config['UPLOAD_IMAGE_NORMAL'],
-            'image_token': token
+            'mimes': mimes,
+            'mimes_image': [m for m in mimes if m.startswith('image')],
+            'max': f'{upload_max}mb',  # Config unit is megabyte
+            'image_preview_sm': app.config['UPLOAD_IMAGE_PREVIEW_SM'],
+            'image_preview_md': app.config['UPLOAD_IMAGE_PREVIEW_MD'],
+            'video_poster_sm': app.config['UPLOAD_VIDEO_POSTER_SM'],
+            'token': token
         }
         return dict(upload_config=uc)
 
 
 def configure_i18n(app):
+    """ 国际化支持. """
     babel = Babel(app)
 
     @babel.localeselector
@@ -167,8 +172,14 @@ def configure_template_filters(app):
         return helpers.date(value)
 
     @app.template_filter()
+    def datetime(value):
+        return helpers.datetime(value)
+
+    @app.template_filter()
     def commas(value):
         """ Add commas to an number. """
+        if value is None:
+            return ''
         if type(value) is int:
             return '{:,d}'.format(value)
         else:
@@ -193,6 +204,11 @@ def configure_template_filters(app):
     def items(value):
         """ Return key-value pairs of dict. """
         return value.items()
+
+    @app.template_filter()
+    def basename(value):
+        """ Return file name from a path. """
+        return os.path.basename(value)
 
     @app.template_filter()
     def split(value, separator):

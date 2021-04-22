@@ -228,7 +228,7 @@ def delete({{ initial }}id):
                 </tr>
                 {{ '{%' }} else {{ '%}' }}
                 <tr>
-                    <td colspan="{{ 1+columns|length }}">
+                    <td colspan="{{ 1+columns|length }}" class="px-0">
                         <div class="alert alert-warning">Can not find any {{ plural }}!</div>
                     </td>
                 </tr>
@@ -244,9 +244,7 @@ def delete({{ initial }}id):
                                         <img class="img-thumbnail" style="max-height:100px;"
                                              src="{{ r[f] }}{{ upload_config.image_preview }}">
                                     {% elif fs.type == 'array' %}
-                                        {% for e in r[f] %}
-                                            {{ e }}{{ ',' if not loop.last }}
-                                        {% endfor %}
+                                        {{ r[f]|length }} {{ f|capitalize }}
                                     {% else %}
                                         {{ r[f] }}
                                     {% endif %}
@@ -265,7 +263,7 @@ def delete({{ initial }}id):
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="{{ 1+columns|length }}">
+                        <td colspan="{{ 1+columns|length }}" class="px-0">
                             <div class="alert alert-warning">Can not find any {{ plural }}!</div>
                         </td>
                     </tr>

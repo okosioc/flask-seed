@@ -55,3 +55,8 @@ def timesince(dt, default=None):
 def date(dt):
     """ Show date string in jinja2. """
     return dt.strftime('%Y/%m/%d')
+
+def datetime(dt):
+    """ Show date time string in jinja2. """
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
+

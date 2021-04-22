@@ -120,6 +120,7 @@ def save(model_name, record_id=None):
             for k, v in record.items():  # Not recursive and only update fields in request
                 existing[k] = v
             existing.save()
+            record._id = existing._id
         else:
             record = populate_model(request.form, model, True)
             record._id = ObjectId()

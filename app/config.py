@@ -34,14 +34,18 @@ UPLOAD_BASE = '//cdn.flask-seed.com'
 UPLOAD_BUCKET = 'flask-seed'
 UPLOAD_AK = '<FIXME>'
 UPLOAD_SK = '<FIXME>'
-UPLOAD_IMAGE_EXTS = ['jpg', 'jpeg', 'png']
-UPLOAD_IMAGE_MAX = 10
-UPLOAD_IMAGE_PREVIEW = '?imageView2/1/w/300/h/300/q/75'
-UPLOAD_IMAGE_NORMAL = '?imageView2/1/w/600/q/75'
+UPLOAD_MIMES = ['image/jpeg', 'image/png', 'image/gif',
+                'video/quicktime', 'video/mp4', 'video/mpeg', 'video/webm',
+                'audio/mpeg', 'audio/x-wav', 'audio/webm']
+UPLOAD_MAX = 50
+UPLOAD_IMAGE_PREVIEW_SM = '?imageMogr2/thumbnail/x200'
+UPLOAD_IMAGE_PREVIEW_MD = '?imageMogr2/thumbnail/600x'
+UPLOAD_VIDEO_POSTER_SM = '?vframe/jpg/offset/1/h/200'
 # Upload to Local
 # UPLOAD_ENDPOINT = '/upload'
 # UPLOAD_FOLDER = 'uploads'
-# UPLOAD_IMAGE_EXTS = ['jpg', 'jpeg', 'png']
-# UPLOAD_IMAGE_MAX = 10
-# UPLOAD_IMAGE_PREVIEW = ''
-# UPLOAD_IMAGE_NORMAL = ''
+# UPLOAD_MIMES = ['image/jpeg', 'image/png']
+# UPLOAD_MAX = 10
+# UPLOAD_IMAGE_PREVIEW_SM = ''
+# UPLOAD_IMAGE_PREVIEW_MD = ''
+# UPLOAD_VIDEO_COVER_SM = ''

@@ -65,15 +65,18 @@
                                     {% endif %}
                                 </div>
                                 <div class="form-group">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input"
-                                               id="agree" name="agree" value="{{ form.agree.data }}">
+                                    <div class="custom-control custom-checkbox {{ 'is-invalid' if form.agree.errors }}">
+                                        <input type="checkbox" class="custom-control-input" {{ 'checked' if form.agree.data }}
+                                               id="agree" name="agree" value="true">
                                         <label class="custom-control-label" for="agree">
                                             {{ _('I accept') }}
                                             <a href="javascript:coming();"
                                                class="text-dark">{{ _('Terms and Conditions') }}</a>
                                         </label>
                                     </div>
+                                    {% if form.agree.errors %}
+                                        <div class="invalid-feedback">{{ form.agree.errors|join('/') }}</div>
+                                    {% endif %}
                                 </div>
                                 <div class="form-group mb-0 text-center">
                                     <button class="btn btn-primary btn-block" type="submit">

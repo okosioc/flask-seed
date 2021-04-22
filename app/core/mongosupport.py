@@ -17,7 +17,7 @@ import pymongo
 from pymongo import MongoClient, uri_parser, ReadPreference, WriteConcern
 from pymongo.cursor import Cursor as PyMongoCursor
 
-from app.core import SchemaDict, SeedDataError, SimpleEnumMeta, Comparator
+from app.core import SchemaDict, SeedDataError, SimpleEnumMeta, Comparator, MyError
 
 # Find the stack on which we want to store the database connection.
 # Starting with Flask 0.9, the _app_ctx_stack is the correct one,
@@ -117,7 +117,7 @@ _dbs = {}
 _valid_formats = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d']
 
 
-class SeedConnectionError(Exception):
+class SeedConnectionError(MyError):
     """ Database connection error. """
     pass
 
@@ -417,6 +417,7 @@ def populate_search(multidict, model_cls):
             continue
         # Remove search. from k
         k = k.replace('search.', '')
+        v = v.strip()
         search[k] = v
         # Set default comparator
         c = Comparator.EQ
@@ -429,18 +430,23 @@ def populate_search(multidict, model_cls):
         if isinstance(t, list):
             t = valid_paths['%s[]' % k]
         if Comparator.EQ == c:
-            condition[k] = convert_from_string(v, t)
+            cond = convert_from_string(v, t)
         elif Comparator.IN == c or Comparator.NIN == c:
-            condition[k] = {'$%s' % c: [convert_from_string(vv, t) for vv in v]}
+            cond = {'$%s' % c: [convert_from_string(vv, t) for vv in v]}
         elif Comparator.LIKE == c:
             # In order to use index, we only support starting string search here
             # https://docs.mongodb.com/manual/reference/operator/query/regex/#index-use
             regx = re.compile('^%s' % re.escape(v))
-            condition[k] = {'$regex': regx}
+            cond = {'$regex': regx}
         else:
-            condition[k] = {'$%s' % c: convert_from_string(v, t)}
+            cond = {'$%s' % c: convert_from_string(v, t)}
+        #
+        if k not in condition:
+            condition[k] = cond
+        else:
+            condition[k].update(cond)
     #
-    return search, condition if condition else None
+    return search, condition
 
 
 def _normalized_path(path, list_char='-'):

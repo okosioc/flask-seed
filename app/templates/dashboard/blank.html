@@ -1,6 +1,16 @@
 {% extends 'layoutdash.html' %}
 
-{% block title %}Blank Page{% endblock %}
+{% set title = 'Blank' %}
+{% set breadcrumb = {
+    'subtitle': 'alpha',
+    'title': title,
+    'commands': [],
+    'links': [
+        {'url':'/', 'title': '首页'}
+    ]
+} %}
+
+{% block title %}{{ title }}{% endblock %}
 
 {% block left %}
     <section>

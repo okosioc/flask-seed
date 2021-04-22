@@ -90,7 +90,9 @@ class Format(SimpleEnum):
     TEXTAREA = 'textarea'
     RTE = 'rte'
     MARKDOWN = 'markdown'
-    IMAGE = 'image'
+    IMAGE = 'image'  # Image upload support
+    FILE = 'file'  # File upload support
+    SWITCH = 'switch'  # Bool
     IPV4 = 'ipv4'
     IPV4 = 'ipv6'
     CHART = 'chart'
@@ -155,12 +157,22 @@ class SchemaJSONEncoder(json.JSONEncoder):
 # Exceptions
 #
 
-class SeedSchemaError(Exception):
+class MyError(Exception):
+    """ Base class for exceptions. """
+
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class SeedSchemaError(MyError):
     """ Schema error. """
     pass
 
 
-class SeedDataError(Exception):
+class SeedDataError(MyError):
     """ Data error. """
     pass
 
@@ -328,7 +340,7 @@ class SchemaMetaclass(type):
         https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
         https://swagger.io/docs/specification/data-models/
 
-        However, we still some grammars
+        However, we still have some grammars
           - Add format to array, so that we can gen a component for the whole array
           - Add searchables to root object, so that it can be used to generate search form
           - Add sortables to root object, so that it can be used to generate order drowpdown

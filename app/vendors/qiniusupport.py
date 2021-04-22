@@ -36,17 +36,26 @@ class QiniuSupport(object):
         """
         return self.auth.upload_token(self.bucket, policy=policy)
 
-    def image_token(self):
-        """ Create image upload token.
+    def gen_token(self):
+        """ Create upload token.
 
         https://developer.qiniu.com/kodo/manual/1206/put-policy
         https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
         """
         policy = {
-            'fsizeLimit': self.app.config['UPLOAD_IMAGE_MAX'] * 1024 * 1024,  # Config unit is megabyte
-            'mimeLimit': 'image/jpeg;image/png',
-            'saveKey': '${year}${mon}${day}/${hour}${min}${sec}_${fsize}${ext}',
-            'returnBody': '{"etag":"${etag}","name":"${fname}","key":"${key}","url":"%s/${key}","width":${imageInfo.width},"height":${imageInfo.height}}' % self.base
+            # Config unit is megabyte
+            'fsizeLimit': self.app.config['UPLOAD_MAX'] * 1024 * 1024,
+            'mimeLimit': ';'.join(self.app.config['UPLOAD_MIMES']),
+            # Please keep ext in the last position because some callback/render logic depend on it
+            'saveKey': '${year}${mon}${day}/${etag}${ext}',
+            'returnBody': '{'
+                          '"etag":"${etag}",'
+                          '"name":"${fname}",'
+                          '"key":"${key}",'
+                          '"url":"%s/${key}",'
+                          '"width":${imageInfo.width},'
+                          '"height":${imageInfo.height}'
+                          '}' % self.base
         }
         return self.token(policy)
 

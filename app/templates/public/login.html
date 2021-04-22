@@ -54,8 +54,8 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" checked
-                                               id="remember" name="remember" value="{{ form.remember.data }}">
+                                        <input type="checkbox" class="custom-control-input" {{ 'checked' if form.remember.data }}
+                                               id="remember" name="remember" value="true">
                                         <label class="custom-control-label" for="remember">
                                             {{ _('Remember me') }}
                                         </label>

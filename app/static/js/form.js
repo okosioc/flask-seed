@@ -1,6 +1,7 @@
 //
 // Js functions to install components and process a crud form
 //
+
 function install_form() {
     _install_form($(".form-editor"));
 }
@@ -43,58 +44,116 @@ function _install_form(container) {
 }
 
 // Install components
-// NOTE: Only install on the visible inputs, for dynamic created inputs, need to invoke install_plupload manually
+// NOTE: Only install on the non-template inputs, for dynamic created inputs, need to invoke install_plupload manually
 function _install_components(container) {
-    // Flatpickr
-    // https://flatpickr.js.org/formatting/
-    container.find("input.date-time:visible").each(function (i, n) {
-        $(n).flatpickr({
-            enableTime: true,
-            dateFormat: "Y-m-d H:i:S",
-            defaultHour: new Date().getHours(),
-            defaultMinute: new Date().getMinutes()
-        })
-    });
-    container.find("input.date:visible").each(function (i, n) {
-        $(n).flatpickr({
-            dateFormat: "Y-m-d"
-        })
-    });
+    container.find(".form-group").each(function (fgi, fgn) {
+        var formGroup = $(fgn);
 
-    // Select2
-    // https://select2.org/
-    container.find("select.select2:visible").each(function (i, n) {
-        var option = {tags: $(n).is("[tags]")};
-        $(n).select2(option)
-    });
+        // Skip form-groups in template
+        if (formGroup.closest(".list-group-item").is(".template")) {
+            return false;
+        }
+        if (formGroup.closest("fieldset").is(".template")) {
+            return false;
+        }
 
-    // Image
-    // https://www.plupload.com/docs/v2/Getting-Started
-    container.find(".plupload:visible").each(function (i, n) {
-        install_plupload($(n));
-    });
+        // Lazy load images
+        formGroup.find("img[data-src]").each(function (i, n) {
+            var btn = $(n).closest(".plupload-input-group").children(".plupload");
+            if (btn) {
+                var preview = btn.attr("data-preview") ? JSON.parse(btn.attr("data-preview")) : {};
+                $(n).attr("src", my_preview($(n).data("src"), preview));
+            }
+        });
 
-    // Rte
-    // https://github.com/quilljs/quill/
-    container.find(".quill:visible").each(function (i, n) {
-        install_quill($(n));
+        // Switch
+        // https://getbootstrap.com/docs/4.5/components/forms/#switches
+        formGroup.find(".custom-switch").each(function (i, n) {
+            var id = "switch-" + my_random();
+            var btn = $(n).find(":checkbox");
+            btn.attr("id", id);
+            btn.next("label").attr("for", id)
+        });
+
+        // Flatpickr
+        // https://flatpickr.js.org/formatting/
+        formGroup.find("input.date-time").each(function (i, n) {
+            $(n).flatpickr({
+                locale: "zh",
+                enableTime: true,
+                dateFormat: "Y-m-d H:i:S",
+                defaultHour: new Date().getHours(),
+                defaultMinute: new Date().getMinutes()
+            })
+        });
+        formGroup.find("input.date").each(function (i, n) {
+            $(n).flatpickr({
+                locale: "zh",
+                dateFormat: "Y-m-d"
+            })
+        });
+
+        // Time range
+        formGroup.find(".time-range-input-group").each(function (i, n) {
+            var start = $(n).find(".time-start").timepicker({
+                timeFormat: "H:i"
+            });
+            var end = $(n).find(".time-end").timepicker({
+                timeFormat: "H:i"
+            });
+            start.change(function () {
+                var val = $(this).val();
+                if (!my_validateHhMm(val)) {
+                    return false;
+                }
+                var tokens = val.split(":");
+                var nextHour = (parseInt(tokens[0]) + 1).toString().padStart(2, "0");
+                end.val(nextHour + ":" + tokens[1]);
+            });
+        });
+
+        // Select2
+        // https://select2.org/
+        formGroup.find("select.select2").each(function (i, n) {
+            var option = {
+                containerCssClass: n.getAttribute("class").replace("select2", ""), // Remove class select2 as it impacts display
+                dropdownAutoWidth: true,
+                dropdownCssClass: n.classList.contains("custom-select-sm") || n.classList.contains("form-control-sm") ? "dropdown-menu dropdown-menu-sm show" : "dropdown-menu show",
+                dropdownParent: n.closest('.modal-body') || document.body,
+                tags: $(n).is("[tags]")
+            };
+            $(n).select2(option);
+        });
+
+        // Plupload
+        // https://www.plupload.com/docs/v2/Getting-Started
+        formGroup.find(".plupload").each(function (i, n) {
+            install_plupload($(n));
+        });
+
+        // Rte
+        // https://github.com/quilljs/quill/
+        formGroup.find(".quill").each(function (i, n) {
+            install_quill($(n));
+        });
     });
 }
 
 var global_pluploading = false;
 
 function install_plupload(btn) {
-    var result = btn.closest(".image-input-group").find(".image-input-result"),
+    var result = btn.closest(".plupload-input-group").find(".plupload-input-result"),
         multi = btn.is("[multiple]"),
         hiddens = btn.data("hiddens"),
         upload = btn.data("upload"),
         token = btn.data("token"),
         max = btn.data("max"),
-        preview = btn.data("preview"),
-        filters = btn.data("filters");
+        preview = btn.attr("data-preview") ? JSON.parse(btn.attr("data-preview")) : {},
+        suffix = btn.attr("data-suffix") ? JSON.parse(btn.attr("data-suffix")) : {},
+        filters = btn.attr("data-filters") ? JSON.parse(btn.attr("data-filters")) : {};
+    var isImageResult = result.is(".image-input-result");
     // Generate a unique id for button so it can work correctly
-    btn.attr("id", "plupload-" + Math.round(new Date() / 1000));
-
+    btn.attr("id", "plupload-" + my_random());
     var uploader = new plupload.Uploader({
         browse_button: btn[0],
         url: upload,
@@ -107,7 +166,11 @@ function install_plupload(btn) {
     uploader.bind('FilesAdded', function (up, files) {
         var html = '';
         plupload.each(files, function (file) {
-            html += '<div id="' + file.id + '" class="image uploading"><div class="progress progress-sm"><div class="progress-bar" style="width:5%;"></div></div></div>';
+            if (isImageResult) {
+                html += '<div id="' + file.id + '" class="image uploading"><div class="progress progress-sm"><div class="progress-bar" style="width:5%;"></div></div></div>'
+            } else {
+                html += '<div id="' + file.id + '" class="file uploading d-flex justify-content-start align-items-center"><div class="mr-3">' + file.name + '</div><div class="flex-grow-1 mr-3"><div class="progress progress-sm"><div class="progress-bar" style="width:5%;"></div></div></div></div>'
+            }
         });
         if (multi) {
             result.append(html);
@@ -121,45 +184,51 @@ function install_plupload(btn) {
         $("#" + file.id).find(".progress-bar").css("width", file.percent + "%");
     });
     uploader.bind('Error', function (up, err) {
-        if (err.file) {
-            var html = '<small class="text-danger">' + err.file.name + '<br>' + err.message + ' (' + err.code + ')</small>';
-            // Errors may happen before FilesAdded event, e.g, "File size error.", so need to check if any wrap div here
-            if ($("#" + err.file.id).length) {
-                $("#" + err.file.id).removeClass("uploading").addClass("error").html(html);
-            } else {
-                html = '<div id="' + err.file.id + '" class="image error">' + html + '</div>';
-                result.html(html);
-            }
+        // Errors may happen before FilesAdded event, e.g, "File size error.", so need to check if any wrap div here
+        if (err.file && $("#" + err.file.id).length) {
+            var html = '<small class="text-danger">' + err.file.name + (isImageResult ? '<br>' : '') + err.message + ' (' + err.code + ')</small>';
+            $("#" + err.file.id).removeClass("uploading").addClass("error").html(html);
         } else {
             showError("Failed when uploading, " + err.message + " (" + err.code + ")");
         }
     });
     uploader.bind("FileUploaded", function (up, file, c) {
-        // Response from qiniu service
+        // Response from qiniu or local upload service
         var d = jQuery.parseJSON(c.response);
         // Service error, // https://developer.qiniu.com/kodo/manual/1651/simple-response
         if (d.error) {
-            var html = '<small class="text-danger">' + file.name + '<br>' + d.error + '</small>';
+            var html = '<small class="text-danger">' + file.name + (isImageResult ? '<br>' : '') + d.error + '</small>';
             $("#" + file.id).removeClass("uploading").addClass("error").html(html);
-        }
-        // Defined response, https://developer.qiniu.com/kodo/manual/1654/response-body
-        // d
-        //   url - uploaded url = base + '/' + key, e.g, //cdn.flask-seed.com/20200521/183247_821388.jpg
-        //   key - relative path from base, e.g, 20200521/183247_821388.jpg
-        //   name - upload file name
-        //   width - image width, int
-        //   height - image height, int
-        else {
-            var img = $('<img>').one("load", function () {
-                $(this).closest(".image").css("width", "auto");
-            }).attr("src", d.url + preview);
-            var image = $("#" + file.id).removeClass("uploading").addClass("uploaded").html(img);
-            var btns = '<div class="btns"><a href="' + d.url + '" target="_blank">i</a><a href="javascript:;" onclick="$(this).closest(\'.image\').remove();">x</a></div>';
-            image.append(btns);
+        } else {
+            // Defined response, https://developer.qiniu.com/kodo/manual/1654/response-body
+            // d
+            //   url - uploaded url = base + '/' + key, e.g, //cdn.flask-seed.com/20200521/183247_821388.jpg
+            //   key - relative path from base, e.g, 20200521/183247_821388.jpg
+            //   name - upload file name
+            //   width - image width, int
+            //   height - image height, int
+            var uploaded = $("#" + file.id);
+            uploaded.removeClass("uploading").addClass("uploaded");
+            if (isImageResult) {
+                var src = my_preview(d.url, preview);
+                var img = $('<img>').one("load", function () {
+                    $(this).closest(".image").css("width", "auto");
+                }).attr("src", src);
+                uploaded.html(img);
+                var btns = '<div class="btns"><a href="' + d.url + '" target="_blank">i</a><a href="javascript:;" onclick="$(this).closest(\'.image\').remove();">x</a></div>';
+                uploaded.append(btns);
+            } else {
+                uploaded.find(".flex-grow-1").remove();
+                var btns = '<div><a class="mr-2" href="' + d.url + '" target="_blank">i</a><a href="javascript:;" onclick="$(this).closest(\'.file\').remove();">x</a></div>';
+                uploaded.append(btns);
+            }
             $.each(hiddens.split(','), function (i, k) {
                 var v = k in d ? d[k] : "";
+                if (k == "url") {
+                    v = my_preview(v, suffix);
+                }
                 var hidden = $('<input type="hidden" name="' + k + '">').val(v);
-                image.append(hidden);
+                uploaded.append(hidden);
             });
         }
     });
@@ -169,12 +238,12 @@ function install_plupload(btn) {
 }
 
 function install_quill(div) {
-    var random = Math.round(new Date() / 1000),
+    var random = my_random(),
         upload = div.data("upload"),
         token = div.data("token"),
         max = div.data("max"),
-        preview = div.data("preview"),
-        filters = div.data("filters");
+        preview = div.attr("data-preview") ? JSON.parse(div.attr("data-preview")) : {},
+        filters = div.attr("data-filters") ? JSON.parse(div.attr("data-filters")) : {};
     div.attr("id", "quill-" + random);
     // Install quill
     var toolbarOptions = [
@@ -233,7 +302,7 @@ function install_quill(div) {
             showError("Failed when uploading file " + file.name + ", " + d.error);
         } else {
             var length = (quill.getSelection() || {}).index || quill.getLength();
-            quill.insertEmbed(length, 'image', d.url + preview);
+            quill.insertEmbed(length, 'image', my_preview(d.url, preview));
             quill.insertText(length + 1, '\n');
             quill.setSelection(length + 2);
         }
@@ -247,13 +316,20 @@ function _process(param, field, path) {
     debug("Try to process path " + path);
     // object
     if (field.is(".object")) {
-        field.find("> .form-group, > fieldset").each(function (i, n) {
-            _process(param, $(n), path + "." + $(n).attr("name"));
+        field.find("> .form-group, > .form-row .form-group, > fieldset").each(function (i, n) {
+            var name = $(n).attr("name");
+            if (name) {
+                if (name.includes(".")) { // Restart path, so that more than two models can be posted together
+                    _process(param, $(n), name);
+                } else {
+                    _process(param, $(n), path + "." + name);
+                }
+            }
         });
     }
     // array
     else if (field.is(".array")) {
-        var select = field.children("select"), imageInputGroup = field.children(".image-input-group");
+        var select = field.find("select"), pluploadInputGroup = field.find(".plupload-input-group");
         if (select.length) { // array of integer/number/string
             select.removeClass("is-valid is-invalid");
             var vals = select.val();
@@ -269,11 +345,11 @@ function _process(param, field, path) {
                 }
             }
             debug("Parsed array's length is " + vals.length);
-        } else if (imageInputGroup.length) { // array of string/object
-            imageInputGroup.removeClass("in-valid is-invalid");
-            var images = imageInputGroup.find(".image.uploaded");
-            if (images.length) {
-                $.each(images, function (i, n) {
+        } else if (pluploadInputGroup.length) { // array of string/object
+            pluploadInputGroup.removeClass("is-valid is-invalid");
+            var uploads = pluploadInputGroup.find(".uploaded");
+            if (uploads.length) {
+                $.each(uploads, function (i, n) {
                     var hiddens = $(n).find(":hidden[name]");
                     if (hiddens.length == 1) {
                         param[path + "[" + i + "]"] = hiddens.val();
@@ -285,12 +361,12 @@ function _process(param, field, path) {
                 });
             } else {
                 // Manually validate required
-                if (imageInputGroup.is("[required]")) {
-                    imageInputGroup.addClass("is-invalid");
+                if (pluploadInputGroup.is("[required]")) {
+                    pluploadInputGroup.addClass("is-invalid");
                     param["valid"] = false;
                 }
             }
-            debug("Parsed array's length is " + images.length);
+            debug("Parsed array's length is " + uploads.length);
         } else {
             field.find("> .list-group > .list-group-item").not(".template").each(function (i, n) {
                 _process(param, $(n).children(), path + "[" + i + "]");
@@ -299,10 +375,12 @@ function _process(param, field, path) {
     }
     // simple types
     else {
-        var radioInputGroup = field.children(".radio-input-group"),
-            imageInputGroup = field.children(".image-input-group"),
-            rteInputGroup = field.children(".rte-input-group"),
-            simpleInput = field.children(":input[name]");
+        var radioInputGroup = field.find(".radio-input-group"),
+            pluploadInputGroup = field.find(".plupload-input-group"),
+            rteInputGroup = field.find(".rte-input-group"),
+            timeRangeInputGroup = field.find(".time-range-input-group"),
+            inputGroup = field.find(".input-group"),
+            simpleInput = field.find(":input[name]");
         if (radioInputGroup.length) {
             radioInputGroup.removeClass("is-valid is-invalid");
             // If radio group is in array, they may share same name, so here use the active button to get checked value
@@ -316,15 +394,15 @@ function _process(param, field, path) {
                     param["valid"] = false;
                 }
             }
-        } else if (imageInputGroup.length) {
-            imageInputGroup.removeClass("in-valid is-invalid");
-            var image = imageInputGroup.find(".image.uploaded");
-            if (image.length) {
-                param[path] = image.find(":hidden[name=url]").val();
+        } else if (pluploadInputGroup.length) {
+            pluploadInputGroup.removeClass("in-valid is-invalid");
+            var upload = pluploadInputGroup.find(".uploaded");
+            if (upload.length) {
+                param[path] = upload.find(":hidden[name=url]").val();
             } else {
                 // Manually validate required
-                if (imageInputGroup.is("[required]")) {
-                    imageInputGroup.addClass("is-invalid");
+                if (pluploadInputGroup.is("[required]")) {
+                    pluploadInputGroup.addClass("is-invalid");
                     param["valid"] = false;
                 }
             }
@@ -341,9 +419,68 @@ function _process(param, field, path) {
                     param["valid"] = false;
                 }
             }
+        } else if (timeRangeInputGroup.length) {
+            var inputStart = timeRangeInputGroup.find("input.time-start"), start = inputStart.val().trim(),
+                inputEnd = timeRangeInputGroup.find("input.time-end"), end = inputEnd.val().trim();
+            timeRangeInputGroup.removeClass("in-valid is-invalid");
+            inputStart.removeClass("in-valid is-invalid");
+            inputEnd.removeClass("in-valid is-invalid");
+            if (start.length || end.length) {
+                param[path.replace("@", inputStart.attr("name"))] = start;
+                param[path.replace("@", inputEnd.attr("name"))] = end;
+                param[path] = start + "~" + end; // Path with placeholder for debug
+                if (!my_validateHhMm(start) || !my_validateHhMm(end) || start >= end) {
+                    timeRangeInputGroup.addClass("is-invalid");
+                    inputStart.addClass("is-invalid");
+                    inputEnd.addClass("is-invalid");
+                    param["valid"] = false;
+                } else {
+                    timeRangeInputGroup.addClass("is-valid");
+                    inputStart.addClass("is-valid");
+                    inputEnd.addClass("is-valid");
+                }
+            } else {
+                if (timeRangeInputGroup.is("[required]")) {
+                    timeRangeInputGroup.addClass("is-invalid");
+                    inputStart.addClass("is-invalid");
+                    inputEnd.addClass("is-invalid");
+                    param["valid"] = false;
+                }
+            }
+        } else if (inputGroup.length) {
+            var innerInput = inputGroup.find(":input[name]");
+            inputGroup.removeClass("is-invalid is-valid");
+            var val = innerInput.val().trim();
+            if (innerInput.is(":checkbox")) {
+                val = innerInput.is(":checked") ? "true" : "false";
+            }
+            if (val.length) {
+                param[path] = val;
+                // Invoke built-in validation for Non-empty value
+                if (innerInput[0].checkValidity) {
+                    if (innerInput[0].checkValidity() === false) {
+                        inputGroup.addClass("is-invalid");
+                        innerInput.addClass("is-invalid");
+                        param["valid"] = false;
+                    } else {
+                        inputGroup.addClass("is-valid");
+                        innerInput.addClass("is-valid");
+                    }
+                }
+            } else {
+                // Manually validate required only for empty value
+                if (inputGroup.is("[required]")) {
+                    inputGroup.addClass("is-invalid");
+                    innerInput.addClass("is-invalid");
+                    param["valid"] = false;
+                }
+            }
         } else if (simpleInput.length) {
             simpleInput.removeClass("is-invalid is-valid");
             var val = simpleInput.val().trim();
+            if (simpleInput.is(":checkbox")) {
+                val = simpleInput.is(":checked") ? "true" : "false";
+            }
             if (val.length) {
                 param[path] = val;
                 // Invoke built-in validation for Non-empty value
@@ -364,6 +501,9 @@ function _process(param, field, path) {
             }
         }
         debug("Parsed string is " + param[path]); // All values in form are string type
+        if (path.includes("@")) { // Remove paths with placeholder
+            delete param[path]
+        }
     }
 }
 
@@ -375,4 +515,25 @@ function debug(msg, more) {
             console.log(msg);
         }
     }
+}
+
+function my_preview(url, config) {
+    var rawUrl = url.split(/[#?]/)[0];
+    var ext = rawUrl.split('.').pop().trim().toLowerCase();
+    var isVideo = (ext == "mov" || ext == "mp4" || ext == "mpeg" || ext == "webm") ? true : false;
+    if (isVideo && "video" in config) {
+        return rawUrl + config["video"];
+    } else if ("image" in config) {
+        return rawUrl + config["image"];
+    } else {
+        return url;
+    }
+}
+
+function my_random() {
+    return Math.floor((Math.random() * 1000000000));
+}
+
+function my_validateHhMm(val) {
+    return /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(val);
 }

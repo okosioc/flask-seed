@@ -1,0 +1,36 @@
+{# parent, name, jschema, jvalue, is_in_list, is_required #}
+<div class="form-group array" name="{{ name }}">
+    <label>{{ name }}</label>
+    <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+    {% if jschema.type == 'array' %}
+        {% if jschema['items'].enum %} {# inner is enum #}
+            <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
+                    multiple>
+                <option value="">Choose...</option>
+                {% for e in jschema['items'].enum %}
+                    <option value="{{ e }}" {{ 'selected' if e in jvalue }}>{{ e }}</option>
+                {% endfor %}
+            </select>
+        {% else %} {# tags #}
+            <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
+                    multiple tags>
+                {% for e in jvalue %}
+                    <option value="{{ e }}" selected>{{ e }}</option>
+                {% endfor %}
+            </select>
+            <small class="form-text">You can select existing option or input a new option.</small>
+        {% endif %}
+    {% else %}
+        <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}>
+            <option value="">Choose...</option>
+            {% for e in jschema.enum %}
+                <option value="{{ each }}" {{ 'selected' if e == jvalue }}>{{ each }}</option>
+            {% endfor %}
+        </select>
+    {% endif %}
+    <div class="invalid-feedback">Please input valid {{ name }}!</div>
+    <div class="act">
+        <a class="format"
+           href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
+    </div>
+</div>

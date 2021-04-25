@@ -52,7 +52,6 @@ gulp.task('scripts:copy', function () {
             paths.node + "/moment/min/*",
         ], {base: paths.node})
         .pipe(gulp.dest(paths.vendor));
-
 });
 gulp.task('scripts:merge', function () {
     // Merge core libs into vendor.min.js, which will be shared in all pages
@@ -60,10 +59,7 @@ gulp.task('scripts:merge', function () {
         .src([
             paths.vendor + "/jquery/dist/jquery.min.js",
             paths.vendor + "/bootstrap/dist/js/bootstrap.bundle.min.js",
-            paths.vendor + "/bootstrap4-notify/bootstrap-notify.min.js",
-            paths.vendor + "/jquery-slimscroll/jquery.slimscroll.min.js",
-            paths.vendor + "/node-waves/dist/waves.min.js",
-            paths.vendor + "/waypoints/lib/jquery.waypoints.min.js"
+            paths.vendor + "/bootstrap4-notify/bootstrap-notify.min.js"
         ])
         .pipe(concat("vendor.min.js"))
         .pipe(gulp.dest(paths.js.dir));

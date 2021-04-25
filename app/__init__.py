@@ -46,12 +46,16 @@ def create_app(blueprints=None, pytest=False, runscripts=False):
 
     app = Flask(DEFAULT_APP_NAME, instance_relative_config=True)
 
-    # Json Encoder
+    # Json encoder
     app.json_encoder = SchemaJSONEncoder
 
     # Url converter
     app.url_map.converters['list'] = ListConverter
     app.url_map.converters['ObjectId'] = BSONObjectIdConverter
+
+    # Jinja whitespace control
+    app.jinja_options['trim_blocks'] = True
+    app.jinja_options['lstrip_blocks'] = True
 
     # Config
     app.config.from_object('app.config')

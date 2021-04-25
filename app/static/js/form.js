@@ -79,7 +79,7 @@ function _install_components(container) {
         // https://flatpickr.js.org/formatting/
         formGroup.find("input.date-time").each(function (i, n) {
             $(n).flatpickr({
-                locale: "zh",
+                //locale: "zh",
                 enableTime: true,
                 dateFormat: "Y-m-d H:i:S",
                 defaultHour: new Date().getHours(),
@@ -88,7 +88,7 @@ function _install_components(container) {
         });
         formGroup.find("input.date").each(function (i, n) {
             $(n).flatpickr({
-                locale: "zh",
+                //locale: "zh",
                 dateFormat: "Y-m-d"
             })
         });

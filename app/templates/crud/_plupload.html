@@ -1,0 +1,48 @@
+{% if jschema.type == 'array' %}
+    {% set hiddens = jschema['items'].properties|keys if jschema['items'].type == 'object' else ['url'] %}
+    {% set multiple = true %}
+{% else %}
+    {% set hiddens = ['url'] %}
+    {% set multiple = false %}
+    {% set jvalue = [jvalue] %}
+{% endif %}
+{% if jschema.format == 'image' %}
+    {% set mimes = upload_config.mimes_image %}
+{% else %}
+    {% set mimes = upload_config.mimes %}
+{% endif %}
+<div class="form-group array" name="{{ name }}">
+    <label>{{ name }}</label>
+    <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+    <div class="plupload-input-group {{ jschema.format }}-input-group" {{ 'required' if is_required }}>
+        <a class="btn btn-primary plupload" href="javascript:;" {{ 'multiple' if multiple }}
+           data-token="{{ upload_config.token }}"
+           data-upload="{{ upload_config.endpoint }}"
+           data-max="{{ upload_config.max }}"
+           data-preview='{"image":"{{ upload_config.image_preview_sm }}","video":"{{ upload_config.video_poster_sm }}"}'
+           data-filters='{"mime_types":"{{ mimes|join(',') }}"}'
+           data-hiddens="{{ hiddens|join(',') }}">Choose...</a>
+        <small class="form-text">Support {{ mimes|join(', ') }}. </small>
+        <div class="plupload-input-result {{ jschema.format }}-input-result mt-1 clearfix">
+            {% if jschema['items'].type == 'object' %} {# object array #}
+                {% for e in jvalue %}
+                    {% call(k) render_image(hiddens) -%}
+                        {{ e[k] }}
+                    {%- endcall %}
+                {% endfor %}
+            {% else %} {# string array #}
+                {% for e in jvalue %}
+                    {% set image_obj = {'url': e } %}
+                    {% call(k) render_image(hiddens) -%}
+                        {{ image_obj[k] }}
+                    {%- endcall %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="invalid-feedback">Please input valid {{ name }}!</div>
+    <div class="act">
+        <a class="format"
+           href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
+    </div>
+</div>

@@ -100,49 +100,40 @@ from app.tools import auth_permission
 
 {{ plural }} = Blueprint('{{ plural }}', __name__)
 
-@{{ plural }}.route('/form/')
-@{{ plural }}.route('/form/&lt;ObjectId:{{ initial }}id&gt;')
+@{{ plural }}.route('/form/', methods=('GET', 'POST'))
+@{{ plural }}.route('/form/&lt;ObjectId:{{ initial }}id&gt;', methods=('GET', 'POST'))
 @auth_permission
 def form({{ initial }}id=None):
-    if {{ initial }}id:
-        {{ model.name }} = {{ model.name|capitalize }}.find_one({{ initial }}id)
-        if not {{ model.name }}:
-            abort(404)
-    else:
-        {{ model.name }} = {{ model.name|capitalize }}()
-    #
-    return render_template('{{ plural }}/form.html', {{ model.name }}={{ model.name }}, token=qiniu.gen_token())
-
-@{{ plural }}.route('/save', methods=('POST',))
-@{{ plural }}.route('/save/&lt;ObjectId:{{ initial }}id&gt;', methods=('POST',))
-@auth_permission
-def save({{ initial }}id=None):
-    """ Create or Update a {{ model.name }}. """
-    try:
-        {{ model.name }} = populate_model(request.form, {{ model.name|capitalize }})
-
-        # TODO: Implement some validation logic here
-
-        # Create
-        if not {{ initial }}id:
-            {{ model.name }}.save()
-            {{ initial }}id = {{ model.name }}._id
-            current_app.logger.info('Successfully create {{ model.name }} %s' % {{ initial }}id)
-        # Update
-        else:
-            existing = {{ model.name|capitalize }}.find_one({{ initial }}id)
-            if not existing:
+    # Get
+    if request.method == 'GET':
+        if {{ initial }}id:
+            {{ model.name }} = {{ model.name|capitalize }}.find_one({{ initial }}id)
+            if not {{ model.name }}:
                 abort(404)
-            # TODO: Only update necessary fields
-            # e.g,
-            # existing.status = {{ model.name }}.status
-            # existing.updateTime = datetime.now()
-            existing.save()
-            current_app.logger.info('Successfully update {{ model.name }} %s' % {{ initial }}id)
-    except:
-        current_app.logger.exception('Failed when saving {{ model.name }}')
-        return jsonify(success=False, message=_('Failed when saving {{ model.name }}, please try again later!'))
-
+        else:
+            {{ model.name }} = {{ model.name|capitalize }}()
+        #
+        return render_template('{{ plural }}/form.html', {{ model.name }}={{ model.name }}, token=qiniu.gen_token())
+    # Post
+    {{ model.name }} = populate_model(request.form, {{ model.name|capitalize }})
+    # TODO: Implement some validation logic here
+    # Create
+    if not {{ initial }}id:
+        {{ model.name }}.save()
+        {{ initial }}id = {{ model.name }}._id
+        current_app.logger.info(f'Successfully create {{ model.name }} {{ '{' }}{{ initial }}id{{ '}' }}')
+    # Update
+    else:
+        existing = {{ model.name|capitalize }}.find_one({{ initial }}id)
+        if not existing:
+            abort(404)
+        # TODO: Only update necessary fields
+        # e.g,
+        # existing.status = {{ model.name }}.status
+        # existing.updateTime = datetime.now()
+        existing.save()
+        current_app.logger.info(f'Successfully update {{ model.name }} {{ '{' }}{{ initial }}id{{ '}' }}')
+    #
     return jsonify(success=True, message=_('Save {{ model.name }} successfully.'), {{ initial }}id={{ initial }}id)
                                     </textarea>
                                 </div>
@@ -174,8 +165,8 @@ def save({{ initial }}id=None):
                         code = html_beautify($(n).next("iframe").html().trim(), {
                             indent_size: "2",
                             indent_char: " ",
-                            max_preserve_newlines: -1,
-                            preserve_newlines: false,
+                            max_preserve_newlines: 0,
+                            preserve_newlines: true,
                         });
                     } else if ($(n).is(".python")) {
                         session.setMode("ace/mode/python");
@@ -232,19 +223,21 @@ def save({{ initial }}id=None):
                     {{ render(n, s, none if gen else jvalue[n], pn, is_required=required, gen=gen) }}
                 {% endif %}
             {% endfor %}
-            <div class="act">
-                <a class="format" href="javascript:;">Object {{ '{' }}{{ jschema.properties|length }}{{ '}' }}</a>
-                {% if is_in_list %}
-                    <a class="del" href="javascript:;">x</a>
-                {% endif %}
-            </div>
+            {% if not gen %}
+                <div class="act">
+                    <a class="format" href="javascript:;">Object {{ '{' }}{{ jschema.properties|length }}{{ '}' }}</a>
+                    {% if is_in_list %}
+                        <a class="del" href="javascript:;">x</a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </fieldset>
     {% elif jschema.type == 'array' %} {# Array #}
         {% if jschema.format == 'select' and jschema['items'].type in ['integer','number','string'] %} {# select #}
             <div class="form-group array" name="{{ name }}">
                 <label>{{ name }}</label>
                 <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
-                {% if jschema['items'].enum %}{# inner is enum #}
+                {% if jschema['items'].enum %} {# inner is enum #}
                     <select class="custom-select select2" name="{{ name }}" {{ 'required' if is_required }}
                             multiple>
                         <option value="">Choose...</option>
@@ -268,10 +261,12 @@ def save({{ initial }}id=None):
                     <small class="form-text">You can select existing option or input a new option.</small>
                 {% endif %}
                 <div class="invalid-feedback">Please input valid {{ name }}!</div>
-                <div class="act">
-                    <a class="format"
-                       href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
-                </div>
+                {% if not gen %}
+                    <div class="act">
+                        <a class="format"
+                           href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
+                    </div>
+                {% endif %}
             </div>
         {% elif jschema.format == 'image' and jschema['items'].type in ['string', 'object'] %} {# image #}
             {% set hiddens = jschema['items'].properties|keys if jschema['items'].type == 'object' else ['url'] %}
@@ -323,10 +318,12 @@ def save({{ initial }}id=None):
                     </div>
                 </div>
                 <div class="invalid-feedback">Please input valid {{ name }}!</div>
-                <div class="act">
-                    <a class="format"
-                       href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
-                </div>
+                {% if not gen %}
+                    <div class="act">
+                        <a class="format"
+                           href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
+                    </div>
+                {% endif %}
             </div>
         {% elif jschema.format == 'file' and jschema['items'].type in ['string', 'object'] %} {# image #}
             {% set hiddens = jschema['items'].properties|keys if jschema['items'].type == 'object' else ['url'] %}
@@ -378,10 +375,12 @@ def save({{ initial }}id=None):
                     </div>
                 </div>
                 <div class="invalid-feedback">Please input valid {{ name }}!</div>
-                <div class="act">
-                    <a class="format"
-                       href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
-                </div>
+                {% if not gen %}
+                    <div class="act">
+                        <a class="format"
+                           href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }}|{{ jschema.format }}</a>
+                    </div>
+                {% endif %}
             </div>
         {% else %}
             <fieldset class="array {{ 'mb-0' if is_in_list }}" name="{{ name }}">
@@ -418,14 +417,16 @@ def save({{ initial }}id=None):
                         {{ render('-', jschema['items'], init, name, is_in_list=true, gen=false) }}
                     </div>
                 </div>
-                <div class="act">
-                    <a class="format"
-                       href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }} {{ '[{{ ' + path + '|length }}]' if gen else '[' + jvalue|length|string + ']' }}</a>
-                    <a class="add" href="javascript:;">+</a>
-                    {% if is_in_list %}
-                        <a class="del" href="javascript:;">x</a>
-                    {% endif %}
-                </div>
+                {% if not gen %}
+                    <div class="act">
+                        <a class="format"
+                           href="javascript:;">{{ jschema['items'].type }} {{ jschema.type }} {{ '[{{ ' + path + '|length }}]' if gen else '[' + jvalue|length|string + ']' }}</a>
+                        <a class="add" href="javascript:;">+</a>
+                        {% if is_in_list %}
+                            <a class="del" href="javascript:;">x</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </fieldset>
         {% endif %}
     {% else %} {# Simple types #}
@@ -568,13 +569,15 @@ def save({{ initial }}id=None):
                 {% endif %}
             {% endif %}
             <div class="invalid-feedback">Please input valid {{ 'value' if is_in_list else name }}!</div>
-            <div class="act">
-                <a class="format" href="javascript:;">
-                    {{ jschema.type }}{{ '|' + jschema.format if jschema.format }}</a>
-                {% if is_in_list %}
-                    <a class="del" href="javascript:;">x</a>
-                {% endif %}
-            </div>
+            {% if not gen %}
+                <div class="act">
+                    <a class="format" href="javascript:;">
+                        {{ jschema.type }}{{ '|' + jschema.format if jschema.format }}</a>
+                    {% if is_in_list %}
+                        <a class="del" href="javascript:;">x</a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     {% endif %}
 {% endmacro %}

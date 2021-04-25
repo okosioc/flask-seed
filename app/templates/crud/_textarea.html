@@ -1,0 +1,14 @@
+<div class="form-group" name="{{ name }}">
+    <label>{{ name }}</label>
+    <span class="text-muted font-weight-light">{{ '*' if is_required }}</span>
+    <textarea name="{{ name }}" rows="3"
+              class="form-control" {{ 'required' if is_required }}>{{ jvalue or '' }}</textarea>
+    <div class="invalid-feedback">Please input valid {{ 'value' if is_in_list else name }}!</div>
+    <div class="act">
+        <a class="format" href="javascript:;">
+            {{ jschema.type }}{{ '|' + jschema.format if jschema.format }}</a>
+        {% if is_in_list %}
+            <a class="del" href="javascript:;">x</a>
+        {% endif %}
+    </div>
+</div>

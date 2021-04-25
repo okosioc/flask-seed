@@ -10,14 +10,6 @@
         $('[data-toggle="tooltip"]').tooltip();
         // Bootstrap popover
         $('[data-toggle="popover"]').popover();
-        // Slimscroll - scroll content within a container
-        $(".slimscroll").slimScroll({
-            height: 'auto',
-            position: 'right',
-            size: "8px",
-            touchScrollStep: 20,
-            color: '#9ea5ab'
-        });
     }
 
     function initToast() {
@@ -82,7 +74,6 @@
         });
     }
 
-
     function init() {
         initComponents();
 
@@ -91,9 +82,6 @@
 
         // Scroll to tup
         initScroll2Top();
-
-        // Wave effects
-        Waves.init();
     }
 
     init();

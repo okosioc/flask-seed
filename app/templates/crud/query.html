@@ -105,13 +105,8 @@ def delete({{ initial }}id):
     existing = {{ model.name|capitalize }}.find_one({{ initial }}id)
     if not existing:
         abort(404)
-
-    try:
-        existing.delete()
-    except:
-        current_app.logger.exception('Failed when deleting {{ model.name }}')
-        return jsonify(success=False, message=_('Failed when deleting the {{ model.name }}, please try again later!'))
-
+    #
+    existing.delete()
     return jsonify(success=True, message=_('Delete the {{ model.name }} successfully.'), {{ initial }}id={{ initial }}id)
                                 </textarea>
                                 </div>
@@ -143,8 +138,8 @@ def delete({{ initial }}id):
                         code = html_beautify($(n).next("iframe").html().trim(), {
                             indent_size: "2",
                             indent_char: " ",
-                            max_preserve_newlines: -1,
-                            preserve_newlines: false,
+                            max_preserve_newlines: 0,
+                            preserve_newlines: true,
                         });
                     } else if ($(n).is(".python")) {
                         session.setMode("ace/mode/python");

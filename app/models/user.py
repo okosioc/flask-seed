@@ -10,11 +10,12 @@
 """
 
 from datetime import datetime
+from typing import List
 
 from flask_login import UserMixin
 from werkzeug.utils import cached_property
 
-from app.core import Model, SimpleEnum, Format
+from app.core import Model, SimpleEnum, Format, Comparator
 from app.extensions import mdb
 
 
@@ -29,6 +30,22 @@ class UserStatus(SimpleEnum):
     """ User Status. """
     NORMAL = 'normal'
     REJECTED = 'rejected'
+
+
+class Account():
+    name: str
+    email: str
+    password: str
+    intro: str = None
+    avatar: str = None
+    point: int = 0
+    status: UserStatus = UserStatus.NORMAL
+    roles: List[UserRole] = [UserRole.MEMBER]
+    updateTime: datetime = None
+    createTime: datetime = datetime.now
+
+    __collection = 'accounts'
+    __indexes = [{'fields': ['email'], 'unique': True}]
 
 
 @mdb.register
@@ -49,7 +66,7 @@ class User(Model, UserMixin):
     required_fields = ['name', 'email', 'avatar', 'point', 'status', 'roles', 'createTime']
     default_values = {'point': 0, 'status': UserStatus.NORMAL, 'roles': [UserRole.MEMBER], 'createTime': datetime.now}
     formats = {'intro': Format.TEXTAREA, 'avatar': Format.IMAGE, 'roles': Format.SELECT}
-    searchables = ['name', 'email', 'point', 'status']
+    searchables = [('name', Comparator.LIKE), 'email', 'point', 'status']
     columns = ['avatar', 'name', 'email', 'point', 'status', 'roles', 'createTime']
     indexes = [{'fields': ['email'], 'unique': True}]
 

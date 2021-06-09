@@ -4,7 +4,7 @@ ENV = 'production'
 DEBUG = False
 SECRET_KEY = '<FIXME>'
 
-CACHE_TYPE = "simple"
+CACHE_TYPE = "SimpleCache"
 CACHE_DEFAULT_TIMEOUT = 300
 CACHE_THRESHOLD = 10240
 

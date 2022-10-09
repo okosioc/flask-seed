@@ -1,0 +1,61 @@
+<div id="div-demo-team-summary">
+    <div class="card"><div class="card-body">
+    <div class="row text-center">
+        <div class="col">
+            <div name="logo" format="avatar">
+                <a href="javascript:;" class="avatar avatar-xl mt-2 mb-4">
+                    <img src="{{ demo_team.logo or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_team.logo }}">
+                    <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if demo_team.logo }}">{{ demo_team.name|first|upper if demo_team.name is not none }}</span>
+                </a>
+            </div>
+            <div class="mb-4">
+                <span class="h3 text-primary" name="name" foramt="text">{{ demo_team.name or '-' }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="list-group list-group-flush border-top">
+        <div class="list-group-item">
+            <div class="row align-items-center">
+                <div class="col">
+                    <span><i class="fe fe-type mr-2"></i>团队名称</span>
+                </div>
+                <div class="col-auto text-muted" name="name" format="text" enum="">
+                    {{ demo_team.name or '-' }}
+                </div>
+            </div>
+        </div>
+        <div class="list-group-item">
+            <div class="row align-items-center">
+                <div class="col">
+                    <span><i class="fe fe-circle mr-2"></i>团队状态</span>
+                </div>
+                <div class="col-auto text-muted" name="status" format="select" enum="DemoTeamStatus">
+                    {% if demo_team.status is not none %}<span class="text-{{ demo_team.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoTeamStatus')[demo_team.status] }}{% else %}-{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="list-group-item">
+            <div class="row align-items-center">
+                <div class="col">
+                    <span><i class="fe fe-users mr-2"></i>团队成员</span>
+                </div>
+                <div class="col-auto text-muted" name="members" format="table" enum="">
+                    {{ demo_team.members|length }}
+                </div>
+            </div>
+        </div>
+        <div class="list-group-item">
+            <div class="row align-items-center">
+                <div class="col">
+                    <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                </div>
+                <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                    {{ demo_team.create_time|datetime if demo_team.create_time is not none else '-' }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.summary -->
+    </div></div>
+</div>

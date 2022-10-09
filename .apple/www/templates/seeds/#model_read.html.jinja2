@@ -1,0 +1,205 @@
+{% from '#urls.html' import detail_url, edit_url with context %}
+{% from "#macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
+{% set model_schema = model.schema %}
+{% set seed_is_card = seed.params.is_card or false %}
+{% set seed_is_horizontal = seed.params.is_horizontal or false %}
+{# macro - render field with specified format that has complex display #}
+{% macro render_format(field_name, field_schema, field_path, is_in_card) %}
+{% include '#display_'+ field_schema.format + '.html.jinja2' %}
+<!-- /.{{ field_schema.format }} -->
+{%- endmacro %}
+{# macro - render relation #}
+{% macro render_relation(field_name, field_schema, field_path, is_in_card) %}
+<div class="relation {{ field_schema.type }}" name="{{ field_name }}" format="{{ field_schema.format }}">
+{% if field_schema.format in ['table', 'modal', 'media', 'timeline'] %}
+    {{ render_format(field_name, field_schema, field_path, is_in_card)|indent(4) }}
+{% else %}
+    {% filter indent(width=4, first=true) %}{% include '#display_relation.html.jinja2' %}{% endfilter %}
+{% endif %}
+</div>
+{%- endmacro %}
+{# macro - render layout #}
+{# Each column in layout can be blank('')/hyphen(-)/summary($)/group(number)/field(string)/inner fields(has children) #}
+{% macro render_layout(name, schema, path, layout, is_in_card) %}
+{% for row in layout %}
+{% if row[0].name == '-' %}
+<hr class="mt-4 mb-5">
+{% else %}
+<div class="row">
+{% for column in row %}
+    <div class="{{ 'col-sm-'+column.span|string if column.span else 'col-sm' }}">
+    {% set cols = column.children if column.children else [column] %}
+    {% for col in cols if col.name %}
+        {# render summary #}
+        {% if col.name == '$' %}
+        {% if not is_in_card %}
+        <div class="card"><div class="card-body">
+        {% endif %}
+        {{ display_summary(name, schema, path)|indent(8) }}
+        {% if not is_in_card %}
+        </div></div>
+        {% endif %}
+        {# render group #}
+        {% elif col.name|int(-1) != -1 %}
+        {% if not is_in_card %}
+        <div class="card"><div class="card-header"><h4 class="card-header-title">{% if schema.icon %}<i class="fe fe-{{ schema.icon }} mr-2"></i>{% endif %}{{ schema.title }}</h4></div><div class="card-body">
+        {% endif %}
+        {{ render_layout(name, schema, path, schema.groups[col.name|int], is_in_card)|indent(8) }}
+        {% if not is_in_card %}
+        </div></div>
+        {% endif %}
+        {# render field #}
+        {% else %}
+        {{ render_field(col.name, schema.properties[col.name], path + '.' + col.name, is_in_card)|indent(8) }}
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+{% endfor %}
+<!-- /.layout -->
+{%- endmacro %}
+{# macro - render object field #}
+{% macro render_object(name, schema, path, is_in_card) %}
+{# model object, i.e, name='user', path=user, so current field's path is user #}
+{% if name == path %}
+    {% set current_path = path %}
+{# object in array, i.e, name='-', path=xxx_item, so current field's path is xxx_item #}
+{% elif name == '-' %}
+    {% set current_path = path %}
+{# inner object, i.e, name=info, path=user.info, so current field's path is info #}
+{% else %}
+{{ '{%' }} set {{ name }} = {{ path }} {{ '%}' }}
+    {% set current_path = name %}
+{% endif %}
+<div class="object" name="{{ name }}" format="{{ schema.format }}">
+{# has format #}
+{% if schema.format %}
+    {{ render_format(name, schema, current_path, is_in_card)|indent(4) }}
+{# no format #}
+{% else %}
+    {{ render_layout(name, schema, current_path, schema.read, is_in_card)|indent(4) }}
+{% endif %}
+</div>
+{%- endmacro %}
+{# macro - render array field #}
+{% macro render_array(name, schema, path, is_in_card) %}
+<div class="array" name="{{ name }}" format="{{ schema.format }}">
+{# has format #}
+{% if schema.format %}
+    {{ render_format(name, schema, path, is_in_card)|indent(4) }}
+{# no format #}
+{% else %}
+    {% set item_schema = schema['items'] %}
+    <div class="array-items">
+    {{ '{%' }} for {{ name }}_item in {{ path }} {{ '%}' }}
+        <div class="array-item" name="-">
+            {{ render_field('-', item_schema, name+'_item', is_in_card)|indent(12) }}
+        </div>
+    {{ '{%' }} else {{ '%}' }}
+        <div class="array-item">
+            <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div>
+        </div>
+    {{ '{%' }} endfor {{ '%}' }}
+    </div>
+{% endif %}
+</div>
+{%- endmacro %}
+{# macro - render simple field #}
+{% macro render_simple(name, schema, path, is_in_card) %}
+{% if schema.format in ['video', 'metric'] %}
+{{ render_format(name, schema, path, is_in_card) }}
+{%- else %}
+<div class="field-group {{ 'row' if seed_is_horizontal }}">
+    <label class="{{ 'col-auto col-field-label' if seed_is_horizontal }}">{{ schema.title }}{{ '('~schema.unit~')' if schema.unit }}</label>
+    {% if seed_is_horizontal %}
+    <div class="col">
+    {% endif %}
+    <div class="field-control">
+        <span>{{ display_inline(name, schema, path) }}</span>
+    </div>
+    {% if seed_is_horizontal %}
+    </div>
+    {% endif %}
+</div>
+{%- endif %}
+{%- endmacro %}
+{# macro - render field, check type and handle card display logic #}
+{% macro render_field(name, schema, path, is_in_card, is_seed_level=false) %}
+{# card start #}
+{% set render_card = false %}
+{% if not is_in_card %}
+    {% if is_seed_level %}
+       {% if seed_is_card %}
+           {% set render_card = true %}
+        {% endif %}
+    {% else %}
+        {% if schema.format in ['table', 'modal', 'media', 'timeline', 'chart', 'metric'] %}
+            {% set render_card = true %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% if render_card %}
+{% set is_in_card = true %}
+{% set card_class = 'table-responsive' if schema.format in ['table', 'modal'] else 'card-body' %}
+<div class="card">{% if schema.format !='metric' %}<div class="card-header"><h4 class="card-header-title">{% if schema.icon %}<i class="fe fe-{{ schema.icon }} mr-2"></i>{% endif %}{{ schema.title }}</h4></div>{% endif %}<div class="{{ card_class }}">
+{% endif %}
+{# is relation #}
+{% if schema.is_relation %}
+{{ render_relation(name, schema, path, is_in_card) }}
+{% else %}
+{% if schema.type == 'object' %}
+{{ render_object(name, schema, path, is_in_card) }}
+{% elif schema.type == 'array' %}
+{{ render_array(name, schema, path, is_in_card) }}
+{% else %}
+{{ render_simple(name, schema, path, is_in_card) }}
+{% endif %}
+{% endif %}
+{# card end #}
+{% if render_card %}
+</div></div>
+{% endif %}
+<!-- /.{{ schema.type }} -->
+{%- endmacro %}
+{# macro ends #}
+<div id="div-{{ seed.name_kebab }}">
+{% if sub %}
+    <div class="object" name="{{ model.name_snake }}">
+        {{ render_field(sub, model_schema.properties[sub], model.name_snake+'.'+sub, is_seed_level=true)|indent(8) }}
+    </div>
+{% else %}
+    {{ render_field(model.name_snake, model_schema, model.name_snake, is_seed_level=true)|indent(4) }}
+{% endif %}
+</div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // Init
+    });
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+</script>

@@ -11,16 +11,16 @@
 
 from flask_script import Server, Shell, Manager
 
-from app import create_app
+from www import create_www
 
-app = create_app()
-manager = Manager(app)
+www = create_www()
+manager = Manager(www)
 
 manager.add_command('runserver', Server('0.0.0.0', port=6060))
 
 
 def _make_context():
-    return dict(app=app)
+    return dict(www=www)
 
 
 manager.add_command('shell', Shell(make_context=_make_context))

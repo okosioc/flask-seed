@@ -1,0 +1,60 @@
+{% if field_schema.type == 'object' %}
+{# Guess x/y field names #}
+{% if 'names' in field_schema.properties %}
+    {% set chart_x_name = 'names' %}
+{% elif 'labels' in field_schema.properties %}
+    {% set chart_x_name = 'labels' %}
+{% else %}
+    {% set chart_x_name = 'x' %}
+{% endif %}
+{% if 'values' in field_schema.properties %}
+    {% set chart_y_name = 'values' %}
+{% elif 'amounts' in field_schema.properties %}
+    {% set chart_y_name = 'amounts' %}
+{% else %}
+    {% set chart_y_name = 'y' %}
+{% endif %}
+{# Options #}
+{{ '{%' }} set chart_type = 'doughnut' {{ '%}' }}
+{{ '{%' }} set chart_data =  {
+    'x': {{ field_path }}.{{ chart_x_name }},
+    'y': {{ field_path }}.{{ chart_y_name }},
+    'title': {{ field_path }}.title,
+    'unit': '{{ field_schema.properties[chart_y_name].unit }}',
+    'half': false,
+{{ '} %}' }}
+{% elif field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{# Guess x/y field names #}
+{% if 'name' in item_schema.properties %}
+    {% set chart_x_name = 'name' %}
+{% elif 'label' in item_schema.properties %}
+    {% set chart_x_name = 'label' %}
+{% else %}
+    {% set chart_x_name = 'x' %}
+{% endif %}
+{% if 'value' in item_schema.properties %}
+    {% set chart_y_name = 'value' %}
+{% elif 'amount' in item_schema.properties %}
+    {% set chart_y_name = 'amount' %}
+{% else %}
+    {% set chart_y_name = 'y' %}
+{% endif %}
+{{ '{%' }} set chart_type = 'line' {{ '%}' }}
+{{ '{%' }} set {{ field_name }}_ns = namespace(x=[], y=[]) {{ '%}' }}
+{{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+    {{ '{%' }} set {{ field_name }}_ns.x = {{ field_name }}_ns.x + [{{ field_name }}_item.{{ chart_x_name }}] {{ '%}' }}
+    {{ '{%' }} set {{ field_name }}_ns.y = {{ field_name }}_ns.y + [{{ field_name }}_item.{{ chart_y_name }}] {{ '%}' }}
+{{ '{%' }} endfor {{ '%}' }}
+{# Options #}
+{{ '{%' }} set chart_data =  {
+    'x': {{ field_name }}_ns.x,
+    'y': {{ '{' }}'{{ item_schema.properties[chart_y_name].title }}': {{ field_name }}_ns.y{{ '}' }},
+    'title': '{{ field_schema.title }}',
+    'unit': {{ '{' }}'{{ item_schema.properties[chart_y_name].title }}': '{{ item_schema.properties[chart_y_name].unit }}' {{ '}' }},
+{{ '} %}' }}
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}
+{# Include chat seed #}
+{{ '{%' }} include 'seeds/chart_' + chart_type + '.html' {{ '%}' }}

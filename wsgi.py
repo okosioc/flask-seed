@@ -9,9 +9,9 @@
     :date: 16/6/30
 """
 
-from app import create_app
+from www import create_www
 
-app = create_app()
+www = create_www()
 
 if __name__ == "__main__":
-    app.run()
+    www.run()

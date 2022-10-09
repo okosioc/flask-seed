@@ -1,0 +1,16 @@
+{% extends "demo.html" %}
+{% set title = '项目详情' %}
+{% set breadcrumb = {
+    'subtitle': 'Project',
+    'title': title,
+    'actions': [{'icon': 'edit', 'title': '编辑项目', 'view': 'project-edit?'}],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg">
+        {% include "seeds/demo_project-read.html" %}
+    </div>
+</div>
+{% endblock %}

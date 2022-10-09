@@ -1,0 +1,70 @@
+//
+// custom-forms.scss
+// Extended from Bootstrap
+//
+
+//
+// Bootstrap Overrides ===================================
+//
+
+// Switch
+
+.custom-switch {
+  min-height: $custom-switch-height;
+
+  .custom-control-label {
+
+    &::before {
+      top: 0;
+      height: $custom-switch-height;
+      border-radius: $custom-switch-height / 2;
+    }
+
+    &::after {
+      top: $custom-switch-spacing;
+      left: $custom-switch-spacing - $custom-control-gutter - $custom-switch-width;
+      background-color: $custom-switch-indicator-bg;
+    }
+  }
+
+  .custom-control-input:checked ~ .custom-control-label {
+
+    &::after {
+      background-color: $custom-switch-indicator-active-bg;
+      transform: translateX($custom-switch-width - $custom-switch-spacing * 2 - $custom-switch-indicator-size);
+    }
+  }
+}
+
+
+// Select
+
+.custom-select-sm {
+  line-height: $input-line-height-sm;
+}
+
+
+//
+// Dashkit ===================================
+//
+
+// Control circle
+
+.custom-control-circle {
+  padding-left: $custom-control-gutter + $custom-control-circle-indicator-size;
+}
+
+.custom-control-circle .custom-control-label::after,
+.custom-control-circle .custom-control-label::before {
+  top: ($font-size-base * $line-height-base - $custom-control-circle-indicator-size) / 2;
+  left: -($custom-control-gutter + $custom-control-circle-indicator-size);
+  width: $custom-control-circle-indicator-size;
+  height: $custom-control-circle-indicator-size;
+  border-radius: $custom-control-circle-indicator-border-radius;
+}
+
+.custom-control-circle .custom-control-label::after,
+.custom-control-circle .custom-control-input:checked ~ .custom-control-label::after {
+  background-image: escape-svg($custom-control-circle-indicator-icon-checked);
+  background-size: $custom-control-circle-indicator-bg-size;
+}

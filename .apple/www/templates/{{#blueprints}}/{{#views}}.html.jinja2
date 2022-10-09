@@ -1,0 +1,32 @@
+{{ '{% extends "' }}{{ view.params.extends }}{{ '.html" %}' }}
+{{ '{%' }} set title = {{ view.params.title|quote }} {{ '%}' }}
+{{ '{%' }} set breadcrumb = {
+    'subtitle': {{ view.params.subtitle|quote }},
+    'title': title,
+    'actions': {{ view.params.actions or '[]' }},
+    'tabs': [],
+} {{ '%}' }}
+{{ '{% block title %}{{ title }}{% endblock %}' }}
+{{ '{% block content %}' }}
+{% for row in view.rows %}
+<div class="row">
+    {% for column in row %}
+    <div class="{{ 'col-lg-'+column.span|string if column.span else 'col-lg' }}">
+        {# one column #}
+        {% if not column.children %}
+        {{ '{%' }} include "seeds/{{ column.name }}.html" {{ '%}' }}
+        {# children columns #}
+        {% else %}
+        <div class="row">
+            {% for child in column.children %}
+            <div class="col-12">
+                {{ '{%' }} include "seeds/{{ child.name }}.html" {{ '%}' }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{{ '{% endblock %}' }}

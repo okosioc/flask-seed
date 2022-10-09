@@ -43,7 +43,8 @@ def deploy(ctx):
             ctx.run('. venv/bin/activate')
             # Restart unicorn
             # run('killall -9 gunicorn')
-            # run('gunicorn wsgi:app -p wsgi.pid -b 0.0.0.0:6060 -D --timeout 300 --log-file app/logs/gunicorn.log')
+            # About workers and threads, refer to https://docs.gunicorn.org/en/stable/settings.html#workers
+            # ctx.run('gunicorn wsgi:www --threads 8 -p wsgi.pid -b 0.0.0.0:6060 -D --timeout 300 --log-file www/logs/gunicorn.log')
             ctx.run('kill -HUP `cat wsgi.pid`')
 
 

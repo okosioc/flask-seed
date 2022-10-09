@@ -1,0 +1,43 @@
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{# First field should be a meaningful subject, i.e, user name or event type and etc. #}
+{% set first_field_name = item_schema.columns[0] %}
+{% set first_field = item_schema.properties[first_field_name] %}
+{% if first_field.type == 'object' %}
+    {% set object_field_name = match_field(first_field.columns, 'name|\w*name') %}
+    {% set first_field_name = first_field_name~'.'~object_field_name %}
+    {% set first_field = first_field.properties[object_field_name] %}
+{% endif %}
+{% set title_field_name = match_field(item_schema.columns, 'title') %}
+{% set title_field = item_schema.properties[title_field_name] %}
+{% set content_field_name = match_field(item_schema.columns, 'content|text') %}
+{% set time_field_name = match_field(item_schema.columns, 'update_time|create_time|\w*time') %}
+<ul class="array-items list-group list-group-flush list-group-activity">
+    {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+    <li class="array-item list-group-item">
+        <div class="row align-items-center">
+            <div class="col-auto" name="{{ first_field_name }}" format="{{ first_field.format }}">
+                <a href="javascript:;" class="avatar avatar-sm">
+                    <span class="avatar-title bg-primary-soft rounded-circle text-primary">{{ '{{' }} {{ field_name }}_item.{{ first_field_name }}|first|upper if {{ field_name }}_item.{{ first_field_name }} is not none {{ '}}' }}</span>
+                </a>
+            </div>
+            <div class="col ml-n2">
+                <p name="{{ title_field_name }}" format="{{ title_field.format }}" class="mb-1">{{ '{{' }} {{ field_name }}_item.{{ title_field_name }}|safe if {{ field_name }}_item.{{ title_field_name }} is not none {{ '}}' }}</p>
+                {% if content_field_name %}
+                <p name="{{ content_field_name }}" format="{{ item_schema.properties[content_field_name].format }}" class="small text-gray-700 mb-1">{{ '{{' }} {{ field_name }}_item.{{ content_field_name }} or '' {{ '}}' }}</p>
+                {% endif %}
+                <p class="small text-muted mb-0"><i class="fe fe-clock mr-2"></i>{{ '{{' }} {{ field_name }}_item.{{ time_field_name }}|timesince if {{ field_name }}_item.{{ time_field_name }} is not none {{ '}}' }}</p>
+            </div>
+        </div>
+    </li>
+    {{ '{%' }} else {{ '%}' }}
+    <li class="array-item list-group-item">
+        <div class="row align-items-center">
+            <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></div>
+        </div>
+    </li>
+    {{ '{%' }} endfor {{ '%}' }}
+</ul>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

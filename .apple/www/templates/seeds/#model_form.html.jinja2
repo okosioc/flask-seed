@@ -1,0 +1,348 @@
+{% from '#urls.html' import detail_url, edit_url with context %}
+{% from "#macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
+{% set model_schema = model.schema %}
+{% set seed_is_card = seed.params.is_card or false %}
+{% set seed_is_horizontal = seed.params.is_horizontal or false %}
+{# macro - render field with specified format that has complex display #}
+{% macro render_format(field_name, field_schema, field_path, is_in_card) %}
+{% include '#input_'+ field_schema.format + '.html.jinja2' %}
+<!-- /.{{ field_schema.format }} -->
+{%- endmacro %}
+{# macro - render relation #}
+{% macro render_relation(field_name, field_schema, field_path, is_in_card) %}
+<fieldset class="relation {{ field_schema.type }}" name="{{ field_name }}" format="{{ field_schema.format }}">
+{% if field_schema.format in ['media', 'timeline', 'modal'] %}
+    {{ render_format(field_name, field_schema, field_path, is_in_card)|indent(4) }}
+{% else %}
+    {% filter indent(width=4, first=true) %}{% include '#input_relation.html.jinja2' %}{% endfilter %}
+{% endif %}
+</fieldset>
+{%- endmacro %}
+{# macro - render layout #}
+{# Each column in layout can be blank('')/hyphen(-)/summary($)/group(number)/field(string)/inner fields(has children) #}
+{% macro render_layout(name, schema, path, layout, is_in_card) %}
+{% for row in layout %}
+{% if row[0].name == '-' %}
+<hr class="mt-4 mb-5">
+{% else %}
+<div class="row">
+{% for column in row %}
+    <div class="{{ 'col-sm-'+column.span|string if column.span else 'col-sm' }}">
+    {% set cols = column.children if column.children else [column] %}
+    {% for col in cols if col.name %}
+        {# render summary #}
+        {% if col.name == '$' %}
+        {% if not is_in_card %}
+        <div class="card"><div class="card-body">
+        {% endif %}
+        {{ display_summary(name, schema, path)|indent(8) }}
+        {% if not is_in_card %}
+        </div></div>
+        {% endif %}
+        {# render group #}
+        {% elif col.name|int(-1) != -1 %}
+        {% if not is_in_card %}
+        <div class="card"><div class="card-header"><h4 class="card-header-title">{% if schema.icon %}<i class="fe fe-{{ schema.icon }} mr-2"></i>{% endif %}{{ schema.title }}</h4></div><div class="card-body">
+        {% endif %}
+        {{ render_layout(name, schema, path, schema.groups[col.name|int], is_in_card)|indent(8) }}
+        {% if not is_in_card %}
+        </div></div>
+        {% endif %}
+        {# render field #}
+        {% else %}
+        {{ render_field(col.name, schema.properties[col.name], path + '.' + col.name, is_in_card)|indent(8) }}
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+{% endfor %}
+<!-- /.layout -->
+{%- endmacro %}
+{# macro - render object field #}
+{% macro render_object(name, schema, path, is_in_card) %}
+{# model object, i.e, name='user', path=user, so current field's path is user #}
+{% if name == path %}
+    {% set current_path = path %}
+{# object in array, i.e, name='-', path=xxx_item, so current field's path is xxx_item #}
+{% elif name == '-' %}
+    {% set current_path = path %}
+{# inner object, i.e, name=info, path=user.info, so current field's path is info #}
+{% else %}
+{{ '{%' }} set {{ name }} = {{ path }} {{ '%}' }}
+    {% set current_path = name %}
+{% endif %}
+<fieldset class="object" name="{{ name }}" format="{{ schema.format }}">
+{# has format #}
+{% if schema.format %}
+    {{ render_format(name, schema, current_path, is_in_card)|indent(4) }}
+{# no format #}
+{% else %}
+    {{ render_layout(name, schema, current_path, schema.form, is_in_card)|indent(4) }}
+{% endif %}
+</fieldset>
+{%- endmacro %}
+{# macro - render array field #}
+{% macro render_array(name, schema, path, is_in_card) %}
+<fieldset class="array" name="{{ name }}" format="{{ schema.format }}">
+{# has format #}
+{% if schema.format %}
+    {{ render_format(name, schema, path, is_in_card)|indent(4) }}
+{# no format #}
+{% else %}
+    {% set item_schema = schema['items'] %}
+    <div class="array-items">
+        {{ '{%' }} for {{ name }}_item in {{ path }} + [new_model('{{ item_schema.py_type }}')] {{ '%}' }}
+        <div class="array-item {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="-">
+            <div class="row">
+                <div class="col">
+                    {{ render_field('-', item_schema, name+'_item', is_in_card)|indent(20) }}
+                </div>
+                <div class="col-auto pl-0">
+                    <a href="javascript:;" class="text-muted" onclick="array_action_delete($(this));" data-title="{{ item_schema.title }}">
+                        <i class="fe fe-x-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {{ '{%' }} endfor {{ '%}' }}
+        <div class="array-item p-0" style="{{ '{{' }} 'display:none' if {{ path }}  {{ '}}' }}"><div class="alert alert-light mb-4"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></div>
+    </div>
+    <div class="array-actions mb-4">
+        <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ item_schema.title }}</a>
+    </div>
+{% endif %}
+</fieldset>
+{%- endmacro %}
+{# macro - render field, check type and handle card display logic #}
+{% macro render_field(name, schema, path, is_in_card, is_seed_level=false) %}
+{% if schema.editable %}
+{# card start #}
+{% set render_card = false %}
+{% if not is_in_card %}
+    {% if is_seed_level %}
+       {% if seed_is_card %}
+           {% set render_card = true %}
+        {% endif %}
+    {% else %}
+        {% if schema.format in ['table', 'modal', 'media', 'timeline', 'chart', 'metric'] %}
+            {% set render_card = true %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% if render_card %}
+{% set is_in_card = true %}
+{% set card_class = 'table-responsive' if schema.format in ['table', 'modal', 'chart'] else 'card-body' %}
+<div class="card">{% if schema.format !='metric' %}<div class="card-header"><h4 class="card-header-title">{% if schema.icon %}<i class="fe fe-{{ schema.icon }} mr-2"></i>{% endif %}{{ schema.title }}</h4></div>{% endif %}<div class="{{ card_class }}">
+{% endif %}
+{# is relation #}
+{% if schema.is_relation %}
+{{ render_relation(name, schema, path, is_in_card) }}
+{% else %}
+{% if schema.type == 'object' %}
+{{ render_object(name, schema, path, is_in_card) }}
+{% elif schema.type == 'array' %}
+{{ render_array(name, schema, path, is_in_card) }}
+{% else %}
+{{ render_format(name, schema, path, is_in_card) }}
+{% endif %}
+{% endif %}
+{# card end #}
+{% if render_card %}
+</div></div>
+{% endif %}
+<!-- /.{{ schema.type }} -->
+{%- endif %}
+{%- endmacro %}
+{# macro ends #}
+<div id="div-{{ seed.name_kebab }}">
+    <form id="{{ seed.name_kebab }}" class="form-editor needs-validation" novalidate method="post">
+    {% if sub %}
+        <fieldset class="object" name="{{ model.name_snake }}">
+            {{ render_field(sub, model_schema.properties[sub], model.name_snake+'.'+sub, is_seed_level=true)|indent(12) }}
+        </fieldset>
+    {% else %}
+        {{ render_field(model.name_snake, model_schema, model.name_snake, is_seed_level=true)|indent(8) }}
+    {% endif %}
+    </form>
+    <div class="form-actions mb-4">
+        <a class="btn btn-primary mr-2" onclick="post_{{ seed.name_snake }}($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        {{ '{%' }} if {{ model.name_snake }}.{{ model_schema.id_name }} {{ '%}' }}
+        <a href="{{ detail_url(model_schema.py_type, model.name_snake) }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        {{ '{%' }} endif {{ '%}' }}
+    </div>
+</div>
+{% for relation in model_schema.form_relations %}
+{% set related_model = models[relation] %}
+{% set related_model_schema = related_model.schema %}
+{% set title_field_name = match_field(related_model_schema.columns, 'title|name|\w*name') %}
+<div class="modal fade search-modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+     id="search-{{ related_model.name_kebab_plural }}"
+     relation-url="{{ '{{' }} request.path {{ '}}' }}/{{ seed.name_kebab }}/search-{{ related_model.name_kebab_plural }}"
+     relation-key="{{ related_model.name_snake_plural }}"
+     relation-title="{{ title_field_name }}"
+     relation-id="{{ related_model_schema.id_name }}">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fe fe-search mr-2"></i>添加{{ related_model_schema.title }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pb-0">
+                <div class="form-search">
+                    <div class="form-row justify-content-center">
+                        {% for f in related_model_schema.searchables %}
+                        {# Do not support nested field, and f may contains comparator #}
+                        {% set rf =  f %}
+                        {% set comparator = 'eq' %}
+                        {% if '__' in rf %}
+                            {% set tokens = f|split('__') %}
+                            {% set rf = tokens[0] %}
+                            {% set comparator = tokens[1] %}
+                        {% endif %}
+                        {% set fs = related_model_schema.properties[rf] %}
+                        {% set path = 'search.' + f %}
+                        <div class="form-group col-sm{{ '-auto' if fs.enum or  fs.type in ['integer', 'number', 'boolean', 'date'] }} mb-4">
+                            <label class="sr-only">{{ fs.title }}</label>
+                            {% if fs.enum %}
+                            <select class="custom-select" name="{{ path }}" >
+                                <option value="">请选择{{ fs.title }}...</option>
+                                {{ '{%' }} for value, label in enum_titles('{{ fs.py_type }}')|items {{ '%}' }}
+                                <option value="{{ '{{' }} value {{ '}}' }}">{{ '{{' }} label {{ '}}' }}</option>
+                                {{ '{%' }} endfor {{ '%}' }}
+                            </select>
+                            {% elif fs.type == 'boolean' %}
+                            <select class="custom-select" name="{{ path }}">
+                                <option value="">请选择{{ fs.title }}...</option>
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </select>
+                            {% elif fs.type in ['integer', 'number'] %}
+                            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                                   value=""
+                                   name="{{ path }}">
+                            {% elif fs.format in ['date', 'datetime'] %}
+                            <div class="input-group input-group-merge">
+                                <input type="text" class="form-control form-control-prepended date" placeholder="{{ fs.title }}"
+                                       value=""
+                                       name="{{ path }}">
+                                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-calendar"></span></div></div>
+                            </div>
+                            {% elif comparator == 'like' %}
+                            <div class="input-group input-group-merge">
+                                <input type="text" class="form-control form-control-prepended" placeholder="{{ fs.title }}"
+                                       value=""
+                                       name="{{ path }}">
+                                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-search"></span></div></div>
+                            </div>
+                            {% else %}
+                            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                                   value=""
+                                   name="{{ path }}">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <div class="col-sm-auto mb-4">
+                            <button type="button" class="btn btn-primary btn-default" onclick="relation_action_search($(this));">查找</button>
+                            <button type="button" class="btn btn-light btn-default" onclick="relation_action_search_reset($(this));">重置</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mx-n4">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="list-checkbox-all custom-control-input" id="checkbox-all-{{ related_model.name_kebab_plural }}" onchange="relation_action_checkbox_changed($(this));">
+                                        <label class="custom-control-label" for="checkbox-all-{{ related_model.name_kebab_plural }}"></label>
+                                    </div>
+                                </th>
+                                {% for f in related_model_schema.columns %}
+                                {% set fs = related_model_schema.properties[f] %}
+                                <th>{{ fs.title }}{{ '(' + fs.unit + ')' if fs.unit }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ '{%' }} for {{ related_model.name_snake }} in [new_model('{{ related_model_schema.py_type }}')] {{ '%}' }}
+                            <tr class="template" name="-'">
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="list-checkbox custom-control-input" onchange="relation_action_checkbox_changed($(this));">
+                                        <label class="custom-control-label"></label>
+                                    </div>
+                                </td>
+                                {{ display_table_columns(related_model_schema, related_model.name_snake)|indent(32) }}
+                            </tr>
+                            {{ '{%' }} endfor {{ '%}' }}
+                            <tr style=""><td colspan="{{ related_model_schema.columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ related_model_schema.title }}！</div></td></tr>
+                        </tbody>
+                    </table>
+                    <ul class="pagination border-top mb-0" style="padding:1rem;display:none;"></ul>
+                </div>
+            </div>
+            <div class="modal-footer py-3">
+                <a class="btn btn-light mr-auto"><i class="fe fe-check-square mr-2"></i>选择了<span class="span-checked mx-1 text-primary">0</span>个{{ related_model_schema.title }}</a>
+                <button type="button" class="btn btn-light" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="relation_action_choosed_return($(this));" message="请至少选择一个{{ related_model_schema.title }}！">选择</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{ '{%' }} if {{ related_model.name_snake_plural }} {{ '%}' }}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // render preload data
+        relation_action_render_results("{{ related_model.name_snake_plural }}", {{ '{{' }} {{ related_model.name_snake_plural }}|tojson {{ '}}' }}, {{ '{{' }} {{ related_model.name_snake_plural }}_pagination|tojson {{ '}}' }});
+    });
+</script>
+{{ '{%' }} endif {{ '%}' }}
+{% endfor %}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // init
+    });
+    function post_{{ seed.name_snake }}(btn){
+        if (btn.is(".doing")) {
+            return;
+        }
+        var msg = "确定要保存么?";
+        var con = window.confirm(msg);
+        if (!con) {
+            return false;
+        }
+        var param = process_form($("#{{ seed.name_kebab }}"));
+        if (!param["valid"]) {
+            showError('检测到不正确的数据, 请更正后重试!');
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        {{ '{%' }} for arg in args {{ '%}' }}
+        param["{{ model.name_snake }}.{{ '{{' }} arg[0] {{ '}}' }}"] = "{{ '{{' }} arg[1] {{ '}}' }}";
+        {{ '{%' }} endfor {{ '%}' }}
+        //
+        var url = "{{ '{{' }} request.path {{ '}}' }}/{{ seed.name_kebab }}?id={{ '{{' }} {{ model.name_snake }}.{{ model_schema.id_name }} or '' {{ '}}' }}";
+        $.post(url, param, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+                showInfo('Refreshing...');
+                setTimeout(function () {
+                    location.href = "{{ '{{' }} request.path {{ '}}' }}?id=" + result.id;
+                }, 1000);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+</script>

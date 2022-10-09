@@ -1,0 +1,229 @@
+<div id="div-demo-project-read">
+    <div class="object" name="demo_project" format="">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="card"><div class="card-body">
+                <div class="row text-center ">
+                    <div class="col">
+                        <div name="title" format="text">
+                            <a href="/demo/project-detail?id={{ demo_project.id }}" class="avatar avatar-xl mt-2 mb-4">
+                                <span class="avatar-title rounded bg-primary">{{ demo_project.title|first|upper if demo_project.title is not none }}</span>
+                            </a>
+                        </div>
+                        <div class="mb-4">
+                            <span class="h3 text-primary" name="title" foramt="text">{{ demo_project.title or '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-group list-group-flush border-top">
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span><i class="fe fe-circle mr-2"></i>项目状态</span>
+                            </div>
+                            <div class="col-auto text-muted" name="status" format="select" enum="DemoProjectStatus">
+                                {% if demo_project.status is not none %}<span class="text-{{ demo_project.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoProjectStatus')[demo_project.status] }}{% else %}-{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span><i class="fe fe-dollar-sign mr-2"></i>项目价值(元)</span>
+                            </div>
+                            <div class="col-auto text-muted" name="value" format="float" enum="">
+                                {{ demo_project.value|int|commas if demo_project.value is not none else '-' }} 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span><i class="fe fe-calendar mr-2"></i>开始日期</span>
+                            </div>
+                            <div class="col-auto text-muted" name="start" format="date" enum="">
+                                {{ demo_project.start|date if demo_project.start is not none else '-' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span><i class="fe fe-users mr-2"></i>项目成员</span>
+                            </div>
+                            <div class="col-auto text-muted" name="members" format="media" enum="">
+                                {{ demo_project.members|length }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span><i class="fe fe-percent mr-2"></i>项目进度(%)</span>
+                            </div>
+                            <div class="col" name="percent" format="float">
+                                <div class="progress progress-sm">
+                                    <div class="progress-bar" role="progressbar" style="width:{{ demo_project.percent or 0 }}%;" aria-valuenow="{{ demo_project.percent or 0 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="col-auto text-muted" name="percent" format="float" enum="">
+                                {{ demo_project.percent|int|commas if demo_project.percent is not none else '-' }} %
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                            </div>
+                            <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                                {{ demo_project.create_time|datetime if demo_project.create_time is not none else '-' }}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.summary -->
+                </div></div>
+                <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-users mr-2"></i>项目成员</h4></div><div class="card-body">
+                <div class="relation array" name="members" format="media">
+                    <ul class="array-items list-group list-group-flush">
+                        {% for members_item in demo_project.members %}
+                        <li class="array-item list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto" name="avatar" format="avatar">
+                                    <a href="javascript:;" class="avatar ">
+                                        <img src="{{ members_item.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not members_item.avatar }}">
+                                        <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if members_item.avatar }}">{{ members_item.name|first|upper if members_item.name is not none }}</span>
+                                    </a>
+                                </div>
+                                <div class="col ml-n2">
+                                    <p name="name" format="text" class="mb-1">{{ members_item.name or '' }}</p>
+                                    <p class="small text-muted mb-0"><i class="fe fe-clock mr-2"></i>{{ members_item.create_time|timesince if members_item.create_time is not none }}</p>
+                                </div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="array-item list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <!-- /.media -->
+                </div>
+                </div></div>
+                <!-- /.array -->
+            </div>
+            <div class="col-sm-8">
+                <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-check-square mr-2"></i>任务列表</h4></div><div class="table-responsive">
+                <div class="relation array" name="tasks" format="table">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>任务标题</th>
+                                <th>任务状态</th>
+                                <th>负责人</th>
+                                <th>开始日期</th>
+                                <th>创建时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tasks_item in demo_project.tasks %}
+                            <tr class="" name="{{ loop.index0 }}">
+                                <td name="title" format="text" enum="">
+                                    <a href="/demo/task-detail?id={{ tasks_item.id }}">{{ tasks_item.title or '-' }}</a>
+                                </td>
+                                <td name="status" format="select" enum="DemoTaskStatus">
+                                    {% if tasks_item.status is not none %}<span class="text-{{ tasks_item.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoTaskStatus')[tasks_item.status] }}{% else %}-{% endif %}
+                                </td>
+                                <td name="user" format="select" enum="">
+                                    {{ tasks_item.user.name or '-' }}
+                                </td>
+                                <td name="start" format="date" enum="">
+                                    {{ tasks_item.start|date if tasks_item.start is not none else '-' }}
+                                </td>
+                                <td name="create_time" format="datetime" enum="">
+                                    {{ tasks_item.create_time|datetime if tasks_item.create_time is not none else '-' }}
+                                </td>
+                                <!-- /.columns -->
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有任务！</div></td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="array-actions my-4" style="margin-left:1rem">
+                        <a class="btn btn-outline-primary" href="/demo/task-edit?project_id={{ demo_project.id }}">创建任务...</a>
+                    </div>
+                    <!-- /.table -->
+                </div>
+                </div></div>
+                <!-- /.array -->
+                <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-activity mr-2"></i>操作</h4></div><div class="card-body">
+                <div class="array" name="activities" format="timeline">
+                    <ul class="array-items list-group list-group-flush list-group-activity">
+                        {% for activities_item in demo_project.activities %}
+                        <li class="array-item list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto" name="user.name" format="text">
+                                    <a href="javascript:;" class="avatar avatar-sm">
+                                        <span class="avatar-title bg-primary-soft rounded-circle text-primary">{{ activities_item.user.name|first|upper if activities_item.user.name is not none }}</span>
+                                    </a>
+                                </div>
+                                <div class="col ml-n2">
+                                    <p name="title" format="text" class="mb-1">{{ activities_item.title|safe if activities_item.title is not none }}</p>
+                                    <p name="content" format="textarea" class="small text-gray-700 mb-1">{{ activities_item.content or '' }}</p>
+                                    <p class="small text-muted mb-0"><i class="fe fe-clock mr-2"></i>{{ activities_item.time|timesince if activities_item.time is not none }}</p>
+                                </div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="array-item list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有操作！</div></div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <!-- /.timeline -->
+                </div>
+                </div></div>
+                <!-- /.array -->
+            </div>
+        </div>
+        <!-- /.layout -->
+    </div>
+    <!-- /.object -->
+</div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // Init
+    });
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+</script>

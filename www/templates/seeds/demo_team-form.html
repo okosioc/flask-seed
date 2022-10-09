@@ -1,0 +1,129 @@
+<div id="div-demo-team-form">
+    <form id="demo-team-form" class="form-editor needs-validation" novalidate method="post">
+        <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-users mr-2"></i>团队</h4></div><div class="card-body">
+        <fieldset class="object" name="demo_team" format="">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="form-group " name="name">
+                        <label class=""><span class="text-danger mr-1">*</span>团队名称</label>
+                        <input name="name" type="text" class="form-control" required
+                               value="{{ demo_team.name or '' }}">
+                        <div class="invalid-feedback">请输入正确的团队名称!</div>
+                    </div>
+                    <!-- /.text -->
+                    <!-- /.string -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div class="form-group " name="code">
+                        <label class="">邀请码</label>
+                        <input name="code" type="text" class="form-control" 
+                               value="{{ demo_team.code or '' }}">
+                        <div class="invalid-feedback">请输入正确的邀请码!</div>
+                    </div>
+                    <!-- /.text -->
+                    <!-- /.string -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div class="form-group " name="remarks">
+                        <label class="">备注</label>
+                        <textarea name="remarks" rows="7"
+                                  class="form-control autosize" >{{ demo_team.remarks or '' }}</textarea>
+                        <div class="invalid-feedback">请输入正确的备注!</div>
+                    </div>
+                    <!-- /.textarea -->
+                    <!-- /.string -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div class="form-group string " name="logo">
+                        <label class="">团队图标</label>
+                        <div class="plupload-input-group image-input-group" >
+                            <a class="btn btn-outline-primary plupload" href="javascript:;"
+                               data-token="{{ upload_config.token }}"
+                               data-upload="{{ upload_config.endpoint }}"
+                               data-max="{{ upload_config.max }}"
+                               data-preview='{"image":"?imageView2/1/w/200/h/200/","video":""}'
+                               data-suffix='{"image":"?imageView2/1/w/200/h/200/","video":""}'
+                               data-filters='{"mime_types":"{{ upload_config.mimes_image|join(", ") }}"}'
+                               data-hiddens="url">选择图片...</a>
+                            <small class="mt-2 form-text text-muted">支持的图片格式有 {{ upload_config.mimes_image|join(', ') }}</small>
+                            <div class="plupload-input-result image-input-result mt-1 clearfix">
+                                {% if demo_team.logo %}
+                                <div class="image uploaded" style="width: auto">
+                                    <img data-src="{{ demo_team.logo }}">
+                                    <div class="btns">
+                                        <a href="{{ demo_team.logo }}" target="_blank">i</a>
+                                        <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+                                    </div>
+                                    <input type="hidden" name="url" value="{{ demo_team.logo }}">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="invalid-feedback">请上传团队图标!</div>
+                    </div>
+                    <!-- /.avatar -->
+                    <!-- /.string -->
+                </div>
+            </div>
+            <!-- /.layout -->
+        </fieldset>
+        </div></div>
+        <!-- /.object -->
+    </form>
+    <div class="form-actions mb-4">
+        <a class="btn btn-primary mr-2" onclick="post_demo_team_form($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        {% if demo_team.id %}
+        <a href="javascript:;" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        {% endif %}
+    </div>
+</div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // init
+    });
+    function post_demo_team_form(btn){
+        if (btn.is(".doing")) {
+            return;
+        }
+        var msg = "确定要保存么?";
+        var con = window.confirm(msg);
+        if (!con) {
+            return false;
+        }
+        var param = process_form($("#demo-team-form"));
+        if (!param["valid"]) {
+            showError('检测到不正确的数据, 请更正后重试!');
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        {% for arg in args %}
+        param["demo_team.{{ arg[0] }}"] = "{{ arg[1] }}";
+        {% endfor %}
+        //
+        var url = "{{ request.path }}/demo-team-form?id={{ demo_team.id or '' }}";
+        $.post(url, param, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+                showInfo('Refreshing...');
+                setTimeout(function () {
+                    location.href = "{{ request.path }}?id=" + result.id;
+                }, 1000);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+</script>

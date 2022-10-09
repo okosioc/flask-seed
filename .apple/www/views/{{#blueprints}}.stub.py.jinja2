@@ -1,0 +1,173 @@
+""" {{ blueprint.name }} module. """
+from datetime import datetime
+
+from bson import ObjectId
+from flask import Blueprint, render_template, current_app, redirect, request, abort, jsonify, url_for
+from flask_login import current_user
+
+from py3seed import populate_model, populate_search
+from .common import get_id
+from www.tools import auth_permission
+{% if blueprint.models %}
+from www.models import {{ blueprint.models|map(attribute='name')|join(', ') }}
+{% endif %}
+
+
+{{ blueprint.name_snake }} = Blueprint('{{ blueprint.name_snake }}', __name__)
+
+
+{% for view in blueprint.views %}
+@{{ blueprint.name_snake }}.route('/{{ view.name }}')
+{% if blueprint.name != 'public' %}
+@auth_permission
+{% endif %}
+def {{ view.name_snake }}():
+    """ {{ view.params.title }}. """
+    {# with seeds #}
+    {% if view.seeds %}
+    {# find main seed #}
+    {% set main_seed = namespace(value=view.seeds[0]) %}
+    {% for seed in view.seeds if seed.params.is_main_seed %}
+        {% set main_seed.value = seed %}
+    {% endfor %}
+    {% set model = main_seed.value.model %}
+    {% set sub = main_seed.value.sub %}
+    {% set action = main_seed.value.action %}
+    {# read #}
+    {% if action in ['read', 'summary'] %}
+    id_ = get_id({{ model.schema.id_type }})
+    {{ model.name_snake }} = {{ model.name }}.find_one(id_)
+    if not {{ model.name_snake }}:
+        abort(404)
+    #
+    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }})
+    {# form #}
+    {% elif action == 'form' %}
+    id_ = get_id({{ model.schema.id_type }})
+    args = []
+    if id_:
+        {{ model.name_snake }} = {{ model.name }}.find_one(id_)
+        if not {{ model.name_snake }}:
+            abort(404)
+    else:
+        {{ model.name_snake }} = {{ model.name }}()
+        {% for field in model.schema.properties %}
+        {% set field_schema = model.schema.properties[field] %}
+        {# presetting values for out relation fields #}
+        {% if field_schema.is_out_relation %}
+        #
+        if '{{ field_schema.save_field_name }}' in request.args:
+            {% if field_schema.type == 'array' %}
+            {{ field_schema.save_field_name }} = list(map({{ field_schema['items'].id_type }}, request.args.getlist('{{ field_schema.save_field_name }}')))
+            {{ model.name_snake }}.{{ field }} = {{ field_schema['items'].py_type }}.find_by_ids({{ field_schema.save_field_name }})
+            args.extend([('{{ field_schema.save_field_name }}', i) for i in {{ field_schema.save_field_name }}])
+            {% else %}
+            {{ field_schema.save_field_name }} = {{ field_schema.id_type }}(request.args.get('{{ field_schema.save_field_name }}'))
+            {{ model.name_snake }}.{{ field }} = {{ field_schema.py_type }}.find_one({{ field_schema.save_field_name }})
+            args.append(('{{ field_schema.save_field_name }}', {{ field_schema.save_field_name }}))
+            {% endif %}
+        {% endif %}
+        {% endfor %}
+    #
+    preloads = {}
+    {% for relation in model.schema.form_relations %}
+    {% set related_model = models[relation] %}
+    {{ related_model.name_snake_plural }}, {{ related_model.name_snake_plural }}_pagination = {{ related_model.name }}.search({}, projection={{ related_model.schema.columns }}, sort=[('create_time', -1)])
+    current_app.logger.info(f'Preloaded {len({{ related_model.name_snake_plural }})} {{ related_model.name_title_lower_plural }}')
+    preloads.update({'{{ related_model.name_snake_plural }}': {{ related_model.name_snake_plural }}, '{{ related_model.name_snake_plural }}_pagination': dict({{ related_model.name_snake_plural }}_pagination), })
+    {% endfor %}
+    #
+    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
+    {# query #}
+    {% elif action == 'query' %}
+    page, sort = request.args.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
+    search, condition = populate_search(request.args, {{ model.name }})
+    current_app.logger.info(f'Try to search {{ model.name_title_lower }} by {condition}, sort by {sort}')
+    {{ model.name_snake_plural }}, pagination = {{ model.name }}.search(condition, page, sort=sort)
+    #
+    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html',
+                           search=search, pagination=pagination, {{ model.name_snake_plural }}={{ model.name_snake_plural }})
+    {# unsupported action #}
+    {% else %}
+    # FIXME: UNSUPPORTED! action is {{ action }}
+    {% endif %}
+    {# w/o Seeds #}
+    {% else %}
+    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html')
+    {% endif %}
+
+
+{% for seed in view.seeds %}
+{% set model = seed.model %}
+{% set sub = seed.sub %}
+{% if seed.action == 'form' %}
+@{{ blueprint.name_snake }}.route('/{{ view.name }}/{{ seed.name_kebab }}', methods=('POST',))
+{% if blueprint.name != 'public' %}
+@auth_permission
+{% endif %}
+def {{ view.name_snake }}_{{ seed.name_snake }}():
+    """ 保存{{ view.params.title }}. """
+    req_{{ model.name_snake }} = populate_model(request.form, {{ model.name }})
+    id_ = get_id({{ model.schema.id_type }})
+    {% if sub %}
+    if not id_:
+        abort(404)
+    #
+    existing = {{ model.name }}.find_one(id_)
+    if not existing:
+        abort(404)
+    #
+    current_app.logger.info(f'Try to save {{ model.name_title_lower }} {{ sub }}: {{ '{' }}req_{{ model.name_snake }}{{ '}' }}')
+    #
+    existing.{{ sub }} = req_{{ model.name_snake }}.{{ sub }}
+    existing.update_time = datetime.now()
+    existing.save()
+    current_app.logger.info(f'Successfully update {{ model.name_title_lower }}.{{ sub }} {{ '{' }}id_{{ '}' }}')
+    #
+    return jsonify(error=0, message='Save {{ model.name_title_lower }}.{{ sub }} successfully.', id=id_)
+    {% else %}
+    current_app.logger.info(f'Try to save {{ model.name_title_lower }}: {{ '{' }}req_{{ model.name_snake }}{{ '}' }}')
+    #
+    if not id_:  # Create
+        req_{{ model.name_snake }}.save()
+        id_ = req_{{ model.name_snake }}.{{ model.schema.id_name }}
+        current_app.logger.info(f'Successfully create {{ model.name_title_lower }}: {{ '{' }}id_{{ '}' }}')
+    else:  # Update
+        existing = {{ model.name }}.find_one(id_)
+        if not existing:
+            abort(404)
+        #
+        {% for field in model.schema.form_fields %}
+        existing.{{ field }} = req_{{ model.name_snake }}.{{ field }}
+        {% endfor %}
+        #
+        existing.update_time = datetime.now()
+        existing.save()
+        current_app.logger.info(f'Successfully update {{ model.name_title_lower }} {{ '{' }}id_{{ '}' }}')
+    #
+    return jsonify(error=0, message='Save {{ model.name_title_lower }} successfully.', id=id_)
+    {% endif %}
+
+
+{% for relation in model.schema.form_relations %}
+{% set related_model = models[relation] %}
+@{{ blueprint.name_snake }}.route('/{{ view.name }}/{{ seed.name_kebab }}/search-{{ related_model.name_kebab_plural }}', methods=('POST',))
+{% if blueprint.name != 'public' %}
+@auth_permission
+{% endif %}
+def {{ view.name_snake }}_{{ seed.name_snake }}_search_{{ related_model.name_snake_plural }}():
+    """ 查找{{ related_model.schema.title }}. """
+    page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
+    search, condition = populate_search(request.form, {{ related_model.name }})
+    current_app.logger.info(f'Try to search {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')
+    {{ related_model.name_snake_plural }}, pagination = {{ related_model.name }}.search(condition, page, projection={{ related_model.schema.columns }}, sort=sort)
+    return jsonify(error=0, message='Search {{ related_model.name_title_lower }} successfully.', pagination=dict(pagination), {{ related_model.name_snake_plural }}={{ related_model.name_snake_plural }})
+
+
+{# /.seed.model.schema.form_relations #}
+{% endfor %}
+{% endif %}
+{# /.view.seeds #}
+{% endfor %}
+{# /.blueprint.views #}
+{% endfor %}

@@ -1,0 +1,52 @@
+2020-06-03 00:47:39,333 21149-123145404207104 ERROR: Failed when saving post [in /Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py:89]
+Traceback (most recent call last):
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py", line 71, in save
+    post.save()
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/mongosupport.py", line 704, in save
+    if not self.validate():
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 428, in validate
+    self._validate_required(self)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 484, in _validate_required
+    self._raise_exception(SeedDataError, rf, '%s is required' % rf)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 504, in _raise_exception
+    raise exception(message)
+app.core.schema.SeedDataError: uid is required
+2020-06-03 00:48:03,484 21166-123145344638976 ERROR: Failed when saving post [in /Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py:89]
+Traceback (most recent call last):
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py", line 72, in save
+    post.save()
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/mongosupport.py", line 704, in save
+    if not self.validate():
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 428, in validate
+    self._validate_required(self)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 484, in _validate_required
+    self._raise_exception(SeedDataError, rf, '%s is required' % rf)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 504, in _raise_exception
+    raise exception(message)
+app.core.schema.SeedDataError: comments[].id is required
+2020-06-03 16:30:19,974 23548-123145423441920 ERROR: Failed when saving post [in /Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py:89]
+Traceback (most recent call last):
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py", line 72, in save
+    post.save()
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/mongosupport.py", line 704, in save
+    if not self.validate():
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 453, in validate
+    self._validate_required(self)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 509, in _validate_required
+    self._raise_exception(SeedDataError, rf, '%s is required' % rf)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 529, in _raise_exception
+    raise exception(message)
+app.core.schema.SeedDataError: comments[].id is required
+2020-06-03 16:30:35,747 23548-123145423441920 ERROR: Failed when saving post [in /Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py:89]
+Traceback (most recent call last):
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/views/blog.py", line 72, in save
+    post.save()
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/mongosupport.py", line 704, in save
+    if not self.validate():
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 453, in validate
+    self._validate_required(self)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 509, in _validate_required
+    self._raise_exception(SeedDataError, rf, '%s is required' % rf)
+  File "/Users/weiminfeng/Desktop/python-workspace/flask-seed/app/core/schema.py", line 529, in _raise_exception
+    raise exception(message)
+app.core.schema.SeedDataError: comments[].id is required

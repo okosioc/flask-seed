@@ -1,29 +1,29 @@
 // Plugins
 var gulp = require('gulp'),
-    sass = require('gulp-sass'),
+    sass = require('gulp-sass')(require('sass')),
     autoprefixer = require('gulp-autoprefixer'), // Add vendor prefixes
     concat = require('gulp-concat'),
     rename = require('gulp-rename'),
-    cleancss = require('gulp-clean-css'),// Minify css
+    cleancss = require('gulp-clean-css'), // Minify css
     uglify = require('gulp-uglify'), // Minify js
     npmdist = require('gulp-npm-dist');
 
 // Paths
 const paths = {
     node: './node_modules',
-    vendor: './app/static/assets/vendor',
+    vendor: './www/static/assets/vendor',
     scss: {
-        dir: './app/static/assets/scss',
-        main: './app/static/assets/scss/*.scss'
+        dir: './www/static/assets/scss',
+        main: './www/static/assets/scss/*.scss'
     },
     css: {
-        dir: './app/static/assets/css'
+        dir: './www/static/assets/css'
     },
     js: {
-        dir: './app/static/assets/js'
+        dir: './www/static/assets/js'
     },
     appjs: {
-        dir: './app/static/js'
+        dir: './www/static/js'
     }
 };
 

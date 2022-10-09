@@ -1,0 +1,11 @@
+{% if field_schema.type == 'array' %}
+<div class="gallery">
+{{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+    <a href=":;" data-fancybox="{{ field_schema.title }}" data-src="{{ '{{' }} {{ field_name }}_item.url {{ '}}' }}" data-caption="{{ '{{' }} {{ field_name }}_item.name {{ '}}' }}">
+        <img src="{{ '{{' }} {{ field_name }}_item.url {{ '}}' }}">
+    </a>
+{{ '{%' }} endfor {{ '%}' }}
+</div>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

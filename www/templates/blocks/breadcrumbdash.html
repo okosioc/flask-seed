@@ -1,0 +1,81 @@
+{% set block = breadcrumb or {
+    'title': 'Blank Page',
+    'subtitle': 'Overview',
+    'links': [
+        {'url':'/', 'title': 'Home'},
+        {'url':'/dashboard/', 'title': 'Dashboard'},
+        {'url':'/blank', 'title': 'Blank Page'}
+    ],
+    'actions': [],
+    'tabs':[]
+} %}
+<div class="header">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-end">
+                <div class="col">
+                    <h6 class="header-pretitle">
+                        {{ block.subtitle }}
+                    </h6>
+                    <h1 class="header-title">
+                        {{ block.title }}
+                    </h1>
+                </div>
+                <div class="col-auto">
+                    {% if block.links %}
+                        <ol class="breadcrumb mb-0">
+                            {% for l in block.links %}
+                                {% if loop.last %}
+                                    <li class="breadcrumb-item active">{{ l.title }}</li>
+                                {% else %}
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ l.url }}">{{ l.title }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ol>
+                    {% elif block.commands %}
+                        {% for c in block.commands %}
+                            <a href="{{ c.url }}"  {{ 'onclick=' + c.click if c.click }}
+                               class="btn btn-outline-primary ml-2">
+                                <i class="{{ c.icon }} mr-2"></i>{{ c.title }}
+                            </a>
+                        {% endfor %}
+                    {% elif block.actions %}
+                        {% for a in block.actions %}
+                            {% if a.view %}
+                                {% set href = update_full_path(a.view) %}
+                            {% elif a.href %}
+                                {% set href = a.href %}
+                            {% else %}
+                                {% set href = 'javascript:;' %}
+                            {% endif %}
+                            <a href="{{ href }}" {% for k,v in a|items if k not in ['icon', 'title', 'href']%}{{ k }}="{{ v }}"{% endfor %}
+                               class="btn btn-outline-primary ml-2">
+                                {% if a.icon %}<i class="fe fe-{{ a.icon }} mr-2"></i>{% endif %}{{ a.title }}
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            {% if block.tabs %}
+                <div class="row align-items-center">
+                    <div class="col">
+                        <ul class="nav nav-tabs header-tabs">
+                            {% for t in block.tabs %}
+                                <li class="nav-item">
+                                    <a href="{{ t.url }}" class="nav-link {{ 'active' if request.path == t.url }}">
+                                        {{ t.title|safe }}
+                                        {% if t.count %}
+                                            <span class="badge badge-pill badge-soft-secondary">{{ t.count }}</span>
+                                        {% endif %}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

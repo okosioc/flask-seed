@@ -1,0 +1,48 @@
+template: apple
+blueprints:
+  - name: demo
+    views:
+      - name: project-dashboard
+        params: {extends: demo, title: 项目仪表盘, subtitle: Dashboard, actions: []}
+        layout: |-
+          demo_project_dashboard-read
+
+      - name: user-profile
+        params: {extends: demo, title: 用户设置, subtitle: User, actions: []}
+        layout: |-
+          demo_user-summary?is_card=true#4, demo_user-form?is_main_seed=true&is_card=true#8
+
+      - name: team-profile
+        params: {extends: demo, title: 团队设置, subtitle: Team, actions: []}
+        layout: |-
+          demo_team-summary?is_card=true#4, demo_team-form?is_card=true#8
+
+      - name: team-members
+        params: {extends: demo, title: 团队成员, subtitle: Team, actions: []}
+        layout: |-
+          demo_team-summary?is_card=true#4, demo_team.members-read?is_card=true#8
+
+      - name: project-list
+        params: {extends: demo, title: 项目管理, subtitle: Project, actions: [{icon: plus, title: 新建项目, view: project-edit}]}
+        layout: |-
+          demo_project-query?result_view=grid
+
+      - name: project-detail
+        params: {extends: demo, title: 项目详情, subtitle: Project, actions: [{icon: edit, title: 编辑项目, view: "project-edit?"}]}
+        layout: |-
+          demo_project-read
+
+      - name: project-edit
+        params: {extends: demo, title: 项目编辑, subtitle: Project, actions: []}
+        layout: |-
+          demo_project-form
+
+      - name: task-detail
+        params: {extends: demo, title: 任务详情, subtitle: Project, actions: [{icon: edit, title: 编辑任务, view: "task-edit?"}]}
+        layout: |-
+          demo_task.project-summary?is_card=true#4, demo_task-read?is_main_seed=true&is_card=true&is_horizontal=true#8
+
+      - name: task-edit
+        params: {extends: demo, title: 任务编辑, subtitle: Project, actions: []}
+        layout: |-
+          demo_task.project-summary?is_card=true#4, demo_task-form?is_main_seed=true&is_card=true#8

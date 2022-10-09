@@ -1,0 +1,16 @@
+{% extends "demo.html" %}
+{% set title = '项目管理' %}
+{% set breadcrumb = {
+    'subtitle': 'Project',
+    'title': title,
+    'actions': [{'icon': 'plus', 'title': '新建项目', 'view': 'project-edit'}],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg">
+        {% include "seeds/demo_project-query.html" %}
+    </div>
+</div>
+{% endblock %}

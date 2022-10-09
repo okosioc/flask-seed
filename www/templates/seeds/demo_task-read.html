@@ -1,0 +1,130 @@
+<div id="div-demo-task-read">
+    <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-check-square mr-2"></i>任务</h4></div><div class="card-body">
+    <div class="object" name="demo_task" format="">
+        <div class="row">
+            <div class="col-sm">
+                <div class="field-group row">
+                    <label class="col-auto col-field-label">任务标题</label>
+                    <div class="col">
+                    <div class="field-control">
+                        <span>{{ demo_task.title or '-' }}</span>
+                    </div>
+                    </div>
+                </div>
+                <!-- /.string -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="field-group row">
+                    <label class="col-auto col-field-label">任务状态</label>
+                    <div class="col">
+                    <div class="field-control">
+                        <span>{% if demo_task.status is not none %}<span class="text-{{ demo_task.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoTaskStatus')[demo_task.status] }}{% else %}-{% endif %}</span>
+                    </div>
+                    </div>
+                </div>
+                <!-- /.string -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="field-group row">
+                    <label class="col-auto col-field-label">任务详情</label>
+                    <div class="col">
+                    <div class="field-control">
+                        <span>{{ demo_task.content or '-' }}</span>
+                    </div>
+                    </div>
+                </div>
+                <!-- /.string -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="field-group row">
+                    <label class="col-auto col-field-label">开始日期</label>
+                    <div class="col">
+                    <div class="field-control">
+                        <span>{{ demo_task.start|date if demo_task.start is not none else '-' }}</span>
+                    </div>
+                    </div>
+                </div>
+                <!-- /.date -->
+            </div>
+            <div class="col-sm">
+                <div class="field-group row">
+                    <label class="col-auto col-field-label">结束日期</label>
+                    <div class="col">
+                    <div class="field-control">
+                        <span>{{ demo_task.end|date if demo_task.end is not none else '-' }}</span>
+                    </div>
+                    </div>
+                </div>
+                <!-- /.date -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="relation object" name="user" format="select">
+                    <div class="field-group row">
+                        <label class="col-auto col-field-label">负责人</label>
+                        <div class="col">
+                        <div class="field-control">
+                            {% if demo_task.user %}
+                            <span class="font-size-base badge badge-soft-secondary mr-2">{{ demo_task.user.name if demo_task.user.name is not none }}</span>
+                            {% endif %}
+                        </div>
+                        </div>
+                    </div></div>
+                <!-- /.object -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="field-group row">
+                    <label class="col-auto col-field-label">创建时间</label>
+                    <div class="col">
+                    <div class="field-control">
+                        <span>{{ demo_task.create_time|datetime if demo_task.create_time is not none else '-' }}</span>
+                    </div>
+                    </div>
+                </div>
+                <!-- /.date -->
+            </div>
+        </div>
+        <!-- /.layout -->
+    </div>
+    </div></div>
+    <!-- /.object -->
+</div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // Init
+    });
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+</script>

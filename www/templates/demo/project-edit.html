@@ -1,0 +1,16 @@
+{% extends "demo.html" %}
+{% set title = '项目编辑' %}
+{% set breadcrumb = {
+    'subtitle': 'Project',
+    'title': title,
+    'actions': [],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg">
+        {% include "seeds/demo_project-form.html" %}
+    </div>
+</div>
+{% endblock %}

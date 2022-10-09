@@ -1,0 +1,92 @@
+{# macro - display field content inline, i.e, in a table column or in summary's .list-group-item #}
+{% macro display_inline(field_name, field_schema, field_path, fallback=None, fallback_path=None) %}
+{% if field_schema.type == 'object' %}
+{% set title_field_name = match_field(field_schema.columns, 'title|name|\w*name') %}
+{{ '{{' }} {{ field_path }}.{{ title_field_name }} or '-' {{ '}}' }}
+{%- elif field_schema.type == 'array' %}
+{# display length for object array #}
+{% if field_schema['items'].type == 'object' %}
+{{ '{{' }} {{ field_path }}|length {{ '}}' }}
+{%- else %}
+{# display each for simple array #}
+{{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+{{ display_inline('-', field_schema['items'], field_name~'_item') }}
+{{ '{%' }} endfor {{ '%}' }}
+{%- endif %}
+{%- else %}
+{% if field_schema.format in ['int', 'float'] %}
+{{ '{{' }} {{ field_path }}|int|commas if {{ field_path }} is not none else '-' {{ '}}' }} {{ '%' if field_schema.unit == '%' }}
+{%- elif field_schema.format in ['datetime'] %}
+{{ '{{' }} {{ field_path }}|datetime if {{ field_path }} is not none else '-' {{ '}}' }}
+{%- elif field_schema.format in ['date'] %}
+{{ '{{' }} {{ field_path }}|date if {{ field_path }} is not none else '-' {{ '}}' }}
+{%- elif field_schema.format in ['select', 'buttongroup'] %}
+{{ '{% if' }} {{ field_path }} is not none {{ '%}' }}{% if field_name == 'status' %}<span class="text-{{ '{{' }} {{ field_path }}|tocolor {{ '}}' }} mr-2">●</span>{% endif %}{{ '{{' }} enum_titles('{{ field_schema.py_type }}')[{{ field_path }}] {{ '}}' }}{{ '{% else %}-{% endif %}' }}
+{%- elif field_schema.format in ['avatar'] %}
+<a href="javascript:;" class="avatar avatar-sm">
+    <img src="{{ '{{' }} {{ field_path }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ field_path }} {{ '}}' }}">
+    <span fallback={{ fallback }} class="avatar-title bg-primary-soft rounded-circle text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ fallback_path }}|first|upper if {{ fallback_path }} is not none {{ '}}' }}</span>
+</a>
+{%- elif field_schema.format in ['image'] %}
+<a href="javascript:;" class="avatar avatar-sm avatar-4by3">
+    <img src="{{ '{{' }} {{ field_path }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded {{ '{{' }} 'd-none' if not {{ field_path }} {{ '}}' }}">
+    <span fallback={{ fallback }} class="avatar-title bg-primary-soft rounded text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ fallback_path }}|first|upper if {{ fallback_path }} is not none {{ '}}' }}</span>
+</a>
+{%- elif field_schema.format in ['link'] %}
+<a href="{{ '{{' }} {{ field_path }} or 'javascript:;' {{ '}}' }}" target="_blank"><i class="fe fe-external-link mr-2"></i></a>
+{%- else %}
+{{ '{{' }} {{ field_path }} or '-' {{ '}}' }}
+{%- endif %}
+{%- endif %}
+{%- endmacro %}
+{# macro - display summary for a object #}
+{% macro display_summary(field_name, field_schema, field_path, field_target=None) %}
+{% include '#display_summary.html.jinja2' %}
+<!-- /.summary -->
+{%- endmacro %}
+{# macro - display columns in table #}
+{% macro display_table_columns(row_schema, row_path, excludes=[], row_target=None) %}
+{% for c in row_schema.columns if c not in excludes %}
+{% set column_schema = row_schema.properties[c] %}
+{% set column_path = row_path~'.'~c %}
+{% set column_enum = column_schema['items'].py_type if column_schema.type == 'array' and column_schema['items'].enum else (column_schema.py_type if column_schema.enum else '') %}
+{% set title_field_name = match_field(row_schema.columns, 'title|name|\w*name') %}
+{% set fallback = title_field_name if column_schema.format in ['image', 'avatar'] %}
+{% set fallback_path = row_path~'.'~fallback if column_schema.format in ['image', 'avatar'] %}
+<td name="{{ c }}" format="{{ column_schema.format }}" enum="{{ column_enum }}">
+    {% if row_target and row_target != 'javascript:;' and c == title_field_name %}
+    <a href="{{ row_target }}">{{ '{{' }} {{ column_path }} or '-' {{ '}}' }}</a>
+    {% else %}
+    {{ display_inline(c, column_schema, column_path, fallback, fallback_path)|indent(4) }}
+    {% endif %}
+</td>
+{% endfor %}
+<!-- /.columns -->
+{%- endmacro %}
+{# macro - display list-group-item in a list-group #}
+{% macro display_list_group_items(item_schema, item_path, excludes=[]) %}
+{% for c in item_schema.columns if c not in excludes %}
+{% set column_schema = item_schema.properties[c] %}
+{% set column_path = item_path~'.'~c %}
+{% set column_enum = column_schema['items'].py_type if column_schema.type == 'array' and column_schema['items'].enum else (column_schema.py_type if column_schema.enum else '') %}
+{% set fallback = match_field(item_schema.columns, 'title|name|\w*name') if column_schema.format in ['image', 'avatar'] %}
+{% set fallback_path = item_path~'.'~fallback if column_schema.format in ['image', 'avatar'] %}
+<div class="list-group-item">
+    <div class="row align-items-center">
+        <div class="{{ 'col-auto' if column_schema.unit == '%' else 'col'}}">
+            <span>{% if column_schema.icon %}<i class="fe fe-{{ column_schema.icon }} mr-2"></i>{% else %}<i class="mx-3"></i>{% endif %}{{ column_schema.title}}{{ '('~column_schema.unit~')' if column_schema.unit }}{% if column_schema.description %}<i class="fe fe-help-circle ml-2" data-toggle="tooltip" data-placement="top" title="{{ column_schema.description }}"></i>{% endif %}</span>
+        </div>
+        {% if column_schema.unit == '%'  %}
+        <div class="col" name="{{ c }}" format="{{ column_schema.format }}">
+            <div class="progress progress-sm">
+                <div class="progress-bar" role="progressbar" style="width:{{ '{{' }} {{ column_path }} or 0 {{ '}}' }}%;" aria-valuenow="{{ '{{' }} {{ column_path }} or 0 {{ '}}' }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-auto text-muted" name="{{ c }}" format="{{ column_schema.format }}" enum="{{ column_enum }}">
+            {{ display_inline(c, column_schema, column_path, fallback, fallback_path)|indent(12) }}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endmacro %}

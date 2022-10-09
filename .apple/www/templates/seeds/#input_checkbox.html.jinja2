@@ -1,0 +1,15 @@
+<div class="form-group {{ 'row' if seed_is_horizontal }}" name="{{ field_name }}">
+    <label class="{{ 'col-auto col-form-label' if seed_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
+    {% if seed_is_horizontal %}
+    <div class="col">
+    {% endif %}
+    <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" name="{{ field_name }}"
+        {{ 'required' if field_schema.required }} {{ '{{' }} 'checked' if {{ field_path }} == true {{ '}}' }}
+        >
+        <label class="custom-control-label"></label>
+    </div>
+    {% if seed_is_horizontal %}
+    </div>
+    {% endif %}
+</div>

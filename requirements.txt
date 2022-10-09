@@ -14,3 +14,4 @@ arrow
 qiniu
 pandas
 pydash
+py3seed

@@ -1,0 +1,28 @@
+{# TODO: Add modals to display field details #}
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{% set title_field_name = match_field(item_schema.columns, 'title|name|\w*name') %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            {% for c in item_schema.columns %}
+            {% set column_schema = item_schema.properties[c] %}
+            <th>{{ column_schema.title }}{{ '(' + column_schema.unit + ')' if column_schema.unit }}</th>
+            {% endfor %}
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+        <tr class="" name="{{ '{{' }} loop.index0 {{ '}}' }}">
+            {{ display_table_columns(item_schema, field_name~'_item')|indent(12) }}
+            <td></td>
+        </tr>
+        {{ '{%' }} else {{ '%}' }}
+        <tr><td colspan="{{ item_schema.columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>
+        {{ '{%' }} endfor {{ '%}' }}
+    </tbody>
+</table>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

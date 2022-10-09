@@ -9,6 +9,8 @@ app/logs/*.log.*
 # LocalConfig
 instance/config.py
 instance/ui.json
+instance/*.pem
+instance/*.txt
 
 # PyCharm
 .idea/
@@ -40,3 +42,6 @@ npm-debug.log
 
 # venv
 venv/
+
+# jupyter
+.ipynb_checkpoints/

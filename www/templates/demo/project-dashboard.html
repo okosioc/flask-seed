@@ -1,0 +1,16 @@
+{% extends "demo.html" %}
+{% set title = '项目仪表盘' %}
+{% set breadcrumb = {
+    'subtitle': 'Dashboard',
+    'title': title,
+    'actions': [],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg">
+        {% include "seeds/demo_project_dashboard-read.html" %}
+    </div>
+</div>
+{% endblock %}

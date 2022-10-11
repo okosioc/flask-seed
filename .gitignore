@@ -3,12 +3,11 @@
 *.DS_Store
 
 # Logs
-app/logs/*.log
-app/logs/*.log.*
+www/logs/*.log
+www/logs/*.log.*
 
 # LocalConfig
-instance/config.py
-instance/ui.json
+instance/*.py
 instance/*.pem
 instance/*.txt
 
@@ -16,17 +15,17 @@ instance/*.txt
 .idea/
 
 # Data preparation
-app/scripts/*.json
-app/scripts/*.log
+www/scripts/*.json
+www/scripts/*.log
 
 # Wsgi
 wsgi.pid
 
 # Uploads
-app/static/uploads/
-app/static/downloads/
-app/static/exports/
-app/static/reports/
+www/static/uploads/
+www/static/downloads/
+www/static/exports/
+www/static/reports/
 
 # Qiniu
 .qiniu*

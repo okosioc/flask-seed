@@ -1,4 +1,4 @@
-template: apple
+template: template-apple
 blueprints:
   - name: demo
     views:

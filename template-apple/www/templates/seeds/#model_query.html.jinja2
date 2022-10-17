@@ -90,9 +90,9 @@
 {%- endmacro %}
 {# macro - render grid view #}
 {% macro render_grid() %}
-<div class="cards row row-cols-1 row-cols-lg-2 row-cols-xl-3">
+<div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
     {{ '{%' }} for {{ model.name_snake }} in {{ model.name_snake_plural }} {{ '%}' }}
-    <div class="card-wrapper col">
+    <div class="col">
         <div class="card">
             <div class="card-body">
                 {{ display_summary(model.name_snake, model_schema, model.name_snake, target)|indent(16) }}

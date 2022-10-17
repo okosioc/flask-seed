@@ -29,7 +29,7 @@ public = Blueprint('public', __name__)
 
 @public.route('/')
 def index():
-    """ Index page. """
+    """ 首页. """
     return render_template('public/index.html')
 
 
@@ -38,8 +38,14 @@ def index():
 @public.route('/404')
 @public.route('/500')
 def error():
-    """ Demo error pages. """
+    """ 错误页面. """
     abort(int(request.path.strip('/')))
+
+
+@public.route('/dashboard')
+def dashboard():
+    """ 仪表盘. """
+    return redirect(url_for('demo.project_dashboard'))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

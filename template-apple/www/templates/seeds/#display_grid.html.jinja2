@@ -32,9 +32,9 @@
 {%- endmacro %}
 {% set item_schema = field_schema['items'] %}
 {% set title_field = 'title' if 'title' in item_schema.properties else 'name' %}
-<div class="cards row row-cols-1 row-cols-lg-2">
+<div class="array-items row row-cols-1 row-cols-lg-2">
 {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
-    <div class="card-wrapper col">
+    <div class="array-item col">
         <div class="card">
         {% if item_schema.stat %}
             <div class="card-header">

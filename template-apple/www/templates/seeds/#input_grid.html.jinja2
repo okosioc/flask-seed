@@ -1,12 +1,12 @@
-<div class="cards row row-cols-1  row-cols-lg-2">
+<div class="array-items row row-cols-1  row-cols-lg-2">
     {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ field_schema['items'].py_type }}')] {{ '%}' }}
-    <div class="card-wrapper col {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="-">
+    <div class="array-item col {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="-">
         <div class="card">
             <div class="card-body pt-3">
                 <div class="row align-items-center">
                     <div class="col"></div>
                     <div class="col-auto">
-                        <a href="javascript:;" class="text-muted card-action-delete" data-title="{{ field_schema.title }}">
+                        <a href="javascript:;" class="text-muted" onclick="array_action_delete($(this));" data-title="{{ field_schema.title }}">
                             <i class="fe fe-x-circle"></i>
                         </a>
                     </div>
@@ -18,5 +18,5 @@
     {{ '{%' }} endfor {{ '%}' }}
 </div>
 <div class="card-actions mb-4">
-    <a class="btn btn-outline-primary mr-2 card-action-add"><i class="fe fe-plus mr-1"></i>添加{{ field_schema.title }}</a>
+    <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ field_schema.title }}</a>
 </div>

@@ -4,9 +4,10 @@
 
 import moment from '../moment';
 
-var numbersPast = 'nolla yksi kaksi kolme neljä viisi kuusi seitsemän kahdeksan yhdeksän'.split(
-        ' '
-    ),
+var numbersPast =
+        'nolla yksi kaksi kolme neljä viisi kuusi seitsemän kahdeksan yhdeksän'.split(
+            ' '
+        ),
     numbersFuture = [
         'nolla',
         'yhden',
@@ -25,7 +26,8 @@ function translate(number, withoutSuffix, key, isFuture) {
         case 's':
             return isFuture ? 'muutaman sekunnin' : 'muutama sekunti';
         case 'ss':
-            return isFuture ? 'sekunnin' : 'sekuntia';
+            result = isFuture ? 'sekunnin' : 'sekuntia';
+            break;
         case 'm':
             return isFuture ? 'minuutin' : 'minuutti';
         case 'mm':
@@ -67,12 +69,14 @@ export default moment.defineLocale('fi', {
     months: 'tammikuu_helmikuu_maaliskuu_huhtikuu_toukokuu_kesäkuu_heinäkuu_elokuu_syyskuu_lokakuu_marraskuu_joulukuu'.split(
         '_'
     ),
-    monthsShort: 'tammi_helmi_maalis_huhti_touko_kesä_heinä_elo_syys_loka_marras_joulu'.split(
-        '_'
-    ),
-    weekdays: 'sunnuntai_maanantai_tiistai_keskiviikko_torstai_perjantai_lauantai'.split(
-        '_'
-    ),
+    monthsShort:
+        'tammi_helmi_maalis_huhti_touko_kesä_heinä_elo_syys_loka_marras_joulu'.split(
+            '_'
+        ),
+    weekdays:
+        'sunnuntai_maanantai_tiistai_keskiviikko_torstai_perjantai_lauantai'.split(
+            '_'
+        ),
     weekdaysShort: 'su_ma_ti_ke_to_pe_la'.split('_'),
     weekdaysMin: 'su_ma_ti_ke_to_pe_la'.split('_'),
     longDateFormat: {

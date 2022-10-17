@@ -20,57 +20,6 @@ function process_form(form) {
 
 function _install_form(container) {
     //
-    // Install array add or delete action
-    //
-    // Array add
-    container.find(".act > .add").click(function () {
-        // Find the last .list-group-item and clone it
-        var list = $(this).parent().prev(".list-group"),
-            template = list.children(".list-group-item.template"),
-            clone = template.clone(true);
-        //
-        clone.removeClass("template");
-        list.append(clone);
-        // Install components
-        _install_components(clone);
-    });
-    // Array delete
-    container.find(".act > .del").click(function () {
-        var con = window.confirm("Are you sure to delete this item?");
-        if (!con) {
-            return false;
-        }
-        $(this).closest(".list-group-item").remove();
-    });
-    // Array in grid format
-    container.find(".card-action-add").click(function () {
-        var btn = $(this);
-        var cards = btn.closest('fieldset.array').find(".cards").find("> .card-wrapper, > div > .card-wrapper");
-        var template = cards.last();
-        var clone = template.clone(true);
-        clone.removeClass("template");
-        clone.insertBefore(template);
-        clone.show();
-        // Interactive
-        _install_components(clone);
-    });
-    container.find(".card-action-delete").click(function () {
-        var btn = $(this);
-        var len = btn.closest('fieldset.array').find(".cards").find(">.card-wrapper, > div > .card-wrapper").length;
-        var title = btn.attr("data-title");
-        if (len == 2) {
-            showError("至少包含一个" + title + "!");
-            return false;
-        }
-        var msg = "确定删除此" + title + "么?";
-        var con = window.confirm(msg);
-        if (!con) {
-            return false;
-        }
-        var card = btn.closest(".card-wrapper");
-        card.remove();
-    });
-    //
     // Install components
     //
     _install_components(container);
@@ -341,7 +290,7 @@ function relation_action_choosed_return(btn) {
     }
     // Callback
     var checked_ids = $.map(checked, function (v) {
-        return $(v).attr("id").replace(key+"-", ""); // checkbox id is set in render_results
+        return $(v).attr("id").replace(key + "-", ""); // checkbox id is set in render_results
     });
     var checked_objects = relation_action_search_records[key].filter(function (v) {
         return checked_ids.includes(String(v[id]))
@@ -515,151 +464,6 @@ function relation_action_search_reset(btn) {
     btn.closest(".form-search").find(":input[name]").val("");
 }
 
-//
-// Array actions in list-group
-//
-function list_action_add(btn) {
-    // Find the last .list-group-item and clone it
-    var items = btn.closest("fieldset").find(".list-group > .list-group-item[name]");
-    var template = items.last();
-    var clone = template.clone(true);
-    clone.removeClass("template");
-    clone.insertBefore(template);
-    template.next(".list-group-item").hide(); // Hide empty alert
-    // Install components
-    _install_components(clone);
-}
-
-function list_action_delete(btn) {
-    var title = btn.attr("data-title");
-    var msg = "确定删除此" + title + "么?";
-    var con = window.confirm(msg);
-    if (!con) {
-        return false;
-    }
-    var items = btn.closest("fieldset").find(".list-group > .list-group-item[name]");
-    if (items.length == 2) {
-        items.last().next(".list-group-item").show(); // Show empty alert
-    }
-    btn.closest(".list-group-item").remove();
-}
-
-//
-// Array actions in table format
-//
-function table_action_add(btn) {
-    var rows = btn.closest("fieldset").find("table > tbody > tr[name]");
-    var template = rows.last();
-    var clone = template.clone(true);
-    clone.removeClass("template");
-    clone.insertBefore(template);
-    clone.show();
-    template.next("tr").hide(); // Hide empty alert
-}
-
-function table_action_delete(btn) {
-    var title = btn.attr("data-title");
-    var msg = "确定删除此" + title + "么?";
-    var con = window.confirm(msg);
-    if (!con) {
-        return false;
-    }
-    var rows = btn.closest("fieldset").find("table > tbody > tr[name]");
-    if (rows.length == 2) { // Show empty alert
-        rows.last().next("tr").show();
-    }
-    btn.closest("tr").remove();
-}
-
-//
-// Array actions in modal format
-//
-function modal_action_toggle(btn) {
-    var trs = btn.closest("tr").prevAll("tr")
-    var index = trs.length;
-    var modals = btn.closest("fieldset").find(".modals > .modal");
-    var modal = $(modals.get(index));
-    if (!modal.attr("id")) {
-        modal.attr("id", "modal-" + my_random());
-    }
-    modal.modal('show');
-}
-
-function modal_action_save(btn) {
-    var modal = btn.closest(".modal");
-    var param = {"valid": true}, fieldset = modal.find(".modal-body > fieldset");
-    _process(param, fieldset, fieldset.attr("name"));
-    debug(param);
-    if (!param["valid"]) {
-        showError('检测到不正确的数据, 请更正后重试!');
-        return false;
-    }
-    var modals = btn.closest("fieldset").find(".modals > .modal");
-    var rows = btn.closest("fieldset").find("table > tbody > tr[name]");
-    var row = null;
-    if (modal.is(".template")) { // Adding
-        var row_template = rows.last();
-        var row_clone = row_template.clone(true);
-        row_clone.removeClass("template");
-        row_clone.insertBefore(row_template);
-        row_clone.show();
-        row = row_clone;
-        row_template.next("tr").hide(); // Hide empty alert row
-        var modal_clone = modal.clone(true);
-        modal_clone.removeClass("template show");
-        modal_clone.insertBefore(modal);
-        modal_clone.attr("id", "modal-" + my_random());
-        modal_clone.hide();
-    } else { // Editing
-        var index = modal.prevAll(".modal").length;
-        row = $(rows.get(index));
-    }
-    row.children("td[name]").each(function (i, n) {
-        var td = $(n);
-        var name = td.attr("name"), format = td.attr("format");
-        var value = param[fieldset.attr("name") + "." + name]
-        if (format == "select") {
-            value = fieldset.find("select[name='" + name + "'] option:selected").text();
-        } else if (format == "buttongroup") {
-            value = fieldset.find(".radio-input-group label.active").text();
-        } else if (["checkbox", "switch"].includes(format)) {
-            value = value == "true" ? "是" : "否";
-        }
-        if (value) {
-            td.text(value);
-        } else {
-            td.text('');
-        }
-    });
-    modal.modal("hide");
-}
-
-function modal_action_add(btn) {
-    var modals = btn.closest("fieldset").find(".modals > .modal");
-    var modal_template = modals.last();
-    if (!modal_template.attr("id")) {
-        modal_template.attr("id", "modal-" + my_random());
-    }
-    modal_template.modal('show'); // Use template modal directly
-}
-
-function modal_action_delete(btn) {
-    var title = btn.attr("data-title");
-    var msg = "确定删除此" + title + "么?";
-    var con = window.confirm(msg);
-    if (!con) {
-        return false;
-    }
-    var rows = btn.closest("fieldset").find("table > tbody > tr[name]");
-    if (rows.length == 2) { // Show empty alert row
-        rows.last().next("tr").show();
-    }
-    var row = btn.closest("tr");
-    var index = row.prevAll("tr").length;
-    var modals = btn.closest("fieldset").find(".modals > .modal");
-    row.remove();
-    $(modals.get(index)).remove();
-}
 
 //
 // Input hook for link format
@@ -682,13 +486,7 @@ function _install_components(container) {
         var formGroup = $(fgn);
 
         // Skip form-groups in template
-        if (formGroup.closest(".list-group-item").is(".template")) {
-            return false;
-        }
-        if (formGroup.closest("fieldset").is(".template")) {
-            return false;
-        }
-        if (formGroup.closest(".card-wrapper").is(".template")) {
+        if (formGroup.closest(".array-item").is(".template")) {
             return false;
         }
         if (formGroup.closest(".modal").is(".template")) {
@@ -1128,66 +926,15 @@ function _process(param, field, path) {
     }
     // array
     else if (field.is(".array")) {
-        // FIXME: Enhance template so that cards/table/list-group can use .array-item instead, i.e, check modals firstly then .array-item then to components that support array input
-        var cards = field.find('> .cards'),
-            modals = field.find("> .modals, > .card > div > .modals"),
-            table = field.find('> table, > .card > div > table'),
-            listGroup = field.find('> .list-group, > .card > div > .list-group'),
-            items = field.find('.array-item'), // Array will be render to .array .array-item by default
+        var modals = field.find(".modals"),  // Array in modal/timeline/media format, using modal for really input
+            items = field.find('.array-item'), // Array in table/grid format and non-format
             select = field.find("select"),
             pluploadInputGroup = field.find(".plupload-input-group"),
             tagCloudInputGroup = field.find(".tag-cloud-input-group, .relation-input-group"),
             cascaderInputGroup = field.find(".cascader-input-group");
-        if (cards.length) { // array of object in card format
-            cards.find("> .card-wrapper, > .row > div > .card-wrapper, > div > .card-wrapper").not(".template").each(function (i, n) {
-                var inner = $(n).find("> .card > .card-body > fieldset, > .card > fieldset");
-                _process(param, inner, path + "[" + i + "]");
-            });
-        } else if (modals.length) { // array of object in modal format
+        if (modals.length) { // array of object in modal format
             modals.find("> .modal").not(".template").each(function (i, n) {
                 var inner = $(n).find(".modal-body > fieldset");
-                _process(param, inner, path + "[" + i + "]");
-            });
-        } else if (table.length) { // array of object in table format
-            var trs = table.find("> tbody > tr[name]").not(".template");
-            trs.each(function (i, n) {
-                debug("Try to process table path " + path + "[" + i + "]");
-                $(n).find("> td[name]").each(function (j, m) {
-                    if ($(m).is("[contenteditable=true]")) {
-                        debug("Try to process td path " + path + "[" + i + "]." + $(m).attr("name"));
-                        $(m).removeClass("bg-danger-soft");
-                        var val = $(m).text().trim();
-                        if (val.length) {
-                            // Simple validation on format
-                            var valid = true;
-                            var format = $(m).attr("format");
-                            if (format == "int") {
-                                valid = /[0-9]/.test(val);
-                            } else if (format == 'float') {
-                                valid = /[0-9\.]/.test(val);
-                            }
-                            if (valid) {
-                                param[path + "[" + i + "]." + $(m).attr("name")] = val;
-                            } else {
-                                $(m).addClass("bg-danger-soft");
-                                param["valid"] = false;
-                            }
-                        } else {
-                            if ($(m).is("[required]")) {
-                                $(m).addClass("bg-danger-soft");
-                                param["valid"] = false;
-                            }
-                        }
-                        debug("Parsed string is " + param[path + "[" + i + "]." + $(m).attr("name")]);
-                    } else {
-                        _process(param, $(m), path + "[" + i + "]." + $(m).attr("name"));
-                    }
-                });
-            });
-            debug("Parsed array's length is " + trs.length);
-        } else if (listGroup.length) {
-            listGroup.find(".list-group-item[name]").not(".template").each(function (i, n) {
-                var inner = $(n).find("> .row > .col:eq(0)").children();
                 _process(param, inner, path + "[" + i + "]");
             });
         } else if (items.length) {

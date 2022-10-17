@@ -139,13 +139,13 @@
     </div>
 </nav>
 <div class="main-content">
-    {% include 'blocks/headerdash.html' %}
-    {% include 'blocks/breadcrumbdash.html' %}
+    {% include 'blocks/header-dash.html' %}
+    {% include 'blocks/breadcrumb-dash.html' %}
     <div class="container-fluid">
         {% block content %}
         {% endblock %}
     </div>
-    {% include 'blocks/footerdash.html' %}
+    {% include 'blocks/footer-dash.html' %}
 </div>
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/js/enums.js?{{ version() }}"></script>

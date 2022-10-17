@@ -1,7 +1,7 @@
-{{ '{% extends "' }}{{ view.params.extends }}{{ '.html" %}' }}
+{{ '{% extends "' }}{{ view.params.extends if view.params.extends else view.blueprint.params.extends }}{{ '.html" %}' }}
 {{ '{%' }} set title = {{ view.params.title|quote }} {{ '%}' }}
 {{ '{%' }} set breadcrumb = {
-    'subtitle': {{ view.params.subtitle|quote }},
+    'subtitle': '{{ view.params.subtitle or '' }}',
     'title': title,
     'actions': {{ view.params.actions or '[]' }},
     'tabs': [],
@@ -14,13 +14,13 @@
     <div class="{{ 'col-lg-'+column.span|string if column.span else 'col-lg' }}">
         {# one column #}
         {% if not column.children %}
-        {{ '{%' }} include "seeds/{{ column.name }}.html" {{ '%}' }}
+        {{ '{%' }} include "{{ 'seeds' if column.model else 'blocks' }}/{{ column.name }}.html" {{ '%}' }}
         {# children columns #}
         {% else %}
         <div class="row">
             {% for child in column.children %}
             <div class="col-12">
-                {{ '{%' }} include "seeds/{{ child.name }}.html" {{ '%}' }}
+                {{ '{%' }} include "{{ 'seeds' if child.model else 'blocks' }}/{{ child.name }}.html" {{ '%}' }}
             </div>
             {% endfor %}
         </div>

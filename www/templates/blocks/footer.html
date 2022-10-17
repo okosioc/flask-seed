@@ -1,28 +1,27 @@
 {% set block = {
-    'title': 'Flask-Seed is a seed project for rapid development',
-    'subtitle': 'Once you have defined the data models, your project is ready to go online.',
+    'title': 'flask-seed',
+    'subtitle': '数据结构+项目模板=种子项目',
     'link': {
-        'title': 'Get started now',
-        'url': '#'
+        'title': '免费试用',
+        'url': '/dashboard'
     },
-    'copyright': '2020 © flask-seed.com'
+    'copyright': '2022 © flask-seed.com'
 } %}
 <footer class="bg-dark text-white">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <div class="py-4">
+                <div class="py-6">
                     <div class="row align-items-center">
-                        <div class="col-md-8">
+                        <div class="col-md-8 mb-4 mb-sm-0">
                             <div>
-                                <h3 class="text-white mb-2">{{ block.title }}</h3>
+                                <h3 class="text-white mb-3">{{ block.title }}</h3>
                                 <p class="text-white-50 mo-mb-20 mb-0">{{ block.subtitle }}</p>
-
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="text-md-right">
-                                <a href="{{ block.link.url }}" class="btn btn-primary">{{ block.link.title|safe }}
+                                <a href="{{ block.link.url }}" class="btn btn-white">{{ block.link.title|safe }}
                                 </a>
                             </div>
                         </div>

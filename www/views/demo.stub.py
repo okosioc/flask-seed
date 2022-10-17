@@ -1,12 +1,15 @@
 """ demo module. """
 from datetime import datetime
 
-from flask import Blueprint, render_template, current_app, request, abort, jsonify
-from py3seed import populate_model, populate_search
+from bson import ObjectId
+from flask import Blueprint, render_template, current_app, redirect, request, abort, jsonify, url_for
+from flask_login import current_user
 
-from www.models import DemoProjectDashboard, DemoTeam, DemoUser, DemoProject, DemoTask
-from www.tools import auth_permission
+from py3seed import populate_model, populate_search
 from .common import get_id
+from www.tools import auth_permission
+from www.models import DemoProjectDashboard, DemoTeam, DemoUser, DemoProject, DemoTask
+
 
 demo = Blueprint('demo', __name__)
 
@@ -306,3 +309,5 @@ def task_edit_demo_task_form_search_demo_users():
     current_app.logger.info(f'Try to search demo user at page {page} by {condition}, sort by {sort}')
     demo_users, pagination = DemoUser.search(condition, page, projection=['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time'], sort=sort)
     return jsonify(error=0, message='Search demo user successfully.', pagination=dict(pagination), demo_users=demo_users)
+
+

@@ -1,6 +1,6 @@
 {% set block = breadcrumb or {
     'title': 'Blank Page',
-    'links': [
+    'children': [
         {'url':'/', 'title': 'Home'},
         {'url':'/blank', 'title': 'Blank Page'}
     ]
@@ -12,7 +12,7 @@
                 <div class="text-center">
                     <h3 class="page-header-title text-white">{{ block.title }}</h3>
                     <ol class="breadcrumb mb-0">
-                        {% for l in block.links %}
+                        {% for l in block.children %}
                             {% if loop.last %}
                                 <li class="breadcrumb-item active">{{ l.title }}</li>
                             {% else %}

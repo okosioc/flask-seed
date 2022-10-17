@@ -33,12 +33,6 @@ def index():
     return render_template('public/index.html')
 
 
-@public.route('/blank')
-def blank():
-    """ Blank page. """
-    return render_template('public/blank.html')
-
-
 @public.route('/400')
 @public.route('/403')
 @public.route('/404')
@@ -53,6 +47,7 @@ def error():
 #
 
 class LoginForm(FlaskForm):
+    """ 登录表单. """
     email = StringField('email', validators=[
         DataRequired(_('Email is required!')),
         Email(_('Invalid email address!'))
@@ -64,18 +59,17 @@ class LoginForm(FlaskForm):
 
 @public.route('/login', methods=('GET', 'POST'))
 def login():
-    """ Login. """
+    """ 登录. """
     form = LoginForm()
+    #
     if form.validate_on_submit():
         em = form.email.data.strip().lower()
         u = DemoUser.find_one({'email': em})
         if not u or not check_password_hash(u.password, form.password.data):
-            form.email.errors.append(_('User name or password incorrect!'))
+            form.email.errors.append('登录邮箱或者登录密码不匹配')
             return render_template('public/login.html', form=form)
-
         # Keep the user info in the session using Flask-Login
         login_user(u, remember=form.remember.data)
-
         # TODO: Validate next url
         next_url = form.next_url.data
         if not next_url:
@@ -96,6 +90,7 @@ def logout():
 
 
 class SignupForm(FlaskForm):
+    """ 注册表单. """
     email = StringField('email', validators=[
         DataRequired(_('Email is required!')),
         Email(_('Invalid email address!'))
@@ -114,15 +109,15 @@ class SignupForm(FlaskForm):
 
 @public.route('/signup', methods=('GET', 'POST'))
 def signup():
-    """ Signup. """
+    """ 注册. """
     form = SignupForm()
-
+    #
     if form.validate_on_submit():
         em = form.email.data.strip().lower()
         pwd = form.password.data.strip()
         u = DemoUser.find_one({'email': em})
         if u:
-            form.email.errors.append(_('This email has been registered!'))
+            form.email.errors.append('该登录邮箱已经注册!')
             return render_template('public/signup.html', form=form)
         # Create user
         u = DemoUser()

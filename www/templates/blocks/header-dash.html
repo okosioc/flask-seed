@@ -4,7 +4,7 @@
         {'url':'javascript:coming()', 'title':'English'},
         {'url':'javascript:coming()', 'title':'中文'}
     ],
-    'commands': [
+    'actions': [
         {'icon':'fe fe-user', 'title':'账号设置', 'url':'/dashboard/profile'},
         {'icon':'fe fe-dollar-sign', 'title':'费用', 'url':'/pay/orders'},
         {'title':''},
@@ -46,7 +46,7 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
                     <h6 class="dropdown-header">Hi, {{ current_user.name|capitalize }}</h6>
-                    {% for l in block.commands %}
+                    {% for l in block.actions %}
                         {% if l.title %}
                             <a href="{{ l.url }}" class="dropdown-item">
                                 <i class="{{ l.icon }} mr-3"></i>{{ l.title }}

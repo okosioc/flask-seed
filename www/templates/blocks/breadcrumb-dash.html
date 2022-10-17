@@ -1,7 +1,7 @@
 {% set block = breadcrumb or {
     'title': 'Blank Page',
     'subtitle': 'Overview',
-    'links': [
+    'children': [
         {'url':'/', 'title': 'Home'},
         {'url':'/dashboard/', 'title': 'Dashboard'},
         {'url':'/blank', 'title': 'Blank Page'}
@@ -22,9 +22,9 @@
                     </h1>
                 </div>
                 <div class="col-auto">
-                    {% if block.links %}
+                    {% if block.children %}
                         <ol class="breadcrumb mb-0">
-                            {% for l in block.links %}
+                            {% for l in block.children %}
                                 {% if loop.last %}
                                     <li class="breadcrumb-item active">{{ l.title }}</li>
                                 {% else %}
@@ -34,13 +34,6 @@
                                 {% endif %}
                             {% endfor %}
                         </ol>
-                    {% elif block.commands %}
-                        {% for c in block.commands %}
-                            <a href="{{ c.url }}"  {{ 'onclick=' + c.click if c.click }}
-                               class="btn btn-outline-primary ml-2">
-                                <i class="{{ c.icon }} mr-2"></i>{{ c.title }}
-                            </a>
-                        {% endfor %}
                     {% elif block.actions %}
                         {% for a in block.actions %}
                             {% if a.view %}

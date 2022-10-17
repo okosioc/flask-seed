@@ -1,0 +1,86 @@
+{% set form = form or {
+    'csrf_token': '',
+    'next_url': '',
+    'email': {
+        'data': '',
+        'errors': ['Invalid email address!']
+    },
+    'password': {
+        'data': '',
+        'errors': None
+    },
+    'repassword': {
+        'data': '',
+        'errors': None
+    },
+    'agree': {
+        'data': '',
+        'errors': None
+    }
+} %}
+<div class="my-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center w-75 m-auto">
+                            <a href="/">
+                                <span><img src="{{ base() }}/img/logo-dark.png" alt="" height="40"></span>
+                            </a>
+                            <p class="text-muted mb-4 mt-3">请使用邮箱注册</p>
+                        </div>
+                        <form class="needs-validation" novalidate action="/signup" method="post">
+                            {{ form.csrf_token }}
+                            {{ form.next_url }}
+                            <div class="form-group">
+                                <label for="email">登录邮箱</label>
+                                <input type="text" class="form-control {{ 'is-invalid' if form.email.errors }}"
+                                       id="email" name="email" value="{{ form.email.data or '' }}">
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback">{{ form.email.errors|join('/') }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="password">登录密码</label>
+                                <input type="password" class="form-control {{ 'is-invalid' if form.password.errors }}"
+                                       id="password" name="password" value="{{ form.password.data or '' }}">
+                                {% if form.password.errors %}
+                                <div class="invalid-feedback">{{ form.password.errors|join('/') }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="repassword">确认密码</label>
+                                <input type="password" class="form-control {{ 'is-invalid' if form.repassword.errors }}"
+                                       id="repassword" name="repassword" value="{{ form.repassword.data or '' }}">
+                                {% if form.repassword.errors %}
+                                <div class="invalid-feedback">{{ form.repassword.errors|join('/') }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <div class="custom-control custom-checkbox {{ 'is-invalid' if form.agree.errors }}">
+                                    <input type="checkbox" class="custom-control-input" {{ 'checked' if form.agree.data }}
+                                           id="agree" name="agree" value="true">
+                                    <label class="custom-control-label" for="agree">
+                                        同意<a href="javascript:coming();" class="text-dark">用户使用协议</a>
+                                    </label>
+                                </div>
+                                {% if form.agree.errors %}
+                                <div class="invalid-feedback">{{ form.agree.errors|join('/') }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group mb-0 text-center">
+                                <button class="btn btn-primary btn-block" type="submit">注册</button>
+                            </div>
+                        </form>
+                    </div>
+                </div> <!-- /.card -->
+                <div class="row">
+                    <div class="col-12 text-right">
+                        <p class=""><a href="/login" class="text-muted">已经注册<i class="fe fe-arrow-right ml-2"></i></a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

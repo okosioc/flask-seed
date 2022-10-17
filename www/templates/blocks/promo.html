@@ -1,24 +1,29 @@
 {% set block = {
-    'title': 'Flask-Seed is a seed project<br>for rapid development',
-    'subtitle': 'Flask-Seed is built on top of awesome Flask and Bootstrap.',
-    'links': [
-        {'title': 'Get started with Flask-Seed', 'url': '#', 'class':'btn-light'},
-        {'title': 'GitHub', 'url': 'https://github.com/okosioc/flask-seed', 'class':'btn-dark'}
+    'title': 'Welcome to <span class="text-primary">flask-seed</span>.<br>Develop anything.',
+    'subtitle': '数据结构+项目模板，生成易于二次开发的种子项目',
+    'image': base() + '/assets/img/illustrations/cowork.png',
+    'children': [
+        {'title': 'Github<i class="fe fe-github d-none d-md-inline ml-2"></i>', 'url': 'https://github.com/okosioc/flask-seed/', 'class':'btn btn-primary'},
+        {'title': 'View all pages<i class="fe fe-arrow-right d-none d-md-inline ml-2"></i>', 'url': '/dashboard', 'class':'btn btn-outline-primary'},
     ]
 } %}
-<section class="bg-primary py-5">
+<section class="py-7">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <div class="text-center mb-4">
-                    <h1 class="mb-4 text-white">{{ block.title|safe }}</h1>
-                    <p class="text-white-50 mb-4">{{ block.subtitle }}</p>
-                    <div>
-                        {% for l in block.links %}
-                            <a href="{{ l.url }}"
-                               class="btn {{ l.class }} {{ 'mr-1' if not loop.last }}">{{ l.title|safe }}</a>
-                        {% endfor %}
-                    </div>
+        <div class="row align-items-center">
+            <div class="col-12 col-md-5 col-lg-6 order-md-2">
+                <img src="{{ block.image }}"
+                     class="img-fluid mb-6 mb-md-0" alt="..." data-aos="fade-up"
+                     data-aos-delay="100">
+            </div>
+            <div class="col-12 col-md-7 col-lg-6 order-md-1" data-aos="fade-up">
+                <h1 class="display-3 text-center text-md-left">{{ block.title|safe }}</h1>
+                <p class="lead text-center text-md-left text-muted mb-4">{{ block.subtitle|safe }}</p>
+                <div class="text-center text-md-left">
+                    {% for l in block.children %}
+                    <a href="{{ l.url }}" class="{{ l.class }} mr-1" {{ 'target="_blank"' if not l.url[0]=='/' }}>
+                        {{ l.title|safe }}
+                    </a>
+                    {% endfor %}
                 </div>
             </div>
         </div>

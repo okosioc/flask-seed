@@ -9,7 +9,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "express": "^4.16.1",
     "gulp": "^4.0.1",
     "gulp-autoprefixer": "^6.1.0",
     "gulp-clean-css": "^4.2.0",
@@ -18,10 +17,6 @@
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^5.0.0",
     "gulp-uglify": "^3.0.2",
-    "lodash": "^4.17.19",
-    "mockjs": "^1.1.0",
-    "nunjucks": "^3.2.1",
-    "qiniu": "^7.3.1",
     "sass": "^1.42.1"
   },
   "dependencies": {

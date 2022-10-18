@@ -1,21 +1,18 @@
 DOMAIN = 'flask-seed.com'
-
 ENV = 'production'
-DEBUG = False
 SECRET_KEY = '<FIXME>'
-
+# Cache
 CACHE_TYPE = "simple"
 CACHE_DEFAULT_TIMEOUT = 300
 CACHE_THRESHOLD = 10240
-
+# Locale
 ACCEPT_LANGUAGES = ['en', 'zh']
-
 BABEL_DEFAULT_LOCALE = 'en'
 BABEL_DEFAULT_TIMEZONE = 'UTC'
-
+# Log
 DEBUG_LOG = 'logs/debug.log'
 ERROR_LOG = 'logs/error.log'
-
+# Email
 ADMINS = ['<FIXME>']
 MAIL_SERVER = 'smtp.mxhichina.com'
 MAIL_PORT = 465
@@ -24,11 +21,10 @@ MAIL_USE_SSL = True
 MAIL_USERNAME = '<FIXME>'
 MAIL_PASSWORD = '<FIXME>'
 MAIL_DEFAULT_SENDER = '<FIXME>'
-
+# DB
 MONGODB_URI = 'mongodb://localhost:27017/flask-seed'
 MONGODB_URI_PYTEST = 'mongodb://localhost:27017/pytest'
-
-# Upload to Storage Service
+# Upload
 UPLOAD_ENDPOINT = '//upload.qiniup.com/'
 UPLOAD_BASE = '//cdn.flask-seed.com'
 UPLOAD_BUCKET = 'flask-seed'

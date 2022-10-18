@@ -1,0 +1,16 @@
+{% set block = {
+    'copyright': '2020 © flask-seed.com',
+    'children': [
+        {'title': 'About Us', 'url': 'javascript:coming();'},
+        {'title': 'Help', 'url': 'javascript:coming();'}
+    ]
+} %}
+<footer class="footer py-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <div class="text-right text-muted">{{ block.copyright }}</div>
+            </div>
+        </div>
+    </div>
+</footer>

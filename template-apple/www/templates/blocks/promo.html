@@ -1,0 +1,31 @@
+{% set block = {
+    'title': 'Welcome to <span class="text-primary">flask-seed</span>.<br>Develop anything.',
+    'subtitle': '数据结构+项目模板，生成易于二次开发的种子项目',
+    'image': base() + '/assets/img/illustrations/cowork.png',
+    'children': [
+        {'title': 'Github<i class="fe fe-github d-none d-md-inline ml-2"></i>', 'url': 'https://github.com/okosioc/flask-seed/', 'class':'btn btn-primary'},
+        {'title': 'View all pages<i class="fe fe-arrow-right d-none d-md-inline ml-2"></i>', 'url': '/dashboard', 'class':'btn btn-outline-primary'},
+    ]
+} %}
+<section class="py-7">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-5 col-lg-6 order-md-2">
+                <img src="{{ block.image }}"
+                     class="img-fluid mb-6 mb-md-0" alt="..." data-aos="fade-up"
+                     data-aos-delay="100">
+            </div>
+            <div class="col-12 col-md-7 col-lg-6 order-md-1" data-aos="fade-up">
+                <h1 class="display-3 text-center text-md-left">{{ block.title|safe }}</h1>
+                <p class="lead text-center text-md-left text-muted mb-4">{{ block.subtitle|safe }}</p>
+                <div class="text-center text-md-left">
+                    {% for l in block.children %}
+                    <a href="{{ l.url }}" class="{{ l.class }} mr-1" {{ 'target="_blank"' if not l.url[0]=='/' }}>
+                        {{ l.title|safe }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

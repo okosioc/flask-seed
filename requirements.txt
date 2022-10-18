@@ -13,3 +13,4 @@ schedule
 arrow
 pydash
 py3seed
+qiniu

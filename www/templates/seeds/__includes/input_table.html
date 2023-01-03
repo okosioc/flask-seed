@@ -1,0 +1,63 @@
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+<table class="table table-striped border-bottom" style="margin-bottom:1rem;">
+    <thead>
+        <tr>
+            {% for c in item_schema.columns %}
+            {% set column_schema = item_schema.properties[c] %}
+            <th>{{ column_schema.title }}{{ '(' + column_schema.unit + ')' if column_schema.unit }}</th>
+            {% endfor %}
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody class="array-items">
+        {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ item_schema.py_type }}')] {{ '%}' }}
+        <tr class="array-item {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="{{ '{{' }} '-' if loop.last else loop.index0 {{ '}}' }}">
+            {% for c in item_schema.columns %}
+            {% set column_schema = item_schema.properties[c] %}
+            {% set column_path = field_name~'_item.'~c %}
+            <td name="{{ c }}">
+                {% if column_schema.format == 'int' %}
+                <input class="form-control" pattern="[0-9]*" name="{{ c }}" {{ 'required' if column_schema.required }} value="{{ '{{' }} {{ column_path }} if {{ column_path }} is not none {{ '}}' }}">
+                {% elif column_schema.format == 'float' %}
+                <input class="form-control" pattern="[0-9\.]*" name="{{ c }}" {{ 'required' if column_schema.required }} value="{{ '{{' }} {{ column_path }} if {{ column_path }} is not none {{ '}}' }}">
+                {% elif column_schema.format in ['select', 'buttongroup'] %}
+                <select class="custom-select" name="{{ c }}" {{ 'required' if column_schema.required }} {{ 'multiple' if column_schema.type=='array' }}>
+                    <option value="">请选择...</option>
+                    {% if column_schema.type == 'array' %}
+                    {% if column_schema['items'].enum %}
+                    {% for value, label in column_schema['items'].enum_titles|items %}
+                    <option value="{{ value }}" {{ '{{' }} 'selected' if {{ value|quote }} in {{ column_path }} {{ '}}' }}>{{ label }}</option>
+                    {% endfor %}
+                    {% else %}
+                    <option>UNSUPPORTED!</option>
+                    {% endif %}
+                    {% else %}
+                    {% if column_schema.enum %}
+                    {% for value, label in column_schema.enum_titles|items %}
+                    <option value="{{ value }}" {{ '{{' }} 'selected' if {{ value|quote }}=={{ column_path }} {{ '}}' }}>{{ label }}</option>
+                    {% endfor %}
+                    {% else %}
+                    <option>UNSUPPORTED!</option>
+                    {% endif %}
+                    {% endif %}
+                </select>
+                {% else %}
+                <input class="form-control" name="{{ c }}" {{ 'required' if column_schema.required }} value="{{ '{{' }} {{ column_path }} or '' {{ '}}' }}">
+                {% endif %}
+            </td>
+            {% endfor %}
+            <td>
+                <a class="btn pl-0 py-0" onclick="array_action_delete($(this));" data-title="{{ item_schema.title }}"><i class="fe fe-delete"></i></a>
+            </td>
+        </tr>
+        {{ '{%' }} endfor {{ '%}' }}
+        <tr class="array-item" style="{{ '{{' }} 'display:none' if {{ field_path }}  {{ '}}' }}"><td colspan="{{ item_schema.columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>
+    </tbody>
+</table>
+<div class="table-actions" style="margin-bottom:1rem;">
+    <a class="btn btn-outline-primary mr-2" style="margin:0 1rem;" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ item_schema.title }}</a>
+</div>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

@@ -7,13 +7,24 @@
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
+{% block style %}
+{% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-lg-4">
-        {% include "seeds/demo_user-summary.html" %}
+        {% include "seeds/DemoUser-summary.html" %}
     </div>
     <div class="col-lg-8">
-        {% include "seeds/demo_user-form.html" %}
+        {% include "seeds/DemoUser-form.html" %}
     </div>
 </div>
+{% endblock %}
+{% block script %}
+<script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
+<script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        install_form();
+    });
+</script>
 {% endblock %}

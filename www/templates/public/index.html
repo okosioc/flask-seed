@@ -7,30 +7,36 @@
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
+{% block style %}
+<link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-lg">
-        {% include "blocks/promo.html" %}
+        {% include "seeds/Block-read-promo-basic.html" %}
     </div>
 </div>
 <div class="row">
     <div class="col-lg">
-        {% include "blocks/features.html" %}
+        {% include "seeds/Block-read-features-basic.html" %}
     </div>
 </div>
 <div class="row">
     <div class="col-lg">
-        {% include "blocks/feature-1.html" %}
+        {% include "seeds/Block-read-feature-1-basic.html" %}
     </div>
 </div>
 <div class="row">
     <div class="col-lg">
-        {% include "blocks/feature-2.html" %}
+        {% include "seeds/Block-read-feature-2-basic.html" %}
     </div>
 </div>
 <div class="row">
     <div class="col-lg">
-        {% include "blocks/pricing.html" %}
+        {% include "seeds/Block-read-pricing-basic.html" %}
     </div>
 </div>
+{% endblock %}
+{% block script %}
+<script src="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
 {% endblock %}

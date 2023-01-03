@@ -7,13 +7,17 @@
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
+{% block style %}
+{% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-lg-4">
-        {% include "seeds/demo_team-summary.html" %}
+        {% include "seeds/DemoTeam-summary.html" %}
     </div>
     <div class="col-lg-8">
-        {% include "seeds/demo_team.members-read.html" %}
+        {% include "seeds/DemoTeam.members-read.html" %}
     </div>
 </div>
+{% endblock %}
+{% block script %}
 {% endblock %}

@@ -8,6 +8,7 @@ from flask_login import current_user
 from py3seed import populate_model, populate_search
 from .common import get_id
 from www.tools import auth_permission
+from www.models import Block
 
 
 public = Blueprint('public', __name__)
@@ -16,7 +17,12 @@ public = Blueprint('public', __name__)
 @public.route('/index')
 def index():
     """ 首页. """
-    return render_template('public/index.html')
+    id_ = get_id(int)
+    block = Block.find_one(id_)
+    if not block:
+        abort(404)
+    #
+    return render_template('public/index.html', block=block)
 
 
 @public.route('/login')

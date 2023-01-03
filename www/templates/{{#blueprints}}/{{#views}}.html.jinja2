@@ -1,0 +1,124 @@
+{{ '{% extends "' }}{{ view.params.extends if view.params.extends else view.blueprint.params.extends }}{{ '.html" %}' }}
+{{ '{%' }} set title = {{ view.params.title|quote }} {{ '%}' }}
+{{ '{%' }} set breadcrumb = {
+    'subtitle': '{{ view.params.subtitle or '' }}',
+    'title': title,
+    'actions': {{ view.params.actions or '[]' }},
+    'tabs': {{ view.params.tabs or '[]' }},
+} {{ '%}' }}
+{# macro - iterate model schema to get needed formats and etc #}
+{% set render_controls = namespace(formats=[], has_read=false, has_form=false, has_query=false) %}
+{% macro _iterate_schema(schema, action) %}
+    {% set format = schema.format %}
+    {% set fields = [] %}
+    {% set necessary_formats = [] %}
+    {% if action == 'read' %}
+        {% set fields = schema.read_fields or [] %}
+        {% set necessary_formats = ['image', 'calendar', 'chart'] %}
+        {% set render_controls.has_read = true %}
+    {% elif action == 'form' %}
+        {% set fields = schema.form_fields or [] %}
+        {% set necessary_formats = ['image', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
+        {% set render_controls.has_form = true %}
+    {% elif action == 'query' %}
+        {% set fields = schema.searchable_fields or [] %}
+        {% set necessary_formats = ['date', 'datetime'] %}
+        {% set render_controls.has_query = true %}
+    {% endif %}
+    {% if format %}
+        {% if format in necessary_formats and format not in render_controls.formats %}
+            {% set render_controls.formats = render_controls.formats + [format] %}
+        {% endif %}
+    {% else %}
+        {# object #}
+        {% if schema.type == 'object' %}
+            {% for f in fields %}
+                {{- _iterate_schema(schema.properties[f], action) -}}
+            {% endfor %}
+        {# array #}
+        {% elif schema.type == 'array' %}
+            {{- _iterate_schema(schema['items'], action) -}}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+{# iterate layout to control rendering #}
+{% for row in view.rows %}
+    {% for column in row %}
+        {% set cols = column.children if column.children else [column] %}
+        {% for col in cols if col.model %}
+            {{- _iterate_schema(col.model.schema, col.action) -}}
+        {% endfor %}
+    {% endfor %}
+{% endfor %}
+{{ '{% block title %}{{ title }}{% endblock %}' }}
+{{ '{% block style %}' }}
+{% if 'image' in render_controls.formats or 'file' in render_controls.formats %}
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
+{% endif %}
+{% if 'calendar' in render_controls.formats %}
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/fullcalendar/main.min.css" rel="stylesheet" type="text/css">
+{% endif %}
+{% if 'date' in render_controls.formats or 'datetime' in render_controls.formats %}
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+{% endif %}
+{{ '{% endblock %}' }}
+{{ '{% block content %}' }}
+{% for row in view.rows %}
+<div class="row">
+    {% for column in row %}
+    <div class="{{ 'col-lg-'+column.span|string if column.span else 'col-lg' }}">
+        {# one column #}
+        {% if not column.children %}
+        {{ '{%' }} include "{{ 'seeds' if column.model else 'includes' }}/{{ column.name }}.html" {{ '%}' }}
+        {# children columns #}
+        {% else %}
+        <div class="row">
+            {% for child in column.children %}
+            <div class="col-12">
+                {{ '{%' }} include "{{ 'seeds' if child.model else 'includes' }}/{{ child.name }}.html" {{ '%}' }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{{ '{% endblock %}' }}
+{{ '{% block script %}' }}
+{% if 'image' in render_controls.formats or 'file' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
+{% if render_controls.has_form %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
+{% endif %}
+{% endif %}
+{% if 'calendar' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/fullcalendar/main.min.js"></script>
+{% endif %}
+{% if 'date' in render_controls.formats or 'datetime' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/flatpickr/dist/l10n/zh.js"></script>
+{% endif %}
+{% if 'chart' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/chart.js/dist/Chart.bundle.min.js"></script>
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/js/Chart.extension.js"></script>
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/js/charts.js"></script>
+{% endif %}
+{% if 'textarea' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/autosize/dist/autosize.min.js"></script>
+{% endif %}
+{% if 'tag' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/corejs-typeahead/dist/typeahead.jquery.min.js"></script>
+{% endif %}
+{% if 'select' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
+{% endif %}
+{% if render_controls.has_form %}
+<script src="{{ '{{' }} base() {{ '}}' }}/js/form.min.js?{{ '{{' }} version() {{ '}}' }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        install_form();
+    });
+</script>
+{% endif %}
+{{ '{% endblock %}' }}

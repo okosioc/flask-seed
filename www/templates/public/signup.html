@@ -7,10 +7,14 @@
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
+{% block style %}
+{% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-lg">
-        {% include "blocks/signup.html" %}
+        {% include "includes/signup-simple.html" %}
     </div>
 </div>
+{% endblock %}
+{% block script %}
 {% endblock %}

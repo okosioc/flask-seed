@@ -1,0 +1,7 @@
+{% set model = seed.model %}
+{% set sub = seed.sub %}
+{% if seed.action in ['read', 'summary', 'form', 'query'] %}
+    {% include '__includes/model_' + seed.action + '.html' %}
+{% else %}
+    TODO: unsupport action {{ seed.action }}
+{% endif %}

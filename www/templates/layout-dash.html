@@ -11,12 +11,10 @@
     {% endblock %}
     <title>{% block title %}{% endblock %}</title>
     <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon">
-    {% block style %}
-    <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
-    <link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
-    {% endblock %}
     <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css"/>
     <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
+    {% block style %}
+    {% endblock %}
 </head>
 <body>
 {# Nav #}
@@ -138,33 +136,17 @@
     </div>
 </nav>
 <div class="main-content">
-    {% include 'blocks/header-dash.html' %}
-    {% include 'blocks/breadcrumb-dash.html' %}
+    {% include 'seeds/Block-read-header-dash-basic.html' %}
+    {% include 'includes/breadcrumb-dash.html' %}
     <div class="container-fluid">
         {% block content %}
         {% endblock %}
     </div>
-    {% include 'blocks/footer-dash.html' %}
+    {% include 'seeds/Block-read-footer-dash-basic.html' %}
 </div>
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/js/enums.js?{{ version() }}"></script>
 <script src="{{ base() }}/js/app.min.js?{{ version() }}"></script>
-<script src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
-<script src="{{ base() }}/assets/vendor/flatpickr/dist/l10n/zh.js"></script>
-<script src="{{ base() }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
-<script src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
-<script src="{{ base() }}/assets/vendor/corejs-typeahead/dist/typeahead.jquery.min.js"></script>
-<script src="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
-<script src="{{ base() }}/assets/vendor/chart.js/dist/Chart.bundle.min.js"></script>
-<script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
-<script src="{{ base() }}/assets/js/Chart.extension.js"></script>
-<script src="{{ base() }}/assets/js/charts.js"></script>
-<script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
-<script type="text/javascript">
-    $(document).ready(function () {
-        install_form();
-    });
-</script>
 {% block script %}
 {% endblock %}
 </body>

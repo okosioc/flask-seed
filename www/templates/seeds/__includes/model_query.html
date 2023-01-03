@@ -1,0 +1,268 @@
+{% from '__includes/urls.html' import detail_url, edit_url with context %}
+{% from "__includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
+{% set seed_is_card = seed.params.is_card or False %}
+{% set result_view = seed.params.result_view or 'table' %}
+{% set has_search = True if 'has_search' not in seed.params else seed.params.has_search %}
+{# query relation model #}
+{% if sub %}
+    {% set sub_schema = model.schema.properties[sub] %}
+    {% set relation_model_name = sub_schema['items']['py_type'] if sub_schema.type == 'array' else sub_schema['py_type'] %}
+    {% set model = models[relation_model_name] %}
+{% endif %}
+{% set model_schema = model.schema %}
+{% set columns = model_schema.columns %}
+{% set first_field_name = columns[0] %}
+{% set first_field = model_schema.properties[first_field_name] %}
+{% set title_field_name = match_field(columns, 'title|name|\w*name')%}
+{# macro - render search form #}
+{% macro render_search_form() %}
+<form class="form-query" novalidate>
+    <div class="form-row justify-content-center">
+        {% for f in model_schema.searchables %}
+        {# Do not support nested field, and f may contains comparator #}
+        {% set rf =  f %}
+        {% set comparator = 'eq' %}
+        {% if '__' in rf %}
+            {% set tokens = f|split('__') %}
+            {% set rf = tokens[0] %}
+            {% set comparator = tokens[1] %}
+        {% endif %}
+        {% set fs = model_schema.properties[rf] %}
+        {% set path = 'search.' + f %}
+        <div class="form-group col-sm{{ '-auto' if fs.enum or fs.type in ['integer', 'number', 'boolean', 'date'] }} mb-4">
+            <label class="sr-only">{{ fs.title }}</label>
+            {% if fs.enum %}
+            <select class="custom-select" name="{{ path }}" >
+                <option value="">请选择{{ fs.title }}...</option>
+                {{ '{%' }} for value, label in enum_titles('{{ fs.py_type }}')|items {{ '%}' }}
+                <option value="{{ '{{' }} value {{ '}}' }}" {{ '{{' }} 'selected' if value=={{ path }} {{ '}}' }}>{{ '{{' }} label {{ '}}' }}</option>
+                {{ '{%' }} endfor {{ '%}' }}
+            </select>
+            {% elif fs.type == 'boolean' %}
+            <select class="custom-select" name="{{ path }}">
+                <option value="">请选择{{ fs.title }}...</option>
+                <option value="true" {{ '{{' }} 'selected' if value==true {{ '}}' }}>True</option>
+                <option value="false" {{ '{{' }} 'selected' if value==false {{ '}}' }}>False</option>
+            </select>
+            {% elif fs.type in ['integer', 'number'] %}
+            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                   value="{{ '{{' }} {{ path }} if {{ path }} is not none {{ '}}' }}"
+                   name="{{ path }}">
+            {% elif fs.format in ['date', 'datetime'] %}
+            <div class="input-group input-group-merge">
+                <input type="text" class="form-control form-control-prepended date" placeholder="{{ fs.title }}"
+                       value="{{ '{{' }} {{ path }} or '' {{ '}}' }}"
+                       name="{{ path }}">
+                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-calendar"></span></div></div>
+            </div>
+            {% elif comparator == 'like' %}
+            <div class="input-group input-group-merge">
+                <input type="text" class="form-control form-control-prepended" placeholder="{{ fs.title }}"
+                       value="{{ '{{' }} {{ path }} or '' {{ '}}' }}"
+                       name="{{ path }}">
+                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-search"></span></div></div>
+            </div>
+            {% else %}
+            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                   value="{{ '{{' }} {{ path }} or '' {{ '}}' }}"
+                   name="{{ path }}">
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="col-sm-auto mb-4">
+            <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">查找</button>
+            <button type="button" class="btn btn-light btn-default" onclick="search_reset();">重置</button>
+        </div>
+    </div>
+</form>
+<form class="form-batch" novalidate style="display:none">
+    <div class="alert alert-light mb-4">
+        <div class="row align-items-center">
+            <div class="col-sm">
+                <i class="fe fe-info mr-2"></i>您选择了<span id="span-checked" class="text-primary mx-1"></span>个{{ model_schema.title }}
+            </div>
+            <div class="col-sm-auto">
+                <button type="button" class="btn btn-primary btn-default" onclick="coming($(this));">ACTION</button>
+            </div>
+        </div>
+    </div>
+</form>
+{%- endmacro %}
+{# macro - render grid view #}
+{% macro render_grid() %}
+{{ '{%' }} if {{ model.name_snake_plural }} {{ '%}' }}
+<div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
+    {{ '{%' }} for {{ model.name_snake }} in {{ model.name_snake_plural }} {{ '%}' }}
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                {% set target = detail_url(model.name, model.name_snake) %}
+                {{ display_summary(model.name_snake, model_schema, model.name_snake, target)|indent(16) }}
+            </div>
+        </div>
+    </div>
+    {{ '{%' }} endfor {{ '%}' }}
+</div>
+<div style="margin:0 1rem 1rem;">
+{{ '{%' }} include 'includes/pagination.html' {{ '%}' }}
+</div>
+{{ '{%' }} else {{ '%}' }}
+<div class="alert alert-light"><i class="fe fe-alert-circle mr-2"></i>找不到{{ model_schema.title }}!</div>
+{{ '{%' }} endif {{ '%}' }}
+{%- endmacro %}
+{# macro - render media view #}
+{% macro render_media() %}
+TODO
+{% endmacro %}
+{# macro - render table view #}
+{% macro render_table() %}
+<div class="table-responsive">
+    <table class="table table-striped {{ '{{' }} 'border-bottom mb1' if {{ model.name_snake_plural }} {{ '}}' }}">
+        <thead>
+        <tr>
+            <th>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="list-checkbox-all custom-control-input" id="checkbox-all-{{ model.name_kebab }}">
+                    <label class="custom-control-label" for="checkbox-all-{{ model.name_kebab }}"></label>
+                </div>
+            </th>
+            {% for f in columns %}
+            {% set fs = model_schema.properties[f] %}
+            <th>{{ fs.title }}{{ '(' + fs.unit + ')' if fs.unit }}</th>
+            {% endfor %}
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ '{%' }} for {{ model.name_snake }} in {{ model.name_snake_plural }} {{ '%}' }}
+        <tr>
+            <td>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="list-checkbox custom-control-input" id="checkbox-{{ model.name_kebab }}-{{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} {{ '}}' }}">
+                    <label class="custom-control-label" for="checkbox-{{ model.name_kebab }}-{{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} {{ '}}' }}"></label>
+                </div>
+            </td>
+            {% set detail_url = detail_url(model.name, model.name_snake) %}
+            {{ display_table_columns(model_schema, model.name_snake, row_target=detail_url)|indent(12) }}
+            <td>
+                <a class="btn pl-0 py-0" href="{{ detail_url }}"><i class="fe fe-eye"></i></a>
+                <a class="btn pl-0 py-0" href="{{ edit_url(model.name, model.name_snake) }}"><i class="fe fe-edit"></i></a>
+            </td>
+        </tr>
+        {{ '{%' }} else {{ '%}' }}
+        <tr>
+            <td colspan="{{ 2+columns|length }}">
+                <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>找不到{{ model_schema.title }}!</div>
+            </td>
+        </tr>
+        {{ '{%' }} endfor {{ '%}' }}
+        </tbody>
+    </table>
+    <div class="m1">
+    {{ '{%' }} include 'includes/pagination.html' {{ '%}' }}
+    </div>
+</div>
+{%- endmacro %}
+{# main #}
+<div id="div-{{ seed.name_kebab }}">
+{% if seed.params.result_view == 'grid' %}
+    {% if has_search %}
+    {% if seed_is_card %}
+    <div class="card"><div class="card-body pb-0">
+    {% endif %}
+    {{ render_search_form()|indent(4) }}
+    {% if seed_is_card %}
+    </div></div>
+    {% endif %}
+    {% endif %}
+    {# do not wrap card to grid #}
+    {{ render_grid()|indent(4) }}
+{% elif seed.params.result_view == 'media' %}
+    {% if seed_is_card %}
+    <div class="card"><div class="card-body">
+    {% endif %}
+    {% if has_search %}
+    {{ render_search_form()|indent(4) }}
+    {% endif %}
+    {{ render_media()|indent(4) }}
+    {% if seed_is_card %}
+    </div></div>
+    {% endif %}
+{% else %}
+    {% if seed_is_card %}
+    <div class="card">
+    {% endif %}
+    {% if has_search %}
+    {% if seed_is_card %}
+    <div class="card-body pb-0">
+    {% endif %}
+    {{ render_search_form()|indent(4) }}
+    {% if seed_is_card %}
+    </div>
+    {% endif %}
+    {% endif %}
+    {{ render_table() }}
+    {% if seed_is_card %}
+    </div>
+    {% endif %}
+{% endif %}
+</div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".list-checkbox-all").change(function () {
+            var checked = $(this).is(":checked");
+            $(this).closest("table").find(".list-checkbox").prop("checked", checked);
+            toggle_batch();
+        });
+        $(".list-checkbox").change(function () {
+            var checked = $(this).is(":checked");
+            toggle_batch();
+        });
+    });
+    //
+    function toggle_batch() {
+        var checked_length = $(".list-checkbox:checked").length;
+        if (checked_length > 0) {
+            $(".form-query").hide();
+            $("#span-checked").text(checked_length);
+            $(".form-batch").show();
+        } else {
+            $("#span-checked").text("");
+            $(".form-batch").hide();
+            $(".form-query").show();
+        }
+    }
+    //
+    function search_do(btn) {
+        var form = btn.closest("form");
+        location.href = "{{ '{{' }} request.path {{ '}}' }}?" + form.serialize();
+    }
+    function search_reset() {
+        location.href = "{{ '{{' }} request.path {{ '}}' }}";
+    }
+    //
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, 'json');
+    }
+</script>

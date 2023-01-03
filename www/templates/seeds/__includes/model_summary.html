@@ -1,0 +1,17 @@
+{% from '__includes/urls.html' import detail_url, edit_url with context %}
+{% from "__includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
+{% set model_schema = model.schema %}
+{% set seed_is_card = seed.params.is_card or false %}
+<div id="div-{{ seed.name_kebab }}">
+    {% if seed_is_card %}
+    <div class="card"><div class="card-body">
+    {% endif %}
+    {% if sub %}
+    {{ display_summary(sub, model_schema.properties[sub], model.name_snake+'.'+sub)|indent(4) }}
+    {% else %}
+    {{ display_summary(model.name_snake, model_schema, model.name_snake)|indent(4) }}
+    {% endif %}
+    {% if seed_is_card %}
+    </div></div>
+    {% endif %}
+</div>

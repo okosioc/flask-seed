@@ -1,0 +1,94 @@
+{% set chart_data = chart_data or {
+    'x': ['2020', '2021', '2022'],
+    'y': {'y0':[100, 50, 10], 'y1':[0.1, 0.4, 0.8]},
+    'unit': {'y0':'元', 'y1':'%'},
+    'height:': '300px',
+} %}
+{% set chart_id = randstr() %}
+<div class="chart" style="height:{{ chart_data.height }};">
+    <canvas class="chart-canvas" id="chart-{{ chart_id }}">
+    </canvas>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        {# 参考文档, https://www.chartjs.org/docs/2.9.4/charts/line.html #}
+        new Chart('chart-{{ chart_id }}', {
+            options: {
+                legend: {
+                    display: true
+                },
+                tooltips: {
+                    mode: "index",
+                    intersect: false,
+                    callbacks: {
+                        label: function (tooltipItem, data) {
+                            var dataset = data.datasets[tooltipItem.datasetIndex];
+                            var label = dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += isNaN(tooltipItem.yLabel)?"-":(tooltipItem.yLabel.toFixed(0) + dataset.unit);
+                            return label;
+                        },
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        {% if chart_data.unit == 'day' %}
+                        type: 'time',
+                        unit: 'day',
+                        tooltipFormat: 'MM-DD',
+                        displayFormats: {
+                            day: 'MM-DD'
+                        }
+                        {% elif chart_data.unit == 'time' %}
+                        type: 'time',
+                        unit: 'minute',
+                        tooltipFormat: 'HH:mm',
+                        displayFormats: {
+                            day: 'HH:mm'
+                        },
+                        {% endif %}
+                        offset: true,
+                        ticks: {
+                            autoSkipPadding: 30
+                        },
+                    }],
+                    yAxes: [
+                        {
+                            id: 'y0',
+                            ticks: {
+                                beginAtZero: true,
+                                autoSkipPadding: 30
+                            },
+                        },
+                        {
+                            id: 'y1',
+                            position: 'right',
+                            ticks: {
+                                beginAtZero: true,
+                                autoSkipPadding: 30
+                            },
+                        },
+                    ]
+                }
+            },
+            data: {
+                labels: {{ chart_data.x|tojson }},
+                datasets: [
+                    {% for label, y in chart_data.y|items %}
+                    {
+                        yAxisID: "{{ 'y0' if loop.first else 'y1' }}",
+                        type: "{{ 'bar' if loop.first else 'line' }}",
+                        borderColor: "{{ '#2c7be5' if loop.first else '#00d97e' }}",
+                        backgroundColor: "{{ '#2c7be5' if loop.first else '#ffffff' }}",
+                        label: "{{ label }}",
+                        unit: "{{ chart_data.unit[label] }}",
+                        data: {{ y|tojson }},
+                    },
+                    {% endfor %}
+                ],
+            },
+        });
+    });
+</script>

@@ -54,7 +54,7 @@ function array_action_delete(btn) {
         return false;
     }
     var template = btn.closest("fieldset.array").find(".array-item.template");
-    if (template.prevAll(".array-item").length == 2) {
+    if (template.prevAll(".array-item").length == 1) {
         template.next(".array-item").show(); // Show empty alert
     }
     btn.closest(".array-item").remove();
@@ -179,6 +179,9 @@ function relation_action_show_search_modal(btn) {
     modal.modal("show");
 }
 
+/**
+ * Search related models in modal.
+ */
 function relation_action_search(btn, page) {
     if (btn.is(".doing")) {
         return;
@@ -209,6 +212,9 @@ function relation_action_search(btn, page) {
     }, "json");
 }
 
+/**
+ * Render search results into table in modal.
+ */
 function relation_action_render_results(key, results, pagination) {
     var modal = $("#search-" + key.replace(/_/g, '-'));
     var key = modal.attr("relation-key");
@@ -258,10 +264,16 @@ function relation_action_render_results(key, results, pagination) {
     }
 }
 
+/**
+ * Reset search contidion in search modal.
+ */
 function relation_action_search_reset(btn) {
     btn.closest(".form-search").find(":input[name]").val("");
 }
 
+/**
+ * Checkbox changed event in search modal.
+ */
 function relation_action_checkbox_changed(btn) {
     var table = btn.closest("table");
     var checkboxes = table.find("tbody > tr[name]").not(".template").find(".list-checkbox");
@@ -276,6 +288,9 @@ function relation_action_checkbox_changed(btn) {
     btn.closest(".modal-content").find(".modal-footer .span-checked").text(checked_length);
 }
 
+/**
+ * Return selected related modals and render them.
+ */
 function relation_action_choosed_return(btn) {
     var modal = btn.closest(".modal");
     var key = modal.attr("relation-key");
@@ -660,7 +675,7 @@ function _install_components(container) {
                     });
                     if (!found) {
                         var position = cloud.find(".twitter-typeahead");
-                        position.before('<span class="font-size-base badge badge-soft-secondary mr-2">' + val + '<small class="fe fe-x ml-2" style="cursor:pointer" onclick="$(this).parent().remove();"></small></span>');
+                        position.before('<span class="font-size-base badge badge-soft-secondary mr-2 mb-2">' + val + '<small class="fe fe-x ml-2" style="cursor:pointer" onclick="$(this).parent().remove();"></small></span>');
                     } else {
                         showWarning("已经包含该标签!");
                     }
@@ -927,7 +942,7 @@ function _process(param, field, path) {
     // array
     else if (field.is(".array")) {
         var modals = field.find(".modals"),  // Array in modal/timeline/media format, using modal for really input
-            items = field.find('.array-item'), // Array in table/grid format and non-format
+            items = field.find('.array-item[name]'), // Array in table/grid format and non-format
             select = field.find("select"),
             pluploadInputGroup = field.find(".plupload-input-group"),
             tagCloudInputGroup = field.find(".tag-cloud-input-group, .relation-input-group"),
@@ -939,14 +954,23 @@ function _process(param, field, path) {
             });
         } else if (items.length) {
             items.not(".template").each(function (i, n) {
-                var fieldset = $(n).find("fieldset[name]");
-                if (fieldset.length) {
-                    _process(param, fieldset, path + "[" + i + "]");
-                } else {
-                    // If not fieldset, should contain a simple field
-                    var field = $(n).find(".form-group[name]");
-                    if (field.length) {
-                        _process(param, field, path + "[" + i + "]");
+                // If is tr, is inline-table mode, each row contains td[name] with a form-control in it
+                if ($(n).is("tr")) {
+                    $(n).find("> td[name]").each(function (j, m) {
+                        _process(param, $(m), path + "[" + i + "]." + $(m).attr("name"));
+                    });
+                }
+                // Normal recrusive logic
+                else {
+                    var fieldset = $(n).find("fieldset[name]");
+                    if (fieldset.length) {
+                        _process(param, fieldset, path + "[" + i + "]");
+                    } else {
+                        // If not fieldset, should contain a simple field
+                        var field = $(n).find(".form-group[name]");
+                        if (field.length) {
+                            _process(param, field, path + "[" + i + "]");
+                        }
                     }
                 }
             });

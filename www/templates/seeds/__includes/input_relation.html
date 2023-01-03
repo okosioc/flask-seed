@@ -1,0 +1,68 @@
+{% set related_model_name = field_schema['items']['py_type'] if field_schema.type == 'array' else field_schema['py_type'] %}
+{% set related_model = models[related_model_name] %}
+{% set related_model_schema = related_model.schema %}
+{% set title_field_name = match_field(related_model_schema.columns, 'title|name|\w*name') %}
+{# for select format, need to preload all related models to create options #}
+{% if field_schema.format == 'select' %}
+<div class="form-group relation {{ 'row' if seed_is_horizontal }}" name="@" relation-id="{{ related_model_schema.id_name }}" relation-title="{{ title_field_name }}">
+    <label class="{{ 'col-auto col-form-label' if seed_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
+    {% if seed_is_horizontal %}
+    <div class="col">
+    {% endif %}
+    {% if field_schema.type == 'array' %}
+    <select class="custom-select select2 data" name="" {{ 'required' if field_schema.required }} multiple>
+        <option value="">请选择...</option>
+        {{ '{%' }} set selected_ids = {{ related_model.name_snake_plural }}|map(attribute='{{ related_model_schema.id_name }}') {{ '%}' }}
+        {{ '{%' }} for {{ related_model.name_snake }} in {{ related_model.name_snake_plural }} {{ '%}' }}
+        <option value="{{ '{{' }} {{ related_model.name_snake }}.{{ related_model_schema.id_name }} {{ '}}' }}" {{ '{{' }} 'selected' if {{ field_path }}.{{ related_model_schema.id_name }} in selected_ids {{ '}}' }}>{{ '{{' }} {{ related_model.name_snake }}.{{ title_field_name }} {{ '}}' }}</option>
+        {{ '{%' }} endfor {{ '%}' }}
+    </select>
+    {% else %}
+    <select class="custom-select select2" name="" {{ 'required' if field_schema.required }}>
+        <option value="">请选择...</option>
+        {{ '{%' }} for {{ related_model.name_snake }} in {{ related_model.name_snake_plural }} {{ '%}' }}
+        <option value="{{ '{{' }} {{ related_model.name_snake }}.{{ related_model_schema.id_name }} {{ '}}' }}" {{ '{{' }} 'selected' if {{ field_path }}.{{ related_model_schema.id_name }} == {{ related_model.name_snake }}.{{ related_model_schema.id_name }} {{ '}}' }}>{{ '{{' }} {{ related_model.name_snake }}.{{ title_field_name }} {{ '}}' }}</option>
+        {{ '{%' }} endfor {{ '%}' }}
+    </select>
+    {% endif %}
+    {% if field_schema.description %}
+    <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
+    {% endif %}
+    <div class="invalid-feedback">请选择{{ field_schema.title }}!</div>
+    {% if seed_is_horizontal %}
+    </div>
+    {% endif %}
+</div>
+{# for default render logic, need to preload all related models to options #}
+{% else %}
+<div class="form-group relation {{ 'row' if seed_is_horizontal }}" name="@" relation-id="{{ related_model_schema.id_name }}" relation-title="{{ title_field_name }}">
+    <label class="{{ 'col-auto col-form-label' if seed_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
+    {% if seed_is_horizontal %}
+    <div class="col">
+    {% endif %}
+    <div class="relation-input-group" name="" {{ 'required' if field_schema.required }}>
+        {% if field_schema.type == 'array' %}
+        <a class="btn btn-outline-primary mr-3" relation-key="{{ related_model.name_kebab_plural }}" relation-return="many" onclick="relation_action_show_search_modal($(this));" data-title="{{ field_schema.title }}"><i class="fe fe-search mr-1"></i>添加{{ field_schema.title }}...</a>
+        {{ '{%' }} for value in {{ field_path }} {{ '%}' }}
+        <span class="font-size-base badge badge-soft-secondary mr-2" data-id="{{ '{{' }} value.{{ related_model_schema.id_name }} {{ '}}' }}">{{ '{{' }} value.{{ title_field_name }} {{ '}}' }}
+            <small class="fe fe-x ml-2" style="cursor:pointer" onclick="$(this).parent().remove();"></small>
+        </span>
+        {{ '{%' }} endfor {{ '%}' }}
+        {% else %}
+        <a class="btn btn-outline-primary mr-3" relation-key="{{ related_model.name_kebab_plural }}" relation-return="one" onclick="relation_action_show_search_modal($(this));" data-title="{{ field_schema.title }}"><i class="fe fe-search mr-1"></i>选择{{ field_schema.title }}...</a>
+        {{ '{%' }} if {{ field_path }} {{ '%}' }}
+        <span class="font-size-base badge badge-soft-secondary mr-2" data-id="{{ '{{' }} {{ field_path }}.{{ related_model_schema.id_name }} {{ '}}' }}">{{ '{{' }} {{ field_path }}.{{ title_field_name }} {{ '}}' }}
+            <small class="fe fe-x ml-2" style="cursor:pointer" onclick="$(this).parent().remove();"></small>
+        </span>
+        {{ '{%' }} endif {{ '%}' }}
+        {% endif %}
+    </div>
+    {% if field_schema.description %}
+    <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
+    {% endif %}
+    <div class="invalid-feedback">请输入{{ field_schema.title }}!</div>
+    {% if seed_is_horizontal %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}

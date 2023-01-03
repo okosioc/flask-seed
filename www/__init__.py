@@ -20,7 +20,7 @@ from importlib import import_module
 from logging.handlers import SMTPHandler, TimedRotatingFileHandler
 from urllib.parse import urlparse
 
-from flask import Flask, request, redirect, jsonify, url_for, render_template, session, has_request_context
+from flask import Flask, request, redirect, jsonify, url_for, render_template, session, has_request_context, abort, current_app
 from flask_babel import Babel
 from flask_login import LoginManager
 from py3seed import ModelJSONEncoder, connect, SimpleEnumMeta
@@ -28,9 +28,10 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.urls import url_quote, url_encode
 
 from www import views
+from www.blocks import BLOCKS
 from www.extensions import mail, cache, qiniu
 from www.jobs import init_schedule
-from www.models import DemoUser
+from www.models import DemoUser, Block
 from www.tools import SSLSMTPHandler, helpers, ListConverter, BSONObjectIdConverter
 
 DEFAULT_APP_NAME = 'www'
@@ -64,11 +65,12 @@ def create_www(blueprints=None, pytest=False, runscripts=False):
         # Use test db
         app.config['MONGODB_URI'] = app.config['MONGODB_URI_PYTEST']
     # Chain
+    configure_logging(app)
+    configure_errorhandlers(app)
+    configure_blocks(app)
     configure_py3seed(app)
     configure_extensions(app)
     configure_login(app)
-    configure_logging(app)
-    configure_errorhandlers(app)
     configure_before_handlers(app)
     configure_template_filters(app)
     configure_template_functions(app)
@@ -87,6 +89,18 @@ def configure_extensions(app):
     """ Prepare extensions. """
     mail.init_app(app)
     cache.init_app(app)
+
+
+def configure_blocks(app):
+    """ Prepare blocks. """
+    keys = []
+    for b in BLOCKS:
+        blk = Block(b)
+        blk.save()
+        #
+        keys.append(blk.key)
+    #
+    app.logger.debug(f'loaded {len(keys)} blocks: {keys}')
 
 
 def configure_py3seed(app):
@@ -319,16 +333,16 @@ def configure_template_filters(app):
         if not value:
             return 'secondary'
         #
-        if re.match(r'(normal|primary)', value, re.IGNORECASE):
+        if re.match(r'(normal|primary|pending|\w+able)', value, re.IGNORECASE):  # have something to do
             return 'primary'
-        elif re.match(r'(active|done|complet\w+|online|success)', value, re.IGNORECASE):
+        elif re.match(r'(active|running|online|success)', value, re.IGNORECASE):  # have something ran succsessfully
             return 'success'
-        elif re.match(r'(error|fail\w+|reject\w+|offline|danger)', value, re.IGNORECASE):
+        elif re.match(r'(error|fail\w+|reject\w+|offline|danger)', value, re.IGNORECASE):  # have something ran failed
             return 'danger'
-        elif re.match(r'(running|overdue\w+|warning)', value, re.IGNORECASE):
+        elif re.match(r'(overdue\w+|warning)', value, re.IGNORECASE):  # have something ran but has warning
             return 'warning'
         else:
-            return 'secondary'
+            return 'secondary'  # something is done
 
 
 def configure_template_functions(app):
@@ -411,6 +425,16 @@ def configure_template_functions(app):
     def randstr(n=10):
         """ 生成长度为n的随机字符串. """
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=n))
+
+    @app.template_global()
+    def load_block(key):
+        """ 读取页面板块内容. """
+        b = Block.find_one({'key': key})
+        if b is None:
+            current_app.logger.error(f'Can not load block by {key}')
+            abort(500)
+        #
+        return b
 
 
 def configure_before_handlers(app):
@@ -522,7 +546,7 @@ def configure_logging(app):
     else:
         mail_handler = SMTPHandler(*mail_config)
     # Only send email in production mode
-    if not app.debug:
+    if app.env == 'production':
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
     #
@@ -542,5 +566,7 @@ def configure_logging(app):
     app.logger.addHandler(error_file_handler)
 
     # Set logging level to info in production mode
-    if not app.debug:
+    if app.env == 'production':
         app.logger.setLevel(logging.INFO)
+    else:
+        app.logger.setLevel(logging.DEBUG)

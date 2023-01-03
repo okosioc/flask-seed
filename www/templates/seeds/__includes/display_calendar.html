@@ -1,0 +1,84 @@
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{% set title_field_name = match_field(item_schema.columns, 'title|name|\w*name') %}
+{{ '{%' }} set calendar_id = randstr() {{ '%}' }}
+<div id="calendar-{{ '{{' }} calendar_id {{ '}}' }}"></div>
+{# FullCalendar is big and complex in configration, and there is always only one instance in a page, so we init full calendar here but not in js. #}
+<script type="text/javascript">
+var calendar_{{ '{{' }} calendar_id {{ '}}' }} = null;
+document.addEventListener('DOMContentLoaded', function () {
+    calendar_{{ '{{' }} calendar_id {{ '}}' }} = new FullCalendar.Calendar(document.getElementById("calendar-{{ '{{' }} calendar_id {{ '}}' }}"), {
+        locale: 'zh-cn',
+        themeSystem: 'bootstrap',
+        height: 'auto',
+        buttonText: {
+            'today': '今天',
+            'prev': '<',
+            'next': '>',
+            'dayGridMonth': '月视图',
+        },
+        headerToolbar: {
+            left: 'title',
+            center: '',
+            right: 'today dayGridMonth prev,next'
+        },
+        views: {
+            dayGridMonth: {
+                eventTimeFormat: { // https://fullcalendar.io/docs/eventTimeFormat
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: false,
+                },
+                dayCellContent: function (info) {
+                    // https://fullcalendar.io/docs/day-cell-render-hooks
+                    // 加了locale后会显示x日, 只显示日期的数字
+                    return info.date.getDate();
+                },
+            },
+        },
+        initialView: 'dayGridMonth',
+        {# relation support async load #}
+        {% if field_schema.is_relation %}
+        {% set related_model = models[item_schema.py_type] %}
+        {% set related_model_schema = related_model.schema %}
+        {% set title_field_name = match_field(related_model_schema.columns, 'title|name|\w*name') %}
+        {% set date_field_name = match_field(related_model_schema.columns, 'date|start|since') %}
+        events: function(info, successCallback, failureCallback){
+            // startStr/endStr are in ISO format and with current calendar's timezone, https://fullcalendar.io/docs/events-function
+            // 注: 如果事件是日期段, 生成的查询条件应该是(start__gte&start_lt)|(end__gte&end_lt)
+            // 目前后端的代码并不支持条件的分组, 因此此处只使用了start来查询, 如果是上个月开始这个月结束的事件, 在这个月下就无法显示了
+            // 为了避免这个问题, 下面的onsuccess回调中我们没有使用start和end来绘制日期段, 而只使用start绘制了一天的事件
+            var params = {
+                'search.{{ date_field_name }}__gte': info.startStr.slice(0, 10),
+                'search.{{ date_field_name }}__lt': info.endStr.slice(0, 10), // info.end is exclusive, i.e, it is 0 oclock of next date in dayGridMonth
+            };
+            {# load_xxx is generated in #model_read.html #}
+            // Parse return results so that they can be rendered in calendar, https://fullcalendar.io/docs/event-parsing
+            function onsuccess(results){
+                var events = $.map(results, function(r){
+                    return {
+                        id: r.{{ related_model_schema.id_name }},
+                        title: r.{{ title_field_name }},
+                        start: r.{{ date_field_name }},
+                    }
+                });
+                successCallback(events);
+            }
+            load_{{ related_model.name_kebab_plural }}(params, onsuccess);
+        },
+        eventClick: function (info) {
+            // https://fullcalendar.io/docs/event-object
+            var event = info.event;
+            location.href = "{{ detail_url(item_schema.py_type) }}?id=" + event.id;
+        },
+        {% else %}
+        events: {{ '{{' }} {{ field_path }}|tojson {{ '}}' }},
+        {% endif %}
+        nowIndicator: true,
+    });
+    calendar_{{ '{{' }} calendar_id {{ '}}' }}.render();
+});
+</script>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

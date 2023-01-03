@@ -1,0 +1,90 @@
+<div id="div-demo-team-members-read">
+    <div class="object" name="demo_team">
+        <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-users mr-2"></i>团队成员</h4></div><div class="table-responsive">
+        <div class="relation array" name="members" format="table">
+            <table class="table table-striped ">
+                <thead>
+                    <tr>
+                        <th>头像</th>
+                        <th>用户名</th>
+                        <th>用户状态</th>
+                        <th>用户角色</th>
+                        <th>登录邮箱</th>
+                        <th>手机号</th>
+                        <th>创建时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for members_item in demo_team.members %}
+                    <tr class="" name="{{ loop.index0 }}">
+                        <td name="avatar" format="avatar" enum="">
+                            <a href="javascript:;">
+                            <div class="avatar avatar-sm">
+                                <img src="{{ members_item.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not members_item.avatar }}">
+                                <span fallback=name class="avatar-title bg-primary-soft rounded-circle text-primary {{ 'd-none' if members_item.avatar }}">{{ members_item.name|first|upper if members_item.name is not none }}</span>
+                            </div>
+                            </a>
+                        </td>
+                        <td name="name" format="text" enum="">
+                            {{ members_item.name or '-' }}
+                        </td>
+                        <td name="status" format="select" enum="DemoUserStatus">
+                            {% if members_item.status is not none %}<span class="text-{{ members_item.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoUserStatus')[members_item.status] }}{% else %}-{% endif %}
+                        </td>
+                        <td name="roles" format="select" enum="DemoUserRole">
+                            {% for roles_item in members_item.roles %}
+                            {% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
+                            {% endfor %}
+                        </td>
+                        <td name="email" format="text" enum="">
+                            {{ members_item.email or '-' }}
+                        </td>
+                        <td name="phone" format="text" enum="">
+                            {{ members_item.phone or '-' }}
+                        </td>
+                        <td name="create_time" format="datetime" enum="">
+                            {{ members_item.create_time|datetime if members_item.create_time is not none else '-' }}
+                        </td>
+                        <!-- /.columns -->
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- /.table -->
+        </div>
+        </div></div>
+        <!-- /.array -->
+    </div>
+</div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // Init
+    });
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+</script>

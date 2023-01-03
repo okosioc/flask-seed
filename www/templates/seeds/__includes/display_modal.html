@@ -1,0 +1,43 @@
+{# TODO: Add modals to display field details #}
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{% set title_field_name = match_field(item_schema.columns, 'title|name|\w*name') %}
+{% set excludes = namespace(value=[]) %}
+<table class="table table-striped {{ 'border-bottom mb1' if field_schema.is_back_relation and field_schema.ownership == 'own' }}">
+    <thead>
+        <tr>
+            {% for c in item_schema.columns %}
+            {% set column_schema = item_schema.properties[c] %}
+            {# calculated excludes to prevent self-referencing #}
+            {% set ref = column_schema['items'].ref if column_schema.type == 'array' else column_schema.ref %}
+            {% if ref %}
+                {% set excludes.value = excludes.value + [c] %}
+            {% else %}
+            <th>{{ column_schema.title }}{{ '(' + column_schema.unit + ')' if column_schema.unit }}</th>
+            {% endif %}
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+        <tr class="" name="{{ '{{' }} loop.index0 {{ '}}' }}">
+            {% set target = detail_url(item_schema.py_type, field_name~'_item') if field_schema.is_relation else none %}
+            {{ display_table_columns(item_schema, field_name~'_item', row_target=target, excludes=excludes.value)|indent(12) }}
+        </tr>
+        {{ '{%' }} else {{ '%}' }}
+        <tr><td colspan="{{ item_schema.columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>
+        {{ '{%' }} endfor {{ '%}' }}
+    </tbody>
+</table>
+{# back relation and has defined edit view #}
+{% if field_schema.is_back_relation and field_schema.ownership == 'own' %}
+{% set target = edit_url(item_schema.py_type) %}
+{% if target !='javascript:;' %}
+<div class="array-actions m1">
+    <a class="btn btn-outline-primary" href="{{ target }}?{{ field_schema.save_field_name }}={{ '{{ '~model.name_snake~'.'~model_schema.id_name~' }}' }}">创建{{ item_schema.title }}...</a>
+</div>
+{% endif %}
+{% endif %}
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

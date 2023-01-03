@@ -7,13 +7,28 @@
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
+{% block style %}
+<link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-lg-4">
-        {% include "seeds/demo_task.project-summary.html" %}
+        {% include "seeds/DemoTask.project-summary.html" %}
     </div>
     <div class="col-lg-8">
-        {% include "seeds/demo_task-form.html" %}
+        {% include "seeds/DemoTask-form.html" %}
     </div>
 </div>
+{% endblock %}
+{% block script %}
+<script src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+<script src="{{ base() }}/assets/vendor/flatpickr/dist/l10n/zh.js"></script>
+<script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
+<script src="{{ base() }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
+<script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        install_form();
+    });
+</script>
 {% endblock %}

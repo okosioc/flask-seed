@@ -7,10 +7,17 @@
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
+{% block style %}
+<link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-lg">
-        {% include "seeds/demo_project-query.html" %}
+        {% include "seeds/DemoProject-query.html" %}
     </div>
 </div>
+{% endblock %}
+{% block script %}
+<script src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+<script src="{{ base() }}/assets/vendor/flatpickr/dist/l10n/zh.js"></script>
 {% endblock %}

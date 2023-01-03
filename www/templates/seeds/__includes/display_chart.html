@@ -1,0 +1,34 @@
+{% if field_schema.type == 'object' %}
+{# Guess x/y field names #}
+{% set chart_x_name = match_field(field_schema.properties|keys, 'names|labels') or 'x' %}
+{% set chart_y_name = match_field(field_schema.properties|keys, 'values|amounts') or 'y' %}
+{# Options #}
+{{ '{%' }} set chart_data =  {
+    'x': {{ field_path }}.{{ chart_x_name }},
+    'y': {{ field_path }}.{{ chart_y_name }},
+    'title': {{ field_path }}.title,
+    'unit': '{{ field_schema.properties[chart_y_name].unit }}',
+    'half': false,
+{{ '} %}' }}
+{{ '{%' }} include 'includes/chart_doughnut.html' {{ '%}' }}
+{% elif field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{# Guess x/y field names #}
+{% set chart_x_name = match_field(item_schema.properties|keys, 'name|label') or 'x' %}
+{% set chart_y_name = match_field(item_schema.properties|keys, 'value|amount') or 'y' %}
+{{ '{%' }} set {{ field_name }}_ns = namespace(x=[], y=[]) {{ '%}' }}
+{{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+    {{ '{%' }} set {{ field_name }}_ns.x = {{ field_name }}_ns.x + [{{ field_name }}_item.{{ chart_x_name }}] {{ '%}' }}
+    {{ '{%' }} set {{ field_name }}_ns.y = {{ field_name }}_ns.y + [{{ field_name }}_item.{{ chart_y_name }}] {{ '%}' }}
+{{ '{%' }} endfor {{ '%}' }}
+{# Options #}
+{{ '{%' }} set chart_data =  {
+    'x': {{ field_name }}_ns.x,
+    'y': {{ '{' }}'{{ item_schema.properties[chart_y_name].title }}': {{ field_name }}_ns.y{{ '}' }},
+    'title': '{{ field_schema.title }}',
+    'unit': {{ '{' }}'{{ item_schema.properties[chart_y_name].title }}': '{{ item_schema.properties[chart_y_name].unit }}' {{ '}' }},
+{{ '} %}' }}
+{{ '{%' }} include 'includes/chart_line.html' {{ '%}' }}
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

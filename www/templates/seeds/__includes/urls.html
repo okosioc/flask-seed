@@ -1,0 +1,22 @@
+{# macro - inner macro to generate url #}
+{% macro _generate_url(model_name, model_path, url_suffix) %}
+{% set model = models[model_name] %}
+{% set target = model.name_kebab[5:]~url_suffix if model.name_kebab[:5] == 'demo-' else model.name_kebab~url_suffix %}
+{% set ns = namespace(found=false) %}
+{# NOTE: this macro is invoked in a seed file and a seed file can be used in many blueprint/view #}
+{% for bp in blueprints %}
+    {% for v in bp.views if v.name == target %}
+        {% set ns.found = true %}
+    {% endfor %}
+{% endfor %}
+{% if ns.found %}
+{{ target }}{{ '?id={{ '~model_path~'.'~model.schema.id_name~' }}' if model_path }}
+{%- else %}
+javascript:;
+{%- endif %}
+{% endmacro %}
+{# macro - generate detail url with model name #}
+{# when model_path is none, it is often used in a javascript snippet, where query string is appended by js but not jinja code. #}
+{% macro detail_url(model_name, model_path=none) %}{{ _generate_url(model_name, model_path, '-detail') }}{% endmacro %}
+{# macro - generate edit url with model name #}
+{% macro edit_url(model_name, model_path=none) %}{{ _generate_url(model_name, model_path, '-edit') }}{% endmacro %}

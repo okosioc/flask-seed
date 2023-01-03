@@ -17,12 +17,12 @@
     <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-{% include 'blocks/header.html' %}
+{% include 'seeds/Block-read-header-basic.html' %}
 <div class="container-fluid">
     {% block content %}
     {% endblock %}
 </div>
-{% include 'blocks/footer.html' %}
+{% include 'seeds/Block-read-footer-basic.html' %}
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/js/app.min.js?{{ version() }}"></script>
 {% block script %}

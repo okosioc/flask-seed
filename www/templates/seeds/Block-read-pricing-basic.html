@@ -1,0 +1,60 @@
+{% set block = load_block('pricing') %}
+<section class="pb-7" id="pricing">
+    <div class="py-7 bg-light bg-ellipses">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-10 col-lg-8 text-center">
+                    <span class="badge badge-soft-primary mb-4">
+                        <span class="h5 text-uppercase">{{ block.icon }}</span>
+                    </span>
+                    <h1>{{ block.title }}</h1>
+                    <p class="lead text-gray-700 mb-7 mb-md-9">{{ block.subtitle|safe }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row mt-n7">
+            {% for c in block.children %}
+            <div class="col-12 col-lg-6">
+                <div class="card mb-0">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-center text-muted my-4">{{ c.title }}</h6>
+                        {% if c.subtitle is integer%}
+                        <div class="row no-gutters align-items-center justify-content-center">
+                            <div class="col-auto">
+                                <div class="h2 mb-0">¥</div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="display-2 mb-0">{{ c.subtitle }}</div>
+                            </div>
+                        </div>
+                        <div class="h5 text-uppercase text-center text-muted mb-5">/每月</div>
+                        {% else %}
+                        <div class="row no-gutters align-items-center justify-content-center">
+                            <div class="col-auto">
+                                <div class="display-2 mb-0">{{ c.subtitle }}</div>
+                            </div>
+                        </div>
+                        <div class="h5 text-uppercase text-center text-muted mb-5">&nbsp;</div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <ul class="list-group list-group-flush">
+                                {% for cc in c.children %}
+                                <li class="list-group-item d-flex align-items-center justify-content-between px-0">
+                                    <span>{{ cc.title }}</span>
+                                    {% if cc.content %}
+                                    <span>{{ cc.content|safe }}</span>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <a href="{{ c.action.url }}" class="btn btn-block btn-{{ c.action.cls }}">{{ c.action.title }}</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

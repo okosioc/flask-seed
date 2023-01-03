@@ -1,9 +1,0 @@
-{% if field_schema.type == 'array' %}
-<div class="tag-cloud">
-    {{ '{%' }} for value in {{ field_path }} {{ '%}' }}
-    <span class="font-size-base badge badge-soft-secondary mr-2">{{ '{{' }} value {{ '}}' }}</span>
-    {{ '{%' }} endfor {{ '%}' }}
-</div>
-{% else %}
-UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
-{% endif %}

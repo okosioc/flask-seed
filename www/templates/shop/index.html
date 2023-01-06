@@ -1,5 +1,5 @@
-{% extends "layout-public.html" %}
-{% set title = '首页' %}
+{% extends "layout-shop.html" %}
+{% set title = '商城' %}
 {% set breadcrumb = {
     'subtitle': '',
     'title': title,
@@ -11,29 +11,14 @@
 <link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block content %}
-<div class="row ">
+<div class="row no-gutters">
     <div class="col-lg">
-        {% include "seeds/Block-read-promo-basic.html" %}
+        {% include "seeds/Block-read-promo-shop.html" %}
     </div>
 </div>
-<div class="row ">
+<div class="row no-gutters">
     <div class="col-lg">
         {% include "seeds/Block-read-features-basic.html" %}
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-feature-1-basic.html" %}
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-feature-2-basic.html" %}
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-pricing-basic.html" %}
     </div>
 </div>
 {% endblock %}

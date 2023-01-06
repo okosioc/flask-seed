@@ -1,4 +1,5 @@
 {{ '{% extends "' }}{{ view.params.extends if view.params.extends else view.blueprint.params.extends }}{{ '.html" %}' }}
+{% set has_gutters = True if 'has_gutters' not in view.params else view.params.has_gutters %}
 {{ '{%' }} set title = {{ view.params.title|quote }} {{ '%}' }}
 {{ '{%' }} set breadcrumb = {
     'subtitle': '{{ view.params.subtitle or '' }}',
@@ -64,7 +65,7 @@
 {{ '{% endblock %}' }}
 {{ '{% block content %}' }}
 {% for row in view.rows %}
-<div class="row">
+<div class="row {{ 'no-gutters' if not has_gutters }}">
     {% for column in row %}
     <div class="{{ 'col-lg-'+column.span|string if column.span else 'col-lg' }}">
         {# one column #}

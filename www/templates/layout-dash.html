@@ -25,7 +25,7 @@
         {'url':'javascript:coming()', 'title':'English'},
         {'url':'javascript:coming()', 'title':'中文'}
     ],
-    'commands': [
+    'actions': [
         {'icon':'fe fe-user', 'title':'Profile', 'url':'/dashboard/profile'},
         {'title':''},
         {'icon':'fe fe-log-out', 'title':'Logout', 'url':'/logout'}
@@ -76,7 +76,7 @@
                     </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sidebarIcon">
-                    {% for l in nav.commands %}
+                    {% for l in nav.actions %}
                         {% if l.title %}
                             <a href="{{ l.url }}" class="dropdown-item">
                                 <i class="{{ l.icon }} mr-3"></i>{{ l.title }}

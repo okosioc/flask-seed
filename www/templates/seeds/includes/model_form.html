@@ -1,5 +1,5 @@
-{% from '__includes/urls.html' import detail_url, edit_url with context %}
-{% from "__includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
+{% from 'includes/urls.html' import detail_url, edit_url with context %}
+{% from "includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
 {% set model_schema = model.schema %}
 {% set seed_is_card = seed.params.is_card or false %}
 {% set seed_is_horizontal = seed.params.is_horizontal or false %}
@@ -32,7 +32,7 @@
 {% endif %}
 {# macro - render field with specified format that has complex display #}
 {% macro render_format(field_name, field_schema, field_path, is_in_card) %}
-{% include '__includes/input_'+ field_schema.format + '.html' %}
+{% include 'includes/input_'+ field_schema.format + '.html' %}
 <!-- /.{{ field_schema.format }} -->
 {%- endmacro %}
 {# macro - render relation #}
@@ -43,7 +43,7 @@
     {{ render_format(field_name, field_schema, field_path, is_in_card)|indent(4) }}
 {# relations w/o format or in select format load related models directly #}
 {% else %}
-    {% filter indent(width=4, first=true) %}{% include '__includes/input_relation.html' %}{% endfilter %}
+    {% filter indent(width=4, first=true) %}{% include 'includes/input_relation.html' %}{% endfilter %}
 {% endif %}
 </fieldset>
 {%- endmacro %}

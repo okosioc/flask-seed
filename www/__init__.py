@@ -38,6 +38,7 @@ DEFAULT_APP_NAME = 'www'
 
 DEFAULT_BLUEPRINTS = (
     (views.public, ''),
+    (views.shop, '/shop'),
     (views.demo, '/demo'),
 )
 

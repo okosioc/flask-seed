@@ -27,6 +27,15 @@ blueprints:
         layout: |-
           error-simple
 
+  - name: shop
+    params: {extends: layout-shop}
+    views:
+      - name: index
+        params: {title: 商城, actions: [], has_gutters: False}
+        layout: |-
+          Block-read-promo-shop
+          Block-read-features-basic
+
   - name: demo
     params: {extends: layout-dash}
     views:

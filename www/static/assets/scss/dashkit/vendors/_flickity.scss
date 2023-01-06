@@ -1,0 +1,259 @@
+//
+// flickity.scss
+//
+
+.flickity-viewport {
+  cursor: auto !important;
+}
+
+
+// Responsive initialization
+//
+// Requires "watchCSS" to be "true"
+
+.flickity::after {
+  display: none;
+  content: 'flickity';
+}
+
+.flickity-none::after {
+  display: none;
+  content: '';
+}
+
+@each $breakpoint, $value in $grid-breakpoints {
+  @if $breakpoint !='xs' {
+    @include media-breakpoint-up(#{$breakpoint}) {
+      .flickity-#{$breakpoint}::after {
+        content: 'flickity';
+      }
+
+      .flickity-#{$breakpoint}-none::after {
+        content: '';
+      }
+    }
+  }
+}
+
+
+// Page dots
+
+.flickity-page-dots {
+  position: relative;
+  bottom: 0;
+  margin-top: 3rem;
+}
+
+.flickity-page-dots .dot {
+  width: .5rem;
+  height: .5rem;
+  margin-left: 3px;
+  margin-right: 3px;
+  background-color: $gray-200;
+  opacity: 1;
+
+  @if $enable-transitions {
+    transition: $transition-base;
+  }
+
+  @include hover {
+    background-color: $gray-300;
+  }
+
+  &.is-selected {
+    background-color: $primary;
+  }
+}
+
+
+// Progress
+
+.flickity-page-dots-progress .flickity-page-dots {
+  display: flex;
+  width: 100%;
+  max-width: 570px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.flickity-page-dots-progress .flickity-page-dots .dot {
+  flex: 1;
+  height: .25rem;
+  margin: 0;
+  border-radius: 0;
+  background-color: $primary;
+
+  &.is-selected~.dot {
+    background-color: $gray-100;
+  }
+}
+
+
+// Inner
+
+.flickity-page-dots-inner .flickity-page-dots {
+  position: absolute;
+  bottom: 1.5rem;
+}
+
+
+// Buttons
+
+.flickity-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 0;
+  background-color: $white;
+  z-index: 1;
+
+  @if $enable-transitions {
+    transition: $transition-base;
+  }
+
+  @include hover-focus-active {
+    color: $gray-400;
+    box-shadow: none;
+    opacity: 1;
+  }
+
+  @include media-breakpoint-down(md) {
+    display: none;
+  }
+}
+
+.flickity-button::before {
+  font-family: "Feather";
+  font-size: $font-size-lg;
+  line-height: 1;
+}
+
+.flickity-button>svg {
+  display: none;
+}
+
+.flickity-button.previous {
+  left: 0;
+}
+
+.flickity-button.previous::before {
+  content: "\e92f";
+}
+
+.flickity-button.next {
+  right: 0;
+}
+
+.flickity-button.next::before {
+  content: "\e930";
+}
+
+
+// Large
+
+.flickity-buttons-lg .flickity-button {
+  background-color: transparent;
+  color: $gray-300;
+
+  @include hover {
+    background-color: transparent;
+    color: $body-color;
+  }
+}
+
+.flickity-buttons-lg .flickity-button::before {
+  font-size: $h3-font-size;
+}
+
+
+// Offset
+
+.flickity-buttons-offset .flickity-button {
+  transform: translateY(-125%);
+}
+
+
+// Left bottom
+
+.flickity-buttons-bottom-left .flickity-button {
+  top: auto;
+  bottom: 0;
+  transform: none;
+}
+
+.flickity-buttons-bottom-left .flickity-button.previous {
+  left: 0;
+}
+
+.flickity-buttons-bottom-left .flickity-button.next {
+  left: 42px;
+}
+
+
+// Nav
+
+.flickity-nav .flickity-slider>* {
+  opacity: .8;
+}
+
+.flickity-nav .is-nav-selected {
+  opacity: 1;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: $border-width * 2;
+    padding: inherit;
+    background-color: $body-color;
+    background-clip: content-box;
+  }
+}
+
+
+// No gutters fix
+
+.row.no-gutters>.flickity-viewport>.flickity-slider>[class*="col"] {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+
+// Vertical
+//
+// Stacks items vertically and disabled drag functionality
+
+.flickity-vertical {
+  height: 100% !important;
+}
+
+.flickity-vertical .flickity-viewport {
+  position: relative !important;
+  height: 100% !important;
+}
+
+.flickity-vertical .flickity-slider {
+  position: relative;
+  transform: none !important;
+}
+
+.flickity-vertical .flickity-slider>* {
+  position: relative !important;
+  left: 0 !important;
+}
+
+
+// Light
+
+.flickity-light .flickity-button {
+
+  @include hover-focus-active {
+    color: $white;
+  }
+}

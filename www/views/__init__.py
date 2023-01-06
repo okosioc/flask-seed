@@ -10,4 +10,5 @@
 """
 
 from .public import public
+from .shop import shop
 from .demo import demo

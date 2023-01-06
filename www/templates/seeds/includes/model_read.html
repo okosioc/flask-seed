@@ -1,5 +1,5 @@
-{% from '__includes/urls.html' import detail_url, edit_url with context %}
-{% from "__includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
+{% from 'includes/urls.html' import detail_url, edit_url with context %}
+{% from "includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
 {% set model_schema = model.schema %}
 {% set seed_is_card = seed.params.is_card or false %}
 {% set seed_is_horizontal = seed.params.is_horizontal or false %}
@@ -30,7 +30,7 @@
 {% endif %}
 {# macro - render field with specified format that has complex display #}
 {% macro render_format(field_name, field_schema, field_path, is_in_card) %}
-{% include '__includes/display_'+ field_schema.format + '.html' %}
+{% include 'includes/display_'+ field_schema.format + '.html' %}
 <!-- /.{{ field_schema.format }} -->
 {%- endmacro %}
 {# macro - render relation #}
@@ -39,7 +39,7 @@
 {% if field_schema.format in ['table', 'modal', 'media', 'timeline', 'calendar'] %}
     {{ render_format(field_name, field_schema, field_path, is_in_card)|indent(4) }}
 {% else %}
-    {% filter indent(width=4, first=true) %}{% include '__includes/display_relation.html' %}{% endfilter %}
+    {% filter indent(width=4, first=true) %}{% include 'includes/display_relation.html' %}{% endfilter %}
 {% endif %}
 </div>
 {%- endmacro %}

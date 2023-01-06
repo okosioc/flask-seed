@@ -17,7 +17,7 @@ www/templates/includes/error-simple.html
 www/templates/includes/login-simple.html
 www/templates/includes/pagination.html
 www/templates/includes/signup-simple.html
-www/templates/seeds/__includes
+www/templates/seeds/includes
 www/templates/seeds/Block-read-header-basic.html
 www/templates/seeds/Block-read-header-dash-basic.html
 www/templates/seeds/Block-read-promo-basic.html

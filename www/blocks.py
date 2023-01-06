@@ -14,7 +14,9 @@ BLOCKS = [
     {
         'key': 'header',
         'icon': '/static/img/logo.png',
-        'children': []
+        'children': [
+
+        ]
     },
     {
         'key': 'header-dash',
@@ -125,4 +127,43 @@ BLOCKS = [
             {'title': 'Help', 'url': 'javascript:coming();'}
         ]
     },
+    #
+    # Shop
+    #
+    {
+        'key': 'header-shop',
+        'title': 'Shop.',
+        'subtitle': '<i class="fe fe-truck mr-2"></i><span>Free Shipping Worldwide</span>',
+        'children': [
+            {'title': 'Home', 'url': 'javascript:coming();'},
+            {'title': 'Catelog', 'url': 'javascript:coming();'},
+            {'title': 'Blog', 'url': 'javascript:coming();'},
+            {'title': 'Account', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-search d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-shopping-cart d-inline"></i>', 'url': 'javascript:coming();'},
+        ]
+    },
+    {
+        'key': 'promo-shop',
+        'children': [
+            {
+                'title': 'Summer Sale', 'subtitle': '-70%', 'content': 'with promo code CN67EW*',
+                'cls': 'col-12 col-md-6 col-lg-5 col-xl-4 offset-md-2',
+                'image': '/static/assets/img/covers/cover-5.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Summer Collection', 'content': 'So called give, one whales tree seas dry place own day, winged tree created spirit.',
+                'cls': 'col-12 col-md-6 col-lg-5 col-xl-4 offset-md-7',
+                'image': '/static/assets/img/covers/cover-23.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Summer Styles', 'subtitle': '<span class="text-white">50% OFF</span>',
+                'cls': 'col-12 text-center text-white',
+                'image': '/static/assets/img/covers/cover-16.jpg',
+                'action': {'title': 'Shop Women <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'outline-white', 'url': 'javascript:coming();'}
+            },
+        ]
+    }
 ]

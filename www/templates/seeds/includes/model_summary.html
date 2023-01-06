@@ -1,5 +1,5 @@
-{% from '__includes/urls.html' import detail_url, edit_url with context %}
-{% from "__includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
+{% from 'includes/urls.html' import detail_url, edit_url with context %}
+{% from "includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
 {% set model_schema = model.schema %}
 {% set seed_is_card = seed.params.is_card or false %}
 <div id="div-{{ seed.name_kebab }}">

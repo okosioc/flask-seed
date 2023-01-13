@@ -35,16 +35,19 @@ class Action(BaseModel):
 class Block(CacheModel):
     """ 页面版块. """
     key: str = Field(required=False, title='key')  # 用于查询
+    tag: str = Field(required=False, title='标签')
     icon: str = Field(required=False, title='图标')
     title: str = Field(required=False, title='标题')
     subtitle: str = Field(required=False, title='子标题')
     content: str = Field(required=False, format_=Format.TEXTAREA, title='内容')
     remarks: str = Field(required=False, title='备注')
     image: str = Field(required=False, format_=Format.IMAGE, title='图片')
+    images: List[str] = Field(required=False, format_=Format.IMAGE, title='图片列表')
     value: float = Field(required=False, title='数值')
     url: str = Field(required=False, title='转跳地址')
     cls: str = Field(required=False, title='样式')
     action: Action = Field(required=False, title='动作')
+    actions: List[Action] = Field(required=False, title='动作列表')
     children: List[ForwardRef('Block')] = Field(required=False, title='子版块')
     # TODO: Support __keys__ to mark the key field to be unique
     # e.g,

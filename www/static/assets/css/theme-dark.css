@@ -2790,7 +2790,7 @@ input[type=button].btn-block {
 }
 
 .fade {
-  transition: opacity 0.15s linear;
+  transition: opacity 0.2s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
   .fade {
@@ -14058,7 +14058,7 @@ a:focus, button:focus {
   border-radius: 0.375rem;
   text-align: center;
   color: #6E84A3;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.1s ease-in-out;
   order: -1;
   cursor: pointer;
   z-index: 999;
@@ -14267,7 +14267,7 @@ a:focus, button:focus {
   border: none;
   color: #FFFFFF;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.1s ease-in-out;
 }
 .ql-toolbar button:hover {
   color: #2C7BE5;
@@ -14730,9 +14730,9 @@ a:focus, button:focus {
   height: 0.5rem;
   margin-left: 3px;
   margin-right: 3px;
-  background-color: #EDF2F9;
+  background-color: #E3EBF6;
   opacity: 1;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.1s ease-in-out;
 }
 .flickity-page-dots .dot:hover {
   background-color: #E3EBF6;
@@ -14759,7 +14759,7 @@ a:focus, button:focus {
   background-color: #2C7BE5;
 }
 .flickity-page-dots-progress .flickity-page-dots .dot.is-selected ~ .dot {
-  background-color: #F9FBFD;
+  background-color: #E3EBF6;
 }
 
 .flickity-page-dots-inner .flickity-page-dots {
@@ -14776,7 +14776,7 @@ a:focus, button:focus {
   border-radius: 0;
   background-color: #FFFFFF;
   z-index: 1;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.1s ease-in-out;
 }
 .flickity-button:hover, .flickity-button:focus, .flickity-button:active {
   color: #D2DDEC;
@@ -15085,6 +15085,14 @@ a:focus, button:focus {
   border-left: 2px solid #F9FBFD;
 }
 
+.vw-50 {
+  width: 50vw !important;
+}
+
+.text-decoration-line-through {
+  text-decoration: line-through !important;
+}
+
 .table-compact th {
   padding: 0.8rem 1rem;
 }
@@ -15193,8 +15201,147 @@ span.twitter-typeahead .tt-input:focus {
   background: #1E3A5C;
 }
 
+.card-img {
+  position: relative;
+}
+
+.card-img-hover {
+  display: block;
+}
+.card-img-hover > * {
+  float: left;
+}
+
+.card-img-hover .card-img-top {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.card-img-hover .card-img-back {
+  opacity: 0;
+}
+
+.card-img-hover .card-img-front {
+  margin-left: -100%;
+}
+
+.card-img:hover .card-img-hover .card-img-back {
+  opacity: 1;
+}
+
+.card-img:hover .card-img-hover .card-img-front {
+  opacity: 0;
+}
+
+.card-img-overlay {
+  display: flex;
+}
+.card-img-overlay > * {
+  flex: 1;
+}
+
+a.card-img-overlay {
+  color: inherit;
+}
+a.card-img-overlay:hover {
+  text-decoration: none;
+}
+
+.card-img-overlay-hover {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.card:hover .card-img-overlay-hover {
+  opacity: 1;
+}
+
+.card-badge {
+  position: absolute;
+  top: 2rem;
+  z-index: 1;
+  border-radius: 0 !important;
+  font-size: 0.9375rem;
+}
+
+.card-badge-left {
+  left: 0;
+}
+
+.card-badge-right {
+  right: 0;
+}
+
+.card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.card-bg ~ * {
+  z-index: 1;
+}
+
+.card-bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% + 0.25rem);
+  height: 100%;
+  transition: all 0.2s ease-in-out;
+  transition-property: transform;
+}
+
+.card:hover > .card-bg > .card-bg-img {
+  transform: translateX(-0.25rem);
+}
+
 .card-body > p:last-child {
   margin-bottom: 0 !important;
+}
+
+.rating {
+  display: inline-flex;
+  margin-bottom: 0;
+}
+
+.rating:not([data-value]) .rating-item {
+  color: #E3EBF6;
+}
+
+.rating[data-value="1"] .rating-item:nth-child(n+2) {
+  color: #E3EBF6;
+}
+
+.rating[data-value="2"] .rating-item:nth-child(n+3) {
+  color: #E3EBF6;
+}
+
+.rating[data-value="3"] .rating-item:nth-child(n+4) {
+  color: #E3EBF6;
+}
+
+.rating[data-value="4"] .rating-item:nth-child(n+5) {
+  color: #E3EBF6;
+}
+
+.rating[data-value="5"] .rating-item:nth-child(n+6) {
+  color: #E3EBF6;
+}
+
+.rating-form {
+  position: relative;
+  display: inline-flex;
+}
+
+.rating-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  opacity: 0;
 }
 
 .field-group {

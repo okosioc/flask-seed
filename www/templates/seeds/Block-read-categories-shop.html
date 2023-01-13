@@ -1,0 +1,22 @@
+{% set block = load_block('categories-shop') %}
+<section class="py-4">
+    <div class="container-fluid px-3 px-md-6">
+        <div class="row">
+            {% for c in block.children %}
+            <div class="col-12 col-sm-4">
+                <div class="card card-xl mb-4 mb-sm-0" style="min-height: 280px;">
+                    <div class="card-bg">
+                        <div class="card-bg-img bg-cover" style="background-image: url({{ c.image }});"></div>
+                    </div>
+                    <div class="card-body my-auto" style="flex: 0 0 auto;">
+                        <h2 class="mb-0">{{ c.title|safe }}</h2>
+                        {% if c.action %}
+                        <a class="btn btn-link px-0 text-reset" href="{{ c.action.url }}">{{ c.action.title|safe }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

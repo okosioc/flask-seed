@@ -32,6 +32,7 @@
 //
 // Customize colors
 //
+
 .bg-primary-gardient {
   background-image: linear-gradient(-45deg, mix($white, $primary, 44%), mix($white, $primary, 88%));
   background-position: center;
@@ -149,8 +150,25 @@ $my-orange: #ff8700;
 }
 
 //
+// Heights & Widths
+//
+
+.vw-50 {
+  width: 50vw !important;
+}
+
+//
+// Text
+//
+
+.text-decoration-line-through {
+  text-decoration: line-through !important;
+}
+
+//
 // Table
 //
+
 .table-compact {
   th {
     padding: 0.8rem 1rem;
@@ -189,6 +207,7 @@ $my-orange: #ff8700;
 //
 // Avatar for team logo
 //
+
 .avatar-team {
   width: 8rem;
   height: 8rem;
@@ -204,6 +223,7 @@ $my-orange: #ff8700;
 //
 // Splash screen
 //
+
 #splash-screen {
   background-color: #ffffff;
   width: 100vw;
@@ -227,6 +247,7 @@ $my-orange: #ff8700;
 //
 // gallery
 //
+
 .gallery {
   position: relative;
 
@@ -250,6 +271,7 @@ $my-orange: #ff8700;
 //
 // tyepahead.js
 //
+
 span.twitter-typeahead {
 
   .tt-input {
@@ -288,6 +310,7 @@ span.twitter-typeahead {
 //
 // cascader
 //
+
 .cascader-input-group {
 
 }
@@ -295,6 +318,7 @@ span.twitter-typeahead {
 //
 // heading
 //
+
 .heading {
   display: flex;
   flex-wrap: nowrap;
@@ -316,10 +340,167 @@ span.twitter-typeahead {
 //
 // card
 //
+
+// image
+.card-img {
+  position: relative;
+}
+
+.card-img-hover {
+  display: block;
+
+  > * {
+    float: left;
+  }
+}
+
+.card-img-hover .card-img-top {
+  transition: $transition-fade;
+}
+
+.card-img-hover .card-img-back {
+  opacity: 0;
+}
+
+.card-img-hover .card-img-front {
+  margin-left: -100%;
+}
+
+.card-img:hover .card-img-hover .card-img-back {
+  opacity: 1;
+}
+
+.card-img:hover .card-img-hover .card-img-front {
+  opacity: 0;
+}
+
+// overlay
+.card-img-overlay {
+  display: flex;
+
+  > * {
+    flex: 1;
+  }
+}
+
+a.card-img-overlay {
+  color: inherit;
+
+  @include hover {
+    text-decoration: $link-hover-decoration;
+  }
+}
+
+.card-img-overlay-hover {
+  opacity: 0;
+
+  @if $enable-transitions {
+    transition: $transition-fade;
+  }
+}
+
+.card:hover .card-img-overlay-hover {
+  opacity: 1;
+}
+
+// badge
+.card-badge {
+  position: absolute;
+  top: 2rem;
+  z-index: 1;
+  border-radius: 0 !important;
+  font-size: $font-size-base;
+}
+
+.card-badge-left {
+  left: 0;
+}
+
+.card-badge-right {
+  right: 0;
+}
+
+// background
+.card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.card-bg ~ * {
+  z-index: 1;
+}
+
+.card-bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% + .25rem);
+  height: 100%;
+
+  @if $enable-transitions {
+    transition: $transition-lg;
+    transition-property: -webkit-transform, transform;
+  }
+}
+
+.card:hover > .card-bg > .card-bg-img {
+  transform: translateX(-.25rem);
+}
+
 .card-body {
   > p:last-child {
     margin-bottom: 0 !important;
   }
+}
+
+//
+// rating
+//
+
+.rating {
+  display: inline-flex;
+  margin-bottom: 0;
+}
+
+.rating:not([data-value]) .rating-item {
+  color: $gray-300;
+}
+
+.rating[data-value="1"] .rating-item:nth-child(n + 2) {
+  color: $gray-300;
+}
+
+.rating[data-value="2"] .rating-item:nth-child(n + 3) {
+  color: $gray-300;
+}
+
+.rating[data-value="3"] .rating-item:nth-child(n + 4) {
+  color: $gray-300;
+}
+
+.rating[data-value="4"] .rating-item:nth-child(n + 5) {
+  color: $gray-300;
+}
+
+.rating[data-value="5"] .rating-item:nth-child(n + 6) {
+  color: $gray-300;
+}
+
+.rating-form {
+  position: relative;
+  display: inline-flex;
+}
+
+.rating-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  opacity: 0;
 }
 
 //

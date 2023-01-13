@@ -1,0 +1,39 @@
+{% set block = load_block('best-sellers-shop') %}
+<section class="py-7">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                {% if block.tag %}<h4 class="mb-3 text-center text-gray-500">{{ block.tag }}</h4>{% endif %}
+                <h1 class="mb-6 text-center">{{ block.title }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            {% for c in block.children %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card border-0 shadow-none bg-transparent">
+                    {% if c.tag %}
+                    <div class="badge badge-dark card-badge card-badge-left text-uppercase">{{ c.tag|safe }}</div>
+                    {% endif %}
+                    <div class="card-img">
+                        {% if c.images|length >= 2 %}
+                        <a class="card-img-hover" href="">
+                            <img class="card-img-top card-img-back" src="{{ c.images[1] }}" alt="...">
+                            <img class="card-img-top card-img-front" src="{{ c.images[0] }}" alt="...">
+                        </a>
+                        {% else %}
+                        <a class="" href="">
+                            <img class="card-img-top card-img-front" src="{{ c.images[0] }}" alt="...">
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body px-0">
+                        <div class="font-size-xs"><a class="text-muted" href="#">{{ c.subtitle }}</a></div>
+                        <div class="font-weight-bold"><a class="text-body" href="#">{{ c.title|safe }}</a></div>
+                        <div class="font-weight-bold text-muted">{{ c.content|safe }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

@@ -6,3 +6,7 @@
 // Example of a variable override to change Dashkit's background color
 // Remove the "//" to comment it in and see it in action!
 // $body-bg: #12263F;
+
+$transition-base: all 0.1s ease-in-out !default;
+$transition-lg: all 0.2s ease-in-out !default;
+$transition-fade: opacity 0.2s ease-in-out !default;

@@ -34,7 +34,11 @@ blueprints:
         params: {title: 商城, actions: [], has_gutters: False}
         layout: |-
           Block-read-promo-shop
-          Block-read-features-basic
+          Block-read-categories-shop
+          Block-read-best-sellers-shop
+          Block-read-must-haves-shop
+          Block-read-reviews-shop
+          Block-read-social-shop
 
   - name: demo
     params: {extends: layout-dash}

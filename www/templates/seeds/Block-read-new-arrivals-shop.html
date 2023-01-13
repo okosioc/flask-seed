@@ -1,0 +1,30 @@
+{% set block = load_block('new-arrivals-shop') %}
+<section class="py-7">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                {% if block.tag %}<h4 class="mb-3 text-center text-gray-500">{{ block.tag }}</h4>{% endif %}
+                <h1 class="mb-6 text-center">{{ block.title }}</h1>
+            </div>
+        </div>
+    </div>
+    <div class="flickity-page-dots-progress"
+         data-flickity='{"prevNextButtons":false, "pageDots":true, "wrapAround":true, "initialIndex":0, "imagesLoaded":true, "cellAlign":"left"}'>
+        {% for c in block.children %}
+        <div class="col" style="max-width: 300px;">
+            <div class="card border-0 shadow-none bg-transparent">
+                <div class="card-img">
+                    {% if c.tag %}
+                    <span class="badge badge-dark card-badge card-badge-left text-uppercase">{{ c.tag|safe }}</span>
+                    {% endif %}
+                    <img class="card-img-top" src="{{ c.image }}" alt="...">
+                </div>
+                <div class="card-body font-weight-bold text-center">
+                    <a class="text-body" href="#">{{ c.title|safe }}</a> <br>
+                    <div class="font-weight-bold text-muted">{{ c.content|safe }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>

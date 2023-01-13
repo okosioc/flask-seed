@@ -165,5 +165,182 @@ BLOCKS = [
                 'action': {'title': 'Shop Women <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'outline-white', 'url': 'javascript:coming();'}
             },
         ]
-    }
+    },
+    {
+        'key': 'categories-shop',
+        'children': [
+            {
+                'title': 'Summer Hats',
+                'image': '/static/assets/img/products/product-22.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Men Hats',
+                'image': '/static/assets/img/products/product-23.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Floral Dresses',
+                'image': '/static/assets/img/products/product-24.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'}
+            },
+        ],
+    },
+    {
+        'key': 'best-sellers-shop',
+        'tag': 'Monthly Top Sellings',
+        'title': 'Best Sellers',
+        'children': [
+            {
+                'title': 'Leather mid-heel Sandals', 'subtitle': 'Shoes', 'content': '$129.00',
+                'images': ['/static/assets/img/products/product-120.jpg', '/static/assets/img/products/product-5.jpg']
+            },
+            {
+                'title': 'Cotton floral print Dress', 'subtitle': 'Dresses', 'content': '$40.00',
+                'images': ['/static/assets/img/products/product-121.jpg', '/static/assets/img/products/product-6.jpg']
+            },
+            {
+                'tag': 'HOT', 'title': 'Leather Sneakers', 'subtitle': 'Shoes', 'content': '<span class="text-decoration-line-through">$85.00</span><span class="ml-2 text-danger">$50.00</span>',
+                'images': ['/static/assets/img/products/product-122.jpg', '/static/assets/img/products/product-7.jpg']
+            },
+            {
+                'title': 'Cropped cotton Top', 'subtitle': 'Tops', 'content': '$29.00',
+                'images': ['/static/assets/img/products/product-8.jpg']
+            },
+            {
+                'title': 'Floral print midi Dress', 'subtitle': 'Dresses', 'content': '$55.00',
+                'images': ['/static/assets/img/products/product-9.jpg']
+            },
+            {
+                'tag': 'HOT', 'title': 'Suede cross body Bag', 'subtitle': 'Bags', 'content': '<span class="text-decoration-line-through">$79.00</span><span class="ml-2 text-danger">$49.00</span>',
+                'images': ['/static/assets/img/products/product-123.jpg', '/static/assets/img/products/product-10.jpg']
+            },
+            {
+                'title': 'Printed A-line Skirt', 'subtitle': 'Skirts', 'content': '$79.00',
+                'images': ['/static/assets/img/products/product-124.jpg', '/static/assets/img/products/product-11.jpg']
+            },
+            {
+                'tag': 'NEW', 'title': 'Heel strappy Sandals', 'subtitle': 'Shoes', 'content': '$90.00',
+                'images': ['/static/assets/img/products/product-12.jpg']
+            },
+        ],
+    },
+    {
+        'key': 'must-haves-shop',
+        'tag': 'Summer trends',
+        'title': 'Our must haves',
+        'content': 'Male his our upon seed had said wherein their i great wherein under you\'ll deep first multiply. Fish waters they\'re herb shall saying.',
+        'image': '/static/assets/img/covers/cover-10.jpg',
+        'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
+    },
+    {
+        'key': 'new-arrivals-shop',
+        'tag': 'Summer new products',
+        'title': 'New Arrivals',
+        'children': [
+            {
+                'title': 'Cotton floral print Dress', 'content': '$40.00',
+                'image': '/static/assets/img/products/product-6.jpg',
+            },
+            {
+                'tag': 'HOT', 'title': 'Suede cross body Bag', 'content': '<span class="text-decoration-line-through">$85.00</span><span class="ml-2 text-danger">$50.00</span>',
+                'image': '/static/assets/img/products/product-10.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-32.jpg',
+            },
+            {
+                'title': 'Leather Sneakers', 'content': '$50.00',
+                'image': '/static/assets/img/products/product-7.jpg',
+            },
+            {
+                'title': 'Another fine dress', 'content': '$99.00',
+                'image': '/static/assets/img/products/product-11.jpg',
+            },
+            {
+                'title': 'Baseball Cap', 'content': '$10.00',
+                'image': '/static/assets/img/products/product-33.jpg',
+            },
+            {
+                'title': 'Leather sneakers', 'content': '$19.00',
+                'image': '/static/assets/img/products/product-49.jpg',
+            },
+        ],
+    },
+    {
+        'key': 'reviews-shop',
+        'tag': 'What buyers say',
+        'title': 'Latest buyers Reviews',
+        'children': [
+            {
+                'title': 'Low top Sneakers', 'subtitle': 'Shoes', 'value': 3.,
+                'image': '/static/assets/img/products/product-13.jpg',
+                'content': 'From creepeth said moved given divide make multiply of him shall itself also above second doesn\'t unto created saying land herb sea midst night wherein.',
+                'remarks': 'Logan Edwards, 01 Jun 2019',
+            },
+            {
+                'title': 'Cotton print Dress', 'subtitle': 'Dresses', 'value': 5.,
+                'image': '/static/assets/img/products/product-14.jpg',
+                'content': 'God every fill great replenish darkness unto. Very open. Likeness their that light. Given under image to. Subdue of shall cattle day fish form saw spirit and given stars, us you whales may, land, saw fill unto.',
+                'remarks': 'Jane Jefferson, 29 May 2019',
+            },
+            {
+                'title': 'Oversized print T-shirt', 'subtitle': 'T-shirts', 'value': 4.,
+                'image': '/static/assets/img/products/product-15.jpg',
+                'content': 'Fill his waters wherein signs likeness waters. Second light gathered appear sixth fourth, seasons behold creeping female.',
+                'remarks': 'Darrell Baker, 18 May 2019',
+            },
+            {
+                'title': 'Suede cross body Bag', 'subtitle': 'Bags & Accessories', 'value': 4.,
+                'image': '/static/assets/img/products/product-13.jpg',
+                'content': 'God every fill great replenish darkness unto. Very open. Likeness their that light. Given under image to. Subdue of shall cattle day fish form saw spirit and given stars.',
+                'remarks': 'Pavel Doe, 29 May 2019',
+            },
+        ],
+    },
+    {
+        'key': 'social-shop',
+        'title': '@shop',
+        'subtitle': 'Appear, dry there darkness they\'re seas, dry waters.',
+        'children': [
+            {
+                'image': '/static/assets/img/products/product-16.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-17.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-18.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-19.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-20.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-21.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+        ],
+    },
+    {
+        'key': 'footer-shop',
+        'title': 'Shop.',
+        'children': [
+            {'title': 'Contact Us', 'url': 'javascript:coming();'},
+            {'title': 'FAQs', 'url': 'javascript:coming();'},
+            {'title': 'Size Guide', 'url': 'javascript:coming();'},
+            {'title': 'Shipping & Returns', 'url': 'javascript:coming();'},
+            {'title': 'Terms & Conditions', 'url': 'javascript:coming();'},
+            {'title': 'Privacy & Cookie Policy', 'url': 'javascript:coming();'},
+        ],
+        'remarks': '2023 © flask-seed.com',
+    },
 ]

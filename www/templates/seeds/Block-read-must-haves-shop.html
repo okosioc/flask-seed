@@ -1,0 +1,18 @@
+{% set block = load_block('must-haves-shop') %}
+<section class="bg-light overflow-hidden">
+    <div class="container">
+        <div class="row no-gutters justify-content-between">
+            <div class="col-12 col-md-5 col-lg-4 py-7">
+                {% if block.tag %}<h4 class="mb-3 text-gray-500">{{ block.tag }}</h4>{% endif %}
+                <h1 class="mb-4">{{ block.title }}</h1>
+                <p class="text-gray-500 mb-5">{{ block.content|safe }}</p>
+                {% if block.action %}
+                <a class="btn btn-{{ block.action.cls }}" href="{{ block.action.url }}">{{ block.action.title|safe }}</a>
+                {% endif %}
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="h-100 vw-50 bg-cover" style="background-image: url({{ block.image }});"></div>
+            </div>
+        </div>
+    </div>
+</section>

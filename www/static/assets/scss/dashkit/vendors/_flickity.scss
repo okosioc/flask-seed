@@ -49,7 +49,7 @@
   height: .5rem;
   margin-left: 3px;
   margin-right: 3px;
-  background-color: $gray-200;
+  background-color: $gray-300;
   opacity: 1;
 
   @if $enable-transitions {
@@ -86,7 +86,7 @@
   background-color: $primary;
 
   &.is-selected~.dot {
-    background-color: $gray-100;
+    background-color: $gray-300;
   }
 }
 

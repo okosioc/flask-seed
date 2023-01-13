@@ -15,6 +15,7 @@
     {% endblock %}
     <link href="{{ base() }}/assets/vendor/flickity/dist/flickity.min.css" rel="stylesheet" type="text/css"/>
     <link href="{{ base() }}/assets/vendor/flickity-fade/flickity-fade.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ base() }}/assets/fonts/fontawesome/css/all.min.css" rel="stylesheet" type="text/css"/>
     <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css"/>
     <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
 </head>
@@ -27,7 +28,7 @@
 {% include 'seeds/Block-read-footer-shop.html' %}
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/assets/vendor/flickity/dist/flickity.pkgd.min.js"></script>
-<script href="{{ base() }}/assets/vendor/flickity-fade/flickity-fade.js"></script>
+<script src="{{ base() }}/assets/vendor/flickity-fade/flickity-fade.js"></script>
 <script src="{{ base() }}/js/app.min.js?{{ version() }}"></script>
 {% block script %}
 {% endblock %}

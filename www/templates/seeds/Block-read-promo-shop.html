@@ -1,6 +1,6 @@
 {% set block = load_block('promo-shop') %}
-<section class="">
-    <div data-flickity='{"prevNextButtons":true, "fade":true, "pageDots":false, "wrapAround":true, "initialIndex":0, "imagesLoaded":true}'>
+<section>
+    <div data-flickity='{"prevNextButtons":true, "fade":true, "pageDots":false, "wrapAround":true, "initialIndex":0, "imagesLoaded":true, "cellAlign":"left"}'>
         {% for c in block.children %}
         <div class="w-100 bg-cover" style="background-image: url({{ c.image }});">
             <div class="container d-flex flex-column">
@@ -8,14 +8,13 @@
                     <div class="{{ c.cls }}">
                         <h1>{{ c.title|safe }}</h1>
                         {% if c.subtitle %}
-                            <h2 class="display-1 text-primary">{{ c.subtitle|safe }}</h2>
+                        <h2 class="display-1 text-primary">{{ c.subtitle|safe }}</h2>
                         {% endif %}
                         {% if c.content %}
-                            <p class="font-size-lg mb-5">{{ c.content|safe }}</p>
+                        <p class="font-size-lg mb-5">{{ c.content|safe }}</p>
                         {% endif %}
                         {% if c.action %}
-                            <a class="btn btn-{{ c.action.cls }}"
-                               href="{{ c.action.url }}">{{ c.action.title|safe }}</a>
+                        <a class="btn btn-{{ c.action.cls }}" href="{{ c.action.url }}">{{ c.action.title|safe }}</a>
                         {% endif %}
                     </div>
                 </div>

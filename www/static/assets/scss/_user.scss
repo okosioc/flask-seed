@@ -1,5 +1,5 @@
 //
-// container
+// grid
 //
 .container-xxl {
   width: 100%;
@@ -28,6 +28,24 @@
   font-size: .875rem;
 }
 
+// negative offset
+@for $i from 1 through $grid-columns {
+  .offset-n#{$i} {
+    margin-left: -(100% / $grid-columns * $i);
+  }
+}
+
+@each $breakpoint, $value in $grid-breakpoints {
+  @if $breakpoint !='xs' {
+    @include media-breakpoint-up(#{$breakpoint}) {
+      @for $i from 1 through $grid-columns {
+        .offset-#{$breakpoint}-n#{$i} {
+          margin-left: -(100% / $grid-columns * $i);
+        }
+      }
+    }
+  }
+}
 
 //
 // Customize colors
@@ -420,6 +438,34 @@ a.card-img-overlay {
   right: 0;
 }
 
+// price
+.card-price {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  border: 0;
+  border-radius: 0;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.card-price-left {
+  left: 0;
+}
+
+.card-price-right {
+  right: 0;
+}
+
+.card-price-left + .card-badge-left {
+  top: 3.75rem;
+}
+
+.card-price-right + .card-badge-right {
+  top: 3.75rem;
+}
+
+
 // background
 .card-bg {
   position: absolute;
@@ -454,6 +500,39 @@ a.card-img-overlay {
 .card-body {
   > p:last-child {
     margin-bottom: 0 !important;
+  }
+}
+
+//
+// link
+//
+
+.link-underline {
+  position: relative;
+  display: inline-block;
+  padding: .5rem 1.5rem;
+  font-weight: $font-weight-bold;
+  color: $dark;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-bottom: $border-width solid;
+    transform-origin: left center;
+    transition: $transition-lg;
+    transition-property: -webkit-transform, transform;
+  }
+
+  @include hover {
+    color: $dark;
+
+    &::before {
+      transform-origin: right center;
+      transform: scaleX(0);
+    }
   }
 }
 

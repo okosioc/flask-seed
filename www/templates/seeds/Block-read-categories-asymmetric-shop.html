@@ -1,0 +1,33 @@
+{% set block = load_block('categories-must-haves-shop') %}
+<section class="py-7">
+    <div class="container">
+        <div class="row align-items-center">
+            {% set c0 = block.children[0] %}
+            <div class="col-12 col-md-3">
+                <img class="img-fluid mb-2" src="{{ c0.image }}" alt="...">
+                <div class="mb-7 mb-md-0">
+                    <a class="btn btn-link px-0 text-body font-weight-bold font-size-lg" href="{{ c0.url }}">
+                        {{ c0.title|safe }} <i class="fe fe-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+            {% set c1 = block.children[1] %}
+            <div class="col-12 col-md-4">
+                <img class="img-fluid mb-2" src="{{ c1.image }}" alt="...">
+                <div class="mb-7 mb-md-0">
+                    <a class="btn btn-link px-0 text-body font-weight-bold font-size-lg" href="{{ c1.url }}">
+                        {{ c1.title|safe }} <i class="fe fe-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 pl-lg-4">
+                <h2 class="display-3 mb-5 ml-md-n6">{{ block.title|safe }}</h2>
+                <p>{{ block.content|safe }}</p>
+                <p class="mb-5">{{ block.remarks|safe }}</p>
+                {% if block.action %}
+                <a class="btn btn-dark" href="{{ block.action.url }}">{{ block.action.title|safe }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>

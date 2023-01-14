@@ -1,0 +1,44 @@
+{% set block = load_block('products-asymmetric-shop') %}
+<section class="py-7 bg-white">
+    <div class="container">
+        {% for c in block.children %}
+        {% set row_has_one_column = loop.index0 % 7 in [2, 5] %}
+        {% if loop.index0 % 7 in [0, 2, 3, 5] %}
+        <div class="row {{ 'pt-7' if not loop.first }} {{ 'justify-content-center' if row_has_one_column }}">
+        {% endif %}
+            {% set cls = '' %}
+            {% if loop.index0 % 7 == 0 %}
+                {% set cls = 'col-md-6' %}
+            {% elif loop.index0 % 7 == 1 %}
+                {% set cls = 'col-md-6 pt-7' %}
+            {% elif loop.index0 % 7 == 3 %}
+                {% set cls = 'col-md-6 order-md-2' %}
+            {% elif loop.index0 % 7 == 4 %}
+                {% set cls = 'col-md-6 pt-7 order-md-1' %}
+            {% endif %}
+            <div class="col-12 {{ 'col-md-10' if row_has_one_column else cls }}">
+                <div class="row align-items-center">
+                    <div class="{{ 'col-10 col-md-8' if row_has_one_column else 'col-8 col-lg-6' }}">
+                        <div class="card border-0 rounded-0">
+                            <div class="btn btn-white btn-lg card-price card-price-left">{{ c.content|safe }}</div>
+                            <a href="#">
+                                <img src="{{ c.image }}" alt="..." class="card-img-top rounded-0">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-7 {{ 'col-md-4 offset-n5 offset-md-n1' if row_has_one_column else 'col-lg-6 offset-n3 offset-lg-n1' }}">
+                        <h2 class="display-4 mb-0">
+                            <a class="text-reset" href="#">{{ c.title|safe }}</a>
+                        </h2>
+                        <a class="btn btn-link px-0 text-body" href="#">
+                            Shop Now <i class="fe fe-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% if loop.index0 % 7 in [1, 2, 4, 5] %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</section>

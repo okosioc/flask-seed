@@ -20,12 +20,8 @@
     <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-{% include 'seeds/Block-read-header-shop.html' %}
-<div>
-    {% block content %}
-    {% endblock %}
-</div>
-{% include 'seeds/Block-read-footer-shop.html' %}
+{% block content %}
+{% endblock %}
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/assets/vendor/flickity/dist/flickity.pkgd.min.js"></script>
 <script src="{{ base() }}/assets/vendor/flickity-fade/flickity-fade.js"></script>

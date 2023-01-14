@@ -33,12 +33,24 @@ blueprints:
       - name: index
         params: {title: 商城, actions: [], has_gutters: False}
         layout: |-
-          Block-read-promo-shop
+          Block-read-header-shop
+          Block-read-welcome-shop
           Block-read-categories-shop
-          Block-read-best-sellers-shop
-          Block-read-must-haves-shop
+          Block-read-products-grid-shop
+          Block-read-banner-shop
           Block-read-reviews-shop
           Block-read-social-shop
+          Block-read-footer-shop
+
+      - name: index-asymmetric
+        params: {title: 商城, actions: [], has_gutters: False}
+        layout: |-
+          Block-read-header-boxed-shop
+          Block-read-welcome-boxed-shop
+          Block-read-products-asymmetric-shop
+          Block-read-banner-boxed-shop
+          Block-read-categories-asymmetric-shop
+          Block-read-footer-shop
 
   - name: demo
     params: {extends: layout-dash}

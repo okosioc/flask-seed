@@ -16,8 +16,13 @@ shop = Blueprint('shop', __name__)
 
 @shop.route('/index')
 @auth_permission
-def index_shop():
+def index():
     """ 商城. """
     return render_template('shop/index.html')
 
 
+@shop.route('/index-asymmetric')
+@auth_permission
+def index_asymmetric():
+    """ 商城. """
+    return render_template('shop/index-asymmetric.html')

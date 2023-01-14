@@ -135,7 +135,14 @@ BLOCKS = [
         'title': 'Shop.',
         'subtitle': '<i class="fe fe-truck mr-2"></i><span>Free Shipping Worldwide</span>',
         'children': [
-            {'title': 'Home', 'url': 'javascript:coming();'},
+            {
+                'title': 'Home', 'url': '#',
+                'children': [
+                    {'title': 'Default', 'url': '/shop/index'},
+                    {'title': 'Asymmetric', 'url': '/shop/index-asymmetric'},
+                    {'title': 'Sidenav', 'url': '/shop/index-sidenav'},
+                ],
+            },
             {'title': 'Catelog', 'url': 'javascript:coming();'},
             {'title': 'Blog', 'url': 'javascript:coming();'},
             {'title': 'Account', 'url': 'javascript:coming();'},
@@ -144,7 +151,7 @@ BLOCKS = [
         ]
     },
     {
-        'key': 'promo-shop',
+        'key': 'welcome-shop',
         'children': [
             {
                 'title': 'Summer Sale', 'subtitle': '-70%', 'content': 'with promo code CN67EW*',
@@ -187,7 +194,24 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'best-sellers-shop',
+        'key': 'categories-must-haves-shop',
+        'title': 'Our must haves',
+        'content': 'Open created shall two he second moving whose. He face whose two upon, fowl behold waters. Fly there their day creepeth. Darkness beginning spirit after.',
+        'remarks': 'Third. For morning whales saw were had seed can\'t divide it light shall moveth, us blessed given.',
+        'action': {'title': 'Discover more', 'url': 'javascript:coming();'},
+        'children': [
+            {
+                'title': 'Dress', 'url': '#',
+                'image': '/static/assets/img/products/product-71.jpg',
+            },
+            {
+                'title': 'Cropped Trousers', 'url': '#',
+                'image': '/static/assets/img/products/product-72.jpg',
+            },
+        ],
+    },
+    {
+        'key': 'products-best-sellers-shop',
         'tag': 'Monthly Top Sellings',
         'title': 'Best Sellers',
         'children': [
@@ -226,7 +250,36 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'must-haves-shop',
+        'key': 'products-asymmetric-shop',
+        'children': [
+            {
+                'title': 'Floral Cotton midi Dress', 'content': '$59.00',
+                'image': '/static/assets/img/products/product-65.jpg',
+            },
+            {
+                'title': 'Linen basic Trousers', 'content': '$125.00',
+                'image': '/static/assets/img/products/product-66.jpg',
+            },
+            {
+                'tag': 'HOT', 'title': 'Leather heel Sandals', 'content': '$89.99',
+                'image': '/static/assets/img/products/product-67.jpg',
+            },
+            {
+                'title': 'Leather square Tote Bag', 'content': '$35.00',
+                'image': '/static/assets/img/products/product-68.jpg',
+            },
+            {
+                'title': 'Cotton basic T-Shirt', 'content': '$50.00',
+                'image': '/static/assets/img/products/product-69.jpg',
+            },
+            {
+                'title': 'Acymmetric Cotton Top', 'content': '$39.00',
+                'image': '/static/assets/img/products/product-70.jpg',
+            },
+        ],
+    },
+    {
+        'key': 'banner-shop',
         'tag': 'Summer trends',
         'title': 'Our must haves',
         'content': 'Male his our upon seed had said wherein their i great wherein under you\'ll deep first multiply. Fish waters they\'re herb shall saying.',
@@ -234,7 +287,17 @@ BLOCKS = [
         'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
     },
     {
-        'key': 'new-arrivals-shop',
+        'key': 'banner-discount-shop',
+        'subtitle': 'Summer Styles',
+        'title': '50% OFF',
+        'image': '/static/assets/img/covers/cover-17.jpg',
+        'actions': [
+            {'title': 'Shop Woman', 'url': 'javascript:coming();'},
+            {'title': 'Shop Men', 'url': 'javascript:coming();'},
+        ],
+    },
+    {
+        'key': 'products-new-arrivals-shop',
         'tag': 'Summer new products',
         'title': 'New Arrivals',
         'children': [

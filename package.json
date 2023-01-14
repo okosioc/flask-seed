@@ -36,8 +36,6 @@
     "timepicker": "^1.13.18",
     "@fancyapps/ui": "^4.0.9",
     "autosize": "^4.0.2",
-    "handsontable": "^11.1.0",
-    "video.js": "^7.18.1",
     "flickity": "^2.2.1"
   }
 }

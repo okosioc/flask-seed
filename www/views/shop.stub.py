@@ -26,3 +26,15 @@ def index():
     return render_template('shop/index.html', block=block)
 
 
+@shop.route('/index-asymmetric')
+@auth_permission
+def index_asymmetric():
+    """ 商城. """
+    id_ = get_id(int)
+    block = Block.find_one(id_)
+    if not block:
+        abort(404)
+    #
+    return render_template('shop/index-asymmetric.html', block=block)
+
+

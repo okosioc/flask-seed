@@ -14972,6 +14972,206 @@ a:focus, button:focus {
   font-size: 0.875rem;
 }
 
+.offset-n1 {
+  margin-left: -8.3333333333%;
+}
+
+.offset-n2 {
+  margin-left: -16.6666666667%;
+}
+
+.offset-n3 {
+  margin-left: -25%;
+}
+
+.offset-n4 {
+  margin-left: -33.3333333333%;
+}
+
+.offset-n5 {
+  margin-left: -41.6666666667%;
+}
+
+.offset-n6 {
+  margin-left: -50%;
+}
+
+.offset-n7 {
+  margin-left: -58.3333333333%;
+}
+
+.offset-n8 {
+  margin-left: -66.6666666667%;
+}
+
+.offset-n9 {
+  margin-left: -75%;
+}
+
+.offset-n10 {
+  margin-left: -83.3333333333%;
+}
+
+.offset-n11 {
+  margin-left: -91.6666666667%;
+}
+
+.offset-n12 {
+  margin-left: -100%;
+}
+
+@media (min-width: 576px) {
+  .offset-sm-n1 {
+    margin-left: -8.3333333333%;
+  }
+  .offset-sm-n2 {
+    margin-left: -16.6666666667%;
+  }
+  .offset-sm-n3 {
+    margin-left: -25%;
+  }
+  .offset-sm-n4 {
+    margin-left: -33.3333333333%;
+  }
+  .offset-sm-n5 {
+    margin-left: -41.6666666667%;
+  }
+  .offset-sm-n6 {
+    margin-left: -50%;
+  }
+  .offset-sm-n7 {
+    margin-left: -58.3333333333%;
+  }
+  .offset-sm-n8 {
+    margin-left: -66.6666666667%;
+  }
+  .offset-sm-n9 {
+    margin-left: -75%;
+  }
+  .offset-sm-n10 {
+    margin-left: -83.3333333333%;
+  }
+  .offset-sm-n11 {
+    margin-left: -91.6666666667%;
+  }
+  .offset-sm-n12 {
+    margin-left: -100%;
+  }
+}
+@media (min-width: 768px) {
+  .offset-md-n1 {
+    margin-left: -8.3333333333%;
+  }
+  .offset-md-n2 {
+    margin-left: -16.6666666667%;
+  }
+  .offset-md-n3 {
+    margin-left: -25%;
+  }
+  .offset-md-n4 {
+    margin-left: -33.3333333333%;
+  }
+  .offset-md-n5 {
+    margin-left: -41.6666666667%;
+  }
+  .offset-md-n6 {
+    margin-left: -50%;
+  }
+  .offset-md-n7 {
+    margin-left: -58.3333333333%;
+  }
+  .offset-md-n8 {
+    margin-left: -66.6666666667%;
+  }
+  .offset-md-n9 {
+    margin-left: -75%;
+  }
+  .offset-md-n10 {
+    margin-left: -83.3333333333%;
+  }
+  .offset-md-n11 {
+    margin-left: -91.6666666667%;
+  }
+  .offset-md-n12 {
+    margin-left: -100%;
+  }
+}
+@media (min-width: 992px) {
+  .offset-lg-n1 {
+    margin-left: -8.3333333333%;
+  }
+  .offset-lg-n2 {
+    margin-left: -16.6666666667%;
+  }
+  .offset-lg-n3 {
+    margin-left: -25%;
+  }
+  .offset-lg-n4 {
+    margin-left: -33.3333333333%;
+  }
+  .offset-lg-n5 {
+    margin-left: -41.6666666667%;
+  }
+  .offset-lg-n6 {
+    margin-left: -50%;
+  }
+  .offset-lg-n7 {
+    margin-left: -58.3333333333%;
+  }
+  .offset-lg-n8 {
+    margin-left: -66.6666666667%;
+  }
+  .offset-lg-n9 {
+    margin-left: -75%;
+  }
+  .offset-lg-n10 {
+    margin-left: -83.3333333333%;
+  }
+  .offset-lg-n11 {
+    margin-left: -91.6666666667%;
+  }
+  .offset-lg-n12 {
+    margin-left: -100%;
+  }
+}
+@media (min-width: 1200px) {
+  .offset-xl-n1 {
+    margin-left: -8.3333333333%;
+  }
+  .offset-xl-n2 {
+    margin-left: -16.6666666667%;
+  }
+  .offset-xl-n3 {
+    margin-left: -25%;
+  }
+  .offset-xl-n4 {
+    margin-left: -33.3333333333%;
+  }
+  .offset-xl-n5 {
+    margin-left: -41.6666666667%;
+  }
+  .offset-xl-n6 {
+    margin-left: -50%;
+  }
+  .offset-xl-n7 {
+    margin-left: -58.3333333333%;
+  }
+  .offset-xl-n8 {
+    margin-left: -66.6666666667%;
+  }
+  .offset-xl-n9 {
+    margin-left: -75%;
+  }
+  .offset-xl-n10 {
+    margin-left: -83.3333333333%;
+  }
+  .offset-xl-n11 {
+    margin-left: -91.6666666667%;
+  }
+  .offset-xl-n12 {
+    margin-left: -100%;
+  }
+}
 .bg-primary-gardient {
   background-image: linear-gradient(-45deg, #89b5f0, #e6effc);
   background-position: center;
@@ -15271,6 +15471,32 @@ a.card-img-overlay:hover {
   right: 0;
 }
 
+.card-price {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  border: 0;
+  border-radius: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.card-price-left {
+  left: 0;
+}
+
+.card-price-right {
+  right: 0;
+}
+
+.card-price-left + .card-badge-left {
+  top: 3.75rem;
+}
+
+.card-price-right + .card-badge-right {
+  top: 3.75rem;
+}
+
 .card-bg {
   position: absolute;
   top: 0;
@@ -15300,6 +15526,32 @@ a.card-img-overlay:hover {
 
 .card-body > p:last-child {
   margin-bottom: 0 !important;
+}
+
+.link-underline {
+  position: relative;
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  color: #12263F;
+}
+.link-underline::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border-bottom: 1px solid;
+  transform-origin: left center;
+  transition: all 0.2s ease-in-out;
+  transition-property: transform;
+}
+.link-underline:hover {
+  color: #12263F;
+}
+.link-underline:hover::before {
+  transform-origin: right center;
+  transform: scaleX(0);
 }
 
 .rating {

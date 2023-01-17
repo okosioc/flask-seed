@@ -20,9 +20,15 @@
     <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<div class="container-fluid px-0">
-    {% block content %}
-    {% endblock %}
+<div class="container-fluid">
+    <div class="row no-gutters">
+        <div class="col-12 col-lg-auto">
+            {% include 'seeds/Block-read-shop-horizontal-sidenav.html' %}
+        </div>
+        <div class="col-12 col-lg">
+            {% include 'seeds/Block-read-shop-horizontal-topnav.html' %}
+        </div>
+    </div>
 </div>
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/assets/vendor/flickity/dist/flickity.pkgd.min.js"></script>

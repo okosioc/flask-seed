@@ -33,24 +33,29 @@ blueprints:
       - name: index
         params: {title: 商城, actions: [], has_gutters: False}
         layout: |-
-          Block-read-header-shop
-          Block-read-welcome-shop
-          Block-read-categories-shop
-          Block-read-products-grid-shop
-          Block-read-banner-shop
-          Block-read-reviews-shop
-          Block-read-social-shop
-          Block-read-footer-shop
+          Block-read-shop-topnav
+          Block-read-shop-welcome
+          Block-read-shop-categories
+          Block-read-shop-products-grid
+          Block-read-shop-banner
+          Block-read-shop-reviews-carousel
+          Block-read-shop-social
+          Block-read-shop-footer
 
       - name: index-asymmetric
         params: {title: 商城, actions: [], has_gutters: False}
         layout: |-
-          Block-read-header-boxed-shop
-          Block-read-welcome-boxed-shop
-          Block-read-products-asymmetric-shop
-          Block-read-banner-boxed-shop
-          Block-read-categories-asymmetric-shop
-          Block-read-footer-shop
+          Block-read-shop-topnav-boxed
+          Block-read-shop-welcome-boxed
+          Block-read-shop-products-asymmetric
+          Block-read-shop-banner-boxed
+          Block-read-shop-categories-asymmetric
+          Block-read-shop-footer
+
+      - name: index-horizontal
+        params: {extends: layout-shop-horizontal, title: 商城, actions: [], has_gutters: False}
+        layout: |-
+          Block-read-shop-products-masonry
 
   - name: demo
     params: {extends: layout-dash}

@@ -38,3 +38,15 @@ def index_asymmetric():
     return render_template('shop/index-asymmetric.html', block=block)
 
 
+@shop.route('/index-horizontal')
+@auth_permission
+def index_horizontal():
+    """ 商城. """
+    id_ = get_id(int)
+    block = Block.find_one(id_)
+    if not block:
+        abort(404)
+    #
+    return render_template('shop/index-horizontal.html', block=block)
+
+

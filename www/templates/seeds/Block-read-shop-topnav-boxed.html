@@ -1,0 +1,46 @@
+{% set block = load_block('shop-topnav') %}
+<nav class="navbar navbar-expand-lg navbar-light border-0 py-4">
+    <div class="container">
+        <a class="navbar-brand mb-0 h1" href="/">
+            {% if block.icon %}
+                <img src="{{ block.icon }}" style="height:30px;max-height:30px;">
+            {% else %}
+                {{ block.title }}
+            {% endif %}
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarCollapse">
+            <ul class="navbar-nav ml-auto">
+                {% for l in block.children %}
+                    {% if l.children %}
+                    <li class="nav-item">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="{{ l.url }}" role="button"
+                               data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false">
+                                {{ l.title|safe }}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                            {% for sl in l.children %}
+                            {% if sl.title %}
+                                <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
+                            {% else %}
+                                <div class="dropdown-divider"></div>
+                            {% endif %}
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ l.url }}">{{ l.title|safe }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</nav>

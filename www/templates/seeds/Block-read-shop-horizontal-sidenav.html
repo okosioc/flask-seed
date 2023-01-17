@@ -1,0 +1,41 @@
+{% set block = load_block('shop-horizontal-sidenav') %}
+<nav class="navbar navbar-expand-lg navbar-vertical navbar-light sticky-left">
+    <div class="container-fluid">
+        <a class="navbar-brand h1 mb-0 text-left" href="/shop/index-sidenav">
+            {% if block.icon %}
+                <img src="{{ block.icon }}" style="height:30px;max-height:30px;">
+            {% else %}
+                {{ block.title }}
+            {% endif %}
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSidenavLeftCollapse"
+                aria-controls="navbarSidenavLeftCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSidenavLeftCollapse">
+            <ul class="navbar-nav mb-4 my-lg-6" id="sidenav-parent">
+            {% for c in block.children %}
+                {% if c.children %}
+                <li class="nav-item">
+                    <a class="nav-link font-size-lg dropdown-toggle" data-toggle="collapse"
+                       href="#sidenav-{{ loop.index0 }}">{{ c.title|safe }}</a>
+                    <div class="collapse" id="sidenav-{{ loop.index0 }}" data-parent="#sidenav-parent">
+                        <ul class="list-unstyled my-3">
+                        {% for cc in c.children %}
+                            <li class="">
+                                <a class="nav-link font-size-base" href="{{ cc.url }}">{{ cc.title|safe }}</a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link font-size-lg" href="{{ c.url }}">{{ c.title|safe }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</nav>

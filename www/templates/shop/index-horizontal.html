@@ -1,0 +1,22 @@
+{% extends "layout-shop-horizontal.html" %}
+{% set title = '商城' %}
+{% set breadcrumb = {
+    'subtitle': '',
+    'title': title,
+    'actions': [],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block style %}
+<link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block content %}
+<div class="row no-gutters">
+    <div class="col-lg">
+        {% include "seeds/Block-read-shop-products-masonry.html" %}
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
+{% endblock %}

@@ -131,7 +131,7 @@ BLOCKS = [
     # Shop
     #
     {
-        'key': 'header-shop',
+        'key': 'shop-topnav',
         'title': 'Shop.',
         'subtitle': '<i class="fe fe-truck mr-2"></i><span>Free Shipping Worldwide</span>',
         'children': [
@@ -140,7 +140,7 @@ BLOCKS = [
                 'children': [
                     {'title': 'Default', 'url': '/shop/index'},
                     {'title': 'Asymmetric', 'url': '/shop/index-asymmetric'},
-                    {'title': 'Sidenav', 'url': '/shop/index-sidenav'},
+                    {'title': 'Horizontal', 'url': '/shop/index-horizontal'},
                 ],
             },
             {'title': 'Catelog', 'url': 'javascript:coming();'},
@@ -148,10 +148,35 @@ BLOCKS = [
             {'title': 'Account', 'url': 'javascript:coming();'},
             {'title': '<i class="fe fe-search d-inline"></i>', 'url': 'javascript:coming();'},
             {'title': '<i class="fe fe-shopping-cart d-inline"></i>', 'url': 'javascript:coming();'},
-        ]
+        ],
     },
     {
-        'key': 'welcome-shop',
+        'key': 'shop-horizontal-sidenav',
+        'title': 'Shop.',
+        'children': [
+            {
+                'title': 'Home', 'url': '#',
+                'children': [
+                    {'title': 'Default', 'url': '/shop/index'},
+                    {'title': 'Asymmetric', 'url': '/shop/index-asymmetric'},
+                    {'title': 'Horizontal', 'url': '/shop/index-horizontal'},
+                ],
+            },
+            {'title': 'Catelog', 'url': 'javascript:coming();'},
+            {'title': 'Blog', 'url': 'javascript:coming();'},
+            {'title': 'Account', 'url': 'javascript:coming();'},
+        ],
+    },
+    {
+        'key': 'shop-horizontal-topnav',
+        'children': [
+            {'title': 'Catelog', 'url': 'javascript:coming();'},
+            {'title': 'Blog', 'url': 'javascript:coming();'},
+            {'title': 'Account', 'url': 'javascript:coming();'},
+        ],
+    },
+    {
+        'key': 'shop-welcome',
         'children': [
             {
                 'title': 'Summer Sale', 'subtitle': '-70%', 'content': 'with promo code CN67EW*',
@@ -174,7 +199,16 @@ BLOCKS = [
         ]
     },
     {
-        'key': 'categories-shop',
+        'key': 'shop-welcome-boxed',
+        'images': [
+            '/static/assets/img/covers/cover-26.jpg',
+            '/static/assets/img/covers/cover-27.jpg',
+            '/static/assets/img/covers/cover-28.jpg',
+        ],
+        'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
+    },
+    {
+        'key': 'shop-categories',
         'children': [
             {
                 'title': 'Summer Hats',
@@ -194,7 +228,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'categories-must-haves-shop',
+        'key': 'shop-categories-asymmetric',
         'title': 'Our must haves',
         'content': 'Open created shall two he second moving whose. He face whose two upon, fowl behold waters. Fly there their day creepeth. Darkness beginning spirit after.',
         'remarks': 'Third. For morning whales saw were had seed can\'t divide it light shall moveth, us blessed given.',
@@ -211,7 +245,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'products-best-sellers-shop',
+        'key': 'shop-products-grid',
         'tag': 'Monthly Top Sellings',
         'title': 'Best Sellers',
         'children': [
@@ -250,7 +284,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'products-asymmetric-shop',
+        'key': 'shop-products-asymmetric',
         'children': [
             {
                 'title': 'Floral Cotton midi Dress', 'content': '$59.00',
@@ -279,7 +313,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'banner-shop',
+        'key': 'shop-banner',
         'tag': 'Summer trends',
         'title': 'Our must haves',
         'content': 'Male his our upon seed had said wherein their i great wherein under you\'ll deep first multiply. Fish waters they\'re herb shall saying.',
@@ -287,7 +321,7 @@ BLOCKS = [
         'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
     },
     {
-        'key': 'banner-discount-shop',
+        'key': 'shop-banner-discount',
         'subtitle': 'Summer Styles',
         'title': '50% OFF',
         'image': '/static/assets/img/covers/cover-17.jpg',
@@ -297,7 +331,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'products-new-arrivals-shop',
+        'key': 'shop-products-carousel',
         'tag': 'Summer new products',
         'title': 'New Arrivals',
         'children': [
@@ -332,7 +366,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'reviews-shop',
+        'key': 'shop-reviews-carousel',
         'tag': 'What buyers say',
         'title': 'Latest buyers Reviews',
         'children': [
@@ -363,7 +397,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'social-shop',
+        'key': 'shop-social',
         'title': '@shop',
         'subtitle': 'Appear, dry there darkness they\'re seas, dry waters.',
         'children': [
@@ -394,7 +428,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'footer-shop',
+        'key': 'shop-footer',
         'title': 'Shop.',
         'children': [
             {'title': 'Contact Us', 'url': 'javascript:coming();'},

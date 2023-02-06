@@ -19,7 +19,7 @@
     <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css"/>
     <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
 </head>
-<body>
+<body class="bg-white">
 <div class="container-fluid">
     <div class="row no-gutters">
         <div class="col-12 col-lg-auto">
@@ -27,6 +27,9 @@
         </div>
         <div class="col-12 col-lg">
             {% include 'seeds/Block-read-shop-horizontal-topnav.html' %}
+            {% block content %}
+            {% endblock %}
+            {% include 'seeds/Block-read-shop-horizontal-footer.html' %}
         </div>
     </div>
 </div>

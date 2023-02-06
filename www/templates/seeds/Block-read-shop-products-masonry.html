@@ -1,0 +1,106 @@
+{% macro render_single_product(p) %}
+<div class="card border-0 rounded-0 mb-4 bg-cover" style="min-height: 240px; background-image: url({{ p.image }});">
+    <div class="card-img-overlay card-img-overlay-hover align-items-center bg-white-90">
+        <div class="text-center">
+            <p class="font-weight-bold">
+                <a class="text-body mb-3" href="#">{{ p.title|safe }}</a> <br>
+                <span class="text-gray-800">{{ p.content|safe }}</span>
+            </p>
+            <p class="mb-0">
+                <button class="btn btn-link text-reset" data-toggle="modal"
+                        data-target="#modalProduct">
+                    <i class="fe fe-eye"></i>
+                </button>
+                <button class="btn btn-link text-reset" data-toggle="button">
+                    <i class="fe fe-shopping-cart"></i>
+                </button>
+                <button class="btn btn-link text-reset" data-toggle="button">
+                    <i class="fe fe-heart"></i>
+                </button>
+            </p>
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+{% set block = load_block('shop-products-summer-sale') %}
+<section class="pb-12">
+    <div class="row">
+    {# The first 16 products in masonry format, remaining products in grid format #}
+    {% for c in block.children %}
+    {% if loop.index0 in [0] %}
+        <div class="col-12 col-xl-6">
+            <a class="card border-0 rounded-0 mb-4" href="#" style="min-height: 503px;">
+                <div class="card-bg">
+                    <div class="card-bg-img bg-cover"
+                         style="background-image: url({{ c.image }});"></div>
+                </div>
+                <div class="card-body text-center text-{{ c.cls }} my-auto" style="flex: 0 0 auto;">
+                    <p class="text-uppercase">{{ c.remarks|safe }}</p>
+                    <h1 class="display-1 text-uppercase">{{ c.title|safe }}</h1>
+                    <h2>{{ c.subtitle|safe}}</h2>
+                </div>
+            </a>
+        </div>
+    {% elif loop.index0 in [1, 2, 3, 4] %}
+        {% if loop.index0 == 1 %}
+        <div class="col-12 col-xl-6">
+            <div class="row">
+        {% endif %}
+                <div class="col-12 col-md-6">
+                    {{ render_single_product(c)|indent(20) }}
+                </div>
+        {% if loop.index0 == 4 %}
+            </div>
+        </div>
+        {% endif %}
+    {% elif loop.index0 in [9, 10] %}
+        {% if loop.index0 == 9 %}
+        <div class="col-12 col-xl-3">
+            <div class="row">
+        {% endif %}
+                <div class="col-12 col-md-6 col-xl-12">
+                    {{ render_single_product(c)|indent(20) }}
+                </div>
+        {% if loop.index0 == 10 %}
+            </div>
+        </div>
+        {% endif %}
+    {% elif loop.index0 in [11] %}
+        <div class="col-12 col-xl-6">
+            <div class="card justify-content-end border-0 rounded-0 mb-4" style="min-height: 503px;">
+                <div class="card-bg">
+                    <div class="card-bg-img bg-cover" style="background-image: url({{ c.image }});"></div>
+                </div>
+                <div class="card-body p-5" style="flex: 0 0 auto;">
+                    <h2 class="display-4 mb-0">{{ c.title|safe}}</h2>
+                    {% if c.action %}
+                    <a class="btn btn-link stretched-link px-0 text-body" href="{{ c.action.link }}">{{ c.action.title|safe }}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% elif loop.index0 in [12, 13] %}
+        {% if loop.index0 == 12 %}
+        <div class="col-12 col-xl-3">
+            <div class="row">
+        {% endif %}
+                <div class="col-12 col-md-6 col-xl-12">
+                    {{ render_single_product(c)|indent(20) }}
+                </div>
+        {% if loop.index0 == 13 %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="col-12 col-md-6 col-xl-3">
+            {{ render_single_product(c)|indent(12) }}
+        </div>
+    {% endif %}
+    {% endfor %}
+    </div>
+    <div class="row justify-content-center mt-4 mb-5">
+        <div class="col-12 text-left">
+            <a class="btn btn-outline-dark rounded-0" href="#!">Discover More<i class="fe fe-arrow-right ml-2"></i></a>
+        </div>
+    </div>
+</section>

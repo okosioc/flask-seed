@@ -15232,6 +15232,10 @@ a:focus, button:focus {
   border-left: 2px solid #F9FBFD;
 }
 
+.bg-white-90 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
 .vw-50 {
   width: 50vw !important;
 }
@@ -15499,6 +15503,16 @@ a.card-img-overlay:hover {
 .link-underline:hover::before {
   transform-origin: right center;
   transform: scaleX(0);
+}
+
+.form-control-underline {
+  border-width: 0 0 1px 0;
+  border-radius: 0;
+}
+
+.input-group-underline {
+  border-width: 0 0 1px 0;
+  border-radius: 0;
 }
 
 .rating {

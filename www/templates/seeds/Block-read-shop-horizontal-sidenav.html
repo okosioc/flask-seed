@@ -1,7 +1,7 @@
 {% set block = load_block('shop-horizontal-sidenav') %}
-<nav class="navbar navbar-expand-lg navbar-vertical navbar-light sticky-left">
+<nav class="navbar navbar-expand-lg navbar-vertical navbar-light border-0" style="width:300px;position:-webkit-sticky;position: sticky;top:0;overflow-y: auto;">
     <div class="container-fluid">
-        <a class="navbar-brand h1 mb-0 text-left" href="/shop/index-sidenav">
+        <a class="navbar-brand h1 mb-0 text-left" href="/shop/index-horizontal">
             {% if block.icon %}
                 <img src="{{ block.icon }}" style="height:30px;max-height:30px;">
             {% else %}

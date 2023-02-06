@@ -1,109 +1,44 @@
 {% set block = load_block('shop-horizontal-topnav') %}
-<nav class="navbar navbar-expand navbar-light pt-0 pt-lg-6 @@classList">
-  <div class="container-fluid">
-
-    <!-- Form -->
-    <form class="navbar-form w-100" style="max-width: 550px;">
-      <div class="input-group">
-
-        <!-- Input -->
-        <input class="form-control form-control-underline form-control-sm border-dark" type="search" placeholder="Search for items and brands">
-
-        <!-- Button -->
-        <div class="input-group-append">
-          <button class="btn btn-underline btn-sm border-dark" type="button">
-            <i class="fe fe-search"></i>
-          </button>
-        </div>
-
-      </div>
-    </form>
-
-    <!-- Nav -->
-    <ul class="navbar-nav flex-row">
-      <li class="nav-item">
-        <a class="nav-link" href="@@webRoot/account-orders.html">
-          <i class="fe fe-user"></i>
-        </a>
-      </li>
-      <li class="nav-item ml-lg-n4">
-        <a class="nav-link" href="@@webRoot/account-wishlist.html">
-          <i class="fe fe-heart"></i>
-        </a>
-      </li>
-      <li class="nav-item ml-lg-n4">
-        <a class="nav-link" data-toggle="modal" href="#modalShoppingCart">
-          <span data-cart-items="2">
-            <i class="fe fe-shopping-cart"></i>
-          </span>
-        </a>
-      </li>
-    </ul>
-
-  </div>
-</nav>
-<div class="navbar navbar-topbar navbar-expand-xl navbar-light bg-light">
-    <div class="container">
-        <div class="mr-xl-8">
-            {{ block.subtitle|safe }}
-        </div>
-        <!-- Nav -->
-        <ul class="nav navbar-nav ml-auto">
-            <li class="nav-item dropdown">
-                <!-- Toggle -->
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">USD</a>
-                <!-- Menu -->
-                <div class="dropdown-menu minw-0">
-                    <a class="dropdown-item" href="#!">USD</a>
-                    <a class="dropdown-item" href="#!">CNY</a>
-                    <a class="dropdown-item" href="#!">EUR</a>
+<nav class="navbar navbar-expand navbar-light border-0 pt-0 pt-lg-4 pb-4">
+    <div class="container-fluid">
+        <form class="navbar-form w-100" style="max-width: 550px;">
+            <div class="input-group">
+                <input class="form-control form-control-underline border-dark" type="search"
+                       placeholder="{{ block.remarks or '' }}">
+                <div class="input-group-append">
+                    <div class="input-group-text input-group-underline border-dark">
+                        <i class="fe fe-search"></i>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <ul class="navbar-nav flex-row">
+        {% for l in block.children %}
+            {% if l.children %}
+            <li class="nav-item">
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle" href="{{ l.url }}" role="button"
+                       data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        {{ l.title|safe }}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                    {% for sl in l.children %}
+                    {% if sl.title %}
+                        <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
+                    {% else %}
+                        <div class="dropdown-divider"></div>
+                    {% endif %}
+                    {% endfor %}
+                    </div>
                 </div>
             </li>
-        </ul>
-    </div>
-</div>
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
-    <div class="container">
-        <a class="navbar-brand mb-0 h1" href="/">
-            {% if block.icon %}
-                <img src="{{ block.icon }}" style="height:30px;max-height:30px;">
             {% else %}
-                {{ block.title }}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ l.url }}">{{ l.title|safe }}</a>
+            </li>
             {% endif %}
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-                aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-collapse collapse" id="navbarCollapse">
-            <ul class="navbar-nav ml-auto">
-                {% for l in block.children %}
-                    {% if l.children %}
-                    <li class="nav-item">
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{ l.url }}" role="button"
-                               data-toggle="dropdown"
-                               aria-haspopup="true" aria-expanded="false">
-                                {{ l.title|safe }}
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                            {% for sl in l.children %}
-                            {% if sl.title %}
-                                <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
-                            {% else %}
-                                <div class="dropdown-divider"></div>
-                            {% endif %}
-                            {% endfor %}
-                            </div>
-                        </div>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ l.url }}">{{ l.title|safe }}</a>
-                    </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
+        {% endfor %}
+        </ul>
     </div>
 </nav>

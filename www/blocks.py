@@ -10,7 +10,9 @@
 """
 
 BLOCKS = [
-    # Headers
+    #
+    # Basic
+    #
     {
         'key': 'header',
         'icon': '/static/img/logo.png',
@@ -26,7 +28,6 @@ BLOCKS = [
             {'icon': 'fe fe-log-out', 'title': '退出', 'url': '/logout'}
         ]
     },
-    # Promos
     {
         'key': 'promo',
         'title': 'Welcome to <span class="text-primary">flask-seed</span>.<br>Develop anything.',
@@ -37,7 +38,6 @@ BLOCKS = [
             {'title': 'View all pages<i class="fe fe-arrow-right d-none d-md-inline ml-2"></i>', 'url': '/dashboard', 'cls': 'btn btn-outline-primary'},
         ]
     },
-    # Features
     {
         'key': 'features',
         'title': '',
@@ -78,7 +78,6 @@ BLOCKS = [
             {'title': '组件化', 'subtitle': '定义数据结构时可以指定字段使用的格式，生成项目时可以生成对应的组件'}
         ]
     },
-    # Pricings
     {
         'key': 'pricing',
         'icon': 'PRICING',
@@ -107,7 +106,6 @@ BLOCKS = [
             },
         ]
     },
-    # Footers
     {
         'key': 'footer',
         'title': 'flask-seed',
@@ -145,8 +143,8 @@ BLOCKS = [
             },
             {'title': 'Catelog', 'url': 'javascript:coming();'},
             {'title': 'Blog', 'url': 'javascript:coming();'},
-            {'title': 'Account', 'url': 'javascript:coming();'},
-            {'title': '<i class="fe fe-search d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-user d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-heart d-inline"></i>', 'url': 'javascript:coming();'},
             {'title': '<i class="fe fe-shopping-cart d-inline"></i>', 'url': 'javascript:coming();'},
         ],
     },
@@ -170,10 +168,11 @@ BLOCKS = [
     {
         'key': 'shop-horizontal-topnav',
         'children': [
-            {'title': 'Catelog', 'url': 'javascript:coming();'},
-            {'title': 'Blog', 'url': 'javascript:coming();'},
-            {'title': 'Account', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-user d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-heart d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-shopping-cart d-inline"></i>', 'url': 'javascript:coming();'},
         ],
+        'remarks': 'Search for items and brands',
     },
     {
         'key': 'shop-welcome',
@@ -199,7 +198,8 @@ BLOCKS = [
         ]
     },
     {
-        'key': 'shop-welcome-boxed',
+        'key': 'shop-welcome-summer-sales',
+        'title': '2023 Summer Collection',
         'images': [
             '/static/assets/img/covers/cover-26.jpg',
             '/static/assets/img/covers/cover-27.jpg',
@@ -228,7 +228,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'shop-categories-asymmetric',
+        'key': 'shop-categories-must-haves',
         'title': 'Our must haves',
         'content': 'Open created shall two he second moving whose. He face whose two upon, fowl behold waters. Fly there their day creepeth. Darkness beginning spirit after.',
         'remarks': 'Third. For morning whales saw were had seed can\'t divide it light shall moveth, us blessed given.',
@@ -245,7 +245,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'shop-products-grid',
+        'key': 'shop-products-best-sellers',
         'tag': 'Monthly Top Sellings',
         'title': 'Best Sellers',
         'children': [
@@ -278,13 +278,13 @@ BLOCKS = [
                 'images': ['/static/assets/img/products/product-124.jpg', '/static/assets/img/products/product-11.jpg']
             },
             {
-                'tag': 'NEW', 'title': 'Heel strappy Sandals', 'subtitle': 'Shoes', 'content': '$90.00',
+                'tag': 'HOT', 'title': 'Heel strappy Sandals', 'subtitle': 'Shoes', 'content': '$90.00',
                 'images': ['/static/assets/img/products/product-12.jpg']
             },
         ],
     },
     {
-        'key': 'shop-products-asymmetric',
+        'key': 'shop-products-on-sale',
         'children': [
             {
                 'title': 'Floral Cotton midi Dress', 'content': '$59.00',
@@ -295,7 +295,7 @@ BLOCKS = [
                 'image': '/static/assets/img/products/product-66.jpg',
             },
             {
-                'tag': 'HOT', 'title': 'Leather heel Sandals', 'content': '$89.99',
+                'tag': 'SALE', 'title': 'Leather heel Sandals', 'content': '$89.99',
                 'image': '/static/assets/img/products/product-67.jpg',
             },
             {
@@ -313,25 +313,7 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'shop-banner',
-        'tag': 'Summer trends',
-        'title': 'Our must haves',
-        'content': 'Male his our upon seed had said wherein their i great wherein under you\'ll deep first multiply. Fish waters they\'re herb shall saying.',
-        'image': '/static/assets/img/covers/cover-10.jpg',
-        'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
-    },
-    {
-        'key': 'shop-banner-discount',
-        'subtitle': 'Summer Styles',
-        'title': '50% OFF',
-        'image': '/static/assets/img/covers/cover-17.jpg',
-        'actions': [
-            {'title': 'Shop Woman', 'url': 'javascript:coming();'},
-            {'title': 'Shop Men', 'url': 'javascript:coming();'},
-        ],
-    },
-    {
-        'key': 'shop-products-carousel',
+        'key': 'shop-products-new-arrivals',
         'tag': 'Summer new products',
         'title': 'New Arrivals',
         'children': [
@@ -340,7 +322,7 @@ BLOCKS = [
                 'image': '/static/assets/img/products/product-6.jpg',
             },
             {
-                'tag': 'HOT', 'title': 'Suede cross body Bag', 'content': '<span class="text-decoration-line-through">$85.00</span><span class="ml-2 text-danger">$50.00</span>',
+                'tag': 'NEW', 'title': 'Suede cross body Bag', 'content': '<span class="text-decoration-line-through">$85.00</span><span class="ml-2 text-danger">$50.00</span>',
                 'image': '/static/assets/img/products/product-10.jpg',
             },
             {
@@ -366,7 +348,103 @@ BLOCKS = [
         ],
     },
     {
-        'key': 'shop-reviews-carousel',
+        'key': 'shop-products-summer-sale',
+        'children': [
+            {
+                'title': '50% off', 'subtitle': 'Summer Styles', 'remarks': 'Enjoy an extra', 'cls': 'white',
+                'image': '/static/assets/img/products/product-73.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-74.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-75.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-76.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-77.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-78.jpg',
+            },
+            {
+                'tag': 'NEW', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-79.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-80.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-81.jpg',
+            },
+            {
+                'tag': 'SALE', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-82.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-83.jpg',
+            },
+            {
+                'title': 'Watch Collection',
+                'image': '/static/assets/img/products/product-84.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'},
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-85.jpg',
+            },
+            {
+                'tag': 'NEW', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-86.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-87.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-88.jpg',
+            },
+            {
+                'tag': 'SALE', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-89.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-90.jpg',
+            },
+        ],
+    },
+    {
+        'key': 'shop-banner',
+        'tag': 'Summer trends',
+        'title': 'Our must haves',
+        'content': 'Male his our upon seed had said wherein their i great wherein under you\'ll deep first multiply. Fish waters they\'re herb shall saying.',
+        'image': '/static/assets/img/covers/cover-10.jpg',
+        'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
+    },
+    {
+        'key': 'shop-banner-discount',
+        'subtitle': 'Summer Styles',
+        'title': '50% OFF',
+        'image': '/static/assets/img/covers/cover-17.jpg',
+        'actions': [
+            {'title': 'Shop Woman', 'url': 'javascript:coming();'},
+            {'title': 'Shop Men', 'url': 'javascript:coming();'},
+        ],
+    },
+    {
+        'key': 'shop-reviews',
         'tag': 'What buyers say',
         'title': 'Latest buyers Reviews',
         'children': [

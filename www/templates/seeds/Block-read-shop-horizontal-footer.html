@@ -1,33 +1,18 @@
-{% set block = load_block('footer-shop') %}
-<footer>
-    <div class="py-7 bg-dark bg-cover" style="background-image: url(/static/assets/img/patterns/pattern-2.svg)">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <h1 class="mb-5 text-white">{{ block.title }}</h1>
-                    <ul class="list-inline">
-                        {% for c in block.children %}
+{% set block = load_block('shop-footer') %}
+<footer class="p-5 bg-dark">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <h1 class="mb-7 mb-xl-0 text-white">{{ block.title }}</h1>
+            </div>
+            <div class="col-auto">
+                <ul class="list-inline mb-0">
+                    {% for c in block.children %}
                         <li class="list-inline-item px-3">
                             <a class="text-gray-300" href="{{ c.url }}">{{ c.title }}</a>
                         </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="py-4">
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <p class="mb-3 mb-md-0 font-size-xxs text-muted">{{ block.remarks|safe }}</p>
-                </div>
-                <div class="col-auto">
-                    <img class="footer-payment" src="/static/assets/img/payments/mastercard.svg" alt="...">
-                    <img class="footer-payment" src="/static/assets/img/payments/visa.svg" alt="...">
-                    <img class="footer-payment" src="/static/assets/img/payments/paypal.svg" alt="...">
-                    <img class="footer-payment" src="/static/assets/img/payments/maestro.svg" alt="...">
-                </div>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

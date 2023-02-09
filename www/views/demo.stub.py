@@ -8,7 +8,7 @@ from flask_login import current_user
 from py3seed import populate_model, populate_search
 from .common import get_id
 from www.tools import auth_permission
-from www.models import DemoProjectDashboard, DemoProject, DemoUser, DemoTeam, DemoTask
+from www.models import DemoProjectDashboard, DemoProject, DemoUser, DemoTeam, DemoTask, Block
 
 
 demo = Blueprint('demo', __name__)
@@ -249,5 +249,41 @@ def task_edit_demo_task_form():
         current_app.logger.info(f'Successfully update demo task {id_}')
     #
     return jsonify(error=0, message='Save demo task successfully.', id=id_)
+
+
+@demo.route('/shop-index')
+@auth_permission
+def shop_index():
+    """ 商城. """
+    id_ = get_id(int)
+    block = Block.find_one(id_)
+    if not block:
+        abort(404)
+    #
+    return render_template('demo/shop-index.html', block=block)
+
+
+@demo.route('/shop-index-asymmetric')
+@auth_permission
+def shop_index_asymmetric():
+    """ 商城. """
+    id_ = get_id(int)
+    block = Block.find_one(id_)
+    if not block:
+        abort(404)
+    #
+    return render_template('demo/shop-index-asymmetric.html', block=block)
+
+
+@demo.route('/shop-index-horizontal')
+@auth_permission
+def shop_index_horizontal():
+    """ 商城. """
+    id_ = get_id(int)
+    block = Block.find_one(id_)
+    if not block:
+        abort(404)
+    #
+    return render_template('demo/shop-index-horizontal.html', block=block)
 
 

@@ -27,36 +27,6 @@ blueprints:
         layout: |-
           error-simple
 
-  - name: shop
-    params: {extends: layout-shop}
-    views:
-      - name: index
-        params: {title: 商城, actions: [], has_gutters: False}
-        layout: |-
-          Block-read-shop-topnav
-          Block-read-shop-welcome
-          Block-read-shop-categories
-          Block-read-shop-products-grid
-          Block-read-shop-banner
-          Block-read-shop-reviews-carousel
-          Block-read-shop-social
-          Block-read-shop-footer
-
-      - name: index-asymmetric
-        params: {title: 商城, actions: [], has_gutters: False}
-        layout: |-
-          Block-read-shop-topnav-boxed
-          Block-read-shop-welcome-boxed
-          Block-read-shop-products-asymmetric
-          Block-read-shop-banner-boxed
-          Block-read-shop-categories-asymmetric
-          Block-read-shop-footer
-
-      - name: index-horizontal
-        params: {extends: layout-shop-horizontal, title: 商城, actions: [], has_gutters: False}
-        layout: |-
-          Block-read-shop-products-masonry
-
   - name: demo
     params: {extends: layout-dash}
     views:
@@ -105,5 +75,30 @@ blueprints:
         layout: |-
           DemoTask.project-summary?is_card=true#4, DemoTask-form?is_main_seed=true&is_card=true#8
 
+      - name: shop-index
+        params: {extends: layout-shop, title: 商城, actions: [], has_gutters: False}
+        layout: |-
+          Block-read-shop-topnav
+          Block-read-shop-welcome
+          Block-read-shop-categories
+          Block-read-shop-products-grid
+          Block-read-shop-banner
+          Block-read-shop-reviews-carousel
+          Block-read-shop-social
+          Block-read-shop-footer
 
+      - name: shop-index-asymmetric
+        params: {extends: layout-shop, title: 商城, actions: [], has_gutters: False}
+        layout: |-
+          Block-read-shop-topnav-boxed
+          Block-read-shop-welcome-boxed
+          Block-read-shop-products-asymmetric
+          Block-read-shop-banner-boxed
+          Block-read-shop-categories-asymmetric
+          Block-read-shop-footer
+
+      - name: shop-index-horizontal
+        params: {extends: layout-shop-horizontal, title: 商城, actions: [], has_gutters: False}
+        layout: |-
+          Block-read-shop-products-masonry
 

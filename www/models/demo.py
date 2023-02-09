@@ -10,12 +10,14 @@
 """
 
 from datetime import datetime
-from typing import List
+from typing import List, ForwardRef
 
 from bson import ObjectId
 from flask_login import UserMixin
 from py3seed import SimpleEnum, CacheModel, ModelField as Field, RelationField as Relation, register, BaseModel, Format, Comparator
 from werkzeug.utils import cached_property
+
+from .common import Block
 
 
 class DemoSeries(BaseModel):
@@ -42,7 +44,7 @@ class DemoTeam(CacheModel):
     code: str = Field(required=False, title='邀请码')
     remarks: str = Field(required=False, format_=Format.TEXTAREA, title='备注')
     #
-    update_time: datetime = Field(required=False, title='最近更新时间')
+    update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, icon='clock', title='创建时间')
     #
     __icon__ = 'users'
@@ -98,7 +100,7 @@ class DemoUser(CacheModel, UserMixin):
     )
     team_join_time: datetime = Field(title='加入团队的时间')
     #
-    update_time: datetime = Field(required=False, title='最近更新时间')
+    update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, icon='clock', title='创建时间')
     #
     __icon__ = 'user'
@@ -192,7 +194,7 @@ class DemoProject(CacheModel):
     )
     activities: List[DemoActivity] = Field(required=False, format_=Format.TIMELINE, icon='activity', title='操作')  # 按照时间倒序
     # 其他
-    update_time: datetime = Field(required=False, title='最近更新时间')
+    update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, icon='clock', title='创建时间')
     #
     __icon__ = 'briefcase'
@@ -236,7 +238,7 @@ class DemoTask(CacheModel):
         back_field_format=Format.TABLE, back_field_icon='check-square', back_field_title='任务列表',
     )
     #
-    update_time: datetime = Field(required=False, title='最近更新时间')
+    update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, title='创建时间')
     #
     __icon__ = 'check-square'
@@ -275,6 +277,89 @@ class DemoProjectDashboard(CacheModel):
     active_projects_count, active_projects_value, members_count, tasks_count
     active_projects#8, recent_activities#4
     '''
+
+
+class DemoAttributeOption(BaseModel):
+    """ 属性选项. """
+    title: str = Field(title='名称')
+    value: str = Field(title='值')
+
+
+class DemoAttribute(CacheModel):
+    """ 属性. """
+    name: str = Field(icon='type', title='名称')
+    required: bool = Field(title='是否必填')
+    unit: str = Field(required=False, title='单位')
+    options: List[DemoAttributeOption] = Field(format_=Format.TABLE, title='选项')
+    remarks: str = Field(required=False, format_=Format.TEXTAREA, title='备注')
+
+
+class DemoCategory(CacheModel):
+    """ 类目. """
+    name: str = Field(icon='type', title='名称')
+    parent: ForwardRef('DemoCategory') = Field(required=False, title='父分类')
+    #
+    attrs: List[DemoAttribute] = Relation(required=False, format_=Format.TABLE, title='属性')
+    promos: List[Block] = Field(required=False, title='推广')
+    #
+    update_time: datetime = Field(required=False, title='更新时间')
+    create_time: datetime = Field(default=datetime.now, title='创建时间')
+    #
+    __icon__ = 'grid'
+    __title__ = '类目'
+    __columns__ = ['name', 'parent', 'create_time']
+
+
+class DemoProductAttribute(BaseModel):
+    """ 产品属性值, e.g, 产品有面料属性, 面料为莫代尔, 这些属性不影响SKU. """
+    attr: DemoAttribute = Relation(title='属性')
+    value: str = Field(title='属性值', depends=lambda x: x.attr.options)
+    is_sku: bool = Field(default=False, title='是否SKU属性')  # 产品属性是否是SKU属性, 保存SKU时同步更新, 方便查询
+    image: str = Field(required=False, format_=Format.IMAGE, title='属性图片')  # e.g, 颜色属性往往会有不同的小图
+
+
+class DemoProduct(CacheModel):
+    """ 产品. """
+    no: str = Field(title='')
+    name: str = Field(icon='type', title='名称')
+    category: DemoCategory = Relation(
+        icon='grid', title='分类',
+        back_field_name='products', back_field_is_list=True, back_field_order=[('create_time', -1)],
+        back_field_format=Format.GRID, back_field_icon='shopping-bag', back_field_title='参与项目', )
+    # 基本信息
+    price: float = Field(default=0., icon='dollar-sign', title='价格')
+    original_price: float = Field(required=False, title='原价')
+    images: List[str] = Field(required=False, format_=Format.IMAGE, title='图片列表')
+    description: str = Field(required=False, format_=Format.RTE, title='介绍')
+    # 属性
+    attrs: List[DemoProductAttribute] = Field(format_=Format.TABLE, title='属性')
+    # 客户点评
+    #
+    update_time: datetime = Field(required=False, title='更新时间')
+    create_time: datetime = Field(default=datetime.now, title='创建时间')
+    #
+    __icon__ = 'shopping-bag'
+    __title__ = '产品'
+    __columns__ = ['image', 'name', 'category', 'price', 'create_time']
+
+
+class DemoSku(CacheModel):
+    """ 产品的库存信息. """
+    no: str = Field(title='货号')
+    product: DemoProduct = Relation(
+        icon='shopping-bag', title='产品',
+        back_field_name='skus', back_field_is_list=True, back_field_order=[('create_time', -1)],
+        back_field_format=Format.TABLE, back_field_icon='database', back_field_title='参与项目', )
+    #
+    attrs: List[DemoProductAttribute] = Field(format_=Format.TABLE, title='属性')  # 一个SKU对应多个属性, 如颜色和尺码
+    quanity: int = Field(default=0, title='可销售数量')
+    #
+    update_time: datetime = Field(required=False, title='更新时间')
+    create_time: datetime = Field(default=datetime.now, title='创建时间')
+    #
+    __icon__ = 'database'
+    __title__ = 'SKU'
+    __columns__ = ['no', 'attrs', 'quanity', 'create_time']
 
 
 class DemoEnum(SimpleEnum):
@@ -324,7 +409,7 @@ class DemoPerson(CacheModel):
     remarks: str = Field(required=False, format_=Format.TEXTAREA, title='备注', description='个人简介')
     has_insurance: bool = Field(required=False, format_=Format.SWITCH, title='是否缴纳社保')
     #
-    update_time: datetime = Field(required=False, title='最近更新时间')
+    update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, title='创建时间')
 
     __columns__ = ['avatar', 'gender', 'birthday', 'age', 'height', 'weight', 'create_time']

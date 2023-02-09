@@ -447,3 +447,24 @@ def task_edit_demo_task_form_search_demo_users():
     current_app.logger.info(f'Try to search demo user at page {page} by {condition}, sort by {sort}')
     demo_users, pagination = DemoUser.search(condition, page, projection=['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time'], sort=sort)
     return jsonify(error=0, message='Search demo user successfully.', pagination=dict(pagination), demo_users=demo_users)
+
+
+@demo.route('/shop-index')
+@auth_permission
+def shop_index():
+    """ 商城. """
+    return render_template('demo/shop-index.html')
+
+
+@demo.route('/shop-index-asymmetric')
+@auth_permission
+def shop_index_asymmetric():
+    """ 商城. """
+    return render_template('demo/shop-index-asymmetric.html')
+
+
+@demo.route('/shop-index-horizontal')
+@auth_permission
+def shop_index_sidenav():
+    """ 商城. """
+    return render_template('demo/shop-index-horizontal.html')

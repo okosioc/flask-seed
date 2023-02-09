@@ -136,9 +136,9 @@ BLOCKS = [
             {
                 'title': 'Home', 'url': '#',
                 'children': [
-                    {'title': 'Default', 'url': '/shop/index'},
-                    {'title': 'Asymmetric', 'url': '/shop/index-asymmetric'},
-                    {'title': 'Horizontal', 'url': '/shop/index-horizontal'},
+                    {'title': 'Default', 'url': '/demo/shop-index'},
+                    {'title': 'Asymmetric', 'url': '/demo/shop-index-asymmetric'},
+                    {'title': 'Horizontal', 'url': '/demo/shop-index-horizontal'},
                 ],
             },
             {'title': 'Catelog', 'url': 'javascript:coming();'},
@@ -155,9 +155,9 @@ BLOCKS = [
             {
                 'title': 'Home', 'url': '#',
                 'children': [
-                    {'title': 'Default', 'url': '/shop/index'},
-                    {'title': 'Asymmetric', 'url': '/shop/index-asymmetric'},
-                    {'title': 'Horizontal', 'url': '/shop/index-horizontal'},
+                    {'title': 'Default', 'url': '/demo/shop-index'},
+                    {'title': 'Asymmetric', 'url': '/demo/shop-index-asymmetric'},
+                    {'title': 'Horizontal', 'url': '/demo/shop-index-horizontal'},
                 ],
             },
             {'title': 'Catelog', 'url': 'javascript:coming();'},

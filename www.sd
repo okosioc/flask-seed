@@ -76,7 +76,7 @@ blueprints:
           DemoTask.project-summary?is_card=true#4, DemoTask-form?is_main_seed=true&is_card=true#8
 
       - name: shop-index
-        params: {extends: layout-shop, title: 商城, actions: [], has_gutters: False}
+        params: {extends: layout-shop, title: 商城首页, actions: [], has_gutters: False}
         layout: |-
           Block-read-shop-topnav
           Block-read-shop-welcome
@@ -88,7 +88,7 @@ blueprints:
           Block-read-shop-footer
 
       - name: shop-index-asymmetric
-        params: {extends: layout-shop, title: 商城, actions: [], has_gutters: False}
+        params: {extends: layout-shop, title: 商城首页, actions: [], has_gutters: False}
         layout: |-
           Block-read-shop-topnav-boxed
           Block-read-shop-welcome-boxed
@@ -98,7 +98,14 @@ blueprints:
           Block-read-shop-footer
 
       - name: shop-index-horizontal
-        params: {extends: layout-shop-horizontal, title: 商城, actions: [], has_gutters: False}
+        params: {extends: layout-shop-horizontal, title: 商城首页, actions: [], has_gutters: False}
         layout: |-
           Block-read-shop-products-masonry
+
+      - name: shop-category
+        params: {extends: layout-shop, title: 商城类目, actions: [], has_gutters: False}
+        layout: |-
+          Block-read-shop-topnav
+          DemoCategory-read-default
+          Block-read-shop-footer
 

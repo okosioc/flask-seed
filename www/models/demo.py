@@ -12,7 +12,6 @@
 from datetime import datetime
 from typing import List, ForwardRef
 
-from bson import ObjectId
 from flask_login import UserMixin
 from py3seed import SimpleEnum, CacheModel, ModelField as Field, RelationField as Relation, register, BaseModel, Format, Comparator
 from werkzeug.utils import cached_property
@@ -285,15 +284,17 @@ class DemoAttributeOption(BaseModel):
     value: str = Field(title='值')
 
 
+@register
 class DemoAttribute(CacheModel):
     """ 属性. """
-    name: str = Field(icon='type', title='名称')
-    required: bool = Field(title='是否必填')
+    key: str = Field(title='唯一标识')  # 属性唯一标识, 一般为小写, 如, color
+    name: str = Field(icon='type', title='名称')  # 如, 颜色
     unit: str = Field(required=False, title='单位')
     options: List[DemoAttributeOption] = Field(format_=Format.TABLE, title='选项')
     remarks: str = Field(required=False, format_=Format.TEXTAREA, title='备注')
 
 
+@register
 class DemoCategory(CacheModel):
     """ 类目. """
     name: str = Field(icon='type', title='名称')
@@ -314,10 +315,12 @@ class DemoProductAttribute(BaseModel):
     """ 产品属性值, e.g, 产品有面料属性, 面料为莫代尔, 这些属性不影响SKU. """
     attr: DemoAttribute = Relation(title='属性')
     value: str = Field(title='属性值', depends=lambda x: x.attr.options)
+    is_required: bool = Field(default=False, title='是否必填')
     is_sku: bool = Field(default=False, title='是否SKU属性')  # 产品属性是否是SKU属性, 保存SKU时同步更新, 方便查询
     image: str = Field(required=False, format_=Format.IMAGE, title='属性图片')  # e.g, 颜色属性往往会有不同的小图
 
 
+@register
 class DemoProduct(CacheModel):
     """ 产品. """
     no: str = Field(title='')
@@ -343,6 +346,7 @@ class DemoProduct(CacheModel):
     __columns__ = ['image', 'name', 'category', 'price', 'create_time']
 
 
+@register
 class DemoSku(CacheModel):
     """ 产品的库存信息. """
     no: str = Field(title='货号')
@@ -360,63 +364,3 @@ class DemoSku(CacheModel):
     __icon__ = 'database'
     __title__ = 'SKU'
     __columns__ = ['no', 'attrs', 'quanity', 'create_time']
-
-
-class DemoEnum(SimpleEnum):
-    """ 状态. """
-    FOO = 'foo', 'Foo'
-    BAR = 'bar', 'Bar'
-
-
-class DemoType(BaseModel):
-    """ 类型演示. """
-    str_field: str
-    bool_field: bool
-    int_field: int
-    float_field: float
-    datetime_field: datetime
-    object_id_field: ObjectId
-    enum_field: DemoEnum
-
-
-class DemoList(BaseModel):
-    """ 列表演示. """
-    str_fields: List[str]
-    bool_fields: List[bool]
-    int_fields: List[int]
-    float_fields: List[float]
-    datetime_fields: List[datetime]
-    object_id_fields: List[ObjectId]
-    enum_fields: List[DemoEnum]
-
-
-class DemoPersonGender(SimpleEnum):
-    """ 性别. """
-    MALE = 'male', '男'
-    FEMALE = 'female', '女'
-
-
-@register
-class DemoPerson(CacheModel):
-    """ 通过对个人数据的演示, 测试标题/注释/单位等常用有意义字段. """
-    name: str = Field(searchable=Comparator.LIKE, title='名字', description='姓甚名谁?')
-    gender: DemoPersonGender = Field(searchable=Comparator.EQ, title='性别')
-    birthday: datetime = Field(required=False, format_=Format.DATE, title='生日')
-    age: int = Field(required=False, searchable=Comparator.GTE, title='年龄', description='贵庚?', unit='岁')
-    height: float = Field(required=False, title='身高', unit='cm')
-    weight: float = Field(required=False, title='体重', unit='kg')
-    avatar: str = Field(title='头像', format_=Format.AVATAR)
-    remarks: str = Field(required=False, format_=Format.TEXTAREA, title='备注', description='个人简介')
-    has_insurance: bool = Field(required=False, format_=Format.SWITCH, title='是否缴纳社保')
-    #
-    update_time: datetime = Field(required=False, title='更新时间')
-    create_time: datetime = Field(default=datetime.now, title='创建时间')
-
-    __columns__ = ['avatar', 'gender', 'birthday', 'age', 'height', 'weight', 'create_time']
-    __layout__ = '''
-    name, gender
-    birthday, age
-    height, weight
-    avatar
-    remarks
-    '''

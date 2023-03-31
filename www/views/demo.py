@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, current_app, request, abort, jsoni
 from py3seed import populate_model, populate_search
 from werkzeug.security import generate_password_hash
 
-from www.models import DemoProjectDashboard, DemoTeam, DemoUser, DemoProject, DemoTask, DemoUserRole, DemoActivity
+from www.models import DemoProjectDashboard, DemoTeam, DemoUser, DemoProject, DemoTask, DemoUserRole, DemoActivity, DemoCategory, DemoAttribute, DemoAttributeOption
 from www.tools import auth_permission, str_datetime
 from .common import get_id
 
@@ -449,22 +449,110 @@ def task_edit_demo_task_form_search_demo_users():
     return jsonify(error=0, message='Search demo user successfully.', pagination=dict(pagination), demo_users=demo_users)
 
 
+#
+# 商城
+#
+attr_color = DemoAttribute(
+    key='color',
+    name='Color',
+    options=[
+        DemoAttributeOption(title='Black', value='#12263F'),
+        DemoAttributeOption(title='White', value='#EDF2F9'),
+        DemoAttributeOption(title='Blue', value='#2C7BE5'),
+        DemoAttributeOption(title='Red', value='#E63757'),
+        DemoAttributeOption(title='Gray', value='#283E59'),
+        DemoAttributeOption(title='Pink', value='#FF679B'),
+        DemoAttributeOption(title='Green', value='#00D97E'),
+    ]
+)
+attr_color.save()
+attr_size = DemoAttribute(
+    key='size',
+    name='Size',
+    options=[
+        DemoAttributeOption(title='XS', value='XS'),
+        DemoAttributeOption(title='S', value='S'),
+        DemoAttributeOption(title='M', value='M'),
+        DemoAttributeOption(title='L', value='L'),
+        DemoAttributeOption(title='XL', value='XL'),
+        DemoAttributeOption(title='XXL', value='XXL'),
+        DemoAttributeOption(title='One Size', value='ONE'),
+    ],
+)
+attr_size.save()
+#
+category_clothing = DemoCategory(
+    name='Clothing',
+    attrs=[attr_color, attr_size],
+    promos=[
+        {
+            'title': 'Summer Sale', 'subtitle': '-70%', 'content': 'with promo code CN67EW*',
+            'cls': 'col-12 col-md-6 col-lg-5 col-xl-4 offset-md-2',
+            'image': '/static/assets/img/covers/cover-5.jpg',
+            'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'}
+        },
+        {
+            'title': 'Summer Collection', 'content': 'So called give, one whales tree seas dry place own day, winged tree created spirit.',
+            'cls': 'col-12 col-md-6 col-lg-5 col-xl-4 offset-md-7',
+            'image': '/static/assets/img/covers/cover-23.jpg',
+            'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'}
+        },
+        {
+            'title': 'Summer Styles', 'subtitle': '<span class="text-white">50% OFF</span>',
+            'cls': 'col-12 text-center text-white',
+            'image': '/static/assets/img/covers/cover-16.jpg',
+            'action': {'title': 'Shop Women <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'outline-white', 'url': 'javascript:coming();'}
+        },
+    ],
+)
+category_clothing.save()
+
+
 @demo.route('/shop-index')
 @auth_permission
 def shop_index():
-    """ 商城. """
+    """ 商城首页. """
     return render_template('demo/shop-index.html')
 
 
 @demo.route('/shop-index-asymmetric')
 @auth_permission
 def shop_index_asymmetric():
-    """ 商城. """
+    """ 商城首页. """
     return render_template('demo/shop-index-asymmetric.html')
 
 
 @demo.route('/shop-index-horizontal')
 @auth_permission
 def shop_index_sidenav():
-    """ 商城. """
+    """ 商城首页. """
     return render_template('demo/shop-index-horizontal.html')
+
+
+@demo.route('/shop-category')
+@auth_permission
+def shop_category():
+    """ 商城类目. """
+    id_ = get_id(int)
+    if not id_:
+        id_ = 1
+    #
+    demo_category = DemoCategory.find_one(id_)
+    if not demo_category:
+        abort(404)
+    # filters is {DemoAttribute.key: [DemoAttributeOption]}, meaning selected attribute options
+    # e.g, {size: [l, xl], color: [red, blue]}
+    filters = {}
+    for a in demo_category.attrs:
+        params = request.values.getlist(a.key)
+        selected_options = []
+        # check if request param has valid value
+        for p in params:
+            found_option = next((o for o in a.options if o.value == p.strip()), None)
+            if found_option:
+                selected_options.append(found_option)
+        #
+        if selected_options:
+            filters[a.key] = selected_options
+    #
+    return render_template('demo/shop-category.html', demo_category=demo_category, filters=filters)

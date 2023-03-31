@@ -1,5 +1,5 @@
-{% extends "layout-shop-horizontal.html" %}
-{% set title = '商城首页' %}
+{% extends "layout-shop.html" %}
+{% set title = '商城类目' %}
 {% set breadcrumb = {
     'subtitle': '',
     'title': title,
@@ -13,7 +13,17 @@
 {% block content %}
 <div class="row no-gutters">
     <div class="col-lg">
-        {% include "seeds/Block-read-shop-products-masonry.html" %}
+        {% include "seeds/Block-read-shop-topnav.html" %}
+    </div>
+</div>
+<div class="row no-gutters">
+    <div class="col-lg">
+        {% include "seeds/DemoCategory-read-default.html" %}
+    </div>
+</div>
+<div class="row no-gutters">
+    <div class="col-lg">
+        {% include "seeds/Block-read-shop-footer.html" %}
     </div>
 </div>
 {% endblock %}

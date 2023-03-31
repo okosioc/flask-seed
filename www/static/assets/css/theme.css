@@ -15256,7 +15256,8 @@ a:focus, button:focus {
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
-  align-self: center !important;
+  display: inline-block !important;
+  float: none !important;
 }
 
 .form-control[readonly] {
@@ -15555,6 +15556,73 @@ a.card-img-overlay:hover {
   height: 100%;
   cursor: pointer;
   opacity: 0;
+}
+
+.custom-control-color {
+  padding-left: 0;
+}
+.custom-control-color .custom-control-label {
+  padding-left: 1.875rem;
+}
+.custom-control-color .custom-control-label::before, .custom-control-color .custom-control-label::after {
+  left: 0;
+  top: calc((1em * 1.5 - 1.375rem) / 2);
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+}
+.custom-control-color .custom-control-label::before {
+  background-color: currentColor !important;
+  color: inherit !important;
+}
+.custom-control-color .custom-control-label:empty {
+  padding-left: 1.375rem;
+}
+.custom-control-color .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: currentColor;
+}
+.custom-control-color .custom-control-input:checked ~ .custom-control-label::after {
+  background-color: rgba(0, 0, 0, 0.05);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3e%3cpath fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M9 1L3.5 7L1 4.27273'/%3e%3c/svg%3e");
+}
+.custom-control-color .custom-control-input:disabled ~ .custom-control-label {
+  text-decoration: none;
+}
+.custom-control-color .custom-control-input:disabled ~ .custom-control-label > span {
+  color: #95AAC9 !important;
+  text-decoration: line-through;
+}
+
+.custom-control-size {
+  padding-left: 0;
+}
+.custom-control-size .custom-control-label {
+  min-width: 3rem;
+  padding: 0.5rem;
+  text-align: center;
+  border: 1px solid #E3EBF6;
+}
+.custom-control-size .custom-control-label::before, .custom-control-size .custom-control-label::after {
+  display: none;
+}
+.custom-control-size .custom-control-input:checked ~ .custom-control-label {
+  border-color: currentColor;
+}
+.custom-control-size .custom-control-input[disabled] ~ .custom-control-label {
+  background-color: #EDF2F9;
+}
+
+.dropdown-toggle-right::after {
+  float: right;
+}
+
+.dropdown-toggle[data-toggle=collapse]::after {
+  transition: all 0.1s ease-in-out;
+  transform-origin: center center;
+}
+
+.dropdown-toggle[data-toggle=collapse][aria-expanded=true]::after {
+  transform: rotate(180deg);
 }
 
 .field-group {

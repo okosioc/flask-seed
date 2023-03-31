@@ -8,13 +8,13 @@
                     <div class="{{ c.cls }}">
                         <h1>{{ c.title|safe }}</h1>
                         {% if c.subtitle %}
-                        <h2 class="display-1 text-primary">{{ c.subtitle|safe }}</h2>
+                        <h2 class="display-1 text-danger">{{ c.subtitle|safe }}</h2>
                         {% endif %}
                         {% if c.content %}
                         <p class="font-size-lg mb-5">{{ c.content|safe }}</p>
                         {% endif %}
                         {% if c.action %}
-                        <a class="btn btn-{{ c.action.cls }}" href="{{ c.action.url }}">{{ c.action.title|safe }}</a>
+                        <a class="btn btn-{{ c.action.cls }} rounded-0" href="{{ c.action.url }}">{{ c.action.title|safe }}</a>
                         {% endif %}
                     </div>
                 </div>

@@ -216,7 +216,8 @@ $my-orange: #ff8700;
 
 .breadcrumb-item {
   + .breadcrumb-item::before {
-    align-self: center !important;
+    display: inline-block !important;
+    float: none !important;
   }
 }
 
@@ -599,8 +600,113 @@ a.card-img-overlay {
 }
 
 //
+// checkbox
+//
+
+.custom-control-color {
+  padding-left: 0;
+
+  .custom-control-label {
+    padding-left: $custom-control-color-indicator-size + $custom-control-gutter;
+
+    &::before, &::after {
+      left: 0;
+      top: calc((1em * #{$line-height-base} - #{$custom-control-color-indicator-size}) / 2);
+      width: $custom-control-color-indicator-size;
+      height: $custom-control-color-indicator-size;
+      border-radius: 50%;
+    }
+
+    &::before {
+      background-color: currentColor !important;
+      color: inherit !important;
+    }
+
+    // Empty
+
+    &:empty {
+      padding-left: $custom-control-color-indicator-size;
+    }
+  }
+
+  .custom-control-input:checked ~ .custom-control-label {
+
+    &::before {
+      background-color: currentColor;
+    }
+
+    &::after {
+      background-color: fade-out(black, .95);
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3e%3cpath fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M9 1L3.5 7L1 4.27273'/%3e%3c/svg%3e");
+    }
+  }
+
+  .custom-control-input:disabled ~ .custom-control-label {
+    text-decoration: none;
+
+    > span {
+      color: $custom-control-label-disabled-color !important;
+      text-decoration: line-through;
+    }
+  }
+}
+
+.custom-control-size {
+  padding-left: 0;
+
+  .custom-control-label {
+    min-width: $custom-control-size-width;
+    padding: $custom-control-size-spacing;
+    text-align: center;
+    border: $border-width solid $border-color;
+
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+
+  .custom-control-input:checked ~ .custom-control-label {
+    border-color: currentColor;
+  }
+
+  .custom-control-input[disabled] ~ .custom-control-label {
+    background-color: $light;
+  }
+}
+
+//
+// dropdown
+//
+
+.dropdown-toggle-right {
+  &::after {
+    float: right;
+  }
+}
+
+.dropdown-toggle[data-toggle="collapse"] {
+
+  &::after {
+    @if $enable-transitions {
+      transition: $transition-base;
+    }
+
+    transform-origin: center center;
+  }
+}
+
+.dropdown-toggle[data-toggle="collapse"][aria-expanded="true"] {
+
+  &::after {
+    transform: rotate(180deg);
+  }
+}
+
+//
 // read & form
 //
+
 .field-group {
   margin-bottom: $label-margin-bottom;;
 

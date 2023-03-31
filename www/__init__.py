@@ -394,11 +394,18 @@ def configure_template_functions(app):
         return url_encode(args)
 
     @app.template_global()
-    def update_query(**new_values):
+    def update_query(is_replace=True, **new_values):
         """ Update query string. """
         args = request.args.copy()
         for key, value in new_values.items():
-            args[key] = value
+            if value is None:
+                pass
+            else:
+                if is_replace:
+                    args[key] = value
+                else:
+                    args.update({key: value})
+        #
         return url_encode(args)
 
     @app.template_global()

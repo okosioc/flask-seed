@@ -10,4 +10,5 @@
 """
 from .common import Series, Block
 from .demo import DemoUserStatus, DemoUserRole, DemoUserType, DemoUser, DemoTeam, DemoTeamStatus, \
-    DemoProjectStatus, DemoTaskStatus, DemoTask, DemoActivity, DemoProject, DemoProjectDashboard
+    DemoProjectStatus, DemoTaskStatus, DemoTask, DemoActivity, DemoProject, DemoProjectDashboard, \
+    DemoAttributeOption, DemoAttribute, DemoCategory, DemoProductAttribute, DemoProduct, DemoSku

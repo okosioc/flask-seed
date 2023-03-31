@@ -160,7 +160,7 @@ BLOCKS = [
                     {'title': 'Horizontal', 'url': '/demo/shop-index-horizontal'},
                 ],
             },
-            {'title': 'Catelog', 'url': 'javascript:coming();'},
+            {'title': 'Catelog', 'url': '/demo/shop-category'},
             {'title': 'Blog', 'url': 'javascript:coming();'},
             {'title': 'Account', 'url': 'javascript:coming();'},
         ],

@@ -95,7 +95,7 @@ class DemoUser(CacheModel, UserMixin):
     team: DemoTeam = Relation(
         title='所属团队',
         back_field_name='members', back_field_is_list=True, back_field_order=[('team_join_time', 1)],
-        back_field_format=Format.TABLE, back_field_icon='users', back_field_title='团队成员',
+        back_field_format=Format.TABLE, back_field_title='团队成员',
     )
     team_join_time: datetime = Field(title='加入团队的时间')
     #
@@ -157,7 +157,7 @@ class DemoTaskStatus(SimpleEnum):
 
 class DemoActivity(BaseModel):
     """ 项目相关操作. """
-    user: DemoUser = Relation(format_=Format.SELECT, icon='user', title='操作人')
+    user: DemoUser = Relation(format_=Format.SELECT, title='操作人')
     title: str = Field(title='操作标题')  # 比较简单的说明, 如A新建了项目, A安排任务给B和C等
     content: str = Field(required=False, format_=Format.TEXTAREA, title='操作详情')  # 操作更为详细的说明, 如新建项目的开始结束时间, 安排任务的细节等
     time: datetime = Field(default=datetime.now, title='操作时间')
@@ -187,11 +187,11 @@ class DemoProject(CacheModel):
     percent: float = Field(default=0., icon='percent', title='项目进度', unit='%')
     # 内部数据结构
     members: List[DemoUser] = Relation(
-        required=False, format_=Format.MEDIA, icon='users', title='项目成员',
+        required=False, format_=Format.MEDIA, title='项目成员',
         back_field_name='projects', back_field_is_list=True, back_field_order=[('create_time', -1)],
-        back_field_format=Format.GRID, back_field_icon='briefcase', back_field_title='参与项目',
+        back_field_format=Format.GRID, back_field_title='参与项目',
     )
-    activities: List[DemoActivity] = Field(required=False, format_=Format.TIMELINE, icon='activity', title='操作')  # 按照时间倒序
+    activities: List[DemoActivity] = Field(required=False, format_=Format.TIMELINE, title='操作')  # 按照时间倒序
     # 其他
     update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, icon='clock', title='创建时间')
@@ -227,14 +227,14 @@ class DemoTask(CacheModel):
     end: str = Field(required=False, format_=Format.DATE, title='结束日期')
     #
     project: DemoProject = Relation(
-        icon='briefcase', title='所属项目',
+        title='所属项目',
         back_field_name='tasks', back_field_is_list=True, back_field_order=[('create_time', -1)],
-        back_field_format=Format.TABLE, back_field_icon='check-square', back_field_title='任务列表',
+        back_field_format=Format.TABLE, back_field_title='任务列表',
     )
     user: DemoUser = Relation(
-        format_=Format.SELECT, icon='user', title='负责人',
+        format_=Format.SELECT, title='负责人',
         back_field_name='tasks', back_field_is_list=True, back_field_order=[('create_time', -1)],
-        back_field_format=Format.TABLE, back_field_icon='check-square', back_field_title='任务列表',
+        back_field_format=Format.TABLE, back_field_title='任务列表',
     )
     #
     update_time: datetime = Field(required=False, title='更新时间')
@@ -269,8 +269,8 @@ class DemoProjectDashboard(CacheModel):
     members_count: int = Field(default=0, format_=Format.METRIC, icon='users', title='团队成员数量')
     tasks_count: int = Field(default=0, format_=Format.METRIC, icon='check-square', title='任务数量')
     # Table&Media
-    active_projects: List[DemoProject] = Relation(format_=Format.TABLE, icon='briefcase', title='活跃项目')
-    recent_activities: List[DemoActivity] = Field(format_=Format.TIMELINE, icon='activity', title='最近操作')  # 按照时间倒序
+    active_projects: List[DemoProject] = Relation(format_=Format.TABLE, title='活跃项目')
+    recent_activities: List[DemoActivity] = Field(format_=Format.TIMELINE, title='最近操作')  # 按照时间倒序
 
     __read__ = '''
     active_projects_count, active_projects_value, members_count, tasks_count
@@ -326,9 +326,9 @@ class DemoProduct(CacheModel):
     no: str = Field(title='')
     name: str = Field(icon='type', title='名称')
     category: DemoCategory = Relation(
-        icon='grid', title='分类',
+        title='分类',
         back_field_name='products', back_field_is_list=True, back_field_order=[('create_time', -1)],
-        back_field_format=Format.GRID, back_field_icon='shopping-bag', back_field_title='参与项目', )
+        back_field_format=Format.GRID, back_field_title='参与项目', )
     # 基本信息
     price: float = Field(default=0., icon='dollar-sign', title='价格')
     original_price: float = Field(required=False, title='原价')
@@ -351,9 +351,9 @@ class DemoSku(CacheModel):
     """ 产品的库存信息. """
     no: str = Field(title='货号')
     product: DemoProduct = Relation(
-        icon='shopping-bag', title='产品',
+        title='产品',
         back_field_name='skus', back_field_is_list=True, back_field_order=[('create_time', -1)],
-        back_field_format=Format.TABLE, back_field_icon='database', back_field_title='参与项目', )
+        back_field_format=Format.TABLE, back_field_title='参与项目', )
     #
     attrs: List[DemoProductAttribute] = Field(format_=Format.TABLE, title='属性')  # 一个SKU对应多个属性, 如颜色和尺码
     quanity: int = Field(default=0, title='可销售数量')

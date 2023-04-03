@@ -1,10 +1,75 @@
 template: template-apple
+models:
+  - name: DemoTeam
+    columns: logo, name, status, members, create_time
+    form: |-
+      name
+      code
+      remarks
+      logo
+
+  - name: DemoUser
+    columns: avatar, name, status, roles, email, phone, create_time
+    form: |-
+      name
+      phone
+      intro
+      avatar
+
+  - name: DemoActivity
+    columns: user, title, content, time
+
+  - name: DemoProject
+    columns: title, status, value, start, members, percent, create_time
+    groups:
+      - |-
+        title
+        description
+        status, value
+        start, end
+        percent
+    read: |-
+      ($,members)#4, (tasks,activities)#8
+    form: |-
+      0
+      members#4
+
+  - name: DemoTask
+    columns: title, status, user, start, create_time
+    read: |-
+      title
+      status
+      content
+      start, end
+      user
+      create_time
+    form: |-
+      title
+      status
+      content
+      start, end
+      user
+
+  - name: DemoProjectDashboard
+    read: |-
+      active_projects_count, active_projects_value, members_count, tasks_count
+      active_projects#8, recent_activities#4
+
+  - name: DemoCategory
+    columns: name, parent, create_time
+
+  - name: DemoProduct
+    columns: image, name, category, price, create_time
+
+  - name: DemoSku
+    columns: no, attrs, quanity, create_time
+
 blueprints:
   - name: public
-    params: {extends: layout-public}
+    params: { extends: layout-public }
     views:
       - name: index
-        params: {title: 首页, actions: []}
+        params: { title: 首页, actions: [ ] }
         layout: |-
           Block-read-promo-basic
           Block-read-features-basic
@@ -13,70 +78,70 @@ blueprints:
           Block-read-pricing-basic
 
       - name: login
-        params: {extends: layout-simple, title: 登录, actions: []}
+        params: { extends: layout-simple, title: 登录, actions: [ ] }
         layout: |-
           login-simple
 
       - name: signup
-        params: {extends: layout-simple, title: 注册, actions: []}
+        params: { extends: layout-simple, title: 注册, actions: [ ] }
         layout: |-
           signup-simple
 
       - name: error
-        params: {extends: layout-simple, title: 出错了, actions: []}
+        params: { extends: layout-simple, title: 出错了, actions: [ ] }
         layout: |-
           error-simple
 
   - name: demo
-    params: {extends: layout-dash}
+    params: { extends: layout-dash }
     views:
       - name: project-dashboard
-        params: {title: 项目仪表盘, subtitle: Dashboard, actions: []}
+        params: { title: 项目仪表盘, subtitle: Dashboard, actions: [ ] }
         layout: |-
           DemoProjectDashboard-read
 
       - name: user-profile
-        params: {title: 用户设置, subtitle: User, actions: []}
+        params: { title: 用户设置, subtitle: User, actions: [ ] }
         layout: |-
           DemoUser-summary?is_card=true#4, DemoUser-form?is_main_seed=true&is_card=true#8
 
       - name: team-profile
-        params: {title: 团队设置, subtitle: Team, actions: []}
+        params: { title: 团队设置, subtitle: Team, actions: [ ] }
         layout: |-
           DemoTeam-summary?is_card=true#4, DemoTeam-form?is_card=true#8
 
       - name: team-members
-        params: {title: 团队成员, subtitle: Team, actions: []}
+        params: { title: 团队成员, subtitle: Team, actions: [ ] }
         layout: |-
           DemoTeam-summary?is_card=true#4, DemoTeam.members-read?is_card=true#8
 
       - name: project-list
-        params: {title: 项目管理, subtitle: Project, actions: [{icon: plus, title: 新建项目, view: project-edit}]}
+        params: { title: 项目管理, subtitle: Project, actions: [ { icon: plus, title: 新建项目, view: project-edit } ] }
         layout: |-
           DemoProject-query?result_view=grid&is_card=true
 
       - name: project-detail
-        params: {title: 项目详情, subtitle: Project, actions: [{icon: edit, title: 编辑项目, view: "project-edit?"}]}
+        params: { title: 项目详情, subtitle: Project, actions: [ { icon: edit, title: 编辑项目, view: "project-edit?" } ] }
         layout: |-
           DemoProject-read
 
       - name: project-edit
-        params: {title: 项目编辑, subtitle: Project, actions: []}
+        params: { title: 项目编辑, subtitle: Project, actions: [ ] }
         layout: |-
           DemoProject-form
 
       - name: task-detail
-        params: {title: 任务详情, subtitle: Project, actions: [{icon: edit, title: 编辑任务, view: "task-edit?"}]}
+        params: { title: 任务详情, subtitle: Project, actions: [ { icon: edit, title: 编辑任务, view: "task-edit?" } ] }
         layout: |-
           DemoTask.project-summary?is_card=true#4, DemoTask-read?is_main_seed=true&is_card=true&is_horizontal=true#8
 
       - name: task-edit
-        params: {title: 任务编辑, subtitle: Project, actions: []}
+        params: { title: 任务编辑, subtitle: Project, actions: [ ] }
         layout: |-
           DemoTask.project-summary?is_card=true#4, DemoTask-form?is_main_seed=true&is_card=true#8
 
       - name: shop-index
-        params: {extends: layout-shop, title: 商城首页, actions: [], has_gutters: False}
+        params: { extends: layout-shop, title: 商城首页, actions: [ ], has_gutters: False }
         layout: |-
           Block-read-shop-topnav
           Block-read-shop-welcome
@@ -88,7 +153,7 @@ blueprints:
           Block-read-shop-footer
 
       - name: shop-index-asymmetric
-        params: {extends: layout-shop, title: 商城首页, actions: [], has_gutters: False}
+        params: { extends: layout-shop, title: 商城首页, actions: [ ], has_gutters: False }
         layout: |-
           Block-read-shop-topnav-boxed
           Block-read-shop-welcome-boxed
@@ -98,12 +163,12 @@ blueprints:
           Block-read-shop-footer
 
       - name: shop-index-horizontal
-        params: {extends: layout-shop-horizontal, title: 商城首页, actions: [], has_gutters: False}
+        params: { extends: layout-shop-horizontal, title: 商城首页, actions: [ ], has_gutters: False }
         layout: |-
           Block-read-shop-products-masonry
 
       - name: shop-category
-        params: {extends: layout-shop, title: 商城类目, actions: [], has_gutters: False}
+        params: { extends: layout-shop, title: 商城类目, actions: [ ], has_gutters: False }
         layout: |-
           Block-read-shop-topnav
           DemoCategory-read-default

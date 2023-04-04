@@ -16,13 +16,7 @@
     {% else %}
         {# object #}
         {% if schema.type == 'object' %}
-            {% if action == 'read' %}
-                {% set fields = schema.read_fields %}
-            {% elif action == 'form' %}
-                {% set fields = schema.form_fields %}
-            {% else %}
-                {% set fields = [] %}
-            {% endif %}
+            {% set fields = parse_layout_fields(schema, action) if action in ['read', 'form'] else [] %}
             {% for f in fields %}
                 {{- _iterate_schema(schema.properties[f], action) -}}
             {% endfor %}
@@ -203,7 +197,7 @@ def {{ view.name_snake }}_{{ seed.name_snake }}():
         if not existing:
             abort(404)
         #
-        {% for field in model.schema.form_fields %}
+        {% for field in parse_layout_fields(model.schema, 'form') %}
         existing.{{ field }} = req_{{ model.name_snake }}.{{ field }}
         {% endfor %}
         #

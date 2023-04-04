@@ -8,7 +8,7 @@
     :copyright: (c) 2016 by fengweimin.
     :date: 16/6/11
 """
-from .common import Series, Block
+from .common import Series, Action, Block
 from .demo import DemoUserStatus, DemoUserRole, DemoUserType, DemoUser, DemoTeam, DemoTeamStatus, \
     DemoProjectStatus, DemoTaskStatus, DemoTask, DemoActivity, DemoProject, DemoProjectDashboard, \
     DemoAttributeOption, DemoAttribute, DemoCategory, DemoProductAttribute, DemoProduct, DemoSku

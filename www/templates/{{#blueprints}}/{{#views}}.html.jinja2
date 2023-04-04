@@ -11,18 +11,14 @@
 {% set render_controls = namespace(formats=[], has_read=false, has_form=false, has_query=false) %}
 {% macro _iterate_schema(schema, action) %}
     {% set format = schema.format %}
-    {% set fields = [] %}
     {% set necessary_formats = [] %}
     {% if action == 'read' %}
-        {% set fields = schema.read_fields or [] %}
         {% set necessary_formats = ['image', 'calendar', 'chart'] %}
         {% set render_controls.has_read = true %}
     {% elif action == 'form' %}
-        {% set fields = schema.form_fields or [] %}
         {% set necessary_formats = ['image', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
         {% set render_controls.has_form = true %}
     {% elif action == 'query' %}
-        {% set fields = schema.searchable_fields or [] %}
         {% set necessary_formats = ['date', 'datetime'] %}
         {% set render_controls.has_query = true %}
     {% endif %}
@@ -32,7 +28,13 @@
         {% endif %}
     {% else %}
         {# object #}
-        {% if schema.type == 'object' %}
+        {% if schema.type == 'object' and 'ref' not in schema %}
+            {% set fields = [] %}
+            {% if action in ['read', 'form'] %}
+                {% set fields = parse_layout_fields(schema, action) %}
+            {% elif action == 'query' %}
+                {% set fields = schema.searchable_fields%}
+            {% endif %}
             {% for f in fields %}
                 {{- _iterate_schema(schema.properties[f], action) -}}
             {% endfor %}

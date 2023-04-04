@@ -13,8 +13,8 @@
         {% endif %}
     {% else %}
         {# object #}
-        {% if schema.type == 'object' %}
-            {% for f in schema.read_fields %}
+        {% if schema.type == 'object' and 'ref' not in schema %}
+            {% for f in parse_layout_fields(schema, 'read') %}
                 {{- _iterate_schema(schema.properties[f]) -}}
             {% endfor %}
         {# array #}

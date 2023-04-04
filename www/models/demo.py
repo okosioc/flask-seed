@@ -48,13 +48,6 @@ class DemoTeam(CacheModel):
     #
     __icon__ = 'users'
     __title__ = '团队'
-    __columns__ = ['logo', 'name', 'status', 'members', 'create_time']  # members is a back relation field auto-created from user
-    __form__ = '''
-    name
-    code
-    remarks
-    logo
-    '''
 
 
 class DemoUserStatus(SimpleEnum):
@@ -95,7 +88,7 @@ class DemoUser(CacheModel, UserMixin):
     team: DemoTeam = Relation(
         title='所属团队',
         back_field_name='members', back_field_is_list=True, back_field_order=[('team_join_time', 1)],
-        back_field_format=Format.TABLE, back_field_title='团队成员',
+        back_field_format=Format.TABLE, back_field_icon='users', back_field_title='团队成员',
     )
     team_join_time: datetime = Field(title='加入团队的时间')
     #
@@ -104,13 +97,6 @@ class DemoUser(CacheModel, UserMixin):
     #
     __icon__ = 'user'
     __title__ = '用户'
-    __columns__ = ['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time']
-    __form__ = '''
-    name
-    phone
-    intro
-    avatar  
-    '''
 
     @cached_property
     def is_admin(self):
@@ -164,7 +150,6 @@ class DemoActivity(BaseModel):
     #
     __icon__ = 'activity'
     __title__ = '操作'
-    __columns__ = ['user', 'title', 'content', 'time']
 
 
 class DemoProjectStatus(SimpleEnum):
@@ -187,7 +172,7 @@ class DemoProject(CacheModel):
     percent: float = Field(default=0., icon='percent', title='项目进度', unit='%')
     # 内部数据结构
     members: List[DemoUser] = Relation(
-        required=False, format_=Format.MEDIA, title='项目成员',
+        required=False, format_=Format.MEDIA, icon='users', title='项目成员',
         back_field_name='projects', back_field_is_list=True, back_field_order=[('create_time', -1)],
         back_field_format=Format.GRID, back_field_title='参与项目',
     )
@@ -198,23 +183,6 @@ class DemoProject(CacheModel):
     #
     __icon__ = 'briefcase'
     __title__ = '项目'
-    __columns__ = ['title', 'status', 'value', 'start', 'members', 'percent', 'create_time']
-    __groups__ = [
-        '''
-        title
-        description
-        status, value
-        start, end
-        percent,
-        ''',
-    ]
-    __read__ = '''
-    ($,members)#4, (tasks,activities)#8
-    '''
-    __form__ = '''
-    0
-    members#4,
-    '''
 
 
 @register
@@ -242,22 +210,6 @@ class DemoTask(CacheModel):
     #
     __icon__ = 'check-square'
     __title__ = '任务'
-    __columns__ = ['title', 'status', 'user', 'start', 'create_time']
-    __read__ = '''
-    title
-    status
-    content
-    start, end
-    user
-    create_time
-    '''
-    __form__ = '''
-    title
-    status
-    content
-    start, end
-    user
-    '''
 
 
 @register
@@ -271,11 +223,6 @@ class DemoProjectDashboard(CacheModel):
     # Table&Media
     active_projects: List[DemoProject] = Relation(format_=Format.TABLE, title='活跃项目')
     recent_activities: List[DemoActivity] = Field(format_=Format.TIMELINE, title='最近操作')  # 按照时间倒序
-
-    __read__ = '''
-    active_projects_count, active_projects_value, members_count, tasks_count
-    active_projects#8, recent_activities#4
-    '''
 
 
 class DemoAttributeOption(BaseModel):
@@ -308,7 +255,6 @@ class DemoCategory(CacheModel):
     #
     __icon__ = 'grid'
     __title__ = '类目'
-    __columns__ = ['name', 'parent', 'create_time']
 
 
 class DemoProductAttribute(BaseModel):
@@ -343,7 +289,6 @@ class DemoProduct(CacheModel):
     #
     __icon__ = 'shopping-bag'
     __title__ = '产品'
-    __columns__ = ['image', 'name', 'category', 'price', 'create_time']
 
 
 @register
@@ -363,4 +308,3 @@ class DemoSku(CacheModel):
     #
     __icon__ = 'database'
     __title__ = 'SKU'
-    __columns__ = ['no', 'attrs', 'quanity', 'create_time']

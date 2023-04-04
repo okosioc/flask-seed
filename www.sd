@@ -21,18 +21,17 @@ models:
 
   - name: DemoProject
     columns: title, status, value, start, members, percent, create_time
-    groups:
-      - |-
-        title
-        description
-        status, value
-        start, end
-        percent
+    group: |-
+      title
+      description
+      status, value
+      start, end
+      percent,
     read: |-
       ($,members)#4, (tasks,activities)#8
     form: |-
       0
-      members#4
+      members#4,
 
   - name: DemoTask
     columns: title, status, user, start, create_time

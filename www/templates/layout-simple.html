@@ -21,7 +21,25 @@
     {% block content %}
     {% endblock %}
 </div>
-{% include 'seeds/Block-read-footer-simple-basic.html' %}
+{% set footer = {
+    'remarks': '2023 © koidesk.com',
+    'children': [],
+} %}
+<footer class="fixed-bottom">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="py-3">
+                    <div class="text-center">
+                        <p class="mb-0">
+                            {{ footer.remarks }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/js/app.min.js?{{ version() }}"></script>
 {% block script %}

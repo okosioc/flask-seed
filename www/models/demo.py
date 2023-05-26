@@ -13,19 +13,10 @@ from datetime import datetime
 from typing import List, ForwardRef
 
 from flask_login import UserMixin
-from py3seed import SimpleEnum, CacheModel, ModelField as Field, RelationField as Relation, register, BaseModel, Format, Comparator
+from py3seed import SimpleEnum, CacheModel, ModelField as Field, RelationField as Relation, register, BaseModel, Format, Comparator, Ownership
 from werkzeug.utils import cached_property
 
 from .common import Block
-
-
-class DemoSeries(BaseModel):
-    """ 序列, 适用于各种线图/柱状图/饼图的绘制. """
-    title: str = Field(title='标题')
-    total: float = Field(default=.0, title='数值的和')
-    names: List[str] = Field(required=False, title='各元素的名字')
-    values: List[float] = Field(required=False, title='各元素对应的数值')
-    unit: str = Field(required=False, title='单位')
 
 
 class DemoTeamStatus(SimpleEnum):
@@ -86,11 +77,11 @@ class DemoUser(CacheModel, UserMixin):
     intro: str = Field(required=False, format_=Format.TEXTAREA, title='个人简介')
     #
     team: DemoTeam = Relation(
-        title='所属团队',
+        required=False, title='所属团队',
         back_field_name='members', back_field_is_list=True, back_field_order=[('team_join_time', 1)],
         back_field_format=Format.TABLE, back_field_icon='users', back_field_title='团队成员',
     )
-    team_join_time: datetime = Field(title='加入团队的时间')
+    team_join_time: datetime = Field(required=False, title='加入团队的时间')
     #
     update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, icon='clock', title='创建时间')
@@ -198,6 +189,7 @@ class DemoTask(CacheModel):
         title='所属项目',
         back_field_name='tasks', back_field_is_list=True, back_field_order=[('create_time', -1)],
         back_field_format=Format.TABLE, back_field_title='任务列表',
+        ownership=Ownership.OWN,
     )
     user: DemoUser = Relation(
         format_=Format.SELECT, title='负责人',
@@ -274,7 +266,8 @@ class DemoProduct(CacheModel):
     category: DemoCategory = Relation(
         title='分类',
         back_field_name='products', back_field_is_list=True, back_field_order=[('create_time', -1)],
-        back_field_format=Format.GRID, back_field_title='参与项目', )
+        back_field_format=Format.GRID, back_field_title='参与项目',
+    )
     # 基本信息
     price: float = Field(default=0., icon='dollar-sign', title='价格')
     original_price: float = Field(required=False, title='原价')
@@ -298,7 +291,8 @@ class DemoSku(CacheModel):
     product: DemoProduct = Relation(
         title='产品',
         back_field_name='skus', back_field_is_list=True, back_field_order=[('create_time', -1)],
-        back_field_format=Format.TABLE, back_field_title='参与项目', )
+        back_field_format=Format.TABLE, back_field_title='参与项目',
+    )
     #
     attrs: List[DemoProductAttribute] = Field(format_=Format.TABLE, title='属性')  # 一个SKU对应多个属性, 如颜色和尺码
     quanity: int = Field(default=0, title='可销售数量')

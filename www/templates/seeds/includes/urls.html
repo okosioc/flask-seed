@@ -20,3 +20,5 @@ javascript:;
 {% macro detail_url(model_name, model_path=none) %}{{ _generate_url(model_name, model_path, '-detail') }}{% endmacro %}
 {# macro - generate edit url with model name #}
 {% macro edit_url(model_name, model_path=none) %}{{ _generate_url(model_name, model_path, '-edit') }}{% endmacro %}
+{# macro - generate query url with model name #}
+{% macro query_url(model_name, model_path=none) %}{{ _generate_url(model_name, model_path, '-list') }}{% endmacro %}

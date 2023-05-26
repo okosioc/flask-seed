@@ -4,9 +4,7 @@
     <div class="col">
     {% endif %}
     <div class="custom-control custom-checkbox">
-        <input type="checkbox" class="custom-control-input" name="{{ field_name }}"
-        {{ 'required' if field_schema.required }} {{ '{{' }} 'checked' if {{ field_path }} == true {{ '}}' }}
-        >
+        <input type="checkbox" class="custom-control-input" name="{{ field_name }}" {{ 'required' if field_schema.required }} {{ '{{' }} 'checked' if {{ field_path }} == true {{ '}}' }}>
         <label class="custom-control-label"></label>
     </div>
     {% if seed_is_horizontal %}

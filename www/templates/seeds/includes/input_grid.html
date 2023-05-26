@@ -1,4 +1,4 @@
-<div class="array-items row row-cols-1  row-cols-lg-2">
+<div class="array-items row row-cols-1 row-cols-lg-2">
     {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ field_schema['items'].py_type }}')] {{ '%}' }}
     <div class="array-item col {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="-">
         <div class="card">

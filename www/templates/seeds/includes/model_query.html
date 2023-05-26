@@ -3,6 +3,7 @@
 {% set seed_is_card = seed.params.is_card or False %}
 {% set result_view = seed.params.result_view or 'table' %}
 {% set has_search = True if 'has_search' not in seed.params else seed.params.has_search %}
+{% set grid_type = seed.params.grid_type or 'default'  %}
 {# query relation model #}
 {% if sub %}
     {% set sub_schema = model.schema.properties[sub] %}
@@ -13,7 +14,8 @@
 {% set columns = model_schema.columns %}
 {% set first_field_name = columns[0] %}
 {% set first_field = model_schema.properties[first_field_name] %}
-{% set title_field_name = match_field(columns, 'title|name|\w*name')%}
+{% set title_field_name = match_field(columns, 'title|name|\w*name') %}
+{% set subtitle_field_name = match_field(columns, 'subtitle|type|category|tag|tags|text|description') %}
 {# macro - render search form #}
 {% macro render_search_form() %}
 <form class="form-query" novalidate>
@@ -93,13 +95,110 @@
 {{ '{%' }} if {{ model.name_snake_plural }} {{ '%}' }}
 <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
     {{ '{%' }} for {{ model.name_snake }} in {{ model.name_snake_plural }} {{ '%}' }}
+    {% set detail_url = detail_url(model.name, model.name_snake) %}
+    {% set edit_url = edit_url(model.name, model.name_snake) %}
+    {% set target_url = edit_url if detail_url=='javascript:;' else detail_url %}
     <div class="col">
+        {# image + title #}
+        {% if grid_type == 'simple' %}
         <div class="card">
+            {% if first_field.format in ['image'] %}
+            <a href="{{ target_url }}">
+                <img src="{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }} {{ '}}' }}" class="card-img-top" alt="...">
+            </a>
+            {% endif %}
             <div class="card-body">
-                {% set target = detail_url(model.name, model.name_snake) %}
-                {{ display_summary(model.name_snake, model_schema, model.name_snake, target)|indent(16) }}
+                {% if first_field.format not in ['image'] %}
+                {% if first_field.format in ['avatar'] %}
+                <div class="row text-center">
+                    <div class="col">
+                        <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
+                            <img src="{{ '{{' }} {{ model.name_snake~'.'~first_field_name }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ model.name_snake~'.'~first_field_name }} {{ '}}' }}">
+                            <span fallback={{ title_field_name }} class="avatar-title rounded-circle bg-primary {{ '{{' }} 'd-none' if {{ model.name_snake~'.'~first_field_name }} {{ '}}' }}">{{ '{{' }} {{ model.name_snake~'.'~title_field_name }}|first|upper if {{ model.name_snake~'.'~title_field_name }} is not none {{ '}}' }}</span>
+                        </a>
+                    </div>
+                </div>
+                {% elif first_field.format in ['int', 'float'] %}
+                <div class="row align-items-center text-center">
+                    <div class="col">
+                        <div class="text-muted mb-2">{{ first_field.title }}{{ '('~first_field.unit~')' if first_field.unit }}</div>
+                        <div>
+                            <span class="h2 text-primary" name="{{ first_field_name }}" format="{{ first_field.format }}">{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }}|int|commas if {{ model.name_snake }}.{{ first_field_name }} is not none else '-' {{ '}}' }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row text-center">
+                    <div class="col">
+                        <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
+                            <span class="avatar-title rounded bg-primary">{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }}|first|upper if {{ model.name_snake }}.{{ first_field_name }} is not none {{ '}}' }}</span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="{{ 'mb-0' if not subtitle_field_name }}">
+                            <a href="{{ target_url }}">{{ '{{' }} {{ model.name_snake }}.{{ title_field_name }} {{ '}}' }}</a>
+                        </h4>
+                        {% if subtitle_field_name %}
+                        <p class="small text-muted mb-0">
+                            {{ display_inline(subtitle_field_name, model_schema.properties[subtitle_field_name], model.name_snake~'.'~subtitle_field_name) }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-auto">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-ellipses dropdown-toggle" role="button" data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false">
+                                <i class="fe fe-more-vertical"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                {% if detail_url != 'javascript:;' %}
+                                <a class="dropdown-item" href="{{ detail_url }}"><i class="fe fe-eye mr-2"></i>Detail</a>
+                                {% endif %}
+                                {% if edit_url != 'javascript:;' %}
+                                <a class="dropdown-item" href="{{ edit_url }}"><i class="fe fe-edit mr-2"></i>Edit</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        {% elif grid_type == 'overlay' %}
+        {% if first_field.format in ['image'] %}
+        <div class="card bg-cover" style="min-height:320px;background-image:url({{ '{{' }} {{ model.name_snake }}.{{ first_field_name }} {{ '}}' }});">
+            <div class="card-img-overlay card-img-overlay-hover align-items-center bg-white-90">
+                <div class="text-center">
+                    <h2 class="mb-2"><a href="{{ target_url }}">{{ '{{' }} {{ model.name_snake }}.{{ title_field_name }} {{ '}}' }}</a></h2>
+                    {% if subtitle_field_name %}
+                    <p class="small text-muted mb-2">
+                        {{ display_inline(subtitle_field_name, model_schema.properties[subtitle_field_name], model.name_snake~'.'~subtitle_field_name) }}
+                    </p>
+                    {% endif %}
+                    <p class="mb-0">
+                        {% if detail_url != 'javascript:;' %}
+                        <a class="btn btn-link text-reset" href="{{ detail_url }}"><i class="fe fe-eye"></i></a>
+                        {% endif %}
+                        {% if edit_url != 'javascript:;' %}
+                        <a class="btn btn-link text-reset" href="{{ edit_url }}"><i class="fe fe-edit"></i></a>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        UNSUPPORTED! The format of first field should be image!
+        {% endif %}
+        {% else %}
+        <div class="card">
+            <div class="card-body">
+                {{ display_summary(model.name_snake, model_schema, model.name_snake, target_url)|indent(16) }}
+            </div>
+        </div>
+        {% endif %}
     </div>
     {{ '{%' }} endfor {{ '%}' }}
 </div>
@@ -143,10 +242,16 @@ TODO
                 </div>
             </td>
             {% set detail_url = detail_url(model.name, model.name_snake) %}
-            {{ display_table_columns(model_schema, model.name_snake, row_target=detail_url)|indent(12) }}
+            {% set edit_url = edit_url(model.name, model.name_snake) %}
+            {% set target_url = edit_url if detail_url=='javascript:;' else detail_url %}
+            {{ display_table_columns(model_schema, model.name_snake, row_target=target_url)|indent(12) }}
             <td>
+                {% if detail_url != 'javascript:;' %}
                 <a class="btn pl-0 py-0" href="{{ detail_url }}"><i class="fe fe-eye"></i></a>
-                <a class="btn pl-0 py-0" href="{{ edit_url(model.name, model.name_snake) }}"><i class="fe fe-edit"></i></a>
+                {% endif %}
+                {% if edit_url != 'javascript:;' %}
+                <a class="btn pl-0 py-0" href="{{ edit_url }}"><i class="fe fe-edit"></i></a>
+                {% endif %}
             </td>
         </tr>
         {{ '{%' }} else {{ '%}' }}
@@ -158,9 +263,11 @@ TODO
         {{ '{%' }} endfor {{ '%}' }}
         </tbody>
     </table>
+    {{ '{%' }} if {{ model.name_snake_plural }} {{ '%}' }}
     <div class="m1">
     {{ '{%' }} include 'includes/pagination.html' {{ '%}' }}
     </div>
+    {{ '{%' }} endif {{ '%}' }}
 </div>
 {%- endmacro %}
 {# main #}

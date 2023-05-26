@@ -1,71 +1,7 @@
 template: template-apple
-models:
-  - name: DemoTeam
-    columns: logo, name, status, members, create_time
-    form: |-
-      name
-      code
-      remarks
-      logo
-
-  - name: DemoUser
-    columns: avatar, name, status, roles, email, phone, create_time
-    form: |-
-      name
-      phone
-      intro
-      avatar
-
-  - name: DemoActivity
-    columns: user, title, content, time
-
-  - name: DemoProject
-    columns: title, status, value, start, members, percent, create_time
-    group: |-
-      title
-      description
-      status, value
-      start, end
-      percent,
-    read: |-
-      ($,members)#4, (tasks,activities)#8
-    form: |-
-      0
-      members#4,
-
-  - name: DemoTask
-    columns: title, status, user, start, create_time
-    read: |-
-      title
-      status
-      content
-      start, end
-      user
-      create_time
-    form: |-
-      title
-      status
-      content
-      start, end
-      user
-
-  - name: DemoProjectDashboard
-    read: |-
-      active_projects_count, active_projects_value, members_count, tasks_count
-      active_projects#8, recent_activities#4
-
-  - name: DemoCategory
-    columns: name, parent, create_time
-
-  - name: DemoProduct
-    columns: image, name, category, price, create_time
-
-  - name: DemoSku
-    columns: no, attrs, quanity, create_time
-
 blueprints:
   - name: public
-    params: { extends: layout-public }
+    params: { extends: layout-public-demo }
     views:
       - name: index
         params: { title: 首页, actions: [ ] }
@@ -92,52 +28,112 @@ blueprints:
           error-simple
 
   - name: demo
-    params: { extends: layout-dash }
+    params: { extends: layout-dash-demo }
     views:
       - name: project-dashboard
         params: { title: 项目仪表盘, subtitle: Dashboard, actions: [ ] }
         layout: |-
           DemoProjectDashboard-read
+            active_projects_count, active_projects_value, members_count, tasks_count
+            active_projects#8, recent_activities#4
 
       - name: user-profile
         params: { title: 用户设置, subtitle: User, actions: [ ] }
         layout: |-
-          DemoUser-summary?is_card=true#4, DemoUser-form?is_main_seed=true&is_card=true#8
+          DemoUser-form?is_card=true
+            $#4,           0#8                                           
+              avatar         name  
+              name           phone                                                  
+              status         intro                                                 
+              roles          avatar                                                
+              email
+              phone
+              create_time
 
       - name: team-profile
         params: { title: 团队设置, subtitle: Team, actions: [ ] }
         layout: |-
-          DemoTeam-summary?is_card=true#4, DemoTeam-form?is_card=true#8
+          DemoTeam-form?is_card=true
+            $#4,           0#8 
+              logo           name
+              name           code
+              status         remarks
+              members        logo
+              create_time
 
       - name: team-members
         params: { title: 团队成员, subtitle: Team, actions: [ ] }
         layout: |-
-          DemoTeam-summary?is_card=true#4, DemoTeam.members-read?is_card=true#8
+          DemoTeam-read?is_card=true
+            $#4,           members#8
+              logo           avatar, name, status, roles, email, phone, team_join_time
+              name                                                       
+              status       
+              members      
+              create_time  
 
       - name: project-list
         params: { title: 项目管理, subtitle: Project, actions: [ { icon: plus, title: 新建项目, view: project-edit } ] }
         layout: |-
           DemoProject-query?result_view=grid&is_card=true
+            title, status, value, start, members, percent, create_time
 
       - name: project-detail
         params: { title: 项目详情, subtitle: Project, actions: [ { icon: edit, title: 编辑项目, view: "project-edit?" } ] }
         layout: |-
           DemoProject-read
+            0#4,              1#8
+              $                 tasks                                   
+                title             title, status, user, start, create_time 
+                status          activities                  
+                value             user, title, content, time
+                start         
+                members       
+                percent       
+                create_time   
+              members                         
+                avatar, name                  
 
       - name: project-edit
         params: { title: 项目编辑, subtitle: Project, actions: [ ] }
         layout: |-
           DemoProject-form
+            0?title=项目基本信息
+              title
+              description
+              status, value
+              start, end
+              percent,
+            members#4
+              avatar, name
 
       - name: task-detail
         params: { title: 任务详情, subtitle: Project, actions: [ { icon: edit, title: 编辑任务, view: "task-edit?" } ] }
         layout: |-
-          DemoTask.project-summary?is_card=true#4, DemoTask-read?is_main_seed=true&is_card=true&is_horizontal=true#8
+          DemoTask-read
+            project#4,       0#8     
+              $                title 
+                title          status     
+                status         content    
+                value          start, end 
+                start          user       
+                members        create_time
+                percent    
+                create_time
 
       - name: task-edit
         params: { title: 任务编辑, subtitle: Project, actions: [ ] }
         layout: |-
-          DemoTask.project-summary?is_card=true#4, DemoTask-form?is_main_seed=true&is_card=true#8
+          DemoTask-form
+            project#4,       0#8           
+              $                title       
+                title          status      
+                status         content     
+                value          start, end  
+                start          user         
+                members         
+                percent                    
+                create_time        
 
       - name: shop-index
         params: { extends: layout-shop, title: 商城首页, actions: [ ], has_gutters: False }

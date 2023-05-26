@@ -26,6 +26,13 @@
         {% endif %}
     {% endif %}
 {% endmacro %}
+{% macro generate_permisson(blueprint_name) %}
+{% if blueprint_name == 'admin' %}
+@admin_permission
+{% elif blueprint_name != 'public' %}
+@auth_permission
+{% endif %}
+{% endmacro %}
 """ {{ blueprint.name }} module. """
 from datetime import datetime
 
@@ -35,11 +42,10 @@ from flask_login import current_user
 
 from py3seed import populate_model, populate_search
 from .common import get_id
-from www.tools import auth_permission
+from www.tools import auth_permission, admin_permission
 {% if blueprint.models %}
 from www.models import {{ blueprint.models|map(attribute='name')|join(', ') }}
 {% endif %}
-
 
 {{ blueprint.name_snake }} = Blueprint('{{ blueprint.name_snake }}', __name__)
 
@@ -68,9 +74,7 @@ from www.models import {{ blueprint.models|map(attribute='name')|join(', ') }}
 {% endif %}
 {# define view function #}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}')
-{% if blueprint.name != 'public' %}
-@auth_permission
-{% endif %}
+{{ generate_permisson(blueprint.name) -}}
 def {{ view.name_snake }}():
     """ {{ view.params.title }}. """
     {# with seeds #}
@@ -145,9 +149,7 @@ def {{ view.name_snake }}():
 {% for relation in render_controls.relations_needing_async_load %}
 {% set related_model = models[relation] %}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/{{ seed.name_kebab }}/load-{{ related_model.name_kebab_plural }}', methods=('POST',))
-{% if blueprint.name != 'public' %}
-@auth_permission
-{% endif %}
+{{ generate_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_{{ seed.name_snake }}_load_{{ related_model.name_snake_plural }}():
     """ 读取{{ related_model.schema.title }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
@@ -162,9 +164,7 @@ def {{ view.name_snake }}_{{ seed.name_snake }}_load_{{ related_model.name_snake
 {# define post function in form #}
 {% if action == 'form' %}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/{{ seed.name_kebab }}', methods=('POST',))
-{% if blueprint.name != 'public' %}
-@auth_permission
-{% endif %}
+{{ generate_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_{{ seed.name_snake }}():
     """ 保存{{ view.params.title }}. """
     req_{{ model.name_snake }} = populate_model(request.form, {{ model.name }})
@@ -213,9 +213,7 @@ def {{ view.name_snake }}_{{ seed.name_snake }}():
 {% for relation in render_controls.relations_needing_search %}
 {% set related_model = models[relation] %}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/{{ seed.name_kebab }}/search-{{ related_model.name_kebab_plural }}', methods=('POST',))
-{% if blueprint.name != 'public' %}
-@auth_permission
-{% endif %}
+{{ generate_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_{{ seed.name_snake }}_search_{{ related_model.name_snake_plural }}():
     """ 查找{{ related_model.schema.title }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]

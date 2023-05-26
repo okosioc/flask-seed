@@ -1,4 +1,4 @@
-{% from 'includes/urls.html' import detail_url, edit_url with context %}
+{% from 'includes/urls.html' import detail_url, edit_url, query_url with context %}
 {% from "includes/macros.html" import display_inline, display_summary, display_table_columns, display_list_group_items with context %}
 {% set model_schema = model.schema %}
 {% set seed_is_card = seed.params.is_card or false %}
@@ -198,9 +198,15 @@
     </form>
     <div class="form-actions mb-4">
         <a class="btn btn-primary mr-2" onclick="post_{{ seed.name_snake }}($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        {% set target_url = detail_url(model_schema.py_type, model.name_snake) %}
+        {% if target_url == 'javascript:;' %}
+        {% set target_url = query_url(model_schema.py_type, model.name_snake) %}
+        {% endif %}
+        {% if turl != 'javascript:;' %}
         {{ '{%' }} if {{ model.name_snake }}.{{ model_schema.id_name }} {{ '%}' }}
-        <a href="{{ detail_url(model_schema.py_type, model.name_snake) }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        <a href="{{ target_url }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
         {{ '{%' }} endif {{ '%}' }}
+        {% endif %}
     </div>
 </div>
 {% for relation in render_controls.relations_needing_search %}

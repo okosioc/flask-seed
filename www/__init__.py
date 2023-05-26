@@ -151,9 +151,7 @@ def configure_uploads(app):
 
 def configure_i18n(app):
     """ 国际化支持. """
-    babel = Babel(app)
 
-    @babel.localeselector
     def get_locale():
         """ Guess locale. """
         if has_request_context() and request:
@@ -169,6 +167,9 @@ def configure_i18n(app):
             return session.get('_locale', app.config.get('BABEL_DEFAULT_LOCALE'))
         else:
             return None
+
+    #
+    Babel(app, locale_selector=get_locale)
 
 
 def configure_schedulers(app):
@@ -260,6 +261,27 @@ def configure_template_filters(app):
     def items(value):
         """ Return key-value pairs of dict. """
         return value.items()
+
+    @app.template_filter()
+    def index(value, element):
+        """ Return index of the element, value should be a list. """
+        try:
+            return value.index(element)
+        except ValueError:
+            return -1
+
+    @app.template_filter()
+    def todict(value):
+        """ Convert a list to dict. """
+        if isinstance(value, list):
+            return {i: v for i, v in enumerate(value)}
+        else:
+            return {}
+
+    @app.template_filter()
+    def urlquote(value, charset='utf-8'):
+        """ Url Quote. """
+        return url_quote(value, charset)
 
     @app.template_filter()
     def quote(value):

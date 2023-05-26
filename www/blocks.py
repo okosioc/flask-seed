@@ -14,21 +14,6 @@ BLOCKS = [
     # Basic
     #
     {
-        'key': 'header',
-        'icon': '/static/img/logo.png',
-        'children': [
-
-        ]
-    },
-    {
-        'key': 'header-dash',
-        'children': [
-            {'icon': 'fe fe-user', 'title': '账号设置', 'url': '/dashboard/profile'},
-            {'title': ''},
-            {'icon': 'fe fe-log-out', 'title': '退出', 'url': '/logout'}
-        ]
-    },
-    {
         'key': 'promo',
         'title': 'Welcome to <span class="text-primary">flask-seed</span>.<br>Develop anything.',
         'subtitle': '数据结构+项目模板，生成易于二次开发的种子项目',
@@ -104,25 +89,6 @@ BLOCKS = [
                     {'title': '客户支持', 'content': '<i class="fe fe-check-circle text-success"></i>'},
                 ]
             },
-        ]
-    },
-    {
-        'key': 'footer',
-        'title': 'flask-seed',
-        'subtitle': '数据结构+项目模板=种子项目',
-        'action': {'title': '免费试用<i class="fe fe-arrow-right d-none d-md-inline ml-2"></i>', 'url': '/dashboard'},
-        'remarks': '2023 © flask-seed.com',
-    },
-    {
-        'key': 'footer-simple',
-        'remarks': '2023 © flask-seed.com',
-    },
-    {
-        'key': 'footer-dash',
-        'remarks': '2023 © flask-seed.com',
-        'children': [
-            {'title': 'About Us', 'url': 'javascript:coming();'},
-            {'title': 'Help', 'url': 'javascript:coming();'}
         ]
     },
     #

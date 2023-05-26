@@ -7,9 +7,8 @@ from flask_login import current_user
 
 from py3seed import populate_model, populate_search
 from .common import get_id
-from www.tools import auth_permission
+from www.tools import auth_permission, admin_permission
 from www.models import DemoProjectDashboard, DemoProject, DemoUser, DemoTeam, DemoTask, Block, DemoCategory, DemoAttribute, DemoProduct
-
 
 demo = Blueprint('demo', __name__)
 
@@ -211,6 +210,11 @@ def task_edit():
             abort(404)
     else:
         demo_task = DemoTask()
+        #
+        if 'project_id' in request.args:
+            project_id = int(request.args.get('project_id'))
+            demo_task.project = DemoProject.find_one(project_id)
+            args.append(('project_id', project_id))
     #
     preloads = {}
     demo_users, demo_users_pagination = DemoUser.search({}, projection=['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time'], sort=[('create_time', -1)])

@@ -49,6 +49,26 @@
 }
 
 //
+// margin and padding
+//
+
+.m1 {
+  margin: 1rem !important;
+}
+
+.mb1 {
+  margin-bottom: 1rem !important;
+}
+
+.p1 {
+  padding: 1rem !important;
+}
+
+.pb1 {
+  padding-bottom: 1rem !important;
+}
+
+//
 // Customize colors
 //
 
@@ -170,6 +190,20 @@ $my-orange: #ff8700;
 
 .bg-white-90 {
   background-color: fade-out($white, .1) !important;
+}
+
+@media (max-width: 991.98px) {
+  .bg-between {
+    background-image: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .bg-between {
+    background-repeat: no-repeat;
+    background-position: left center, right center;
+    background-size: auto 70%;
+  }
 }
 
 //
@@ -298,6 +332,8 @@ $my-orange: #ff8700;
 //
 
 span.twitter-typeahead {
+
+  display: inline !important;
 
   .tt-input {
     border-style: dotted;
@@ -758,7 +794,7 @@ a.card-img-overlay {
 .modal-content > .modal-body {
   // last row
   > .row:last-child {
-    > .col, .col-sm {
+    > .col, [class*="col-"] {
       .form-group {
         margin-bottom: 0;
       }

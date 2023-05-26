@@ -119,7 +119,7 @@
             <div class="col-sm-8">
                 <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-check-square mr-2"></i>任务列表</h4></div><div class="table-responsive">
                 <div class="relation array" name="tasks" format="table">
-                    <table class="table table-striped ">
+                    <table class="table table-striped border-bottom mb1">
                         <thead>
                             <tr>
                                 <th>任务标题</th>
@@ -156,6 +156,9 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    <div class="array-actions m1">
+                        <a class="btn btn-outline-primary" href="task-edit?project_id={{ demo_project.id }}">创建任务...</a>
+                    </div>
                     <!-- /.table -->
                 </div>
                 </div></div>

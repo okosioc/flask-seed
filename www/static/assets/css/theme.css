@@ -15119,6 +15119,22 @@ a:focus, button:focus {
     margin-left: -100%;
   }
 }
+.m1 {
+  margin: 1rem !important;
+}
+
+.mb1 {
+  margin-bottom: 1rem !important;
+}
+
+.p1 {
+  padding: 1rem !important;
+}
+
+.pb1 {
+  padding-bottom: 1rem !important;
+}
+
 .bg-primary-gardient {
   background-image: linear-gradient(-45deg, #89b5f0, #e6effc);
   background-position: center;
@@ -15236,6 +15252,18 @@ a:focus, button:focus {
   background-color: rgba(255, 255, 255, 0.9) !important;
 }
 
+@media (max-width: 991.98px) {
+  .bg-between {
+    background-image: none !important;
+  }
+}
+@media (min-width: 768px) {
+  .bg-between {
+    background-repeat: no-repeat;
+    background-position: left center, right center;
+    background-size: auto 70%;
+  }
+}
 .vw-50 {
   width: 50vw !important;
 }
@@ -15314,6 +15342,9 @@ a:focus, button:focus {
   height: 100%;
 }
 
+span.twitter-typeahead {
+  display: inline !important;
+}
 span.twitter-typeahead .tt-input {
   border-style: dotted;
   border-width: 1px;
@@ -15656,22 +15687,22 @@ a.card-img-overlay:hover {
   color: #B1C2D9;
 }
 
-.card > .card-body > .row:last-child > .col .form-group, .card > .card-body > .row:last-child .col-sm .form-group,
+.card > .card-body > .row:last-child > .col .form-group, .card > .card-body > .row:last-child [class*=col-] .form-group,
 .card > .card-body > .object > .row:last-child > .col .form-group,
-.card > .card-body > .object > .row:last-child .col-sm .form-group,
+.card > .card-body > .object > .row:last-child [class*=col-] .form-group,
 .card > .card-body > .array > .row:last-child > .col .form-group,
-.card > .card-body > .array > .row:last-child .col-sm .form-group,
+.card > .card-body > .array > .row:last-child [class*=col-] .form-group,
 .modal-content > .modal-body > .row:last-child > .col .form-group,
-.modal-content > .modal-body > .row:last-child .col-sm .form-group {
+.modal-content > .modal-body > .row:last-child [class*=col-] .form-group {
   margin-bottom: 0;
 }
-.card > .card-body > .row:last-child > .col .field-group, .card > .card-body > .row:last-child .col-sm .field-group,
+.card > .card-body > .row:last-child > .col .field-group, .card > .card-body > .row:last-child [class*=col-] .field-group,
 .card > .card-body > .object > .row:last-child > .col .field-group,
-.card > .card-body > .object > .row:last-child .col-sm .field-group,
+.card > .card-body > .object > .row:last-child [class*=col-] .field-group,
 .card > .card-body > .array > .row:last-child > .col .field-group,
-.card > .card-body > .array > .row:last-child .col-sm .field-group,
+.card > .card-body > .array > .row:last-child [class*=col-] .field-group,
 .modal-content > .modal-body > .row:last-child > .col .field-group,
-.modal-content > .modal-body > .row:last-child .col-sm .field-group {
+.modal-content > .modal-body > .row:last-child [class*=col-] .field-group {
   margin-bottom: 0;
 }
 .card > .card-body > .row:last-child > .form-group,

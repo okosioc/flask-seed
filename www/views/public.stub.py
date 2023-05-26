@@ -7,9 +7,8 @@ from flask_login import current_user
 
 from py3seed import populate_model, populate_search
 from .common import get_id
-from www.tools import auth_permission
+from www.tools import auth_permission, admin_permission
 from www.models import Block
-
 
 public = Blueprint('public', __name__)
 

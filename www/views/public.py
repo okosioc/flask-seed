@@ -140,8 +140,8 @@ def signup():
             current_app.logger.info('Current number of users is %s' % count)
         #
         u.save()
-        current_app.logger.info('A new user created, %s' % u)
-        send_support_email('signup()', 'New user %s with id %s.' % (u.email, u._id))
+        current_app.logger.info(f'A new user created: {u}')
+        send_support_email('signup()', f'New user {u}')
         # Keep the user info in the session using Flask-Login
         login_user(u)
         return redirect('/')
@@ -168,8 +168,10 @@ def upload_file():
     if not isinstance(file, FileStorage) or '.' not in file.filename:
         abort(400)
     ext = file.filename.rsplit('.', 1)[1].lower()
-    if ext not in current_app.config['UPLOAD_IMAGE_EXTS']:
+    mine_exts = [m.split('/')[1] for m in current_app.config['UPLOAD_MIMES']]
+    if ext not in mine_exts:
         abort(400)
+    #
     filename = secure_filename(file.filename)
     key = '%s/%s/%s' % (current_app.config['UPLOAD_FOLDER'], datetime.now().strftime('%Y%m%d'), filename)
     path = os.path.join(current_app.root_path, 'static', key)

@@ -1,0 +1,304 @@
+{% from "macros.html" import base, version with context %}
+{# macro to render user block in navbar #}
+{% macro navbar_user(is_in_sidebar) %}
+<div class="navbar-user {{ 'd-md-none' if is_in_sidebar else 'order-lg-last'}}">
+    <div class="d-none d-md-flex">
+        <a class="nav-link text-gray-700" href="javascript:coming();"><i class="fe fe-help-circle"></i></a>
+    </div>
+    <div class="dropdown mr-4 d-none d-md-flex">
+        <a href="#" class="navbar-user-link" role="button" data-toggle="dropdown" aria-haspopup="true"
+           aria-expanded="false"><span class="icon active"><i class="fe fe-bell"></i></span></a>
+        <div class="dropdown-menu dropdown-menu-right dropdown-menu-card">
+            <div class="card-header">
+                <h5 class="card-header-title">通知</h5>
+                <a href="javascript:coming();" class="small">查看全部</a>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-light mb-0">您暂无消息.</div>
+            </div>
+        </div>
+    </div> <!-- /.messages -->
+    <div class="dropdown">
+        <a href="#" class="avatar avatar-sm avatar-online dropdown-toggle" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+            {% if current_user.avatar %}
+            <img src="{{ current_user.avatar }}" class="avatar-img rounded-circle" alt="...">
+            {% else %}
+            <span class="avatar-title rounded-circle bg-primary">{{ current_user.name|first|upper }}</span>
+            {% endif %}
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+            <h6 class="dropdown-header">Hi, {{ current_user.name|capitalize }}</h6>
+            {% for l in nav.actions %}
+            {% if l.title %}
+            <a href="{{ l.url }}" class="dropdown-item">
+                <i class="{{ l.icon }} mr-3"></i>{{ l.title }}
+            </a>
+            {% else %}
+            <div class="dropdown-divider"></div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div> <!-- /.user -->
+</div>
+{% endmacro %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block seo %}
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    {% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon">
+    <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
+    {% block style %}
+    {% endblock %}
+</head>
+<body>
+{% set nav = {
+    'title': 'pySeed',
+    'icon': base() + '/img/logo-sm.png',
+    'url': '/dashboard',
+    'actions': [
+        {'icon':'fe fe-user', 'title':'Profile', 'url':'/dashboard/profile'},
+        {'title':''},
+        {'icon':'fe fe-log-out', 'title':'Logout', 'url':'/logout'}
+    ],
+    'children': [
+        {'icon':'fe fe-grid', 'title':'首页', 'url':'#', 'children':[
+            {'title':'项目仪表盘', 'url':'/demo/project-dashboard'},
+        ]},
+        {'icon':'fe fe-user', 'title':'用户', 'url':'#', 'children':[
+            {'title':'用户设置', 'url':'/demo/user-profile?id=1'},
+        ]},
+        {'icon':'fe fe-users', 'title':'团队', 'url':'#', 'children':[
+            {'title':'团队设置', 'url':'/demo/team-profile?id=1'},
+            {'title':'团队成员', 'url':'/demo/team-members?id=1'},
+        ]},
+        {'icon':'fe fe-briefcase', 'title':'项目管理', 'url':'#', 'children':[
+            {'title':'项目列表', 'url':'/demo/project-list'},
+            {'title':'项目详情', 'url':'/demo/project-detail?id=1'},
+            {'title':'项目编辑', 'url':'/demo/project-edit'},
+            {'title':'任务详情', 'url':'/demo/task-detail?id=1'},
+            {'title':'任务编辑', 'url':'/demo/task-edit?project_id=1'},
+        ]},
+        {'icon': 'fe fe-shopping-cart', 'title': '商城首页', 'url': '/demo/shop-index'},
+    ],
+} %}
+{# nav_mode can be side/top #}
+{% set nav_mode = 'side' %}
+{# sidebar #}
+{% if nav_mode == 'side' %}
+<nav class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light" id="sidebar">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidebarCollapse"
+                aria-controls="sidebarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button> <!-- /.toggler -->
+        <a href="{{ nav.url }}" class="navbar-brand">
+            <span class="navbar-brand mb-0 h1">{{ nav.title }}</span>
+        </a> <!-- /.brand -->
+        {{ navbar_user(true) }}
+        <div class="collapse navbar-collapse" id="sidebarCollapse">
+            <ul class="navbar-nav">
+            {% for l in nav.children %}
+            {% if current_user.has_role(l.role) %}
+                {% if l.children %}
+                {% set ns = namespace(show=false) %}
+                {% for sl in l.children %}
+                    {% if sl.url|path in request.path %}
+                        {% set ns.show = true %}
+                    {% endif %}
+                {% endfor %}
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="#sidebar-{{ loop.index }}" data-toggle="collapse" role="button"
+                       aria-expanded="{{ 'true' if ns.show else 'false' }}"
+                       aria-controls="sidebar-{{ loop.index }}">
+                        <i class="{{ l.icon }}"></i> {{ l.title }}
+                    </a>
+                    <div class="collapse {{ 'show' if ns.show }}" id="sidebar-{{ loop.index }}">
+                        <ul class="nav nav-sm flex-column">
+                            {% for sl in l.children %}
+                            {% if current_user.has_role(sl.role) %}
+                            <li class="nav-item">
+                                <a href="{{ sl.url }}"
+                                   class="nav-link {{ 'active' if sl.url|path in request.path }}">
+                                    {{ sl.title }}
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if l.url in request.path }}" href="{{ l.url }}">
+                        <i class="{{ l.icon }}"></i>{{ l.title }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endif %}
+            {% endfor %}
+            </ul>
+        </div> <!-- /.collapse -->
+    </div>
+</nav>
+{% endif %}
+<div class="main-content">
+    {% if nav_mode == 'top' %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom" id="topbar">
+        <div class="container-xxl">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#topbarCollapse"
+                aria-controls="topbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button> <!-- /.toggler -->
+            <a href="{{ nav.url }}" class="navbar-brand mr-lg-auto">
+                <span class="navbar-brand mb-0 h1">{{ nav.title }}</span>
+            </a> <!-- /.brand -->
+            {{ navbar_user() }}
+            <div class="navbar-collapse collapse" id="topbarCollapse">
+                <ul class="navbar-nav">
+                    {% for l in nav.children %}
+                    {% if l.children %}
+                    <li class="nav-item">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="{{ l.url }}" role="button"
+                               data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false">
+                                {{ l.title|safe }}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                            {% for sl in l.children %}
+                            {% if sl.title %}
+                                <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
+                            {% else %}
+                                <div class="dropdown-divider"></div>
+                            {% endif %}
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ l.url }}">{{ l.title|safe }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </div> <!-- /.collapse -->
+        </div>
+    </nav>
+    {% elif nav_mode == 'side' %}
+    <nav class="navbar navbar-expand-md navbar-light d-none d-md-flex" id="topbar">
+        <div class="container-fluid">
+            <form class="form-inline mr-4 d-none d-md-flex">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                </div>
+            </form> <!-- /.form -->
+            {{ navbar_user() }}
+        </div>
+    </nav>
+    {% endif %}
+    {% set breadcrumb = breadcrumb or {
+        'title': 'Blank Page',
+        'subtitle': 'Overview',
+        'children': [
+            {'url':'/', 'title': 'Home'},
+            {'url':'/dashboard', 'title': 'Dashboard'},
+            {'url':'/blank', 'title': 'Blank Page'}
+        ],
+        'actions': [],
+        'tabs':[]
+    } %}
+    <div class="header">
+        <div class="container-{{ 'fluid' if nav_mode == 'side' else 'xxl'}}">
+            <div class="header-body">
+                <div class="row align-items-end">
+                    <div class="col">
+                        <h6 class="header-pretitle">{{ breadcrumb.subtitle }}</h6>
+                        <h1 class="header-title">{{ breadcrumb.title }}</h1>
+                    </div>
+                    <div class="col-auto">
+                    {% if breadcrumb.children %}
+                        <ol class="breadcrumb mb-0">
+                        {% for l in breadcrumb.children %}
+                        {% if loop.last %}
+                            <li class="breadcrumb-item active">{{ l.title }}</li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{{ l.url }}">{{ l.title }}</a>
+                            </li>
+                        {% endif %}
+                        {% endfor %}
+                        </ol>
+                    {% elif breadcrumb.actions %}
+                        {% for a in breadcrumb.actions %}
+                        {% if a.view %}
+                            {% set href = update_full_path(a.view) %}
+                        {% elif a.url %}
+                            {% set href = a.url %}
+                        {% else %}
+                            {% set href = 'javascript:;' %}
+                        {% endif %}
+                        <a href="{{ href }}" {% for k,v in a|items if k not in ['icon', 'title', 'href']%}{{ k }}="{{ v }}"{% endfor %}
+                           class="btn btn-outline-primary ml-2">
+                            {% if a.icon %}<i class="fe fe-{{ a.icon }} mr-2"></i>{% endif %}{{ a.title }}
+                        </a>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                </div>
+                {% if breadcrumb.tabs %}
+                <div class="row align-items-center">
+                    <div class="col">
+                        <ul class="nav nav-tabs header-tabs">
+                            {% for t in breadcrumb.tabs %}
+                            <li class="nav-item">
+                                <a href="{{ t.url }}" class="nav-link {{ 'active' if request.full_path == t.url }}">
+                                    {{ t.title|safe }}
+                                    {% if t.count %}
+                                        <span class="badge badge-pill badge-soft-secondary">{{ t.count }}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div> <!-- /.breadcrumb -->
+    <div class="container-{{ 'fluid' if nav_mode == 'side' else 'xxl'}}">
+        {% block content %}
+        {% endblock %}
+    </div>
+    {% set footer = {
+        'remarks': '2023 © koidesk.com',
+        'children': [],
+    } %}
+    <footer class="footer py-3">
+        <div class="container-{{ 'fluid' if nav_mode == 'side' else 'xxl'}}">
+            <div class="row">
+                <div class="col">
+                    <div class="text-right text-muted">{{ footer.remarks }}</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+<script src="{{ base() }}/assets/js/vendor.min.js"></script>
+<script src="{{ base() }}/js/enums.js?{{ version() }}"></script>
+<script src="{{ base() }}/js/app.min.js?{{ version() }}"></script>
+{% block script %}
+{% endblock %}
+</body>
+</html>

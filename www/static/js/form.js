@@ -700,6 +700,35 @@ function _install_components(container) {
             });
         });
 
+        // ranger
+        formGroup.find(".range-input-group").each(function (i, n) {
+            var ranger = $(n).find(".custom-range");
+            var range_value = $(n).find(".range-value");
+            var value = range_value.text();
+            // A mapping, Step => Value
+            var steps = $(n).attr("data-steps") ? JSON.parse($(n).attr("data-steps")) : {};
+            var max = -1;
+            if (Object.keys(steps).length) {
+                max = Object.keys(steps).length - 1;
+                ranger.attr("max", max);
+                // find step from value
+                for (var step in steps) {
+                    if (String(steps[step]) == value) {
+                        ranger.val(parseInt(step));
+                        break;
+                    }
+                }
+            }
+            ranger.on("input", function () {
+                var step = String($(this).val());
+                var value = step;
+                if (max != -1) {
+                    value = steps[step];
+                }
+                range_value.text(value);
+            });
+        });
+
         // Select2
         // https://select2.org/
         formGroup.find("select.select2").each(function (i, n) {
@@ -979,8 +1008,8 @@ function _process(param, field, path) {
             var vals = select.val();
             if (vals.length) {
                 if (field.is(".relation")) {
-                    var id = field.attr("relation-id");
-                    var title = field.attr("relation-title");
+                    var id = field.children(".form-group").attr("relation-id");
+                    var title = field.children(".form-group").attr("relation-title");
                     $.each(vals, function (i, n) {
                         param[path + "[" + i + "]." + id] = n;
                         param[path + "[" + i + "]." + title] = select.children("option[value=" + n + "]").text();
@@ -1072,6 +1101,7 @@ function _process(param, field, path) {
             pluploadInputGroup = field.find(".plupload-input-group"),
             rteInputGroup = field.find(".rte-input-group"),
             timeRangeInputGroup = field.find(".time-range-input-group"),
+            rangeInputGroup = field.find(".range-input-group"),
             relationInputGroup = field.find(".relation-input-group"),
             inputGroup = field.find(".input-group"),
             selectInput = field.find("select"),
@@ -1139,6 +1169,18 @@ function _process(param, field, path) {
                     timeRangeInputGroup.addClass("is-invalid");
                     inputStart.addClass("is-invalid");
                     inputEnd.addClass("is-invalid");
+                    param["valid"] = false;
+                }
+            }
+        } else if (rangeInputGroup.length){
+            rangeInputGroup.removeClass("in-valid is-invalid");
+            var value = rangeInputGroup.find(".range-value").text().trim();
+            if (value.length) {
+                param[path] = value;
+            } else {
+                // Manually validate required
+                if (rangeInputGroup.is("[required]")) {
+                    rangeInputGroup.addClass("is-invalid");
                     param["valid"] = false;
                 }
             }

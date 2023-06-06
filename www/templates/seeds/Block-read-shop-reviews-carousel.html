@@ -1,4 +1,33 @@
-{% set block = load_block('shop-reviews') %}
+{% set block = blocks['shop-reviews'] or {
+        'tag': 'What buyers say',
+        'title': 'Latest buyers Reviews',
+        'children': [
+            {
+                'title': 'Low top Sneakers', 'subtitle': 'Shoes', 'value': 3.,
+                'image': '/static/assets/img/products/product-13.jpg',
+                'content': 'From creepeth said moved given divide make multiply of him shall itself also above second doesn\'t unto created saying land herb sea midst night wherein.',
+                'remarks': 'Logan Edwards, 01 Jun 2019',
+            },
+            {
+                'title': 'Cotton print Dress', 'subtitle': 'Dresses', 'value': 5.,
+                'image': '/static/assets/img/products/product-14.jpg',
+                'content': 'God every fill great replenish darkness unto. Very open. Likeness their that light. Given under image to. Subdue of shall cattle day fish form saw spirit and given stars, us you whales may, land, saw fill unto.',
+                'remarks': 'Jane Jefferson, 29 May 2019',
+            },
+            {
+                'title': 'Oversized print T-shirt', 'subtitle': 'T-shirts', 'value': 4.,
+                'image': '/static/assets/img/products/product-15.jpg',
+                'content': 'Fill his waters wherein signs likeness waters. Second light gathered appear sixth fourth, seasons behold creeping female.',
+                'remarks': 'Darrell Baker, 18 May 2019',
+            },
+            {
+                'title': 'Suede cross body Bag', 'subtitle': 'Bags & Accessories', 'value': 4.,
+                'image': '/static/assets/img/products/product-13.jpg',
+                'content': 'God every fill great replenish darkness unto. Very open. Likeness their that light. Given under image to. Subdue of shall cattle day fish form saw spirit and given stars.',
+                'remarks': 'Pavel Doe, 29 May 2019',
+            },
+        ],
+    } %}
 <section class="py-7">
     <div class="container">
         <div class="row justify-content-center">

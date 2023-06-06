@@ -1,5 +1,15 @@
 {# display one feature using format: image,text #}
-{% set block = load_block('feature-2') %}
+{% set block = blocks['feature-2'] or {
+        'icon': 'TEMPLATE',
+        'title': '项目模板',
+        'subtitle': '通过定义<span class="text-primary">蓝图</span>可以生成多个平台的项目',
+        'image': '/static/assets/img/illustrations/design.png',
+        'children': [
+            {'title': '多平台', 'subtitle': '可以生成多个平台的项目，如网站、小程序、iOS和Android应用等'},
+            {'title': '专业模板', 'subtitle': '生成符合最佳实践的项目组织结构以及规范代码'},
+            {'title': '组件化', 'subtitle': '定义数据结构时可以指定字段使用的格式，生成项目时可以生成对应的组件'}
+        ]
+    } %}
 <section class="py-7 bg-light">
     <div class="container">
         <div class="row justify-content-center">

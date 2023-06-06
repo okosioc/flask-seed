@@ -1,4 +1,11 @@
-{% set block = load_block('shop-horizontal-topnav') %}
+{% set block = blocks['shop-horizontal-topnav'] or {
+        'children': [
+            {'title': '<i class="fe fe-user d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-heart d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-shopping-cart d-inline"></i>', 'url': 'javascript:coming();'},
+        ],
+        'remarks': 'Search for items and brands',
+    } %}
 <nav class="navbar navbar-expand navbar-light border-0 pt-0 pt-lg-4 pb-4">
     <div class="container-fluid">
         <form class="navbar-form w-100" style="max-width: 550px;">

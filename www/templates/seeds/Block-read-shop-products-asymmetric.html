@@ -1,4 +1,31 @@
-{% set block = load_block('shop-products-on-sale') %}
+{% set block = blocks['shop-products-on-sale'] or {
+        'children': [
+            {
+                'title': 'Floral Cotton midi Dress', 'content': '$59.00',
+                'image': '/static/assets/img/products/product-65.jpg',
+            },
+            {
+                'title': 'Linen basic Trousers', 'content': '$125.00',
+                'image': '/static/assets/img/products/product-66.jpg',
+            },
+            {
+                'tag': 'SALE', 'title': 'Leather heel Sandals', 'content': '$89.99',
+                'image': '/static/assets/img/products/product-67.jpg',
+            },
+            {
+                'title': 'Leather square Tote Bag', 'content': '$35.00',
+                'image': '/static/assets/img/products/product-68.jpg',
+            },
+            {
+                'title': 'Cotton basic T-Shirt', 'content': '$50.00',
+                'image': '/static/assets/img/products/product-69.jpg',
+            },
+            {
+                'title': 'Acymmetric Cotton Top', 'content': '$39.00',
+                'image': '/static/assets/img/products/product-70.jpg',
+            },
+        ],
+    } %}
 <section class="py-7 bg-white">
     <div class="container">
         {% for c in block.children %}

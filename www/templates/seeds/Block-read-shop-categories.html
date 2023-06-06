@@ -1,4 +1,22 @@
-{% set block = load_block('shop-categories') %}
+{% set block = blocks['shop-categories'] or {
+        'children': [
+            {
+                'title': 'Summer Hats',
+                'image': '/static/assets/img/products/product-22.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Men Hats',
+                'image': '/static/assets/img/products/product-23.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Floral Dresses',
+                'image': '/static/assets/img/products/product-24.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'}
+            },
+        ],
+    } %}
 <section class="py-4">
     <div class="container-fluid px-3 px-md-6">
         <div class="row">

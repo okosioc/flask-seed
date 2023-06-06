@@ -1,4 +1,19 @@
-{% set block = load_block('shop-horizontal-sidenav') %}
+{% set block = blocks['shop-horizontal-sidenav'] or {
+        'title': 'Shop.',
+        'children': [
+            {
+                'title': 'Home', 'url': '#',
+                'children': [
+                    {'title': 'Default', 'url': '/demo/shop-index'},
+                    {'title': 'Asymmetric', 'url': '/demo/shop-index-asymmetric'},
+                    {'title': 'Horizontal', 'url': '/demo/shop-index-horizontal'},
+                ],
+            },
+            {'title': 'Catelog', 'url': '/demo/shop-category'},
+            {'title': 'Blog', 'url': 'javascript:coming();'},
+            {'title': 'Account', 'url': 'javascript:coming();'},
+        ],
+    } %}
 <nav class="navbar navbar-expand-lg navbar-vertical navbar-light border-0" style="width:300px;position:-webkit-sticky;position: sticky;top:0;overflow-y: auto;">
     <div class="container-fluid">
         <a class="navbar-brand h1 mb-0 text-left" href="/">

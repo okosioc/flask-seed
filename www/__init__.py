@@ -28,7 +28,6 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.urls import url_quote, url_encode
 
 from www import views
-from www.blocks import BLOCKS
 from www.extensions import mail, cache, qiniu
 from www.jobs import init_schedule
 from www.models import DemoUser, Block
@@ -93,14 +92,13 @@ def configure_extensions(app):
 
 def configure_blocks(app):
     """ Prepare blocks. """
-    keys = []
-    for b in BLOCKS:
-        blk = Block(b)
-        blk.save()
-        #
-        keys.append(blk.key)
-    #
-    app.logger.debug(f'loaded {len(keys)} blocks: {keys}')
+    block_dict = {blk.key: blk for blk in list(Block.find())}
+    app.logger.debug(f'loaded {len(block_dict)} blocks: {block_dict.keys()}')
+
+    @app.context_processor
+    def inject_blocks():
+        """ Inject blocks into template context. """
+        return dict(blocks=block_dict)
 
 
 def configure_py3seed(app):
@@ -454,16 +452,6 @@ def configure_template_functions(app):
     def randstr(n=10):
         """ 生成长度为n的随机字符串. """
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=n))
-
-    @app.template_global()
-    def load_block(key):
-        """ 读取页面板块内容. """
-        b = Block.find_one({'key': key})
-        if b is None:
-            current_app.logger.error(f'Can not load block by {key}')
-            abort(500)
-        #
-        return b
 
 
 def configure_before_handlers(app):

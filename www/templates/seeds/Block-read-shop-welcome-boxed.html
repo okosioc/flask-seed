@@ -1,4 +1,12 @@
-{% set block = load_block('shop-welcome-summer-sales') %}
+{% set block = blocks['shop-welcome-summer-sales'] or {
+        'title': '2023 Summer Collection',
+        'images': [
+            '/static/assets/img/covers/cover-26.jpg',
+            '/static/assets/img/covers/cover-27.jpg',
+            '/static/assets/img/covers/cover-28.jpg',
+        ],
+        'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
+    } %}
 <section class="bg-white">
     <div class="container">
         <div class="row">

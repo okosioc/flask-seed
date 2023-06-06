@@ -1,4 +1,30 @@
-{% set block = load_block('pricing') %}
+{% set block = blocks['pricing'] or {
+        'icon': 'PRICING',
+        'title': '产品价格',
+        'subtitle': '免费使用',
+        'children': [
+            {
+                'title': 'FREE',
+                'subtitle': '免费',
+                'action': {'title': '免费使用', 'url': '/dashboard', 'cls': 'primary'},
+                'children': [
+                    {'title': '开源', 'content': '<i class="fe fe-check-circle text-success"></i>'},
+                    {'title': '默认模板', 'content': '<i class="fe fe-check-circle text-success"></i>'},
+                    {'title': '客户支持', 'content': '<i class="fe fe-x-circle text-danger"></i>'},
+                ]
+            },
+            {
+                'title': 'ENTERPRISE',
+                'subtitle': '定制',
+                'action': {'title': '联系我们', 'url': 'javascript:coming()', 'cls': 'light'},
+                'children': [
+                    {'title': '开源', 'content': '<i class="fe fe-check-circle text-success"></i>'},
+                    {'title': '定制模板', 'content': '<i class="fe fe-check-circle text-success"></i>'},
+                    {'title': '客户支持', 'content': '<i class="fe fe-check-circle text-success"></i>'},
+                ]
+            },
+        ]
+    } %}
 <section class="pb-7" id="pricing">
     <div class="py-7 bg-light bg-ellipses">
         <div class="container-fluid">

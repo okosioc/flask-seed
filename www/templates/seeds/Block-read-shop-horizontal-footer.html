@@ -1,4 +1,15 @@
-{% set block = load_block('shop-footer') %}
+{% set block = blocks['shop-footer'] or {
+        'title': 'Shop.',
+        'children': [
+            {'title': 'Contact Us', 'url': 'javascript:coming();'},
+            {'title': 'FAQs', 'url': 'javascript:coming();'},
+            {'title': 'Size Guide', 'url': 'javascript:coming();'},
+            {'title': 'Shipping & Returns', 'url': 'javascript:coming();'},
+            {'title': 'Terms & Conditions', 'url': 'javascript:coming();'},
+            {'title': 'Privacy & Cookie Policy', 'url': 'javascript:coming();'},
+        ],
+        'remarks': '2023 © flask-seed.com',
+    } %}
 <footer class="p-5 bg-dark">
     <div class="container-fluid">
         <div class="row">

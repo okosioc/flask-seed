@@ -1,4 +1,41 @@
-{% set block = load_block('shop-products-best-sellers') %}
+{% set block = blocks['shop-products-best-sellers'] or {
+        'tag': 'Monthly Top Sellings',
+        'title': 'Best Sellers',
+        'children': [
+            {
+                'title': 'Leather mid-heel Sandals', 'subtitle': 'Shoes', 'content': '$129.00',
+                'images': ['/static/assets/img/products/product-120.jpg', '/static/assets/img/products/product-5.jpg']
+            },
+            {
+                'title': 'Cotton floral print Dress', 'subtitle': 'Dresses', 'content': '$40.00',
+                'images': ['/static/assets/img/products/product-121.jpg', '/static/assets/img/products/product-6.jpg']
+            },
+            {
+                'tag': 'HOT', 'title': 'Leather Sneakers', 'subtitle': 'Shoes', 'content': '<span class="text-decoration-line-through">$85.00</span><span class="ml-2 text-danger">$50.00</span>',
+                'images': ['/static/assets/img/products/product-122.jpg', '/static/assets/img/products/product-7.jpg']
+            },
+            {
+                'title': 'Cropped cotton Top', 'subtitle': 'Tops', 'content': '$29.00',
+                'images': ['/static/assets/img/products/product-8.jpg']
+            },
+            {
+                'title': 'Floral print midi Dress', 'subtitle': 'Dresses', 'content': '$55.00',
+                'images': ['/static/assets/img/products/product-9.jpg']
+            },
+            {
+                'tag': 'HOT', 'title': 'Suede cross body Bag', 'subtitle': 'Bags', 'content': '<span class="text-decoration-line-through">$79.00</span><span class="ml-2 text-danger">$49.00</span>',
+                'images': ['/static/assets/img/products/product-123.jpg', '/static/assets/img/products/product-10.jpg']
+            },
+            {
+                'title': 'Printed A-line Skirt', 'subtitle': 'Skirts', 'content': '$79.00',
+                'images': ['/static/assets/img/products/product-124.jpg', '/static/assets/img/products/product-11.jpg']
+            },
+            {
+                'tag': 'HOT', 'title': 'Heel strappy Sandals', 'subtitle': 'Shoes', 'content': '$90.00',
+                'images': ['/static/assets/img/products/product-12.jpg']
+            },
+        ],
+    } %}
 <section class="py-7">
     <div class="container">
         <div class="row justify-content-center">

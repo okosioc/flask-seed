@@ -1,4 +1,33 @@
-{% set block = load_block('shop-social') %}
+{% set block = blocks['shop-social'] or {
+        'title': '@shop',
+        'subtitle': 'Appear, dry there darkness they\'re seas, dry waters.',
+        'children': [
+            {
+                'image': '/static/assets/img/products/product-16.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-17.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-18.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-19.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-20.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+            {
+                'image': '/static/assets/img/products/product-21.jpg',
+                'content': '<i class="fe fe-heart mr-2"></i> 248 <i class="fe fe-message-square mr-2 ml-3"></i> 7',
+            },
+        ],
+    } %}
 <section class="py-7 bg-light">
     <div class="container">
         <div class="row justify-content-center">

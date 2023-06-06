@@ -1,4 +1,10 @@
-{% set block = load_block('shop-banner') %}
+{% set block = blocks['shop-banner'] or {
+        'tag': 'Summer trends',
+        'title': 'Our must haves',
+        'content': 'Male his our upon seed had said wherein their i great wherein under you\'ll deep first multiply. Fish waters they\'re herb shall saying.',
+        'image': '/static/assets/img/covers/cover-10.jpg',
+        'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'},
+    } %}
 <section class="bg-light overflow-hidden">
     <div class="container">
         <div class="row no-gutters justify-content-between">

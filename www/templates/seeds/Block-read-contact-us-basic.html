@@ -1,4 +1,13 @@
-{% set block = load_block('contact-us') %}
+{% set block = blocks['contact-us'] or {
+        'icon': 'CONTACT',
+        'title': '联系我们',
+        'subtitle': '-',
+        'children': [
+            {'icon': 'fe fe-map-pin', 'title': '地址', 'content': '中国香港中环'},
+            {'icon': 'fe fe-phone', 'title': '电话', 'content': '+852-12345678'},
+            {'icon': 'fe fe-mail', 'title': '邮箱', 'content': 'support@flask-seed.com'},
+        ],
+    } %}
 <section class="py-7 mx-n3 bg-light bg-between"
          style="background-image: url(/static/assets/img/illustrations/lost-cropped.png), url(/static/assets/img/illustrations/relax-cropped.png);"
          id="contact-us">

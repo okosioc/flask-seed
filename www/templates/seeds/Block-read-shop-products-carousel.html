@@ -1,4 +1,37 @@
-{% set block = load_block('shop-products-new-arrivals') %}
+{% set block = blocks['shop-products-new-arrivals'] or {
+        'tag': 'Summer new products',
+        'title': 'New Arrivals',
+        'children': [
+            {
+                'title': 'Cotton floral print Dress', 'content': '$40.00',
+                'image': '/static/assets/img/products/product-6.jpg',
+            },
+            {
+                'tag': 'NEW', 'title': 'Suede cross body Bag', 'content': '<span class="text-decoration-line-through">$85.00</span><span class="ml-2 text-danger">$50.00</span>',
+                'image': '/static/assets/img/products/product-10.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-32.jpg',
+            },
+            {
+                'title': 'Leather Sneakers', 'content': '$50.00',
+                'image': '/static/assets/img/products/product-7.jpg',
+            },
+            {
+                'title': 'Another fine dress', 'content': '$99.00',
+                'image': '/static/assets/img/products/product-11.jpg',
+            },
+            {
+                'title': 'Baseball Cap', 'content': '$10.00',
+                'image': '/static/assets/img/products/product-33.jpg',
+            },
+            {
+                'title': 'Leather sneakers', 'content': '$19.00',
+                'image': '/static/assets/img/products/product-49.jpg',
+            },
+        ],
+    } %}
 <section class="py-7">
     <div class="container">
         <div class="row justify-content-center">

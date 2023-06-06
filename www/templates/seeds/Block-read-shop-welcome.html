@@ -1,4 +1,25 @@
-{% set block = load_block('shop-welcome') %}
+{% set block = blocks['shop-welcome'] or {
+        'children': [
+            {
+                'title': 'Summer Sale', 'subtitle': '-70%', 'content': 'with promo code CN67EW*',
+                'cls': 'col-12 col-md-6 col-lg-5 col-xl-4 offset-md-2',
+                'image': '/static/assets/img/covers/cover-5.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Summer Collection', 'content': 'So called give, one whales tree seas dry place own day, winged tree created spirit.',
+                'cls': 'col-12 col-md-6 col-lg-5 col-xl-4 offset-md-7',
+                'image': '/static/assets/img/covers/cover-23.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'dark', 'url': 'javascript:coming();'}
+            },
+            {
+                'title': 'Summer Styles', 'subtitle': '<span class="text-white">50% OFF</span>',
+                'cls': 'col-12 text-center text-white',
+                'image': '/static/assets/img/covers/cover-16.jpg',
+                'action': {'title': 'Shop Women <i class="fe fe-arrow-right ml-2"></i>', 'cls': 'outline-white', 'url': 'javascript:coming();'}
+            },
+        ]
+    } %}
 <section>
     <div data-flickity='{"prevNextButtons":true, "fade":true, "pageDots":false, "wrapAround":true, "initialIndex":0, "imagesLoaded":true, "cellAlign":"left"}'>
         {% for c in block.children %}

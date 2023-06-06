@@ -1,4 +1,22 @@
-{% set block = load_block('shop-topnav') %}
+{% set block = blocks['shop-topnav'] or {
+        'title': 'Shop.',
+        'subtitle': '<i class="fe fe-truck mr-2"></i><span>Free Shipping Worldwide</span>',
+        'children': [
+            {
+                'title': 'Home', 'url': '#',
+                'children': [
+                    {'title': 'Default', 'url': '/demo/shop-index'},
+                    {'title': 'Asymmetric', 'url': '/demo/shop-index-asymmetric'},
+                    {'title': 'Horizontal', 'url': '/demo/shop-index-horizontal'},
+                ],
+            },
+            {'title': 'Catelog', 'url': 'javascript:coming();'},
+            {'title': 'Blog', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-user d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-heart d-inline"></i>', 'url': 'javascript:coming();'},
+            {'title': '<i class="fe fe-shopping-cart d-inline"></i>', 'url': 'javascript:coming();'},
+        ],
+    } %}
 <nav class="navbar navbar-expand-lg navbar-light border-0 py-4">
     <div class="container">
         <a class="navbar-brand mb-0 h1" href="/">

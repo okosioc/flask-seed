@@ -1,4 +1,19 @@
-{% set block = load_block('shop-categories-must-haves') %}
+{% set block = blocks['shop-categories-must-haves'] or {
+        'title': 'Our must haves',
+        'content': 'Open created shall two he second moving whose. He face whose two upon, fowl behold waters. Fly there their day creepeth. Darkness beginning spirit after.',
+        'remarks': 'Third. For morning whales saw were had seed can\'t divide it light shall moveth, us blessed given.',
+        'action': {'title': 'Discover more', 'url': 'javascript:coming();'},
+        'children': [
+            {
+                'title': 'Dress', 'url': '#',
+                'image': '/static/assets/img/products/product-71.jpg',
+            },
+            {
+                'title': 'Cropped Trousers', 'url': '#',
+                'image': '/static/assets/img/products/product-72.jpg',
+            },
+        ],
+    } %}
 <section class="py-7">
     <div class="container">
         <div class="row align-items-center">

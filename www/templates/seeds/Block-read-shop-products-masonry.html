@@ -22,7 +22,83 @@
     </div>
 </div>
 {%- endmacro %}
-{% set block = load_block('shop-products-summer-sale') %}
+{% set block = blocks['shop-products-summer-sale'] or {
+        'children': [
+            {
+                'title': '50% off', 'subtitle': 'Summer Styles', 'remarks': 'Enjoy an extra', 'cls': 'white',
+                'image': '/static/assets/img/products/product-73.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-74.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-75.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-76.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-77.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-78.jpg',
+            },
+            {
+                'tag': 'NEW', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-79.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-80.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-81.jpg',
+            },
+            {
+                'tag': 'SALE', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-82.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-83.jpg',
+            },
+            {
+                'title': 'Watch Collection',
+                'image': '/static/assets/img/products/product-84.jpg',
+                'action': {'title': 'Shop Now <i class="fe fe-arrow-right ml-2"></i>', 'url': 'javascript:coming();'},
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-85.jpg',
+            },
+            {
+                'tag': 'NEW', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-86.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-87.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-88.jpg',
+            },
+            {
+                'tag': 'SALE', 'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-89.jpg',
+            },
+            {
+                'title': 'Cotton leaf print Shirt', 'content': '$65.00',
+                'image': '/static/assets/img/products/product-90.jpg',
+            },
+        ],
+    } %}
 <section class="pb-12">
     <div class="row">
     {# The first 16 products in masonry format, remaining products in grid format #}

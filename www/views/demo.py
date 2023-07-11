@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, current_app, request, abort, jsoni
 from py3seed import populate_model, populate_search
 from werkzeug.security import generate_password_hash
 
-from www.models import DemoProjectDashboard, DemoTeam, DemoUser, DemoProject, DemoTask, DemoUserRole, DemoActivity, DemoCategory, DemoAttribute, DemoAttributeOption
+from core.models import DemoProjectDashboard, DemoTeam, DemoUser, DemoProject, DemoTask, DemoUserRole, DemoActivity, DemoCategory, DemoAttribute, DemoAttributeOption
 from www.tools import auth_permission, str_datetime
 from .common import get_id
 

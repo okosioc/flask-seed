@@ -21,7 +21,7 @@ from werkzeug.utils import secure_filename
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
-from www.models import DemoUser, DemoUserRole
+from core.models import DemoUser, DemoUserRole
 from www.tools import send_support_email, editor_permission
 
 public = Blueprint('public', __name__)

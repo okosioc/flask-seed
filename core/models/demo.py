@@ -19,6 +19,43 @@ from werkzeug.utils import cached_property
 from .common import Block
 
 
+@register
+class DemoPage(CacheModel):
+    """ 页面. """
+    key: str = Field(searchable=Comparator.EQ, title='页面标识', description='通过该标识自动匹配模版')
+    title: str = Field(searchable=Comparator.LIKE, icon='type', title='页面标题')
+    blocks: List[Block] = Relation(title='区块')
+    #
+    update_time: datetime = Field(required=False, title='更新时间')
+    create_time: datetime = Field(default=datetime.now, icon='clock', title='创建时间')
+    #
+    __icon__ = 'file'
+    __title__ = '页面'
+    #
+    __actions__ = {
+        'demo/page-list': {
+            'domains': ['www'],
+            'layout': '''#!query?title=页面管理
+                key, title, blocks, create_time
+            ''',
+        },
+        'demo/page-edit': {
+            'domains': ['www'],
+            'layout': '''#!form?title=页面编辑
+                key, title
+                blocks
+            ''',
+        },
+        # 如果没有设置blueprint, 默认放在public下, 无需权限即可访问
+        # 如果layout没有布局信息, 表示只根据action(即下述#!read_by_key)生成后端逻辑, 而无需生成页面模版; 页面模版需要开发人员自行实现
+        'page-detail': {
+            'domains': ['www'],
+            'layout': '''#!read_by_key
+            ''',
+        },
+    }
+
+
 class DemoTeamStatus(SimpleEnum):
     """ 团队状态. """
     NORMAL = 'normal', '正常'
@@ -39,6 +76,31 @@ class DemoTeam(CacheModel):
     #
     __icon__ = 'users'
     __title__ = '团队'
+    #
+    __actions__ = {
+        'demo/team-profile': {
+            'domains': ['www'],
+            'layout': '''#!form?title=团队设置
+                $#4,           0#8      
+                  logo           name   
+                  name           code   
+                  status         remarks
+                  members        logo   
+                  create_time  
+            ''',
+        },
+        'demo/team-members': {
+            'domains': ['www'],
+            'layout': '''#!read?title=团队成员
+                $#4,           members#8                                                  
+                  logo           avatar, name, status, roles, email, phone, team_join_time
+                  name                                                                    
+                  status                                                                  
+                  members                                                                 
+                  create_time
+            ''',
+        },
+    }
 
 
 class DemoUserStatus(SimpleEnum):
@@ -88,6 +150,22 @@ class DemoUser(CacheModel, UserMixin):
     #
     __icon__ = 'user'
     __title__ = '用户'
+    #
+    __actions__ = {
+        'demo/user-profile': {
+            'domains': ['www'],
+            'layout': '''#!form?title=用户设置
+                $#4,           0#8                                           
+                  avatar         name  
+                  name           phone                                                  
+                  status         intro                                                 
+                  roles          avatar                                                
+                  email
+                  phone
+                  create_time
+            ''',
+        },
+    }
 
     @cached_property
     def is_admin(self):
@@ -174,6 +252,44 @@ class DemoProject(CacheModel):
     #
     __icon__ = 'briefcase'
     __title__ = '项目'
+    #
+    __actions__ = {
+        'demo/project-list': {
+            'domains': ['www'],
+            'layout': '''#!query?title=项目列表result_view=grid
+                title, status, value, start, members, percent, create_time
+            ''',
+        },
+        'demo/project-detail': {
+            'domains': ['www'],
+            'layout': '''#!read?title=项目详情
+                0#4,              1#8
+                  $                 tasks                                   
+                    title             title, status, user, start, create_time 
+                    status          activities                  
+                    value             user, title, content, time
+                    start         
+                    members       
+                    percent       
+                    create_time   
+                  members                         
+                    avatar, name            
+            ''',
+        },
+        'demo/project-edit': {
+            'domains': ['www'],
+            'layout': '''#!form?title=项目编辑
+                0?title=项目基本信息
+                  title
+                  description
+                  status, value
+                  start, end
+                  percent,
+                members#4
+                  avatar, name            
+            ''',
+        },
+    }
 
 
 @register
@@ -202,6 +318,37 @@ class DemoTask(CacheModel):
     #
     __icon__ = 'check-square'
     __title__ = '任务'
+    #
+    __actions__ = {
+        'demo/task-detail': {
+            'domains': ['www'],
+            'layout': '''#!read?title=任务详情
+                project#4,       0#8     
+                  $                title 
+                    title          status     
+                    status         content    
+                    value          start, end 
+                    start          user       
+                    members        create_time
+                    percent    
+                    create_time
+            ''',
+        },
+        'demo/task-edit': {
+            'domains': ['www'],
+            'layout': '''#!form?title=任务编辑
+                project#4,       0#8           
+                  $                title       
+                    title          status      
+                    status         content     
+                    value          start, end  
+                    start          user         
+                    members         
+                    percent                    
+                    create_time        
+            ''',
+        },
+    }
 
 
 @register
@@ -215,6 +362,16 @@ class DemoProjectDashboard(CacheModel):
     # Table&Media
     active_projects: List[DemoProject] = Relation(format_=Format.TABLE, title='活跃项目')
     recent_activities: List[DemoActivity] = Field(format_=Format.TIMELINE, title='最近操作')  # 按照时间倒序
+    #
+    __actions__ = {
+        'demo/project-dashboard': {
+            'domains': ['www'],
+            'layout': '''#!read?title=仪表盘
+                active_projects_count, active_projects_value, members_count, tasks_count
+                active_projects#8, recent_activities#4
+            ''',
+        }
+    }
 
 
 class DemoAttributeOption(BaseModel):

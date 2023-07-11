@@ -30,7 +30,7 @@ from werkzeug.urls import url_quote, url_encode
 from www import views
 from www.extensions import mail, cache, qiniu
 from www.jobs import init_schedule
-from www.models import DemoUser, Block
+from core.models import DemoUser, Block
 from www.tools import SSLSMTPHandler, helpers, ListConverter, BSONObjectIdConverter
 
 DEFAULT_APP_NAME = 'www'
@@ -40,7 +40,7 @@ DEFAULT_BLUEPRINTS = (
     (views.demo, '/demo'),
 )
 
-MODELS_MODULE = import_module('www.models')
+MODELS_MODULE = import_module('core.models')
 
 
 def create_www(blueprints=None, pytest=False, runscripts=False):

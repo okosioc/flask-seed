@@ -1,41 +1,8 @@
 # Each line is a folder or file
-# [TODO] When installing a new template(pyseed install), firstly overwrite the .pyseed-includes file from the installing template, then each folder and file will be overwrited
-# [TODO] When upgrading exsiting template(pyseed upgrade), each folder and file will be merged
-# When generating(pyseed gen), only files with jinja2 ext will be generated using overwriting mode or merging mode
 
 # www
-www/static/assets
 www/static/js/enums.js.jinja2
-www/static/js/app.js
-www/static/js/form.js
-#
-www/templates/includes/breadcrumb.html
-www/templates/includes/breadcrumb-dash.html
-www/templates/includes/chart-doughnut.html
-www/templates/includes/chart-line.html
-www/templates/includes/error-simple.html
-www/templates/includes/login-simple.html
-www/templates/includes/pagination.html
-www/templates/includes/signup-simple.html
-www/templates/seeds/includes
-www/templates/seeds/Block-read-header-basic.html
-www/templates/seeds/Block-read-header-dash-basic.html
-www/templates/seeds/Block-read-promo-basic.html
-www/templates/seeds/Block-read-features-basic.html
-www/templates/seeds/Block-read-feature-1-basic.html
-www/templates/seeds/Block-read-feature-2-basic.html
-www/templates/seeds/Block-read-contact-us-basic.html
-www/templates/seeds/Block-read-pricing-basic.html
-www/templates/seeds/Block-read-footer-basic.html
-www/templates/seeds/Block-read-footer-dash-basic.html
-www/templates/seeds/Block-read-footer-simple-basic.html
-www/templates/seeds/{{#seeds}}.html.jinja2
 www/templates/{{#blueprints}}
-www/templates/layout-dash-demo.html
-www/templates/layout-public.html
-www/templates/layout-simple.html
-www/templates/macros.html
-#
 www/views/{{#blueprints}}.stub.py.jinja2
 
 # miniapp

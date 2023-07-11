@@ -44,3 +44,7 @@ venv/
 
 # jupyter
 .ipynb_checkpoints/
+
+# pyseed
+*.*.11
+*.*.111

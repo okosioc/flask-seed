@@ -1,42 +1,10 @@
-{% extends "layout-public-demo.html" %}
+{% extends "layout-public.html" %}
 {% set title = '首页' %}
-{% set breadcrumb = {
-    'subtitle': '',
-    'title': title,
-    'actions': [],
-    'tabs': [],
-} %}
 {% block title %}{{ title }}{% endblock %}
-{% block style %}
-<link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
-{% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-promo-basic.html" %}
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-features-basic.html" %}
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-feature-1-basic.html" %}
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-feature-2-basic.html" %}
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/Block-read-pricing-basic.html" %}
-    </div>
-</div>
-{% endblock %}
-{% block script %}
-<script src="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
+    {% include 'blocks/basic-promo.html' %}
+    {% include 'blocks/basic-features.html' %}
+    {% include 'blocks/basic-feature-1.html' %}
+    {% include 'blocks/basic-feature-2.html' %}
+    {% include 'blocks/basic-pricing.html' %}
 {% endblock %}

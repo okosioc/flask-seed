@@ -1,20 +1,6 @@
 {% extends "layout-simple.html" %}
 {% set title = '出错了' %}
-{% set breadcrumb = {
-    'subtitle': '',
-    'title': title,
-    'actions': [],
-    'tabs': [],
-} %}
 {% block title %}{{ title }}{% endblock %}
-{% block style %}
-{% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg">
-        {% include "includes/error-simple.html" %}
-    </div>
-</div>
-{% endblock %}
-{% block script %}
+    {% include 'blocks/simple-error.html' %}
 {% endblock %}

@@ -32,7 +32,7 @@ class DemoPage(CacheModel):
     __icon__ = 'file'
     __title__ = '页面'
     #
-    __actions__ = {
+    __views__ = {
         'demo/page-list': {
             'domains': ['www'],
             'layout': '''#!query?title=页面管理
@@ -77,11 +77,11 @@ class DemoTeam(CacheModel):
     __icon__ = 'users'
     __title__ = '团队'
     #
-    __actions__ = {
+    __views__ = {
         'demo/team-profile': {
             'domains': ['www'],
             'layout': '''#!form?title=团队设置
-                $#4,           0#8      
+                1#summary4,    2#8      
                   logo           name   
                   name           code   
                   status         remarks
@@ -92,7 +92,7 @@ class DemoTeam(CacheModel):
         'demo/team-members': {
             'domains': ['www'],
             'layout': '''#!read?title=团队成员
-                $#4,           members#8                                                  
+                1#summary4,    members#8                                                  
                   logo           avatar, name, status, roles, email, phone, team_join_time
                   name                                                                    
                   status                                                                  
@@ -151,11 +151,11 @@ class DemoUser(CacheModel, UserMixin):
     __icon__ = 'user'
     __title__ = '用户'
     #
-    __actions__ = {
+    __views__ = {
         'demo/user-profile': {
             'domains': ['www'],
             'layout': '''#!form?title=用户设置
-                $#4,           0#8                                           
+                1#summary4,    0#8                                           
                   avatar         name  
                   name           phone                                                  
                   status         intro                                                 
@@ -253,18 +253,18 @@ class DemoProject(CacheModel):
     __icon__ = 'briefcase'
     __title__ = '项目'
     #
-    __actions__ = {
+    __views__ = {
         'demo/project-list': {
             'domains': ['www'],
-            'layout': '''#!query?title=项目列表result_view=grid
+            'layout': '''#!query?title=项目管理&result_view=grid
                 title, status, value, start, members, percent, create_time
             ''',
         },
         'demo/project-detail': {
             'domains': ['www'],
             'layout': '''#!read?title=项目详情
-                0#4,              1#8
-                  $                 tasks                                   
+                1#4,              2#8
+                  1.1#summary4      tasks                                   
                     title             title, status, user, start, create_time 
                     status          activities                  
                     value             user, title, content, time
@@ -279,7 +279,7 @@ class DemoProject(CacheModel):
         'demo/project-edit': {
             'domains': ['www'],
             'layout': '''#!form?title=项目编辑
-                0?title=项目基本信息
+                1?title=项目基本信息
                   title
                   description
                   status, value
@@ -319,33 +319,31 @@ class DemoTask(CacheModel):
     __icon__ = 'check-square'
     __title__ = '任务'
     #
-    __actions__ = {
+    __views__ = {
         'demo/task-detail': {
             'domains': ['www'],
             'layout': '''#!read?title=任务详情
-                project#4,       0#8     
-                  $                title 
-                    title          status     
-                    status         content    
-                    value          start, end 
-                    start          user       
-                    members        create_time
-                    percent    
-                    create_time
+                project#summary4,  1#8     
+                  title              title 
+                  status             status     
+                  value              content    
+                  start              start, end 
+                  members            user       
+                  percent            create_time
+                  create_time
             ''',
         },
         'demo/task-edit': {
             'domains': ['www'],
             'layout': '''#!form?title=任务编辑
-                project#4,       0#8           
-                  $                title       
-                    title          status      
-                    status         content     
-                    value          start, end  
-                    start          user         
-                    members         
-                    percent                    
-                    create_time        
+                project#summary4,  1#8     
+                  title              title 
+                  status             status     
+                  value              content    
+                  start              start, end 
+                  members            user       
+                  percent            
+                  create_time      
             ''',
         },
     }
@@ -363,10 +361,10 @@ class DemoProjectDashboard(CacheModel):
     active_projects: List[DemoProject] = Relation(format_=Format.TABLE, title='活跃项目')
     recent_activities: List[DemoActivity] = Field(format_=Format.TIMELINE, title='最近操作')  # 按照时间倒序
     #
-    __actions__ = {
+    __views__ = {
         'demo/project-dashboard': {
             'domains': ['www'],
-            'layout': '''#!read?title=仪表盘
+            'layout': '''#!read?title=项目仪表盘
                 active_projects_count, active_projects_value, members_count, tasks_count
                 active_projects#8, recent_activities#4
             ''',

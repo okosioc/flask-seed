@@ -2,7 +2,7 @@
 
 # www
 www/static/js/enums.js.jinja2
-www/templates/{{#blueprints}}
-www/views/{{#blueprints}}.stub.py.jinja2
+#www/templates/{{#blueprints}}
+www/views/{{#blueprints}}.py0.jinja2
 
 # miniapp

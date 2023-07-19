@@ -29,92 +29,73 @@ def project_dashboard():
 @auth_permission
 def user_profile():
     """ 用户设置. """
-    id_ = get_id(int)
-    args = []
-    if id_:
-        demo_user = DemoUser.find_one(id_)
-        if not demo_user:
-            abort(404)
-    else:
-        demo_user = DemoUser()
-    #
     preloads = {}
+    id_ = get_id(int)
+    demo_user = DemoUser.find_one(id_)
+    if not demo_user:
+        abort(404)
     #
-    return render_template('demo/user-profile.html', demo_user=demo_user, args=args, **preloads)
+    return render_template('demo/user-profile.html', demo_user=demo_user, **preloads)
 
 
-@demo.route('/user-profile-form', methods=('POST',))
+@demo.route('/user-profile-update', methods=('POST',))
 @auth_permission
-def user_profile_form():
-    """ 保存用户设置. """
+def user_profile_update():
+    """ 用户设置. """
     req_demo_user = populate_model(request.form, DemoUser)
     id_ = get_id(int)
-    current_app.logger.info(f'Try to save demo user: {req_demo_user}')
+    current_app.logger.info(f'Try to save demo user with id {id_}: {req_demo_user}')
     #
-    if not id_:  # Create
-        req_demo_user.save()
-        id_ = req_demo_user.id
-        current_app.logger.info(f'Successfully create demo user: {id_}')
-    else:  # Update
-        existing = DemoUser.find_one(id_)
-        if not existing:
-            abort(404)
-        #
-        existing.name = req_demo_user.name
-        existing.phone = req_demo_user.phone
-        existing.intro = req_demo_user.intro
-        existing.avatar = req_demo_user.avatar
-        #
-        existing.update_time = datetime.now()
-        existing.save()
-        current_app.logger.info(f'Successfully update demo user {id_}')
+    existing = DemoUser.find_one(id_)
+    if not existing:
+        abort(404)
+    #
+    existing.name = req_demo_user.name
+    existing.phone = req_demo_user.phone
+    existing.intro = req_demo_user.intro
+    existing.avatar = req_demo_user.avatar
+    #
+    existing.update_time = datetime.now()
+    existing.save()
+    current_app.logger.info(f'Successfully update demo user {id_}')
     #
     return jsonify(error=0, message='Save demo user successfully.', id=id_)
+
 
 
 @demo.route('/team-profile')
 @auth_permission
 def team_profile():
     """ 团队设置. """
-    id_ = get_id(int)
-    args = []
-    if id_:
-        demo_team = DemoTeam.find_one(id_)
-        if not demo_team:
-            abort(404)
-    else:
-        demo_team = DemoTeam()
-    #
     preloads = {}
+    id_ = get_id(int)
+    demo_team = DemoTeam.find_one(id_)
+    if not demo_team:
+        abort(404)
     #
-    return render_template('demo/team-profile.html', demo_team=demo_team, args=args, **preloads)
+    return render_template('demo/team-profile.html', demo_team=demo_team, **preloads)
 
 
-@demo.route('/team-profile-form', methods=('POST',))
+@demo.route('/team-profile-update', methods=('POST',))
 @auth_permission
-def team_profile_form():
-    """ 保存团队设置. """
+def team_profile_update():
+    """ 团队设置. """
     req_demo_team = populate_model(request.form, DemoTeam)
     id_ = get_id(int)
-    current_app.logger.info(f'Try to save demo team: {req_demo_team}')
+    current_app.logger.info(f'Try to save demo team with id {id_}: {req_demo_team}')
     #
-    if not id_:  # Create
-        req_demo_team.save()
-        id_ = req_demo_team.id
-        current_app.logger.info(f'Successfully create demo team: {id_}')
-    else:  # Update
-        existing = DemoTeam.find_one(id_)
-        if not existing:
-            abort(404)
-        #
-        existing.name = req_demo_team.name
-        existing.code = req_demo_team.code
-        existing.remarks = req_demo_team.remarks
-        existing.logo = req_demo_team.logo
-        #
-        existing.update_time = datetime.now()
-        existing.save()
-        current_app.logger.info(f'Successfully update demo team {id_}')
+    existing = DemoTeam.find_one(id_)
+    if not existing:
+        abort(404)
+    #
+    existing.name = req_demo_team.name
+    existing.code = req_demo_team.code
+    existing.remarks = req_demo_team.remarks
+    existing.logo = req_demo_team.logo
+    #
+    existing.update_time = datetime.now()
+    existing.save()
+    current_app.logger.info(f'Successfully update demo team {id_}')
     #
     return jsonify(error=0, message='Save demo team successfully.', id=id_)
 
@@ -129,6 +110,8 @@ def team_members():
         abort(404)
     #
     return render_template('demo/team-members.html', demo_team=demo_team)
+
+
 
 
 @demo.route('/project-list')
@@ -160,8 +143,8 @@ def project_detail():
 @auth_permission
 def project_edit():
     """ 项目编辑. """
+    args, preloads = [], {}
     id_ = get_id(int)
-    args = []
     if id_:
         demo_project = DemoProject.find_one(id_)
         if not demo_project:
@@ -169,7 +152,6 @@ def project_edit():
     else:
         demo_project = DemoProject()
     #
-    preloads = {}
     demo_users, demo_users_pagination = DemoUser.search({}, projection=['avatar', 'name'], sort=[('create_time', -1)])
     current_app.logger.info(f'Preloaded {len(demo_users)} demo users')
     preloads.update({'demo_users': demo_users, 'demo_users_pagination': dict(demo_users_pagination), })
@@ -177,19 +159,19 @@ def project_edit():
     return render_template('demo/project-edit.html', demo_project=demo_project, args=args, **preloads)
 
 
-@demo.route('/project-edit-form', methods=('POST',))
+@demo.route('/project-edit-upcreate', methods=('POST',))
 @auth_permission
-def project_edit_form():
-    """ 保存项目编辑. """
+def project_edit_upcreate():
+    """ 项目编辑. """
     req_demo_project = populate_model(request.form, DemoProject)
     id_ = get_id(int)
-    current_app.logger.info(f'Try to save demo project: {req_demo_project}')
+    current_app.logger.info(f'Try to save demo project with id {id_}: {req_demo_project}')
     #
-    if not id_:  # Create
+    if not id_:
         req_demo_project.save()
         id_ = req_demo_project.id
-        current_app.logger.info(f'Successfully create demo project: {id_}')
-    else:  # Update
+        current_app.logger.info(f'Successfully create demo project {id_}')
+    else:
         existing = DemoProject.find_one(id_)
         if not existing:
             abort(404)
@@ -213,7 +195,7 @@ def project_edit_form():
 @demo.route('/project-edit/search-demo-users', methods=('POST',))
 @auth_permission
 def project_edit_search_demo_users():
-    """ 查找用户. """
+    """ Search 用户. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, DemoUser)
     current_app.logger.info(f'Try to search demo user at page {page} by {condition}, sort by {sort}')
@@ -237,8 +219,8 @@ def task_detail():
 @auth_permission
 def task_edit():
     """ 任务编辑. """
+    args, preloads = [], {}
     id_ = get_id(int)
-    args = []
     if id_:
         demo_task = DemoTask.find_one(id_)
         if not demo_task:
@@ -251,7 +233,6 @@ def task_edit():
             demo_task.project = DemoProject.find_one(project_id)
             args.append(('project_id', project_id))
     #
-    preloads = {}
     demo_users, demo_users_pagination = DemoUser.search({}, projection=['name', 'status', 'roles', 'type', 'email', 'password', 'create_time'], sort=[('create_time', -1)])
     current_app.logger.info(f'Preloaded {len(demo_users)} demo users')
     preloads.update({'demo_users': demo_users, 'demo_users_pagination': dict(demo_users_pagination), })
@@ -259,19 +240,19 @@ def task_edit():
     return render_template('demo/task-edit.html', demo_task=demo_task, args=args, **preloads)
 
 
-@demo.route('/task-edit-form', methods=('POST',))
+@demo.route('/task-edit-upcreate', methods=('POST',))
 @auth_permission
-def task_edit_form():
-    """ 保存任务编辑. """
+def task_edit_upcreate():
+    """ 任务编辑. """
     req_demo_task = populate_model(request.form, DemoTask)
     id_ = get_id(int)
-    current_app.logger.info(f'Try to save demo task: {req_demo_task}')
+    current_app.logger.info(f'Try to save demo task with id {id_}: {req_demo_task}')
     #
-    if not id_:  # Create
+    if not id_:
         req_demo_task.save()
         id_ = req_demo_task.id
-        current_app.logger.info(f'Successfully create demo task: {id_}')
-    else:  # Update
+        current_app.logger.info(f'Successfully create demo task {id_}')
+    else:
         existing = DemoTask.find_one(id_)
         if not existing:
             abort(404)
@@ -288,5 +269,4 @@ def task_edit_form():
         current_app.logger.info(f'Successfully update demo task {id_}')
     #
     return jsonify(error=0, message='Save demo task successfully.', id=id_)
-
 

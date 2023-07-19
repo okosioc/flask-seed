@@ -1,6 +1,10 @@
-{# global var to control code generation #}
+{# * #}
+{# * global var to control code generation #}
+{# * #}
 {% set render_controls = namespace(relations_needing_preload=[], relations_needing_search=[], formats_supporting_relation_search=['media', 'timeline', 'modal'], relations_needing_async_load=[], formats_supporting_relation_async_load=['calendar']) %}
-{# macro - iterate layout to get needed relations and etc, param layout is rows, param schema is alway a object's schema #}
+{# * #}
+{# * macro - iterate layout to get needed relations and etc, param layout is rows, param schema is alway a object's schema #}
+{# * #}
 {% macro iterate_layout(rows, schema) %}
     {% for row in rows %}
         {% for column in row %}
@@ -25,7 +29,7 @@
                     {% if column_schema.type == 'object' %}
                         {% set inner_schema = column_schema %}
                     {% elif column_schema.type == 'array' %}
-                        {% set inner_schema = column_schema['items'] %}
+                        {% set inner_schema = column_schema['items'] if column_schema['items']['type'] == 'object' else none %}
                     {% endif %}
                     {# relation logic #}
                     {% if column_schema.is_relation %}
@@ -61,13 +65,86 @@
         {% endfor %}
     {% endfor %}
 {% endmacro %}
-{% macro generate_permisson(blueprint_name) %}
+{# * #}
+{# * macro - render permission expression for an action #}
+{# * #}
+{% macro render_permisson(blueprint_name) %}
 {% if blueprint_name == 'admin' %}
 @admin_permission
 {% elif blueprint_name != 'public' %}
 @auth_permission
 {% endif %}
 {% endmacro %}
+{# * #}
+{# * macro - render snippet for reading a model by id #}
+{# * #}
+{% macro render_model_read(model) %}
+{{ model.name_snake }} = {{ model.name }}.find_one(id_)
+if not {{ model.name_snake }}:
+    abort(404)
+{% endmacro %}
+{# * #}
+{# * macro - render snippet for creating a model #}
+{# * #}
+{% macro render_model_create(model) %}
+{{ model.name_snake }} = {{ model.name }}()
+{% for field in model.schema.properties %}
+{% set field_schema = model.schema.properties[field] %}
+{# presetting values for out relation fields #}
+{# e.g, task.project -> project.tasks, project field is a out relation to project, and project owns a task means we have to create task under project, by passing project_id param #}
+{% if field_schema.is_out_relation and field_schema.ownership == 'own' %}
+#
+if '{{ field_schema.save_field_name }}' in request.args:
+    {% if field_schema.type == 'array' %}
+    {{ field_schema.save_field_name }} = list(map({{ field_schema['items'].id_type }}, request.args.getlist('{{ field_schema.save_field_name }}')))
+    {{ model.name_snake }}.{{ field }} = {{ field_schema['items'].py_type }}.find_by_ids({{ field_schema.save_field_name }})
+    args.extend([('{{ field_schema.save_field_name }}', i) for i in {{ field_schema.save_field_name }}])
+    {% else %}
+    {{ field_schema.save_field_name }} = {{ field_schema.id_type }}(request.args.get('{{ field_schema.save_field_name }}'))
+    {{ model.name_snake }}.{{ field }} = {{ field_schema.py_type }}.find_one({{ field_schema.save_field_name }})
+    args.append(('{{ field_schema.save_field_name }}', {{ field_schema.save_field_name }}))
+    {% endif %}
+{% endif %}
+{% endfor %}
+{% endmacro %}
+{# * #}
+{# * macro - render snippet for preloading related models in a create/update/upcreate action #}
+{# * #}
+{% macro render_preloads() %}
+{% for relation in render_controls.relations_needing_preload %}
+{% set related_model = models[relation] %}
+{{ related_model.name_snake_plural }}, {{ related_model.name_snake_plural }}_pagination = {{ related_model.name }}.search({}, projection={{ render_controls.relations_projection_needing_preload }}, sort=[('create_time', -1)])
+current_app.logger.info(f'Preloaded {len({{ related_model.name_snake_plural }})} {{ related_model.name_title_lower_plural }}')
+preloads.update({'{{ related_model.name_snake_plural }}': {{ related_model.name_snake_plural }}, '{{ related_model.name_snake_plural }}_pagination': dict({{ related_model.name_snake_plural }}_pagination), })
+{% endfor %}
+{% endmacro %}
+{# * #}
+{# * macro - render snippet for model create post #}
+{# * #}
+{% macro render_model_create_post(model) %}
+req_{{ model.name_snake }}.save()
+id_ = req_{{ model.name_snake }}.{{ model.schema.id_name }}
+current_app.logger.info(f'Successfully create {{ model.name_title_lower }} {{ '{' }}id_{{ '}' }}')
+{% endmacro %}
+{# * #}
+{# * macro - render snippet for model update post #}
+{# * #}
+{% macro render_model_update_post(model, layout) %}
+existing = {{ model.name }}.find_one(id_)
+if not existing:
+    abort(404)
+#
+{% for field in parse_layout_fields(layout) %}
+existing.{{ field }} = req_{{ model.name_snake }}.{{ field }}
+{% endfor %}
+#
+existing.update_time = datetime.now()
+existing.save()
+current_app.logger.info(f'Successfully update {{ model.name_title_lower }} {{ '{' }}id_{{ '}' }}')
+{% endmacro %}
+{# * #}
+{# * main #}
+{# * #}
 """ {{ blueprint.name }} module. """
 from datetime import datetime
 
@@ -86,63 +163,49 @@ from core.models import {{ blueprint.views|map(attribute='model')|map(attribute=
 {% for view in blueprint.views %}
 {# core variables #}
 {% set model = view.model %}
-{% set schema = model.schema %}
 {% set action = view.action %}
 {% set layout = view.rows %}
 {# reset and recalculate render controls #}
 {% set render_controls.relations_needing_preload = [] %}
 {% set render_controls.relations_needing_search = [] %}
 {% set render_controls.relations_needing_async_load = [] %}
-{{- iterate_layout(layout, schema) -}}
+{{- iterate_layout(layout, model.schema) -}}
 {# define view function #}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}')
-{{ generate_permisson(blueprint.name) -}}
+{{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}():
-    """ {{ view.params.title }}. """
+    """ {{ view.params.title if view.params.title else (action|capitalize ~ ' ' ~ model.schema.title) }}. """
     {# read #}
     {% if action == 'read' %}
-    id_ = get_id({{ schema.id_type }})
-    {{ model.name_snake }} = {{ model.name }}.find_one(id_)
-    if not {{ model.name_snake }}:
-        abort(404)
+    id_ = get_id({{ model.schema.id_type }})
+    {% filter right(4) %}{{ render_model_read(model) }}{% endfilter %}
     #
     return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }})
-    {# form #}
-    {% elif action == 'form' %}
-    id_ = get_id({{ schema.id_type }})
-    args = []
-    if id_:
-        {{ model.name_snake }} = {{ model.name }}.find_one(id_)
-        if not {{ model.name_snake }}:
-            abort(404)
-    else:
-        {{ model.name_snake }} = {{ model.name }}()
-        {% for field in schema.properties %}
-        {% set field_schema = schema.properties[field] %}
-        {# presetting values for out relation fields #}
-        {# e.g, task.project -> project.tasks, project field is a out relation to project, and project owns a task means we have to create task under project, by passing project_id param #}
-        {% if field_schema.is_out_relation and field_schema.ownership == 'own' %}
-        #
-        if '{{ field_schema.save_field_name }}' in request.args:
-            {% if field_schema.type == 'array' %}
-            {{ field_schema.save_field_name }} = list(map({{ field_schema['items'].id_type }}, request.args.getlist('{{ field_schema.save_field_name }}')))
-            {{ model.name_snake }}.{{ field }} = {{ field_schema['items'].py_type }}.find_by_ids({{ field_schema.save_field_name }})
-            args.extend([('{{ field_schema.save_field_name }}', i) for i in {{ field_schema.save_field_name }}])
-            {% else %}
-            {{ field_schema.save_field_name }} = {{ field_schema.id_type }}(request.args.get('{{ field_schema.save_field_name }}'))
-            {{ model.name_snake }}.{{ field }} = {{ field_schema.py_type }}.find_one({{ field_schema.save_field_name }})
-            args.append(('{{ field_schema.save_field_name }}', {{ field_schema.save_field_name }}))
-            {% endif %}
-        {% endif %}
-        {% endfor %}
-    #
+    {# update #}
+    {% elif action == 'update' %}
     preloads = {}
-    {% for relation in render_controls.relations_needing_preload %}
-    {% set related_model = models[relation] %}
-    {{ related_model.name_snake_plural }}, {{ related_model.name_snake_plural }}_pagination = {{ related_model.name }}.search({}, projection={{ render_controls.relations_projection_needing_preload }}, sort=[('create_time', -1)])
-    current_app.logger.info(f'Preloaded {len({{ related_model.name_snake_plural }})} {{ related_model.name_title_lower_plural }}')
-    preloads.update({'{{ related_model.name_snake_plural }}': {{ related_model.name_snake_plural }}, '{{ related_model.name_snake_plural }}_pagination': dict({{ related_model.name_snake_plural }}_pagination), })
-    {% endfor %}
+    id_ = get_id({{ model.schema.id_type }})
+    {% filter right(4) %}{{ render_model_read(model) }}{% endfilter %}
+    {% filter right(4) %}{{ render_preloads() }}{% endfilter %}
+    #
+    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, **preloads)
+    {# create #}
+    {% elif action == 'create' %}
+    args, preloads = [], {}
+    {% filter indent(4, true) %}{{ render_model_create(model) }}{% endfilter %}
+    {% filter indent(4, true) %}{{ render_preloads() }}{% endfilter %}
+    #
+    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
+    {# upcreate #}
+    {% elif action == 'upcreate' %}
+    args, preloads = [], {}
+    id_ = get_id({{ model.schema.id_type }})
+    if id_:
+        {% filter indent(8, true) %}{{ render_model_read(model) }}{% endfilter %}
+    else:
+        {% filter indent(8, true) %}{{ render_model_create(model) }}{% endfilter %}
+    #
+    {% filter indent(4, true) %}{{ render_preloads() }}{% endfilter %}
     #
     return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
     {# query #}
@@ -156,7 +219,7 @@ def {{ view.name_snake }}():
                            search=search, pagination=pagination, {{ model.name_snake_plural }}={{ model.name_snake_plural }})
     {# unsupported action #}
     {% else %}
-    # FIXME: UNSUPPORTED! action is {{ action }}
+    # FIXME: UNSUPPORTED action {{ action }}!
     return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html')
     {% endif %}
 
@@ -169,7 +232,7 @@ def {{ view.name_snake }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/load-{{ related_model.name_kebab_plural }}', methods=('POST',))
 {{ generate_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
-    """ 读取{{ related_model.schema.title }}. """
+    """ Load {{ related_model.schema.title }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to load {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')
@@ -179,43 +242,37 @@ def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
 
 {% endfor %}
 {% endif %}
-{# define post function in form #}
-{% if action == 'form' %}
-@{{ blueprint.name_snake }}.route('/{{ view.name }}-form', methods=('POST',))
-{{ generate_permisson(blueprint.name) -}}
-def {{ view.name_snake }}_form():
-    """ 保存{{ view.params.title }}. """
+{# define post function for create/update/upcreate #}
+{% if action in ['create', 'update', 'upcreate'] %}
+@{{ blueprint.name_snake }}.route('/{{ view.name }}-{{ action }}', methods=('POST',))
+{{ render_permisson(blueprint.name) -}}
+def {{ view.name_snake }}_{{ action }}():
+    """ {{ view.params.title if view.params.title else (action|capitalize ~ ' ' ~ model.schema.title) }}. """
     req_{{ model.name_snake }} = populate_model(request.form, {{ model.name }})
-    id_ = get_id({{ schema.id_type }})
-    current_app.logger.info(f'Try to save {{ model.name_title_lower }}: {{ '{' }}req_{{ model.name_snake }}{{ '}' }}')
+    id_ = get_id({{ model.schema.id_type }})
+    current_app.logger.info(f'Try to save {{ model.name_title_lower }} with id {id_}: {{ '{' }}req_{{ model.name_snake }}{{ '}' }}')
     #
-    if not id_:  # Create
-        req_{{ model.name_snake }}.save()
-        id_ = req_{{ model.name_snake }}.{{ schema.id_name }}
-        current_app.logger.info(f'Successfully create {{ model.name_title_lower }}: {{ '{' }}id_{{ '}' }}')
-    else:  # Update
-        existing = {{ model.name }}.find_one(id_)
-        if not existing:
-            abort(404)
-        #
-        {% for field in parse_layout_fields(layout) %}
-        existing.{{ field }} = req_{{ model.name_snake }}.{{ field }}
-        {% endfor %}
-        #
-        existing.update_time = datetime.now()
-        existing.save()
-        current_app.logger.info(f'Successfully update {{ model.name_title_lower }} {{ '{' }}id_{{ '}' }}')
+    {% if action == 'create' %}
+    {% filter indent(4, true) %}{{ render_model_create_post(model) }}{% endfilter %}
+    {% elif action == 'update' %}
+    {% filter indent(4, true) %}{{ render_model_update_post(model, layout) }}{% endfilter %}
+    {% else %}
+    if not id_:
+        {% filter indent(8, true) %}{{ render_model_create_post(model) }}{% endfilter %}
+    else:
+        {% filter indent(8, true) %}{{ render_model_update_post(model, layout) }}{% endfilter %}
+    {% endif %}
     #
     return jsonify(error=0, message='Save {{ model.name_title_lower }} successfully.', id=id_)
 
 
-{# define search relation function in form #}
+{# define search relation function in create/update/upcreate #}
 {% for relation in render_controls.relations_needing_search %}
 {% set related_model = models[relation] %}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/search-{{ related_model.name_kebab_plural }}', methods=('POST',))
-{{ generate_permisson(blueprint.name) -}}
+{{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_search_{{ related_model.name_snake_plural }}():
-    """ 查找{{ related_model.schema.title }}. """
+    """ Search {{ related_model.schema.title }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to search {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')

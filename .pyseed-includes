@@ -3,6 +3,6 @@
 # www
 www/static/js/enums.js.jinja2
 #www/templates/{{#blueprints}}
-www/views/{{#blueprints}}.py0.jinja2
+www/views/{{#blueprints}}0.py.jinja2
 
 # miniapp

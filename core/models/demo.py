@@ -41,7 +41,7 @@ class DemoPage(CacheModel):
         },
         'demo/page-edit': {
             'domains': ['www'],
-            'layout': '''#!form?title=页面编辑
+            'layout': '''#!upcreate?title=页面编辑
                 key, title
                 blocks
             ''',
@@ -80,7 +80,7 @@ class DemoTeam(CacheModel):
     __views__ = {
         'demo/team-profile': {
             'domains': ['www'],
-            'layout': '''#!form?title=团队设置
+            'layout': '''#!update?title=团队设置
                 1#summary4,    2#8      
                   logo           name   
                   name           code   
@@ -154,7 +154,7 @@ class DemoUser(CacheModel, UserMixin):
     __views__ = {
         'demo/user-profile': {
             'domains': ['www'],
-            'layout': '''#!form?title=用户设置
+            'layout': '''#!update?title=用户设置
                 1#summary4,    0#8                                           
                   avatar         name  
                   name           phone                                                  
@@ -278,7 +278,7 @@ class DemoProject(CacheModel):
         },
         'demo/project-edit': {
             'domains': ['www'],
-            'layout': '''#!form?title=项目编辑
+            'layout': '''#!upcreate?title=项目编辑
                 1?title=项目基本信息
                   title
                   description
@@ -335,7 +335,7 @@ class DemoTask(CacheModel):
         },
         'demo/task-edit': {
             'domains': ['www'],
-            'layout': '''#!form?title=任务编辑
+            'layout': '''#!upcreate?title=任务编辑
                 project#summary4,  1#8     
                   title              title 
                   status             status     

@@ -13,107 +13,6 @@ from core.models import DemoProject, DemoProject, DemoProject, DemoProjectDashbo
 demo = Blueprint('demo', __name__)
 
 
-@demo.route('/project-dashboard')
-@auth_permission
-def project_dashboard():
-    """ 项目仪表盘. """
-    id_ = get_id(int)
-    demo_project_dashboard = DemoProjectDashboard.find_one(id_)
-    if not demo_project_dashboard:
-        abort(404)
-    #
-    return render_template('demo/project-dashboard.html', demo_project_dashboard=demo_project_dashboard)
-
-
-@demo.route('/user-profile')
-@auth_permission
-def user_profile():
-    """ 用户设置. """
-    preloads = {}
-    id_ = get_id(int)
-    demo_user = DemoUser.find_one(id_)
-    if not demo_user:
-        abort(404)
-    #
-    return render_template('demo/user-profile.html', demo_user=demo_user, **preloads)
-
-
-@demo.route('/user-profile-update', methods=('POST',))
-@auth_permission
-def user_profile_update():
-    """ 用户设置. """
-    req_demo_user = populate_model(request.form, DemoUser)
-    id_ = get_id(int)
-    current_app.logger.info(f'Try to save demo user with id {id_}: {req_demo_user}')
-    #
-    existing = DemoUser.find_one(id_)
-    if not existing:
-        abort(404)
-    #
-    existing.name = req_demo_user.name
-    existing.phone = req_demo_user.phone
-    existing.intro = req_demo_user.intro
-    existing.avatar = req_demo_user.avatar
-    #
-    existing.update_time = datetime.now()
-    existing.save()
-    current_app.logger.info(f'Successfully update demo user {id_}')
-    #
-    return jsonify(error=0, message='Save demo user successfully.', id=id_)
-
-
-
-@demo.route('/team-profile')
-@auth_permission
-def team_profile():
-    """ 团队设置. """
-    preloads = {}
-    id_ = get_id(int)
-    demo_team = DemoTeam.find_one(id_)
-    if not demo_team:
-        abort(404)
-    #
-    return render_template('demo/team-profile.html', demo_team=demo_team, **preloads)
-
-
-@demo.route('/team-profile-update', methods=('POST',))
-@auth_permission
-def team_profile_update():
-    """ 团队设置. """
-    req_demo_team = populate_model(request.form, DemoTeam)
-    id_ = get_id(int)
-    current_app.logger.info(f'Try to save demo team with id {id_}: {req_demo_team}')
-    #
-    existing = DemoTeam.find_one(id_)
-    if not existing:
-        abort(404)
-    #
-    existing.name = req_demo_team.name
-    existing.code = req_demo_team.code
-    existing.remarks = req_demo_team.remarks
-    existing.logo = req_demo_team.logo
-    #
-    existing.update_time = datetime.now()
-    existing.save()
-    current_app.logger.info(f'Successfully update demo team {id_}')
-    #
-    return jsonify(error=0, message='Save demo team successfully.', id=id_)
-
-
-@demo.route('/team-members')
-@auth_permission
-def team_members():
-    """ 团队成员. """
-    id_ = get_id(int)
-    demo_team = DemoTeam.find_one(id_)
-    if not demo_team:
-        abort(404)
-    #
-    return render_template('demo/team-members.html', demo_team=demo_team)
-
-
-
-
 @demo.route('/project-list')
 @auth_permission
 def project_list():
@@ -162,7 +61,7 @@ def project_edit():
 @demo.route('/project-edit-upcreate', methods=('POST',))
 @auth_permission
 def project_edit_upcreate():
-    """ 项目编辑. """
+    """ Upcreate demo project. """
     req_demo_project = populate_model(request.form, DemoProject)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo project with id {id_}: {req_demo_project}')
@@ -195,12 +94,24 @@ def project_edit_upcreate():
 @demo.route('/project-edit/search-demo-users', methods=('POST',))
 @auth_permission
 def project_edit_search_demo_users():
-    """ Search 用户. """
+    """ Search demo user. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, DemoUser)
     current_app.logger.info(f'Try to search demo user at page {page} by {condition}, sort by {sort}')
     demo_users, pagination = DemoUser.search(condition, page, projection=['avatar', 'name'], sort=sort)
     return jsonify(error=0, message='Search demo user successfully.', pagination=dict(pagination), demo_users=demo_users)
+
+
+@demo.route('/project-dashboard')
+@auth_permission
+def project_dashboard():
+    """ 项目仪表盘. """
+    id_ = get_id(int)
+    demo_project_dashboard = DemoProjectDashboard.find_one(id_)
+    if not demo_project_dashboard:
+        abort(404)
+    #
+    return render_template('demo/project-dashboard.html', demo_project_dashboard=demo_project_dashboard)
 
 
 @demo.route('/task-detail')
@@ -243,7 +154,7 @@ def task_edit():
 @demo.route('/task-edit-upcreate', methods=('POST',))
 @auth_permission
 def task_edit_upcreate():
-    """ 任务编辑. """
+    """ Upcreate demo task. """
     req_demo_task = populate_model(request.form, DemoTask)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo task with id {id_}: {req_demo_task}')
@@ -269,4 +180,91 @@ def task_edit_upcreate():
         current_app.logger.info(f'Successfully update demo task {id_}')
     #
     return jsonify(error=0, message='Save demo task successfully.', id=id_)
+
+
+@demo.route('/team-profile')
+@auth_permission
+def team_profile():
+    """ 团队设置. """
+    preloads = {}
+    id_ = get_id(int)
+    demo_team = DemoTeam.find_one(id_)
+    if not demo_team:
+        abort(404)
+    #
+    return render_template('demo/team-profile.html', demo_team=demo_team, **preloads)
+
+
+@demo.route('/team-profile-update', methods=('POST',))
+@auth_permission
+def team_profile_update():
+    """ Update demo team. """
+    req_demo_team = populate_model(request.form, DemoTeam)
+    id_ = get_id(int)
+    current_app.logger.info(f'Try to save demo team with id {id_}: {req_demo_team}')
+    #
+    existing = DemoTeam.find_one(id_)
+    if not existing:
+        abort(404)
+    #
+    existing.name = req_demo_team.name
+    existing.code = req_demo_team.code
+    existing.remarks = req_demo_team.remarks
+    existing.logo = req_demo_team.logo
+    #
+    existing.update_time = datetime.now()
+    existing.save()
+    current_app.logger.info(f'Successfully update demo team {id_}')
+    #
+    return jsonify(error=0, message='Save demo team successfully.', id=id_)
+
+
+@demo.route('/team-members')
+@auth_permission
+def team_members():
+    """ 团队成员. """
+    id_ = get_id(int)
+    demo_team = DemoTeam.find_one(id_)
+    if not demo_team:
+        abort(404)
+    #
+    return render_template('demo/team-members.html', demo_team=demo_team)
+
+
+@demo.route('/user-profile')
+@auth_permission
+def user_profile():
+    """ 用户设置. """
+    preloads = {}
+    id_ = get_id(int)
+    demo_user = DemoUser.find_one(id_)
+    if not demo_user:
+        abort(404)
+    #
+    return render_template('demo/user-profile.html', demo_user=demo_user, **preloads)
+
+
+@demo.route('/user-profile-update', methods=('POST',))
+@auth_permission
+def user_profile_update():
+    """ Update demo user. """
+    req_demo_user = populate_model(request.form, DemoUser)
+    id_ = get_id(int)
+    current_app.logger.info(f'Try to save demo user with id {id_}: {req_demo_user}')
+    #
+    existing = DemoUser.find_one(id_)
+    if not existing:
+        abort(404)
+    #
+    existing.name = req_demo_user.name
+    existing.phone = req_demo_user.phone
+    existing.intro = req_demo_user.intro
+    existing.avatar = req_demo_user.avatar
+    #
+    existing.update_time = datetime.now()
+    existing.save()
+    current_app.logger.info(f'Successfully update demo user {id_}')
+    #
+    return jsonify(error=0, message='Save demo user successfully.', id=id_)
+
 

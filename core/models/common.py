@@ -11,7 +11,7 @@
 
 from typing import List, ForwardRef
 
-from py3seed import BaseModel, ModelField as Field, Format, CacheModel, register
+from py3seed import BaseModel, ModelField as Field, Format, MongoModel, register
 
 
 class Series(BaseModel):
@@ -32,9 +32,9 @@ class Action(BaseModel):
 
 
 @register
-class Block(CacheModel):
-    """ 页面版块. """
-    key: str = Field(required=False, title='key')  # 用于查询
+class Block(MongoModel):
+    """ 页面版块, 仅包含内容 """
+    key: str = Field(title='key')  # 用于查询, 方便页面模版引用指定版块的内容
     tag: str = Field(required=False, title='标签')
     icon: str = Field(required=False, title='图标')
     title: str = Field(required=False, title='标题')
@@ -49,6 +49,5 @@ class Block(CacheModel):
     action: Action = Field(required=False, title='动作')
     actions: List[Action] = Field(required=False, title='动作列表')
     children: List[ForwardRef('Block')] = Field(required=False, title='子版块')
-    # TODO: Support __keys__ to mark the key field to be unique
-    # e.g,
-    # __keys__ = ['key']
+    #
+    __key__ = 'key'

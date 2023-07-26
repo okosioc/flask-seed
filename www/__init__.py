@@ -66,8 +66,8 @@ def create_www(blueprints=None, pytest=False, runscripts=False):
     # Chain
     configure_logging(app)
     configure_errorhandlers(app)
-    configure_blocks(app)
     configure_py3seed(app)
+    configure_blocks(app)
     configure_extensions(app)
     configure_login(app)
     configure_before_handlers(app)

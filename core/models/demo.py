@@ -19,43 +19,6 @@ from werkzeug.utils import cached_property
 from .common import Block
 
 
-@register
-class DemoPage(CacheModel):
-    """ 页面. """
-    key: str = Field(searchable=Comparator.EQ, title='页面标识', description='通过该标识自动匹配模版')
-    title: str = Field(searchable=Comparator.LIKE, icon='type', title='页面标题')
-    blocks: List[Block] = Relation(title='区块')
-    #
-    update_time: datetime = Field(required=False, title='更新时间')
-    create_time: datetime = Field(default=datetime.now, icon='clock', title='创建时间')
-    #
-    __icon__ = 'file'
-    __title__ = '页面'
-    #
-    __views__ = {
-        'demo/page-list': {
-            'domains': ['www'],
-            'layout': '''#!query?title=页面管理
-                key, title, blocks, create_time
-            ''',
-        },
-        'demo/page-edit': {
-            'domains': ['www'],
-            'layout': '''#!upcreate?title=页面编辑
-                key, title
-                blocks
-            ''',
-        },
-        # 如果没有设置blueprint, 默认放在public下, 无需权限即可访问
-        # 如果layout没有布局信息, 表示只根据action(即下述#!read_by_key)生成后端逻辑, 而无需生成页面模版; 页面模版需要开发人员自行实现
-        'page-detail': {
-            'domains': ['www'],
-            'layout': '''#!read_by_key
-            ''',
-        },
-    }
-
-
 class DemoTeamStatus(SimpleEnum):
     """ 团队状态. """
     NORMAL = 'normal', '正常'
@@ -395,7 +358,6 @@ class DemoCategory(CacheModel):
     parent: ForwardRef('DemoCategory') = Field(required=False, title='父分类')
     #
     attrs: List[DemoAttribute] = Relation(required=False, format_=Format.TABLE, title='属性')
-    promos: List[Block] = Field(required=False, title='推广')
     #
     update_time: datetime = Field(required=False, title='更新时间')
     create_time: datetime = Field(default=datetime.now, title='创建时间')

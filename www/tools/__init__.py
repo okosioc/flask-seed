@@ -14,3 +14,4 @@ from .converters import ListConverter, BSONObjectIdConverter
 from .notifier import send_support_email, send_service_mail
 from .sslsmtphandler import SSLSMTPHandler
 from .helpers import date_str, datetime_str, str_datetime, json_dumps
+from .demo import prepare_demo_data

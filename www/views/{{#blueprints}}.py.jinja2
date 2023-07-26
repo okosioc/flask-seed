@@ -192,8 +192,8 @@ def {{ view.name_snake }}():
     {# create #}
     {% elif action == 'create' %}
     args, preloads = [], {}
-    {% filter indent(4, true) %}{{ render_model_create(model) }}{% endfilter %}
-    {% filter indent(4, true) %}{{ render_preloads() }}{% endfilter %}
+    {% filter right(4) %}{{ render_model_create(model) }}{% endfilter %}
+    {% filter right(4) %}{{ render_preloads() }}{% endfilter %}
     #
     return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
     {# upcreate #}
@@ -201,11 +201,11 @@ def {{ view.name_snake }}():
     args, preloads = [], {}
     id_ = get_id({{ model.schema.id_type }})
     if id_:
-        {% filter indent(8, true) %}{{ render_model_read(model) }}{% endfilter %}
+        {% filter right(8) %}{{ render_model_read(model) }}{% endfilter %}
     else:
-        {% filter indent(8, true) %}{{ render_model_create(model) }}{% endfilter %}
+        {% filter right(8) %}{{ render_model_create(model) }}{% endfilter %}
     #
-    {% filter indent(4, true) %}{{ render_preloads() }}{% endfilter %}
+    {% filter right(4) %}{{ render_preloads() }}{% endfilter %}
     #
     return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
     {# query #}
@@ -232,7 +232,7 @@ def {{ view.name_snake }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/load-{{ related_model.name_kebab_plural }}', methods=('POST',))
 {{ generate_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
-    """ Load {{ related_model.schema.title }}. """
+    """ Load {{ related_model.name_title_lower }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to load {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')
@@ -247,20 +247,20 @@ def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}-{{ action }}', methods=('POST',))
 {{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_{{ action }}():
-    """ {{ view.params.title if view.params.title else (action|capitalize ~ ' ' ~ model.schema.title) }}. """
+    """ {{ action|capitalize ~ ' ' ~ model.name_title_lower }}. """
     req_{{ model.name_snake }} = populate_model(request.form, {{ model.name }})
     id_ = get_id({{ model.schema.id_type }})
     current_app.logger.info(f'Try to save {{ model.name_title_lower }} with id {id_}: {{ '{' }}req_{{ model.name_snake }}{{ '}' }}')
     #
     {% if action == 'create' %}
-    {% filter indent(4, true) %}{{ render_model_create_post(model) }}{% endfilter %}
+    {% filter right(4) %}{{ render_model_create_post(model) }}{% endfilter %}
     {% elif action == 'update' %}
-    {% filter indent(4, true) %}{{ render_model_update_post(model, layout) }}{% endfilter %}
+    {% filter right(4) %}{{ render_model_update_post(model, layout) }}{% endfilter %}
     {% else %}
     if not id_:
-        {% filter indent(8, true) %}{{ render_model_create_post(model) }}{% endfilter %}
+        {% filter right(8) %}{{ render_model_create_post(model) }}{% endfilter %}
     else:
-        {% filter indent(8, true) %}{{ render_model_update_post(model, layout) }}{% endfilter %}
+        {% filter right(8) %}{{ render_model_update_post(model, layout) }}{% endfilter %}
     {% endif %}
     #
     return jsonify(error=0, message='Save {{ model.name_title_lower }} successfully.', id=id_)
@@ -272,7 +272,7 @@ def {{ view.name_snake }}_{{ action }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/search-{{ related_model.name_kebab_plural }}', methods=('POST',))
 {{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_search_{{ related_model.name_snake_plural }}():
-    """ Search {{ related_model.schema.title }}. """
+    """ Search {{ related_model.name_title_lower }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to search {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')

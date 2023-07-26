@@ -1,0 +1,41 @@
+{% extends "layout-dash-demo.html" %}
+{% set title = '项目管理' %}
+{% set breadcrumb = {
+    'subtitle': '',
+    'title': title,
+    'actions': [{'icon': 'plus', 'title': '项目编辑', 'view': 'project-edit'}],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block style %}
+<link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block content %}
+<div class="row ">
+    <div class="col-lg">
+        title
+    </div>
+    <div class="col-lg">
+        status
+    </div>
+    <div class="col-lg">
+        value
+    </div>
+    <div class="col-lg">
+        start
+    </div>
+    <div class="col-lg">
+        members
+    </div>
+    <div class="col-lg">
+        percent
+    </div>
+    <div class="col-lg">
+        create_time
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+<script src="{{ base() }}/assets/vendor/flatpickr/dist/l10n/zh.js"></script>
+{% endblock %}

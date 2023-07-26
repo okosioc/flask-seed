@@ -43,7 +43,7 @@ class DemoTeam(CacheModel):
     __views__ = {
         'demo/team-profile': {
             'domains': ['www'],
-            'layout': '''#!update?title=团队设置
+            'layout': '''#!update?extends=layout-dash-demo&title=团队设置
                 1#summary4,    2#8      
                   logo           name   
                   name           code   
@@ -54,7 +54,7 @@ class DemoTeam(CacheModel):
         },
         'demo/team-members': {
             'domains': ['www'],
-            'layout': '''#!read?title=团队成员
+            'layout': '''#!read?extends=layout-dash-demo&title=团队成员
                 1#summary4,    members#8                                                  
                   logo           avatar, name, status, roles, email, phone, team_join_time
                   name                                                                    
@@ -117,7 +117,7 @@ class DemoUser(CacheModel, UserMixin):
     __views__ = {
         'demo/user-profile': {
             'domains': ['www'],
-            'layout': '''#!update?title=用户设置
+            'layout': '''#!update?extends=layout-dash-demo&title=用户设置
                 1#summary4,    0#8                                           
                   avatar         name  
                   name           phone                                                  
@@ -219,13 +219,13 @@ class DemoProject(CacheModel):
     __views__ = {
         'demo/project-list': {
             'domains': ['www'],
-            'layout': '''#!query?title=项目管理&result_view=grid
+            'layout': '''#!query?extends=layout-dash-demo&title=项目管理&result_view=grid
                 title, status, value, start, members, percent, create_time
             ''',
         },
         'demo/project-detail': {
             'domains': ['www'],
-            'layout': '''#!read?title=项目详情
+            'layout': '''#!read?extends=layout-dash-demo&title=项目详情
                 1#4,              2#8
                   1.1#summary4      tasks                                   
                     title             title, status, user, start, create_time 
@@ -241,7 +241,7 @@ class DemoProject(CacheModel):
         },
         'demo/project-edit': {
             'domains': ['www'],
-            'layout': '''#!upcreate?title=项目编辑
+            'layout': '''#!upcreate?extends=layout-dash-demo&title=项目编辑
                 1?title=项目基本信息
                   title
                   description
@@ -285,7 +285,7 @@ class DemoTask(CacheModel):
     __views__ = {
         'demo/task-detail': {
             'domains': ['www'],
-            'layout': '''#!read?title=任务详情
+            'layout': '''#!read?extends=layout-dash-demo&title=任务详情
                 project#summary4,  1#8     
                   title              title 
                   status             status     
@@ -298,7 +298,7 @@ class DemoTask(CacheModel):
         },
         'demo/task-edit': {
             'domains': ['www'],
-            'layout': '''#!upcreate?title=任务编辑
+            'layout': '''#!upcreate?extends=layout-dash-demo&title=任务编辑
                 project#summary4,  1#8     
                   title              title 
                   status             status     
@@ -327,7 +327,7 @@ class DemoProjectDashboard(CacheModel):
     __views__ = {
         'demo/project-dashboard': {
             'domains': ['www'],
-            'layout': '''#!read?title=项目仪表盘
+            'layout': '''#!read?extends=layout-dash-demo&title=项目仪表盘
                 active_projects_count, active_projects_value, members_count, tasks_count
                 active_projects#8, recent_activities#4
             ''',

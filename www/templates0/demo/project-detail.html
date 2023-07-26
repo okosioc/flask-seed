@@ -1,0 +1,23 @@
+{% extends "layout-dash-demo.html" %}
+{% set title = '项目详情' %}
+{% set breadcrumb = {
+    'subtitle': '',
+    'title': title,
+    'actions': [{'icon': 'edit', 'title': '项目编辑', 'view': 'project-edit?'}],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block style %}
+{% endblock %}
+{% block content %}
+<div class="row ">
+    <div class="col-lg-4">
+        1
+    </div>
+    <div class="col-lg-8">
+        2
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+{% endblock %}

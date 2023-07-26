@@ -1,7 +1,7 @@
 {# * #}
 {# * global var to control code generation #}
 {# * #}
-{% set render_controls = namespace(relations_needing_preload=[], relations_needing_search=[], formats_supporting_relation_search=['media', 'timeline', 'modal'], relations_needing_async_load=[], formats_supporting_relation_async_load=['calendar']) %}
+{% set render_controls = namespace(relations_needing_preload=[], relations_needing_search=[], relations_needing_async_load=[]) %}
 {# * #}
 {# * macro - iterate layout to get needed relations and etc, param layout is rows, param schema is alway a object's schema #}
 {# * #}
@@ -45,12 +45,12 @@
                             {% set render_controls.relations_projection_needing_preload = projection %}
                         {% endif %}
                         {# relations_needing_search is used in action form when searching related models #}
-                        {% if column_schema.format in render_controls.formats_supporting_relation_search and related_model_name not in render_controls.relations_needing_search %}
+                        {% if column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
                             {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [related_model_name] %}
                             {% set render_controls.relations_projection_needing_search = projection %}
                         {% endif %}
                         {# relations_needing_async_load is used in action read #}
-                        {% if column_schema.format in render_controls.formats_supporting_relation_async_load and related_model_name not in render_controls.relations_needing_async_load %}
+                        {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
                             {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [related_model_name] %}
                             {% set render_controls.relations_projection_needing_async_load = projection %}
                         {% endif %}

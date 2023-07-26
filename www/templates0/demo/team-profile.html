@@ -1,0 +1,30 @@
+{% extends "layout-dash-demo.html" %}
+{% set title = '团队设置' %}
+{% set breadcrumb = {
+    'subtitle': '',
+    'title': title,
+    'actions': [],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block style %}
+{% endblock %}
+{% block content %}
+<div class="row ">
+    <div class="col-lg-4">
+        1
+    </div>
+    <div class="col-lg-8">
+        2
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
+<script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        install_form();
+    });
+</script>
+{% endblock %}

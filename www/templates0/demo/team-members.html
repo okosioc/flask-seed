@@ -1,0 +1,23 @@
+{% extends "layout-dash-demo.html" %}
+{% set title = '团队成员' %}
+{% set breadcrumb = {
+    'subtitle': '',
+    'title': title,
+    'actions': [{'icon': 'edit', 'title': '团队设置', 'view': 'team-profile?'}],
+    'tabs': [],
+} %}
+{% block title %}{{ title }}{% endblock %}
+{% block style %}
+{% endblock %}
+{% block content %}
+<div class="row ">
+    <div class="col-lg-4">
+        1
+    </div>
+    <div class="col-lg-8">
+        members
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+{% endblock %}

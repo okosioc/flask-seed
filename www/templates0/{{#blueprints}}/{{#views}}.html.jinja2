@@ -1,0 +1,152 @@
+{# * #}
+{# * global var to control code generation #}
+{# * #}
+{% set render_controls = namespace(formats=[], actions=[], is_read=false, is_form=false, is_query=false) %}
+{# * #}
+{# * macro - iterate layout to get needed relations and etc, param layout is rows, param schema is alway a object's schema #}
+{# * #}
+{% macro iterate_layout(rows, schema) %}
+    {% for row in rows %}
+        {% for column in row %}
+            {# skip summary format, as summmary is only for displaying which do not impact any complex logic #}
+            {% if column['format'] == 'summary' %}
+                {# pass #}
+            {% else %}
+                {% set column_name = column['name'] %}
+                {# blank column #}
+                {% if not column_name %}
+                    {# pass #}
+                {# hyphen column #}
+                {% elif column_name == '-' %}
+                    {# pass #}
+                {# group column #}
+                {% elif column_name|float(-1) != -1 %}
+                    {{- iterate_layout(column['rows'], schema) -}}
+                {# normal column #}
+                {% else %}
+                    {% set column_schema = schema.properties[column_name] %}
+                    {% set necessary_formats = [] %}
+                    {% if render_controls.is_read %}
+                        {% set necessary_formats = ['image', 'calendar', 'chart'] %}
+                    {% elif render_controls.is_form %}
+                        {% set necessary_formats = ['image', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
+                    {% elif render_controls.is_query %}
+                        {% set necessary_formats = ['date', 'datetime'] %}
+                    {% endif %}
+                    {% if column_schema.format in necessary_formats and column_schema.format not in render_controls.formats %}
+                        {% set render_controls.formats = render_controls.formats + [column_schema.format] %}
+                    {% endif %}
+                    {% set inner_schema = none %}
+                    {% if column_schema.type == 'object' %}
+                        {% set inner_schema = column_schema %}
+                    {% elif column_schema.type == 'array' %}
+                        {% set inner_schema = column_schema['items'] if column_schema['items']['type'] == 'object' else none %}
+                    {% endif %}
+                    {% if inner_schema %}
+                        {{- iterate_layout(column['rows'], inner_schema) -}}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endmacro %}
+{# * #}
+{# * macro - calculate possible actions of current view #}
+{# * #}
+{% macro calculate_actions(model) %}
+    {% if render_controls.is_query %}
+        {% for v in model.views if v.action in ['create', 'upcreate'] %}
+            {% set render_controls.actions = [{'icon': 'plus', 'title': v.params.title, 'view': v.name}] %}
+            {% break %}
+        {% endfor %}
+    {% elif render_controls.is_read %}
+        {% for v in model.views if v.action in ['update', 'upcreate'] %}
+            {% set render_controls.actions = [{'icon': 'edit', 'title': v.params.title, 'view': v.name~'?'}] %}
+            {% break %}
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
+{# * #}
+{# * main #}
+{# * #}
+{# core variables #}
+{% set model = view.model %}
+{% set action = view.action %}
+{% set layout = view.rows %}
+{# reset and recalculate render controls #}
+{% set render_controls.formats = [] %}
+{% set render_controls.is_read = action == 'read' %}
+{% set render_controls.is_form = action in ['create', 'update', 'upcreate'] %}
+{% set render_controls.is_query = action == 'query' %}
+{{- iterate_layout(layout, model.schema) -}}
+{{- calculate_actions(model) -}}
+{# render begins #}
+{% set has_gutters = True if 'has_gutters' not in view.params else view.params.has_gutters %}
+{{ '{% extends "' }}{{ view.params.extends }}{{ '.html" %}' }}
+{{ '{%' }} set title = {{ view.params.title|quote }} {{ '%}' }}
+{{ '{%' }} set breadcrumb = {
+    'subtitle': '{{ view.params.subtitle or '' }}',
+    'title': title,
+    'actions': {{ render_controls.actions }},
+    'tabs': [],
+} {{ '%}' }}
+{{ '{% block title %}{{ title }}{% endblock %}' }}
+{{ '{% block style %}' }}
+{% if 'image' in render_controls.formats or 'file' in render_controls.formats %}
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
+{% endif %}
+{% if 'calendar' in render_controls.formats %}
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/fullcalendar/main.min.css" rel="stylesheet" type="text/css">
+{% endif %}
+{% if 'date' in render_controls.formats or 'datetime' in render_controls.formats %}
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
+{% endif %}
+{{ '{% endblock %}' }}
+{{ '{% block content %}' }}
+{% for row in layout %}
+<div class="row {{ 'no-gutters' if not has_gutters }}">
+    {% for column in row %}
+    <div class="{{ 'col-lg-'+column.span|string if column.span else 'col-lg' }}">
+        {{ column.name }}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{{ '{% endblock %}' }}
+{{ '{% block script %}' }}
+{% if 'image' in render_controls.formats or 'file' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
+{% if render_controls.is_form %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
+{% endif %}
+{% endif %}
+{% if 'calendar' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/fullcalendar/main.min.js"></script>
+{% endif %}
+{% if 'date' in render_controls.formats or 'datetime' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/flatpickr/dist/l10n/zh.js"></script>
+{% endif %}
+{% if 'chart' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/chart.js/dist/Chart.bundle.min.js"></script>
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/js/Chart.extension.js"></script>
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/js/charts.js"></script>
+{% endif %}
+{% if 'textarea' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/autosize/dist/autosize.min.js"></script>
+{% endif %}
+{% if 'tag' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/corejs-typeahead/dist/typeahead.jquery.min.js"></script>
+{% endif %}
+{% if 'select' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
+{% endif %}
+{% if render_controls.is_form %}
+<script src="{{ '{{' }} base() {{ '}}' }}/js/form.min.js?{{ '{{' }} version() {{ '}}' }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        install_form();
+    });
+</script>
+{% endif %}
+{{ '{% endblock %}' }}

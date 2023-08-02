@@ -1,0 +1,41 @@
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{% set title_field = match_field(item_schema.properties, 'title|name')%}
+<div class="card">
+    {{ '{%' }} if {{ field_path }} {{ '%}' }}
+    {# 遍历每个元素生成标题 #}
+    <div class="card-header">
+        <ul class="nav nav-tabs nav-tabs-lg card-header-tabs">
+            {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+            <li class="nav-item">
+                <a class="nav-link {{ '{{' }} 'active' if loop.first {{ '}}' }}" data-toggle="tab" href="#{{ field_name }}_item_{{ '{{' }} loop.index {{ '}}' }}">
+                    {% if title_field %}
+                    {{ '{{' }} {{ field_name }}_item.{{ title_field }} {{ '}}' }}
+                    {% else %}
+                    {{ item_schema.title }}
+                    {% endif %}
+                    <span class="badge badge-light mx-2">{{ '{{' }} loop.index {{ '}}' }}</span>
+                </a>
+            </li>
+            {{ '{%' }} endfor {{ '%}' }}
+        </ul>
+    </div>
+    {# 遍历每个元素生成内容 #}
+    <div class="card-body">
+        <div class="tab-content">
+            {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+            <div class="tab-pane fade {{ '{{' }} 'show active' if loop.first {{ '}}' }}" id="{{ field_name }}_item_{{ '{{' }} loop.index {{ '}}' }}">
+                {{ render_field('-', item_schema, field_name+'_item', true)|indent(16) }}
+            </div>
+            {{ '{%' }} endfor {{ '%}' }}
+        </div>
+    </div>
+    {{ '{%' }} else {{ '%}' }}
+    <div class="card-body">
+    <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div>
+    </div>
+    {{ '{%' }} endif {{ '%}' }}
+</div>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

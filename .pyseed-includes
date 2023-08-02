@@ -1,5 +1,5 @@
 # Each line is a folder or file
-# For folder, only sub files with extension .jinja2 will be rendered
+# For folder, only files with extension .jinja2 will be rendered
 
 # www
 www/static/js/enums.js.jinja2

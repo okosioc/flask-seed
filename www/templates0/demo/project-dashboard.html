@@ -10,26 +10,150 @@
 {% block style %}
 {% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg">
-        active_projects_count
+<div id="div-project-dashboard">
+    <div class="row">
+        <div class="col-lg">
+            <div class="card"><div class="card-body">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="text-muted mb-2">活跃项目数量</div>
+                    <div>
+                        <span class="h2 text-primary">{{ demo_project_dashboard.active_projects_count|int|commas if demo_project_dashboard.active_projects_count is not none else '-' }}</span>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <span class="h2 fe fe-briefcase text-muted mb-0"></span>
+                </div>
+            </div>
+            </div></div>
+        </div>
+        <div class="col-lg">
+            <div class="card"><div class="card-body">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="text-muted mb-2">活跃项目价值(元)</div>
+                    <div>
+                        <span class="h2 text-primary">￥{{ demo_project_dashboard.active_projects_value|int|commas if demo_project_dashboard.active_projects_value is not none else '-' }}</span>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <span class="h2 fe fe-dollar-sign text-muted mb-0"></span>
+                </div>
+            </div>
+            </div></div>
+        </div>
+        <div class="col-lg">
+            <div class="card"><div class="card-body">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="text-muted mb-2">团队成员数量</div>
+                    <div>
+                        <span class="h2 text-primary">{{ demo_project_dashboard.members_count|int|commas if demo_project_dashboard.members_count is not none else '-' }}</span>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <span class="h2 fe fe-users text-muted mb-0"></span>
+                </div>
+            </div>
+            </div></div>
+        </div>
+        <div class="col-lg">
+            <div class="card"><div class="card-body">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="text-muted mb-2">任务数量</div>
+                    <div>
+                        <span class="h2 text-primary">{{ demo_project_dashboard.tasks_count|int|commas if demo_project_dashboard.tasks_count is not none else '-' }}</span>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <span class="h2 fe fe-check-square text-muted mb-0"></span>
+                </div>
+            </div>
+            </div></div>
+        </div>
     </div>
-    <div class="col-lg">
-        active_projects_value
-    </div>
-    <div class="col-lg">
-        members_count
-    </div>
-    <div class="col-lg">
-        tasks_count
-    </div>
-</div>
-<div class="row ">
-    <div class="col-lg-8">
-        active_projects
-    </div>
-    <div class="col-lg-4">
-        recent_activities
+    <div class="row">
+        <div class="col-lg-8">
+        <div class="array relation" name="active_projects" format="table">
+            <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-briefcase mr-2"></i>活跃项目</h4></div><div class="table-responsive">
+            <table class="table table-striped ">
+                <thead>
+                    <tr>
+                        <th>项目名称</th>
+                        <th>项目状态</th>
+                        <th>项目价值(元)</th>
+                        <th>开始日期</th>
+                        <th>项目成员</th>
+                        <th>项目进度(%)</th>
+                        <th>创建时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for active_projects_item in demo_project_dashboard.active_projects %}
+                    <tr class="" name="{{ loop.index0 }}">
+                        <td name="title" format="text" enum="">
+                            <a href="javascript:;">
+                            {{ active_projects_item.title or '-' }}
+                            </a>
+                        </td>
+                        <td name="status" format="select" enum="DemoProjectStatus">
+                            {% if active_projects_item.status is not none %}<span class="text-{{ active_projects_item.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoProjectStatus')[active_projects_item.status] }}{% else %}-{% endif %}
+                        </td>
+                        <td name="value" format="float" enum="">
+                            {{ active_projects_item.value|int|commas if active_projects_item.value is not none else '-' }} 
+                        </td>
+                        <td name="start" format="date" enum="">
+                            {{ active_projects_item.start|date if active_projects_item.start is not none else '-' }}
+                        </td>
+                        <td name="members" format="media" enum="">
+                            {{ active_projects_item.members|length }}
+                        </td>
+                        <td name="percent" format="float" enum="">
+                            {{ active_projects_item.percent|int|commas if active_projects_item.percent is not none else '-' }} %
+                        </td>
+                        <td name="create_time" format="datetime" enum="">
+                            {{ active_projects_item.create_time|datetime if active_projects_item.create_time is not none else '-' }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有项目！</div></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div></div>
+        </div>
+        </div>
+        <div class="col-lg-4">
+        <div class="array" name="recent_activities" format="timeline">
+            <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-activity mr-2"></i>最近操作</h4></div><div class="card-body">
+            <ul class="array-items list-group list-group-flush list-group-activity">
+                {% for recent_activities_item in demo_project_dashboard.recent_activities %}
+                <li class="array-item list-group-item">
+                    <div class="row align-items-center">
+                        <div class="col-auto" name="user.name" format="text">
+                            <a href="javascript:;" class="avatar avatar-sm">
+                                <span class="avatar-title bg-primary-soft rounded-circle text-primary">{{ recent_activities_item.user.name|first|upper if recent_activities_item.user.name is not none }}</span>
+                            </a>
+                        </div>
+                        <div class="col ml-n2">
+                            <p name="title" format="text" class="mb-1">{{ recent_activities_item.title|safe if recent_activities_item.title is not none }}</p>
+                            <p name="content" format="textarea" class="small text-gray-700 mb-1">{{ recent_activities_item.content or '' }}</p>
+                            <p class="small text-muted mb-0"><i class="fe fe-clock mr-2"></i>{{ recent_activities_item.time|timesince if recent_activities_item.time is not none }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% else %}
+                <li class="array-item list-group-item">
+                    <div class="row align-items-center">
+                        <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有操作！</div></div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            </div></div>
+        </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,36 @@
+{% if not is_in_card %}
+<div class="card"><div class="card-body">
+{% endif %}
+{% if field_schema.type in ['object', 'array'] %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% else %}
+<div class="row align-items-center">
+    <div class="col">
+        <div class="text-muted mb-2">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</div>
+        {% if field_schema.unit=='%' %}
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span class="h2 text-primary">{{ '{{' }} {{ field_path }}|int|commas if {{ field_path }} is not none else '-' {{ '}}' }}%</span>
+            </div>
+            <div class="col">
+                <div class="progress progress-sm">
+                    <div class="progress-bar" role="progressbar" style="width:{{ '{{' }} {{ field_path }}|int if {{ field_path }} is not none else '0' {{ '}}' }}%" aria-valuenow="{{ '{{' }} {{ field_path }}|int if {{ field_path }} is not none else '0' {{ '}}' }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div>
+            <span class="h2 text-primary">{{ '￥' if field_schema.unit=='元' }}{{ '{{' }} {{ field_path }}|int|commas if {{ field_path }} is not none else '-' {{ '}}' }}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% if field_schema.icon %}
+    <div class="col-auto">
+        <span class="h2 fe fe-{{ field_schema.icon }} text-muted mb-0"></span>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% if not is_in_card %}
+</div></div>
+{% endif %}

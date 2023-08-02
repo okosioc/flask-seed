@@ -1,0 +1,124 @@
+{# * #}
+{# * macro - generate url for a model under current domain, return the first view with matched action #}
+{# * #}
+{% macro generate_url(model_name, model_path=none, actions=none) %}
+    {# NOTE: models & domain is in context always #}
+    {% set model = models[model_name] %}
+    {% if actions is not sequence %}
+        {% set actions = [action] %}
+    {% endif %}
+    {% set ns = namespace(view=none) %}
+    {% for v in model.views %}
+        {% if domain in v.domains and v.action in actions %}
+            {% set ns.view = v %}
+            {% break %}
+        {% endif %}
+    {% endfor %}
+    {% if ns.found %}{{ ns.view.name }}{{ '?id={{ '~model_path~'.'~model.schema.id_name~' }}' if model_path }}{% else %}javascript:;{% endif %}
+{% endmacro %}
+{# * #}
+{# * macro - display field content inline, i.e, in a table column or in summary's .list-group-item #}
+{# * #}
+{% macro display_inline(field_name, field_path, field_schema, fallback=none) %}
+{% if field_schema.type == 'object' %}
+{% set title_field_name = field_schema|field('title|name|\\w*name') %}
+{{ '{{' }} {{ field_path }}.{{ title_field_name }} or '-' {{ '}}' }}
+{% elif field_schema.type == 'array' %}
+{# display length for object array #}
+{% if field_schema['items'].type == 'object' %}
+{{ '{{' }} {{ field_path }}|length {{ '}}' }}
+{% else %}
+{# display each for simple array #}
+{{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+{{ display_inline('-', field_name~'_item', field_schema['items']) }}
+{{ '{%' }} endfor {{ '%}' }}
+{% endif %}
+{% else %}
+{% if field_schema.format in ['int', 'float'] %}
+{{ '{{' }} {{ field_path }}|int|commas if {{ field_path }} is not none else '-' {{ '}}' }} {{ '%' if field_schema.unit == '%' }}
+{% elif field_schema.format in ['switch'] %}
+{{ '{{' }} '是' if {{ field_path }} else '否' {{ '}}' }}
+{% elif field_schema.format in ['datetime'] %}
+{{ '{{' }} {{ field_path }}|datetime if {{ field_path }} is not none else '-' {{ '}}' }}
+{% elif field_schema.format in ['date'] %}
+{{ '{{' }} {{ field_path }}|date if {{ field_path }} is not none else '-' {{ '}}' }}
+{% elif field_schema.format in ['select', 'buttongroup'] %}
+{{ '{% if' }} {{ field_path }} is not none {{ '%}' -}}
+{% if field_name == 'status' %}<span class="text-{{ '{{' }} {{ field_path }}|tocolor {{ '}}' }} mr-2">●</span>{% endif %}
+{% if field_schema.enum %}{{ '{{' }} enum_titles('{{ field_schema.py_type }}')[{{ field_path }}] {{ '}}' }}{% else %}{{ '{{' }} {{ field_path }} {{ '}}' }}{% endif %}
+{{ '{% else %}-{% endif %}' }}
+{% elif field_schema.format in ['avatar'] %}
+<div class="avatar avatar-sm">
+    <img src="{{ '{{' }} {{ field_path }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ field_path }} {{ '}}' }}">
+    {% if fallback %}{{ fallback }}{% endif %}
+</div>
+{% elif field_schema.format in ['image'] %}
+<div class="avatar avatar-sm avatar-4by3">
+    <img src="{{ '{{' }} {{ field_path }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded {{ '{{' }} 'd-none' if not {{ field_path }} {{ '}}' }}">
+    {% if fallback %}{{ fallback }}{% endif %}
+</div>
+{% elif field_schema.format in ['link'] %}
+<a href="{{ '{{' }} {{ field_path }} or 'javascript:;' {{ '}}' }}" target="_blank"><i class="fe fe-external-link mr-2"></i></a>
+{% else %}
+{{ '{{' }} {{ field_path }} or '-' {{ '}}' }}
+{% endif %}
+{% endif %}
+{% endmacro %}
+{# * #}
+{# * macro - display columns in table #}
+{# * #}
+{% macro display_table_columns(row_path, row_schema, row_layout, row_target=none, excludes=[]) %}
+{% set fields = (row_layout or row_schema)|fields %}
+{% set title_field_name = fields|match('title|name|\\w*name') %}
+{% for field_name in fields if field_name not in excludes %}
+{% set field_path = row_path~'.'~field_name %}
+{% set field_schema = row_schema.properties[field_name] %}
+{% set field_enum = field_schema['items'].py_type if field_schema.type == 'array' and field_schema['items'].enum else (field_schema.py_type if field_schema.enum else '') %}
+{% set fallback = none %}
+{% if field_schema.format in ['image', 'avatar'] %}
+    {% set fallback %}<span fallback={{ title_field_name }} class="avatar-title bg-primary-soft rounded{{ '-circle' if field_schema.format == 'avatar' }} text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ row_path~'.'~title_field_name }}|first|upper if {{ row_path~'.'~title_field_name }} is not none {{ '}}' }}</span>{% endset %}
+{% endif %}
+<td name="{{ field_name }}" format="{{ field_schema.format }}" enum="{{ field_enum }}">
+    {% if row_target and loop.first and field_schema.format != 'link' %}
+    <a href="{{ row_target }}">
+    {% endif %}
+    {% filter right(4) %}{{ display_inline(field_name, field_path, field_schema, fallback)}}{% endfilter %}
+    {% if row_target and loop.first %}
+    </a>
+    {% endif %}
+</td>
+{% endfor %}
+{% endmacro %}
+{# * #}
+{# * macro - display list-group-item in a list-group #}
+{# * #}
+{% macro display_list_group_items(item_path, item_schema, item_layout, excludes=[]) %}
+{% set fields = (item_layout or item_schema)|fields %}
+{% set title_field_name = fields|match('title|name|\\w*name') %}
+{% for field_name in fields if field_name not in excludes %}
+{% set field_path = item_path~'.'~field_name %}
+{% set field_schema = item_schema.properties[field_name] %}
+{% set field_enum = field_schema['items'].py_type if field_schema.type == 'array' and field_schema['items'].enum else (field_schema.py_type if field_schema.enum else '') %}
+{% set fallback = none %}
+{% if field_schema.format in ['image', 'avatar'] %}
+    {% set fallback %}<span fallback={{ title_field_name }} class="avatar-title bg-primary-soft rounded{{ '-circle' if field_schema.format == 'avatar' }} text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ item_path~'.'~title_field_name }}|first|upper if {{ item_path~'.'~title_field_name }} is not none {{ '}}' }}</span>{% endset %}
+{% endif %}
+<div class="list-group-item">
+    <div class="row align-items-center">
+        <div class="{{ 'col-auto' if field_schema.unit == '%' else 'col'}}">
+            <span>{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% else %}<i class="mx-3"></i>{% endif %}{{ field_schema.title}}{{ '('~field_schema.unit~')' if field_schema.unit and field_schema.unit != '%' }}{% if field_schema.description %}<i class="fe fe-help-circle ml-2" data-toggle="tooltip" data-placement="top" title="{{ field_schema.description }}"></i>{% endif %}</span>
+        </div>
+        {% if field_schema.unit == '%'  %}
+        <div class="col" name="{{ c }}" format="{{ field_schema.format }}">
+            <div class="progress progress-sm">
+                <div class="progress-bar" role="progressbar" style="width:{{ '{{' }} {{ field_path }} or 0 {{ '}}' }}%;" aria-valuenow="{{ '{{' }} {{ field_path }} or 0 {{ '}}' }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-auto text-muted" name="{{ field_name }}" format="{{ field_schema.format }}" enum="{{ field_enum }}">
+            {% filter right(12) %}{{ display_inline(field_name, field_path, field_schema, fallback) }}{% endfilter %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endmacro %}

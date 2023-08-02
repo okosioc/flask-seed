@@ -1,0 +1,96 @@
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{# First field should be media, i.e, image or video #}
+{% set fields = (field_layout or item_schema)|fields %}
+{% set first_field_name = fields[0] %}
+{% set first_field_schema = item_schema.properties[first_field_name] %}
+{% set title_field_name = fields|match('title|name|\\w*name') %}
+{% set title_field_schema = item_schema.properties[title_field_name] %}
+{% set content_field_name = fields|match('content|text') %}
+{% set time_field_name = fields|match('update_time|create_time|\\w*time') %}
+<ul class="array-items list-group list-group-flush">
+    {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ item_schema.py_type }}')] {{ '%}' }}
+    <li class="array-item list-group-item {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="-">
+        <div class="row align-items-center">
+            {% if first_field_schema.format in ['image', 'avatar'] %}
+            <div class="col-auto" name="{{ first_field_name }}" format="{{ first_field_schema.format }}">
+                <a href="javascript:;" class="avatar {{ 'avatar-4by3' if first_field_schema.format=='image' }}">
+                    <img src="{{ '{{' }} {{ field_name~'_item.'~first_field_name }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded{{ '-circle' if first_field_schema.format=='avatar' }} {{ '{{' }} 'd-none' if not {{ field_name~'_item.'~first_field_name }} {{ '}}' }}">
+                    <span fallback={{ title_field_name }} class="avatar-title rounded{{ '-circle' if first_field_schema.format=='avatar' }} bg-primary {{ '{{' }} 'd-none' if {{ field_name~'_item.'~first_field_name }} {{ '}}' }}">{{ '{{' }} {{ field_name~'_item.'~title_field_name }}|first|upper if {{ field_name~'_item.'~title_field_name }} is not none {{ '}}' }}</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="col-auto" name="{{ title_field_name }}" format="{{ title_field_schema.format }}">
+                <a href="javascript:;" class="avatar">
+                    <span class="avatar-title bg-primary-soft rounded text-primary">{{ '{{' }} {{ field_name }}_item.{{ title_field_name }}|first|upper if {{ field_name }}_item.{{ title_field_name }} is not none {{ '}}' }}</span>
+                </a>
+            </div>
+            {% endif %}
+            <div class="col ml-n2">
+                <p name="{{ title_field_name }}" format="{{ title_field_schema.format }}" class="mb-1">{{ '{{' }} {{ field_name }}_item.{{ title_field_name }} or '' {{ '}}' }}</p>
+                {% if content_field_name %}
+                <p name="{{ content_field_name }}" format="{{ item_schema.properties[content_field_name].format }}" class="small text-gray-700 mb-1">{{ '{{' }} {{ field_name }}_item.{{ content_field_name }} or '' {{ '}}' }}</p>
+                {% endif %}
+                <p class="small text-muted mb-0"><i class="fe fe-clock mr-2"></i>{{ '{{' }} {{ field_name }}_item.{{ time_field_name }}|timesince if {{ field_name }}_item.{{ time_field_name }} is not none {{ '}}' }}</p>
+            </div>
+            <div class="col-auto">
+                <a class="btn pl-0 py-0" onclick="array_action_show_modal($(this));"><i class="fe fe-eye"></i></a>
+                <a class="btn pl-0 py-0" onclick="array_action_delete_modal($(this));" data-title="{{ item_schema.title }}"><i class="fe fe-delete"></i></a>
+            </div>
+        </div>
+    </li>
+    {{ '{%' }} endfor {{ '%}' }}
+    <li class="array-item list-group-item pb-0" style="{{ '{{' }} 'display:none' if {{ field_path }} {{ '}}' }}">
+        <div class="row align-items-center">
+            <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></div>
+        </div>
+    </li>
+</ul>
+<div class="modals">
+    {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ item_schema.py_type }}')] {{ '%}' }}
+    <div class="modal fade {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="-" data-backdrop="static" data-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% if item_schema.icon %}<i class="fe fe-{{ item_schema.icon }} mr-2"></i>{% endif %}{{ item_schema.title }}详情</h5>
+                    <button type="button" class="close" aria-label="Close" onclick="array_action_cancel_modal($(this));">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                {% if field_schema.is_out_relation %}
+                    {# create a fieldset to submit related models' id #}
+                    <fieldset class="object d-none" name="-">
+                        <div class="form-group" name="{{ item_schema.id_name }}">
+                            <input name="{{ item_schema.id_name }}" type="text" value="{{ '{{' }} {{ field_name }}_item.{{ item_schema.id_name }} or '' {{ '}}' }}">
+                        </div>
+                    </fieldset>
+                    {{ display_summary('-', item_schema, field_name+'_item')|indent(20) }}
+                {% else %}
+                    {# modal is card-like, so is_in_card is true #}
+                    {{ render_field('-', item_schema, field_name+'_item', true)|indent(20) }}
+                {% endif %}
+                </div>
+                <div class="modal-footer py-3">
+                    <button type="button" class="btn btn-light" onclick="array_action_cancel_modal($(this));">关闭</button>
+                    {% if not field_schema.is_out_relation %}
+                    <button type="button" class="btn btn-primary" onclick="array_action_save_modal($(this));">确定</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ '{%' }} endfor {{ '%}' }}
+</div>
+<div class="array-actions mt-4">
+    {% if field_schema.is_out_relation %}
+    {% set related_model_name = field_schema['items']['py_type'] if field_schema.type == 'array' else field_schema['py_type'] %}
+    {% set related_model = models[related_model_name] %}
+    <a class="btn btn-outline-primary mr-2" relation-key="{{ related_model.name_kebab_plural }}" relation-return="{{ 'many' if field_schema.type == 'array' else 'one' }}" onclick="relation_action_show_search_modal($(this));" data-title="{{ item_schema.title }}"><i class="fe fe-search mr-1"></i>添加{{ item_schema.title }}...</a>
+    {% else %}
+    <a class="btn btn-outline-primary mr-2" onclick="array_action_add_modal($(this));"><i class="fe fe-plus mr-1"></i>添加{{ item_schema.title }}...</a>
+    {% endif %}
+</div>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

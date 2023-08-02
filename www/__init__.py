@@ -48,7 +48,7 @@ def create_www(blueprints=None, pytest=False, runscripts=False):
     if blueprints is None:
         blueprints = DEFAULT_BLUEPRINTS
     #
-    app = Flask(DEFAULT_APP_NAME, instance_relative_config=True)
+    app = Flask(DEFAULT_APP_NAME, instance_relative_config=True, template_folder='templates0')
     # Json encoder
     app.json_encoder = ModelJSONEncoder
     # Url converter

@@ -72,16 +72,15 @@
 {# core variables #}
 {% set model = view.model %}
 {% set action = view.action %}
-{% set layout = view.rows %}
 {# reset and recalculate render controls #}
 {% set render_controls.formats = [] %}
 {% set render_controls.is_read = action == 'read' %}
 {% set render_controls.is_form = action in ['create', 'update', 'upcreate'] %}
 {% set render_controls.is_query = action == 'query' %}
-{{- iterate_layout(layout, model.schema) -}}
+{{- iterate_layout(view.rows, model.schema) -}}
 {{- calculate_actions(model) -}}
 {# render begins #}
-{% set has_gutters = True if 'has_gutters' not in view.params else view.params.has_gutters %}
+{% set has_gutters = true if 'has_gutters' not in view.params else view.params.has_gutters %}
 {{ '{% extends "' }}{{ view.params.extends }}{{ '.html" %}' }}
 {{ '{%' }} set title = {{ view.params.title|quote }} {{ '%}' }}
 {{ '{%' }} set breadcrumb = {
@@ -103,15 +102,7 @@
 {% endif %}
 {{ '{% endblock %}' }}
 {{ '{% block content %}' }}
-{% for row in layout %}
-<div class="row {{ 'no-gutters' if not has_gutters }}">
-    {% for column in row %}
-    <div class="{{ 'col-lg-'+column.span|string if column.span else 'col-lg' }}">
-        {{ column.name }}
-    </div>
-    {% endfor %}
-</div>
-{% endfor %}
+{% include '__includes/'~action~'.html' %}
 {{ '{% endblock %}' }}
 {{ '{% block script %}' }}
 {% if 'image' in render_controls.formats or 'file' in render_controls.formats %}
@@ -144,9 +135,35 @@
 {% if render_controls.is_form %}
 <script src="{{ '{{' }} base() {{ '}}' }}/js/form.min.js?{{ '{{' }} version() {{ '}}' }}"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function(){
+        //
         install_form();
     });
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
 </script>
 {% endif %}
 {{ '{% endblock %}' }}

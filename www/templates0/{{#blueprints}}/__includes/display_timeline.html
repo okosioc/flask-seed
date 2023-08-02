@@ -1,0 +1,49 @@
+{% if not is_in_card %}
+<div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ field_schema.title }}</h4></div><div class="card-body">
+{% endif %}
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
+{# First field should be a meaningful subject, i.e, user name or event type and etc. #}
+{% set fields = (field_layout or item_schema)|fields %}
+{% set first_field_name = fields[0] %}
+{% set first_field_schema = item_schema.properties[first_field_name] %}
+{% if first_field_schema.type == 'object' %}
+    {% set object_field_name = first_field_schema|field('name|\\w*name') %}
+    {% set first_field_name = first_field_name~'.'~object_field_name %}
+    {% set first_field_schema = first_field_schema.properties[object_field_name] %}
+{% endif %}
+{% set title_field_name = fields|match('title') %}
+{% set content_field_name = fields|match('content|text') %}
+{% set time_field_name = fields|match('update_time|create_time|\\w*time') %}
+<ul class="array-items list-group list-group-flush list-group-activity">
+    {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+    <li class="array-item list-group-item">
+        <div class="row align-items-center">
+            <div class="col-auto" name="{{ first_field_name }}" format="{{ first_field_schema.format }}">
+                <a href="javascript:;" class="avatar avatar-sm">
+                    <span class="avatar-title bg-primary-soft rounded-circle text-primary">{{ '{{' }} {{ field_name }}_item.{{ first_field_name }}|first|upper if {{ field_name }}_item.{{ first_field_name }} is not none {{ '}}' }}</span>
+                </a>
+            </div>
+            <div class="col ml-n2">
+                <p name="{{ title_field_name }}" format="{{ item_schema.properties[title_field_name].format }}" class="mb-1">{{ '{{' }} {{ field_name }}_item.{{ title_field_name }}|safe if {{ field_name }}_item.{{ title_field_name }} is not none {{ '}}' }}</p>
+                {% if content_field_name %}
+                <p name="{{ content_field_name }}" format="{{ item_schema.properties[content_field_name].format }}" class="small text-gray-700 mb-1">{{ '{{' }} {{ field_name }}_item.{{ content_field_name }} or '' {{ '}}' }}</p>
+                {% endif %}
+                <p class="small text-muted mb-0"><i class="fe fe-clock mr-2"></i>{{ '{{' }} {{ field_name }}_item.{{ time_field_name }}|timesince if {{ field_name }}_item.{{ time_field_name }} is not none {{ '}}' }}</p>
+            </div>
+        </div>
+    </li>
+    {{ '{%' }} else {{ '%}' }}
+    <li class="array-item list-group-item">
+        <div class="row align-items-center">
+            <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></div>
+        </div>
+    </li>
+    {{ '{%' }} endfor {{ '%}' }}
+</ul>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}
+{% if not is_in_card %}
+</div></div>
+{% endif %}

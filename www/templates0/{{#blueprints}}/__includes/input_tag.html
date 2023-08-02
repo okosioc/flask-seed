@@ -1,0 +1,21 @@
+<div class="form-group {{ field_schema.type }} {{ 'row' if seed_is_horizontal }}" name="{{ field_name }}">
+    <label class="{{ 'col-auto col-form-label' if seed_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
+    {% if seed_is_horizontal %}
+    <div class="col">
+    {% endif %}
+    <div class="tag-cloud-input-group mt-2" data-tags='{{ '{{ '~field_path~'_depends'~'|tojson }}' if field_schema.depends else '[]' }}'>
+        {{ '{%' }} for value in {{ field_path }} {{ '%}' }}
+        <span class="font-size-base badge badge-soft-secondary mr-2 mb-2">{{ '{{' }} value {{ '}}' }}
+            <small class="fe fe-x ml-2" style="cursor:pointer" onclick="$(this).parent().remove();"></small>
+        </span>
+        {{ '{%' }} endfor {{ '%}' }}
+        <input class="tag-input" type="text" placeholder="+ 添加{{ field_schema.title }}">
+    </div>
+    {% if field_schema.description %}
+    <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
+    {% endif %}
+    <div class="invalid-feedback">请输入{{ field_schema.title }}!</div>
+    {% if seed_is_horizontal %}
+    </div>
+    {% endif %}
+</div>

@@ -1,0 +1,58 @@
+{% macro render_image(hiddens) %}
+            <div class="image uploaded" style="width:auto;">
+                <img data-src="{{ caller('url') }}">
+                <div class="btns">
+                    <a href="{{ caller('url') }}" target="_blank">i</a>
+                    <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+                </div>
+                {% for k in hiddens %}
+                <input type="hidden" name="{{ k }}" value="{{ caller(k) }}">
+                {% endfor %}
+            </div>
+{% endmacro %}
+<div class="form-group {{ field_schema.type }} {{ 'row' if seed_is_horizontal }}" name="{{ field_name }}">
+    <label class="{{ 'col-auto col-form-label' if seed_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
+    {% if seed_is_horizontal %}
+    <div class="col">
+    {% endif %}
+    {# array of string/object #}
+    {% if field_schema.type == 'array' %}
+        {% set hiddens = field_schema['items'].properties|keys if field_schema['items'].type == 'object' else ['url'] %}
+    {# string #}
+    {% elif field_schema.type == 'string' %}
+        {% set hiddens = ['url'] %}
+    {% endif %}
+    <div class="plupload-input-group image-input-group" {{ 'required' if field_schema.required }}>
+        <a class="btn btn-outline-primary plupload" href="javascript:;" {{ 'multiple' if field_schema.type == 'array' }}
+           data-token="{{ '{{ upload_config.token }}' }}"
+           data-upload="{{ '{{ upload_config.endpoint }}' }}"
+           data-max="{{ '{{ upload_config.max }}' }}"
+           data-preview='{"image":"{{ '{{' }} upload_config.image_preview_sm {{ '}}' }}", "video":"{{ '{{' }} upload_config.video_poster_sm {{ '}}' }}"}'
+           data-filters='{"mime_types":"{{ '{{' }} upload_config.mimes_image|join(", ") {{ '}}' }}"}'
+           data-hiddens="{{ hiddens|join(',') }}">选择图片...</a>
+        <small class="mt-2 form-text text-muted">{{ '可上传多张图片；' if field_schema.type == 'array' }}支持的图片格式有 {{ '{{' }} upload_config.mimes_image|join(', ') {{ '}}' }}</small>
+        <div class="plupload-input-result image-input-result mt-1 clearfix">
+        {% if field_schema.type == 'array' %}
+        {% if field_schema['items'].type == 'object' %}
+            {{ '{%' }} for e in {{ field_path }} {{ '%}' }}
+            {% call(k) render_image(hiddens) %}{{ '{{' }} e['{{ k }}'] or '' {{ '}}' }}{% endcall %}
+            {{ '{%' }} endfor {{ '%}' }}
+        {% else %}
+            {{ '{%' }} for e in {{ field_path }} {{ '%}' }}
+            {{ '{%' }} set image_obj = {'url': e } {{ '%}' }}
+            {% call(k) render_image(hiddens) %}{{ '{{' }} image_obj['{{ k }}'] {{ '}}' }}{% endcall %}
+            {{ '{%' }} endfor {{ '%}' }}
+        {% endif %}
+        {% else %}
+            {{ '{%' }} if {{ field_path }} {{ '%}' }}
+            {{ '{%' }} set image_obj = {'url': {{ field_path }} } {{ '%}' }}
+            {% call(k) render_image(hiddens) %}{{ '{{' }} image_obj['{{ k }}'] {{ '}}' }}{% endcall %}
+            {{ '{%' }} endif {{ '%}' }}
+        {% endif %}
+        </div>
+    </div>
+    <div class="invalid-feedback">请上传{{ field_schema.title }}!</div>
+    {% if seed_is_horizontal %}
+    </div>
+    {% endif %}
+</div>

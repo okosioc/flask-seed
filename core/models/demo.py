@@ -16,8 +16,6 @@ from flask_login import UserMixin
 from py3seed import SimpleEnum, CacheModel, ModelField as Field, RelationField as Relation, register, BaseModel, Format, Comparator, Ownership
 from werkzeug.utils import cached_property
 
-from .common import Block
-
 
 class DemoTeamStatus(SimpleEnum):
     """ 团队状态. """
@@ -40,29 +38,23 @@ class DemoTeam(CacheModel):
     __icon__ = 'users'
     __title__ = '团队'
     #
-    __views__ = {
-        'demo/team-profile': {
-            'domains': ['www'],
-            'layout': '''#!update?extends=layout-dash-demo&title=团队设置
-                1#summary4,    2#8      
-                  logo           name   
-                  name           code   
-                  status         remarks
-                  members        logo   
-                  create_time  
-            ''',
-        },
-        'demo/team-members': {
-            'domains': ['www'],
-            'layout': '''#!read?extends=layout-dash-demo&title=团队成员
-                1#summary4,    members#8                                                  
-                  logo           avatar, name, status, roles, email, phone, team_join_time
-                  name                                                                    
-                  status                                                                  
-                  members                                                                 
-                  create_time
-            ''',
-        },
+    __views0__ = {
+        'www://demo/team-profile': '''#!update?extends=layout-dash-demo&title=团队设置
+            1#summary4,    2#8      
+              logo           name   
+              name           code   
+              status         remarks
+              members        logo   
+              create_time  
+        ''',
+        'www://demo/team-members': '''#!read?extends=layout-dash-demo&title=团队成员
+            1#summary4,    members#8                                                  
+              logo           avatar, name, status, roles, email, phone, team_join_time
+              name                                                                    
+              status                                                                  
+              members                                                                 
+              create_time
+        ''',
     }
 
 
@@ -114,20 +106,17 @@ class DemoUser(CacheModel, UserMixin):
     __icon__ = 'user'
     __title__ = '用户'
     #
-    __views__ = {
-        'demo/user-profile': {
-            'domains': ['www'],
-            'layout': '''#!update?extends=layout-dash-demo&title=用户设置
-                1#summary4,    0#8                                           
-                  avatar         name  
-                  name           phone                                                  
-                  status         intro                                                 
-                  roles          avatar                                                
-                  email
-                  phone
-                  create_time
-            ''',
-        },
+    __views0__ = {
+        'www://demo/user-profile': '''#!update?extends=layout-dash-demo&title=用户设置
+            1#summary4,    0#8                                           
+              avatar         name  
+              name           phone                                                  
+              status         intro                                                 
+              roles          avatar                                                
+              email
+              phone
+              create_time
+        ''',
     }
 
     @cached_property
@@ -216,42 +205,33 @@ class DemoProject(CacheModel):
     __icon__ = 'briefcase'
     __title__ = '项目'
     #
-    __views__ = {
-        'demo/project-list': {
-            'domains': ['www'],
-            'layout': '''#!query?extends=layout-dash-demo&title=项目管理&result_view=grid
-                title, status, value, start, members, percent, create_time
-            ''',
-        },
-        'demo/project-detail': {
-            'domains': ['www'],
-            'layout': '''#!read?extends=layout-dash-demo&title=项目详情
-                1#4,              2#8
-                  1.1#summary4      tasks                                   
-                    title             title, status, user, start, create_time 
-                    status          activities                  
-                    value             user, title, content, time
-                    start         
-                    members       
-                    percent       
-                    create_time   
-                  members                         
-                    avatar, name            
-            ''',
-        },
-        'demo/project-edit': {
-            'domains': ['www'],
-            'layout': '''#!upcreate?extends=layout-dash-demo&title=项目编辑
-                1?title=项目基本信息
-                  title
-                  description
-                  status, value
-                  start, end
-                  percent,
-                members#4
-                  avatar, name            
-            ''',
-        },
+    __views0__ = {
+        'www://demo/project-list': '''#!query?extends=layout-dash-demo&title=项目管理&result_view=grid
+            title, status, value, start, members, percent, create_time
+        ''',
+        'www://demo/project-detail': '''#!read?extends=layout-dash-demo&title=项目详情
+            1#4,              2#8
+              1.1#summary4      tasks                                   
+                title             title, status, user, start, create_time 
+                status          activities                  
+                value             user, title, content, time
+                start         
+                members       
+                percent       
+                create_time   
+              members                         
+                avatar, name            
+        ''',
+        'www://demo/project-edit': '''#!upcreate?extends=layout-dash-demo&title=项目编辑
+            1?title=项目基本信息
+              title
+              description
+              status, value
+              start, end
+              percent,
+            members#4
+              avatar, name            
+        ''',
     }
 
 
@@ -282,33 +262,27 @@ class DemoTask(CacheModel):
     __icon__ = 'check-square'
     __title__ = '任务'
     #
-    __views__ = {
-        'demo/task-detail': {
-            'domains': ['www'],
-            'layout': '''#!read?extends=layout-dash-demo&title=任务详情
-                project#summary4,  1#8     
-                  title              title 
-                  status             status     
-                  value              content    
-                  start              start, end 
-                  members            user       
-                  percent            create_time
-                  create_time
-            ''',
-        },
-        'demo/task-edit': {
-            'domains': ['www'],
-            'layout': '''#!upcreate?extends=layout-dash-demo&title=任务编辑
-                project#summary4,  1#8     
-                  title              title 
-                  status             status     
-                  value              content    
-                  start              start, end 
-                  members            user       
-                  percent            
-                  create_time      
-            ''',
-        },
+    __views0__ = {
+        'www://demo/task-detail': '''#!read?extends=layout-dash-demo&title=任务详情
+            project#summary4,  1#8     
+              title              title 
+              status             status     
+              value              content    
+              start              start, end 
+              members            user       
+              percent            create_time
+              create_time
+        ''',
+        'www://demo/task-edit': '''#!upcreate?extends=layout-dash-demo&title=任务编辑
+            project#summary4,  1#8     
+              title              title 
+              status             status     
+              value              content    
+              start              start, end 
+              members            user       
+              percent            
+              create_time      
+        ''',
     }
 
 
@@ -325,13 +299,11 @@ class DemoProjectDashboard(CacheModel):
     recent_activities: List[DemoActivity] = Field(format_=Format.TIMELINE, title='最近操作')  # 按照时间倒序
     #
     __views__ = {
-        'demo/project-dashboard': {
-            'domains': ['www'],
-            'layout': '''#!read?extends=layout-dash-demo&title=项目仪表盘
-                active_projects_count, active_projects_value, members_count, tasks_count
-                active_projects#8, recent_activities#4
-            ''',
-        }
+        'www://demo/project-dashboard': '''#!read?extends=layout-dash-demo&title=项目仪表盘
+            active_projects_count, active_projects_value, members_count, tasks_count
+            active_projects#8,                                            recent_activities#4
+              title, status, value, start, members, percent, create_time    user, title, content, time
+        ''',
     }
 
 

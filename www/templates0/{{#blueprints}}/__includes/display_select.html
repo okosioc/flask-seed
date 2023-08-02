@@ -1,0 +1,16 @@
+{% if field_schema.type == 'array' %}
+<div class="field-group {{ 'row' if seed_is_horizontal }}">
+    <label class="text-gray-700 {{ 'col-auto col-field-label' if seed_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
+    {% if seed_is_horizontal %}
+    <div class="col">
+    {% endif %}
+    <div class="field-control">
+        {{ display_inline(field_name, field_schema, field_path) }}
+    </div>
+    {% if seed_is_horizontal %}
+    </div>
+    {% endif %}
+</div>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

@@ -1,0 +1,30 @@
+{% set block = blocks['features'] or {
+        'title': '',
+        'subtitle': '',
+        'children': [
+            {
+                'icon': '<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M0 0h24v24H0z"></path><path d="M4 9.675l6.88 3.972a.89.89 0 00.231.093v7.704l-6.62-3.918a1 1 0 01-.491-.86V9.675zm16-.106v7.097a1 1 0 01-.49.86l-6.621 3.918v-7.771a.903.903 0 00.048-.026L20 9.569z" fill="#335EEA"></path><path d="M4.216 7.747a.999.999 0 01.314-.262l7-3.728a1 1 0 01.94 0l7 3.728c.095.05.18.116.253.191l-7.675 4.431a.893.893 0 00-.14.1.893.893 0 00-.139-.1l-7.553-4.36z" fill="#335EEA" opacity=".3"></path></g></svg>',
+                'title': '数据结构', 'content': '通过简单的方式定义业务所需的数据结构，无需考虑存储细节，支持主流数据库。'},
+            {
+                'icon': '<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M0 0h24v24H0z"></path><path d="M13.207 4A5.5 5.5 0 0020 10.793V17a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h6.207z" fill="#335EEA"></path><circle fill="#335EEA" opacity=".3" cx="18.5" cy="5.5" r="2.5"></circle></g></svg>',
+                'title': '项目模板', 'content': '定义项目蓝图，即可配合项目模板生成各个平台的种子项目，如网站、小程序、iOS和Android应用等等，内置了多个专业的项目模板。'},
+            {
+                'icon': '<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M0 0h24v24H0z"></path><path d="M7 3h10a4 4 0 110 8H7a4 4 0 110-8zm0 6a2 2 0 100-4 2 2 0 000 4z" fill="#335EEA"></path><path d="M7 13h10a4 4 0 110 8H7a4 4 0 110-8zm10 6a2 2 0 100-4 2 2 0 000 4z" fill="#335EEA" opacity=".3"></path></g></svg>',
+                'title': '二次开发', 'content': '可以方便的对种子项目进行二次开发，如果数据结构或者模板组件的有更新，可重新生成项目，代码会自动合并。'}
+        ]
+    } %}
+<section class="pb-7 border-bottom">
+    <div class="container">
+        <div class="row">
+            {% for f in block.children %}
+            <div class="col-12 col-md-4 aos-init aos-animate" data-aos="fade-up">
+                <div class="icon text-primary mb-4">
+                    {{ f.icon|safe }}
+                </div>
+                <h2>{{ f.title }}</h2>
+                <p class="text-muted mb-6 mb-md-0">{{ f.content }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

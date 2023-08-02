@@ -1,0 +1,116 @@
+{% from "__includes/macros.html" import display_inline, display_table_columns, display_list_group_items, generate_url with context %}
+{# * #}
+{# * available context {view, model, action, render_controls, ...} #}
+{# * #}
+{% set view_is_card = view.params.is_card or false %}
+{% set view_is_horizontal = view.params.is_horizontal or false %}
+{# * #}
+{# * macro - render format #}
+{# * #}
+{% macro render_format(field_name, field_path, field_schema, field_layout, format, is_in_card) %}
+{% set format_file = '__includes/display_' ~ format ~ '.html' %}
+{% if not exists(format_file) %}
+    {% set format_file = '__includes/display_*.html' %}
+{% endif %}
+{% include format_file %}
+{% endmacro %}
+{# * #}
+{# * macro - render object recrusively #}
+{# * NOTE: field_name/field_path/field_schema/field_layout/is_in_card may be used in __includes snippets, can not change their names #}
+{# * #}
+{% macro render_object(field_name, field_path, field_schema, field_layout, level, is_in_card) %}
+{# per row #}
+{% for row in field_layout %}
+<div class="row">
+{# per column #}
+{% for column in row %}
+    {% set column_name = column['name'] %}
+    {% set column_path = field_path~'.'~column_name %}
+    {% set column_schema = field_schema.properties[column_name] %}
+    {% set column_layout = column['rows'] %}
+    {# NOTE: column format overwrites schema format #}
+    {% set column_format = column.format or column_schema.format %}
+    {% set column_title = column.params.title if column.params.title else field_schema.title %}
+    {% set column_class = 'col-lg' if level == 0 else 'col' %}
+    <div class="{{ (column_class~'-'~column.span|string) if column.span else column_class }}">
+    {% if column_schema.type in ['object', 'array'] %}
+    <div class="{{ column_schema.type }}{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_schema.format }}">
+    {% endif %}
+    {# has format #}
+    {% if column_format %}
+        {% filter right(8) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
+    {# no format #}
+    {% else %}
+        {# blank column #}
+        {% if not column_name %}
+            {# pass #}
+        {# hyphen column #}
+        {% elif column_name == '-' %}
+            <hr class="mt-3 mb-4">
+        {# group column #}
+        {% elif column_name|float(-1) != -1 %}
+            {% if not is_in_card %}
+            <div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
+            {% endif %}
+            {% filter right(12) %}{{ render_object(field_name, field_path, field_schema, column_layout, level + 1, true) }}{% endfilter %}
+            {% if not is_in_card %}
+            </div></div>
+            {% endif %}
+        {# normal column #}
+        {% else %}
+            {# object #}
+            {% if column_schema.type == 'object' %}
+            {% if not is_in_card %}
+            <div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
+            {% endif %}
+            {{ '{%' }} set {{ column_name }} = {{ column_path }} {{ '%}' }}
+            {% filter right(12) %}{{ render_object(column_name, column_name, column_schema, column_layout, level + 1, true) }}{% endfilter %}
+            {% if not is_in_card %}
+            </div></div>
+            {% endif %}
+            {# array #}
+            {% elif column_schema.type == 'array' %}
+            <div class="array" name="{{ column_name }}" format="{{ column_format }}">
+                {% set item_schema = column_schema['items'] %}
+                {{ '{%' }} for {{ column_name }}_item in {{ path }} {{ '%}' }}
+                <div class="array-item" name="-">
+                    {% if item_schema.type == 'object' %}
+                    {% filter right(20) %}{{ render_object('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
+                    {% elif item_schema.type == 'array' %}
+                    UNSUPPORTED! array can not contains array!
+                    {% else %}
+                    {% filter right(20) %}{{ render_format('-', column_name~'_item', item_schema, column_layout, is_in_card) }}{% endfilter %}
+                    {% endif %}
+                </div>
+                {{ '{%' }} else {{ '%}' }}
+                    <div class="array-item">
+                        <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>No {{ item_schema.title }}！</div>
+                    </div>
+                {{ '{%' }} endfor {{ '%}' }}
+            </div>
+            {# simple #}
+            {% else %}
+            {% filter right(12) %}{{ render_format(column_name, column_path, column_schema, column_layout, is_in_card) }}{% endfilter %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {% if column_schema.type in ['object', 'array'] %}
+    </div>
+    {% endif %}
+    </div>
+{% endfor %}
+</div>
+{% endfor %}
+{% endmacro %}
+{# * #}
+{# * main #}
+{# * #}
+<div id="div-{{ view.name_kebab }}">
+    {% if view_is_card %}
+    <div class="card"><div class="card-body">
+    {% endif %}
+    {% filter right(4) %}{{ render_object(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
+    {% if view_is_card %}
+    </div></div>
+    {% endif %}
+</div>

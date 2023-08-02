@@ -35,7 +35,7 @@
                     {% if column_schema.is_relation %}
                         {# TODO: Support same related model with different layout #}
                         {% set related_model_name = inner_schema.py_type %}
-                        {% set projection = parse_layout_fields(column['rows']) %}
+                        {% set projection = (column['rows'] or inner_schema)|fields %}
                         {% if not projection %}
                             {% set projection = inner_schema['requires'] %}
                         {% endif %}
@@ -134,7 +134,7 @@ existing = {{ model.name }}.find_one(id_)
 if not existing:
     abort(404)
 #
-{% for field in parse_layout_fields(layout) %}
+{% for field in layout|fields %}
 existing.{{ field }} = req_{{ model.name_snake }}.{{ field }}
 {% endfor %}
 #

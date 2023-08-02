@@ -1,0 +1,37 @@
+{# display one feature using format: text,image #}
+{% set block = blocks['feature-1'] or {
+        'icon': 'DATA',
+        'title': '数据优先',
+        'subtitle': '数据结构决定了整个项目的业务逻辑，可配合项目模板生成种子项目',
+        'image': '/static/assets/img/illustrations/think.png',
+        'children': [
+            {'title': '支持数据结构的嵌套，并可通过优雅的方式支持数据结构之间的关系', 'subtitle': ''},
+            {'title': '支持内存以及主流数据库，包含MySQL以及MongoDB等', 'subtitle': ''},
+            {'title': '通过数据字段的格式指定前端组件的使用', 'subtitle': ''}
+        ]
+    } %}
+<section class="py-7">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-6">
+                <span class="badge badge-soft-primary mb-4">
+                    <span class="h5 text-uppercase">{{ block.icon }}</span>
+                </span>
+                <h2>{{ block.title }}</h2>
+                <p class="font-size-lg text-gray-700 mb-4">{{ block.subtitle }}</p>
+                <div class="row">
+                    {% for f in block.children %}
+                    <div class="col-12">
+                        <div class="d-flex">
+                            <p class="text-muted"><i class="fe fe-check mr-2"></i>{{ f.title }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div> <!-- / .row -->
+            </div>
+            <div class="col-12 col-md-6">
+                <img src="{{ block.image }}" alt="..." class="img-fluid">
+            </div>
+        </div> <!-- / .row -->
+    </div> <!-- / .container -->
+</section>

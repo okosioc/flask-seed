@@ -1,18 +1,25 @@
+{% from "__includes/macros.html" import display_inline, display_table_columns, display_list_group_items, generate_url with context %}
 {# * #}
 {# * global var to control code generation #}
+{# * - relations_needing_search is used in create/update/upcreate to assign out relation object #}
+{# * - relations_needing_async_load is used in read to load related objects asynchronously, e,g, load events for calendar format #}
 {# * #}
-{% set render_controls = namespace(formats=[], actions=[], is_read=false, is_form=false, is_query=false) %}
+{% set render_controls = namespace(formats=[], actions=[], is_read=false, is_form=false, is_query=false, relations_needing_search=[], relations_needing_async_load=[]) %}
 {# * #}
 {# * macro - iterate layout to get needed relations and etc, param layout is rows, param schema is alway a object's schema #}
 {# * #}
 {% macro iterate_layout(rows, schema) %}
     {% for row in rows %}
         {% for column in row %}
+            {% set column_name = column['name'] %}
+            {% set column_schema = schema.properties[column_name] or {} %}
+            {% set column_layout = column['rows'] %}
+            {# column format overwrites schema format #}
+            {% set column_format = column.format or column_schema.format %}
             {# skip summary format, as summmary is only for displaying which do not impact any complex logic #}
-            {% if column['format'] == 'summary' %}
+            {% if column_format == 'summary' %}
                 {# pass #}
             {% else %}
-                {% set column_name = column['name'] %}
                 {# blank column #}
                 {% if not column_name %}
                     {# pass #}
@@ -21,7 +28,7 @@
                     {# pass #}
                 {# group column #}
                 {% elif column_name|float(-1) != -1 %}
-                    {{- iterate_layout(column['rows'], schema) -}}
+                    {{- iterate_layout(column_layout, schema) -}}
                 {# normal column #}
                 {% else %}
                     {% set column_schema = schema.properties[column_name] %}
@@ -29,7 +36,7 @@
                     {% if render_controls.is_read %}
                         {% set necessary_formats = ['image', 'calendar', 'chart'] %}
                     {% elif render_controls.is_form %}
-                        {% set necessary_formats = ['image', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
+                        {% set necessary_formats = ['image', 'avatar', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
                     {% elif render_controls.is_query %}
                         {% set necessary_formats = ['date', 'datetime'] %}
                     {% endif %}
@@ -42,8 +49,30 @@
                     {% elif column_schema.type == 'array' %}
                         {% set inner_schema = column_schema['items'] if column_schema['items']['type'] == 'object' else none %}
                     {% endif %}
-                    {% if inner_schema %}
-                        {{- iterate_layout(column['rows'], inner_schema) -}}
+                    {# relation logic #}
+                    {% if column_schema.is_relation %}
+                        {# TODO: Support same related model with different layout #}
+                        {% set related_model_name = inner_schema.py_type %}
+                        {% set projection = (column_layout or inner_schema)|fields %}
+                        {% if not projection %}
+                            {% set projection = inner_schema['requires'] %}
+                        {% endif %}
+                        {# relations_needing_search is used in action form when searching related models #}
+                        {% if column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
+                            {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [related_model_name] %}
+                            {% set render_controls.relations_projection_needing_search = projection %}
+                        {% endif %}
+                        {# relations_needing_async_load is used in action read #}
+                        {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
+                            {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [related_model_name] %}
+                            {% set render_controls.relations_projection_needing_async_load = projection %}
+                        {% endif %}
+                    {# object/array/simple #}
+                    {% else %}
+                        {# iterate inner layout #}
+                        {% if inner_schema %}
+                            {{- iterate_layout(column_layout, inner_schema) -}}
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -91,7 +120,7 @@
 } {{ '%}' }}
 {{ '{% block title %}{{ title }}{% endblock %}' }}
 {{ '{% block style %}' }}
-{% if 'image' in render_controls.formats or 'file' in render_controls.formats %}
+{% if 'image' in render_controls.formats or 'avatar' in render_controls.formats or 'file' in render_controls.formats %}
 <link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
 {% endif %}
 {% if 'calendar' in render_controls.formats %}
@@ -102,10 +131,14 @@
 {% endif %}
 {{ '{% endblock %}' }}
 {{ '{% block content %}' }}
+{% if render_controls.is_form %}
+{% include '__includes/form.html' %}
+{% else %}
 {% include '__includes/'~action~'.html' %}
+{% endif %}
 {{ '{% endblock %}' }}
 {{ '{% block script %}' }}
-{% if 'image' in render_controls.formats or 'file' in render_controls.formats %}
+{% if 'image' in render_controls.formats or 'avatar' in render_controls.formats or 'file' in render_controls.formats %}
 <script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
 {% if render_controls.is_form %}
 <script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
@@ -132,13 +165,187 @@
 {% if 'select' in render_controls.formats %}
 <script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
 {% endif %}
+{# create/update/upcreate #}
 {% if render_controls.is_form %}
 <script src="{{ '{{' }} base() {{ '}}' }}/js/form.min.js?{{ '{{' }} version() {{ '}}' }}"></script>
+{% for relation in render_controls.relations_needing_search %}
+{% set related_model = models[relation] %}
+{% set related_model_schema = related_model.schema %}
+{% set title_field_name = related_model_schema|field('title|name|\\w*name') %}
+<div class="modal fade search-modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+     id="search-{{ related_model.name_kebab_plural }}"
+     relation-url="{{ '{{' }} request.path {{ '}}' }}/search-{{ related_model.name_kebab_plural }}"
+     relation-key="{{ related_model.name_snake_plural }}"
+     relation-title="{{ title_field_name }}"
+     relation-id="{{ related_model_schema.id_name }}">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fe fe-search mr-2"></i>添加{{ related_model_schema.title }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pb-0">
+                <div class="form-search">
+                    <div class="form-row justify-content-center">
+                        {% for f in related_model_schema.searchables %}
+                        {# Do not support nested field, and f may contains comparator #}
+                        {% set rf =  f %}
+                        {% set comparator = 'eq' %}
+                        {% if '__' in rf %}
+                            {% set tokens = f|split('__') %}
+                            {% set rf = tokens[0] %}
+                            {% set comparator = tokens[1] %}
+                        {% endif %}
+                        {% set fs = related_model_schema.properties[rf] %}
+                        {% set path = 'search.' + f %}
+                        <div class="form-group col-sm{{ '-auto' if fs.enum or  fs.type in ['integer', 'number', 'boolean', 'date'] }} mb-4">
+                            <label class="sr-only">{{ fs.title }}</label>
+                            {% if fs.enum %}
+                            <select class="custom-select" name="{{ path }}" >
+                                <option value="">请选择{{ fs.title }}...</option>
+                                {{ '{%' }} for value, label in enum_titles('{{ fs.py_type }}')|items {{ '%}' }}
+                                <option value="{{ '{{' }} value {{ '}}' }}">{{ '{{' }} label {{ '}}' }}</option>
+                                {{ '{%' }} endfor {{ '%}' }}
+                            </select>
+                            {% elif fs.type == 'boolean' %}
+                            <select class="custom-select" name="{{ path }}">
+                                <option value="">请选择{{ fs.title }}...</option>
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </select>
+                            {% elif fs.type in ['integer', 'number'] %}
+                            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                                   value=""
+                                   name="{{ path }}">
+                            {% elif fs.format in ['date', 'datetime'] %}
+                            <div class="input-group input-group-merge">
+                                <input type="text" class="form-control form-control-prepended date" placeholder="{{ fs.title }}"
+                                       value=""
+                                       name="{{ path }}">
+                                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-calendar"></span></div></div>
+                            </div>
+                            {% elif comparator == 'like' %}
+                            <div class="input-group input-group-merge">
+                                <input type="text" class="form-control form-control-prepended" placeholder="{{ fs.title }}"
+                                       value=""
+                                       name="{{ path }}">
+                                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-search"></span></div></div>
+                            </div>
+                            {% else %}
+                            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                                   value=""
+                                   name="{{ path }}">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <div class="col-sm-auto mb-4">
+                            <button type="button" class="btn btn-primary btn-default" onclick="relation_action_search($(this));">查找</button>
+                            <button type="button" class="btn btn-light btn-default" onclick="relation_action_search_reset($(this));">重置</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mx-n4">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="list-checkbox-all custom-control-input" id="checkbox-all-{{ related_model.name_kebab_plural }}" onchange="relation_action_checkbox_changed($(this));">
+                                        <label class="custom-control-label" for="checkbox-all-{{ related_model.name_kebab_plural }}"></label>
+                                    </div>
+                                </th>
+                                {% for f in render_controls.relations_projection_needing_search %}
+                                {% set fs = related_model_schema.properties[f] %}
+                                <th>{{ fs.title }}{{ '(' + fs.unit + ')' if fs.unit }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ '{%' }} for {{ related_model.name_snake }} in [new_model('{{ related_model_schema.py_type }}')] {{ '%}' }}
+                            <tr class="template" name="-'">
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="list-checkbox custom-control-input" onchange="relation_action_checkbox_changed($(this));">
+                                        <label class="custom-control-label"></label>
+                                    </div>
+                                </td>
+                                {% filter right(32) %}{{ display_table_columns(related_model.name_snake, related_model_schema) }}{% endfilter %}
+                            </tr>
+                            {{ '{%' }} endfor {{ '%}' }}
+                            <tr style=""><td colspan="{{ render_controls.relations_projection_needing_search|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ related_model_schema.title }}！</div></td></tr>
+                        </tbody>
+                    </table>
+                    <ul class="pagination border-top mb-0" style="padding:1rem;display:none;"></ul>
+                </div>
+            </div>
+            <div class="modal-footer py-3">
+                <a class="btn btn-light mr-auto"><i class="fe fe-check-square mr-2"></i>选择了<span class="span-checked mx-1 text-primary">0</span>个{{ related_model_schema.title }}</a>
+                <button type="button" class="btn btn-light" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="relation_action_choosed_return($(this));" message="请至少选择一个{{ related_model_schema.title }}！">选择</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{ '{%' }} if {{ related_model.name_snake_plural }} {{ '%}' }}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        // render preload data in above table
+        relation_action_render_results("{{ related_model.name_snake_plural }}", {{ '{{' }} {{ related_model.name_snake_plural }}|tojson {{ '}}' }}, {{ '{{' }} {{ related_model.name_snake_plural }}_pagination|tojson {{ '}}' }});
+    });
+</script>
+{{ '{%' }} endif {{ '%}' }}
+{% endfor %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function(){
         //
         install_form();
     });
+    function {{ view.name_snake }}_{{ action }}(btn){
+        if (btn.is(".doing")) {
+            return;
+        }
+        var msg = "确定要保存么?";
+        var con = window.confirm(msg);
+        if (!con) {
+            return false;
+        }
+        var param = process_form($("#{{ view.name_kebab }}"));
+        if (!param["valid"]) {
+            showError('检测到不正确的数据, 请更正后重试!');
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        {{ '{%' }} for arg in args {{ '%}' }}
+        param["{{ model.name_snake }}.{{ '{{' }} arg[0] {{ '}}' }}"] = "{{ '{{' }} arg[1] {{ '}}' }}";
+        {{ '{%' }} endfor {{ '%}' }}
+        //
+        var url = "{{ '{{' }} request.path {{ '}}' }}/{{ view.name }}-{{ action }}?id={{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} or '' {{ '}}' }}";
+        $.post(url, param, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+                showInfo('Refreshing...');
+                setTimeout(function () {
+                    {% set target = generate_url(model.schema.py_type, none, 'read') %}
+                    {% if target == 'javascript:;' %}
+                    location.href = "{{ '{{' }} request.path {{ '}}' }}?id=" + result.id;
+                    {% else %}
+                    location.href = "{{ target }}?id=" + result.id;
+                    {% endif %}
+                }, 2000);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
     function action(btn) {
         if (btn.is(".doing")) {
             return;
@@ -164,6 +371,28 @@
             btn[method](oldLabel);
         }, "json");
     }
+</script>
+{# read #}
+{% elif render_controls.is_read %}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        //
+    });
+{% for relation in render_controls.relations_needing_async_load %}
+{% set related_model = models[relation] %}
+{% set related_model_schema = related_model.schema %}
+    function load_{{ related_model.name_snake_plural }}(params, successCallback){
+        var url = "{{ '{{' }} request.path {{ '}}' }}/load-{{ related_model.name_kebab_plural }}";
+        // Post
+        $.post(url, params, function (result) {
+            if (result.error == 0) {
+                successCallback(result.{{ related_model.name_snake_plural }});
+            } else {
+                showError("读取{{ related_model_schema.title }}时出错了!");
+            }
+        }, "json");
+    }
+{% endfor %}
 </script>
 {% endif %}
 {{ '{% endblock %}' }}

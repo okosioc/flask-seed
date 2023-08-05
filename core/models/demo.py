@@ -38,9 +38,9 @@ class DemoTeam(CacheModel):
     __icon__ = 'users'
     __title__ = '团队'
     #
-    __views0__ = {
+    __views__ = {
         'www://demo/team-profile': '''#!update?extends=layout-dash-demo&title=团队设置
-            1#summary4,    2#8      
+            1#summary4,    2?title=团队基本信息#8      
               logo           name   
               name           code   
               status         remarks
@@ -106,9 +106,9 @@ class DemoUser(CacheModel, UserMixin):
     __icon__ = 'user'
     __title__ = '用户'
     #
-    __views0__ = {
+    __views__ = {
         'www://demo/user-profile': '''#!update?extends=layout-dash-demo&title=用户设置
-            1#summary4,    0#8                                           
+            1#summary4,    0?title=用户基本信息#8                                           
               avatar         name  
               name           phone                                                  
               status         intro                                                 

@@ -30,7 +30,7 @@
 {% else %}
 {# display each for simple array #}
 {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
-{{ display_inline('-', field_name~'_item', field_schema['items']) }}
+{{ display_inline('-', field_name~'_item', field_schema['items']) -}}
 {{ '{%' }} endfor {{ '%}' }}
 {% endif %}
 {% else %}
@@ -50,12 +50,12 @@
 {% elif field_schema.format in ['avatar'] %}
 <div class="avatar avatar-sm">
     <img src="{{ '{{' }} {{ field_path }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ field_path }} {{ '}}' }}">
-    {% if fallback %}{{ fallback }}{% endif %}
+    {% filter right(4) %}{{ fallback }}{% endfilter %}
 </div>
 {% elif field_schema.format in ['image'] %}
 <div class="avatar avatar-sm avatar-4by3">
     <img src="{{ '{{' }} {{ field_path }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded {{ '{{' }} 'd-none' if not {{ field_path }} {{ '}}' }}">
-    {% if fallback %}{{ fallback }}{% endif %}
+    {% filter right(4) %}{{ fallback }}{% endfilter %}
 </div>
 {% elif field_schema.format in ['link'] %}
 <a href="{{ '{{' }} {{ field_path }} or 'javascript:;' {{ '}}' }}" target="_blank"><i class="fe fe-external-link mr-2"></i></a>
@@ -76,7 +76,8 @@
 {% set field_enum = field_schema['items'].py_type if field_schema.type == 'array' and field_schema['items'].enum else (field_schema.py_type if field_schema.enum else '') %}
 {% set fallback = none %}
 {% if field_schema.format in ['image', 'avatar'] %}
-    {% set fallback %}<span fallback={{ title_field_name }} class="avatar-title bg-primary-soft rounded{{ '-circle' if field_schema.format == 'avatar' }} text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ row_path~'.'~title_field_name }}|first|upper if {{ row_path~'.'~title_field_name }} is not none {{ '}}' }}</span>{% endset %}
+    {% set fallback %}<span fallback={{ title_field_name }} class="avatar-title bg-primary-soft rounded{{ '-circle' if field_schema.format == 'avatar' }} text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ row_path~'.'~title_field_name }}|first|upper if {{ row_path~'.'~title_field_name }} is not none {{ '}}' }}</span>
+    {% endset %}
 {% endif %}
 <td name="{{ field_name }}" format="{{ field_schema.format }}" enum="{{ field_enum }}">
     {% if row_target and loop.first and field_schema.format != 'link' %}
@@ -101,7 +102,8 @@
 {% set field_enum = field_schema['items'].py_type if field_schema.type == 'array' and field_schema['items'].enum else (field_schema.py_type if field_schema.enum else '') %}
 {% set fallback = none %}
 {% if field_schema.format in ['image', 'avatar'] %}
-    {% set fallback %}<span fallback={{ title_field_name }} class="avatar-title bg-primary-soft rounded{{ '-circle' if field_schema.format == 'avatar' }} text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ item_path~'.'~title_field_name }}|first|upper if {{ item_path~'.'~title_field_name }} is not none {{ '}}' }}</span>{% endset %}
+    {% set fallback %}<span fallback={{ title_field_name }} class="avatar-title bg-primary-soft rounded{{ '-circle' if field_schema.format == 'avatar' }} text-primary {{ '{{' }} 'd-none' if {{ field_path }} {{ '}}' }}">{{ '{{' }} {{ item_path~'.'~title_field_name }}|first|upper if {{ item_path~'.'~title_field_name }} is not none {{ '}}' }}</span>
+    {% endset %}
 {% endif %}
 <div class="list-group-item">
     <div class="row align-items-center">

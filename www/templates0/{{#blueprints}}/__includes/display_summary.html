@@ -61,7 +61,7 @@
 {# 其他字段简单罗列 #}
 <div class="list-group list-group-flush border-top">
     {% set excludes = [first_field_name] if first_field_rendered else [] %}
-    {{ display_list_group_items(field_schema, field_path, excludes)|indent(4) }}
+    {% filter right(4) %}{{ display_list_group_items(field_path, field_schema, field_layout, excludes) }}{% endfilter %}
 </div>
 {% else %}
 UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!

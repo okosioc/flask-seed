@@ -10,14 +10,133 @@
 {% block style %}
 {% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg-4">
-        1
-    </div>
-    <div class="col-lg-8">
-        members
+<div id="div-team-members">
+    <div class="object" name="demo_team">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="group" name="1" format="summary">
+                    <div class="card"><div class="card-body">
+                    <div class="row text-center">
+                        <div class="col">
+                            <div name="logo" format="avatar">
+                                <a href="javascript:;" class="avatar avatar-xl mt-2 mb-4">
+                                    <img src="{{ demo_team.logo or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_team.logo }}">
+                                    <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if demo_team.logo }}">{{ demo_team.name|first|upper if demo_team.name is not none }}</span>
+                                </a>
+                            </div>
+                            <div class="mb-4">
+                                <span class="h3 text-primary" name="name" foramt="text">{{ demo_team.name or '-' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group list-group-flush border-top">
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <span><i class="fe fe-type mr-2"></i>团队名称</span>
+                                </div>
+                                <div class="col-auto text-muted" name="name" format="text" enum="">
+                                    {{ demo_team.name or '-' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <span><i class="fe fe-circle mr-2"></i>团队状态</span>
+                                </div>
+                                <div class="col-auto text-muted" name="status" format="select" enum="DemoTeamStatus">
+                                    {% if demo_team.status is not none %}<span class="text-{{ demo_team.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoTeamStatus')[demo_team.status] }}{% else %}-{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <span><i class="fe fe-users mr-2"></i>团队成员</span>
+                                </div>
+                                <div class="col-auto text-muted" name="members" format="table" enum="">
+                                    {{ demo_team.members|length }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                                </div>
+                                <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                                    {{ demo_team.create_time|datetime if demo_team.create_time is not none else '-' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div></div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="array relation" name="members" format="table">
+                    <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-users mr-2"></i>团队成员</h4></div><div class="table-responsive">
+                    <table class="table table-striped ">
+                        <thead>
+                            <tr>
+                                <th>头像</th>
+                                <th>用户名</th>
+                                <th>用户状态</th>
+                                <th>用户角色</th>
+                                <th>登录邮箱</th>
+                                <th>手机号</th>
+                                <th>加入团队的时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for members_item in demo_team.members %}
+                            <tr class="" name="{{ loop.index0 }}">
+                                <td name="avatar" format="avatar" enum="">
+                                    <a href="javascript:;">
+                                    <div class="avatar avatar-sm">
+                                        <img src="{{ members_item.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not members_item.avatar }}">
+                                        <span fallback=name class="avatar-title bg-primary-soft rounded-circle text-primary {{ 'd-none' if members_item.avatar }}">{{ members_item.name|first|upper if members_item.name is not none }}</span>
+                                    </div>
+                                    </a>
+                                </td>
+                                <td name="name" format="text" enum="">
+                                    {{ members_item.name or '-' }}
+                                </td>
+                                <td name="status" format="select" enum="DemoUserStatus">
+                                    {% if members_item.status is not none %}<span class="text-{{ members_item.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoUserStatus')[members_item.status] }}{% else %}-{% endif %}
+                                </td>
+                                <td name="roles" format="select" enum="DemoUserRole">
+                                    {% for roles_item in members_item.roles %}
+                                    {% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td name="email" format="text" enum="">
+                                    {{ members_item.email or '-' }}
+                                </td>
+                                <td name="phone" format="text" enum="">
+                                    {{ members_item.phone or '-' }}
+                                </td>
+                                <td name="team_join_time" format="datetime" enum="">
+                                    {{ members_item.team_join_time|datetime if members_item.team_join_time is not none else '-' }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="8"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 {% block script %}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        //
+    });
+</script>
 {% endblock %}

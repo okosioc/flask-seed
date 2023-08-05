@@ -4,14 +4,23 @@
 {% set view_is_card = view.params.is_card or false %}
 {% set view_is_horizontal = view.params.is_horizontal or false %}
 {# * #}
-{# * macro - render format #}
+{# * macro - render field who is relation or format #}
 {# * #}
 {% macro render_format(field_name, field_path, field_schema, field_layout, format, is_in_card) %}
-{% set format_file = '__includes/display_' ~ format ~ '.html' %}
-{% if not exists(format_file) %}
-    {% set format_file = '__includes/display_*.html' %}
+{% set format_file = '__includes/input_' ~ format ~ '.html' %}
+{% if format == 'summary' %}
+    {% set format_file = '__includes/display_summary.html' %}
+{% elif field_schema.is_relation %}
+    {# relations w/o format or in select format load related models directly, while media/timeline/modal formats support async search #}
+    {% if not format or format in ['select'] %}
+        {% set format_file = '__includes/input_relation.html' %}
+    {% endif %}
 {% endif %}
+{% if exists(format_file) %}
 {% include format_file %}
+{% else %}
+UNSUPPORTED! input_{{ format }}.html does not exist!
+{% endif %}
 {% endmacro %}
 {# * #}
 {# * macro - render object recrusively #}
@@ -40,7 +49,7 @@
         <hr class="mt-3 mb-4">
     {# group column #}
     {% elif column_name|float(-1) != -1 %}
-        <div class="group" name="{{ column_name }}" format="{{ column_format }}">
+        <fieldset class="group" name="{{ column_name }}" format="{{ column_format }}">
         {# w/ format, i.e, summary #}
         {% if column_format %}
             {% filter right(12) %}{{ render_format(field_name, field_path, field_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
@@ -54,13 +63,13 @@
             </div></div>
             {% endif %}
         {% endif %}
-        </div>
+        </fieldset>
     {# make sure column_schema is valid #}
     {% elif not column_schema %}
         UNSUPPORTED! invalid column name: {{ column_name }}!
     {# object column #}
     {% elif column_schema.type == 'object' %}
-        <div class="object{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_format }}">
+        <fieldset class="object{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_format }}">
         {# w/ format #}
         {% if column_format %}
             {% filter right(12) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
@@ -75,10 +84,10 @@
             </div></div>
             {% endif %}
         {% endif %}
-        </div>
+        </fieldset>
     {# array column #}
     {% elif column_schema.type == 'array' %}
-        <div class="array{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_format }}">
+        <fieldset class="array{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_format }}">
         {# w/ format #}
         {% if column_format %}
             {% filter right(12) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
@@ -86,25 +95,34 @@
         {% else %}
             {% set item_schema = column_schema['items'] %}
             <div class="array-items">
-                {{ '{%' }} for {{ column_name }}_item in {{ column_path }} {{ '%}' }}
-                <div class="array-item {{ item_schema.type }}" name="-" format="{{ item_schema.format }}">
-                    {# simple types always have a format, this also handle objects that have format #}
-                    {% if item_schema.format %}
-                    {% filter right(20) %}{{ render_format('-', column_name~'_item', item_schema, column_layout, is_in_card) }}{% endfilter %}
-                    {% elif item_schema.type == 'object' %}
-                    {% filter right(20) %}{{ render_object('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
-                    {% else %}
-                    UNSUPPORTED! {{ item_schema.type }} with format {{ item_schema.format }} can not in an array!
-                    {% endif %}
-                </div>
-                {{ '{%' }} else {{ '%}' }}
-                <div class="array-item">
-                    <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div>
+                {{ '{%' }} for {{ column_name }}_item in {{ column_path }} + [new_model('{{ item_schema.py_type }}')] {{ '%}' }}
+                <div class="array-item{{ '{{' }} ' template' if loop.last {{ '}}' }}" name="-" format="{{ item_schema.format }}">
+                    <div class="row">
+                        <div class="col">
+                        {# simple types always have a format, this also handle objects that have format #}
+                        {% if item_schema.format %}
+                            {% filter right(28) %}{{ render_format('-', column_name~'_item', item_schema, column_layout, is_in_card) }}{% endfilter %}
+                        {% elif item_schema.type == 'object' %}
+                            {% filter right(28) %}{{ render_object('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
+                        {% else %}
+                            UNSUPPORTED! {{ item_schema.type }} with format {{ item_schema.format }} can not in an array!
+                        {% endif %}
+                        </div>
+                        <div class="col-auto pl-0">
+                            <a href="javascript:;" class="text-muted" onclick="array_action_delete($(this));" data-title="{{ item_schema.title }}">
+                                <i class="fe fe-x-circle"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 {{ '{%' }} endfor {{ '%}' }}
+                <div class="array-item p-0" style="{{ '{{' }} 'display:none' if {{ column_path }}  {{ '}}' }}"><div class="alert alert-light mb-4"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></div>
+            </div>
+            <div class="array-actions mb-4">
+                <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ item_schema.title }}</a>
             </div>
         {% endif %}
-        </div>
+        </fieldset>
     {# simple column #}
     {% else %}
         {% filter right(8) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
@@ -121,8 +139,19 @@
     {% if view_is_card %}
     <div class="card"><div class="card-body">
     {% endif %}
-    <div class="object" name="{{ model.name_snake }}">
-        {% filter right(8) %}{{ render_object(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
+    <form id="{{ view.name_kebab }}" class="form-editor needs-validation" novalidate method="post">
+        <fieldset class="object" name="{{ model.name_snake }}">
+            {% filter right(12) %}{{ render_object(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
+        </fieldset>
+    </form>
+    <div class="form-actions mb-4">
+        <a class="btn btn-primary mr-2" onclick="{{ view.name_snake }}_{{ action }}($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        {% set target = generate_url(model.schema.py_type, model.name_snake, ['read', 'query']) %}
+        {% if target != 'javascript:;' %}
+        {{ '{%' }} if {{ model.name_snake }}.{{ model_schema.id_name }} {{ '%}' }}
+        <a href="{{ target }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        {{ '{%' }} endif {{ '%}' }}
+        {% endif %}
     </div>
     {% if view_is_card %}
     </div></div>

@@ -8,11 +8,15 @@
 {% macro iterate_layout(rows, schema) %}
     {% for row in rows %}
         {% for column in row %}
-            {# skip summary format, as summmary is only for displaying which do not impact any preloading/searching/asyncloading logic #}
-            {% if column['format'] == 'summary' %}
+            {% set column_name = column['name'] %}
+            {% set column_schema = schema.properties[column_name] or {} %}
+            {% set column_layout = column['rows'] %}
+            {# column format overwrites schema format #}
+            {% set column_format = column.format or column_schema.format %}
+            {# skip summary format, as summmary is only for displaying which do not impact any complex logic #}
+            {% if column_format == 'summary' %}
                 {# pass #}
             {% else %}
-                {% set column_name = column['name'] %}
                 {# blank column #}
                 {% if not column_name %}
                     {# pass #}
@@ -21,7 +25,7 @@
                     {# pass #}
                 {# group column #}
                 {% elif column_name|float(-1) != -1 %}
-                    {{- iterate_layout(column['rows'], schema) -}}
+                    {{- iterate_layout(column_layout, schema) -}}
                 {# normal column #}
                 {% else %}
                     {% set column_schema = schema.properties[column_name] %}
@@ -35,7 +39,7 @@
                     {% if column_schema.is_relation %}
                         {# TODO: Support same related model with different layout #}
                         {% set related_model_name = inner_schema.py_type %}
-                        {% set projection = (column['rows'] or inner_schema)|fields %}
+                        {% set projection = (column_layout or inner_schema)|fields %}
                         {% if not projection %}
                             {% set projection = inner_schema['requires'] %}
                         {% endif %}
@@ -56,8 +60,9 @@
                         {% endif %}
                     {# object/array/simple #}
                     {% else %}
+                        {# iterate inner layout #}
                         {% if inner_schema %}
-                            {{- iterate_layout(column['rows'], inner_schema) -}}
+                            {{- iterate_layout(column_layout, inner_schema) -}}
                         {% endif %}
                     {% endif %}
                 {% endif %}
@@ -154,8 +159,8 @@ from flask_login import current_user
 
 from py3seed import populate_model, populate_search
 from .common import get_id
-from www.tools import auth_permission, admin_permission
-from core.models import {{ blueprint.views|map(attribute='model')|map(attribute='name')|join(', ') }}
+from www.tools import auth_permission, admin_permission, prepare_demo_data
+from core.models import {{ blueprint.views|map(attribute='model')|map(attribute='name')|unique|join(', ') }}
 
 {{ blueprint.name_snake }} = Blueprint('{{ blueprint.name_snake }}', __name__)
 

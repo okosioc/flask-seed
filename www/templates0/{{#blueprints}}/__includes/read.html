@@ -105,7 +105,7 @@
             </div>
         {% endif %}
         </div>
-    {# simple column #}
+    {# simple column, always having a format #}
     {% else %}
         {% filter right(8) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
     {% endif %}

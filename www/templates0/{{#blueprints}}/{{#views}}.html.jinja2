@@ -19,60 +19,47 @@
             {# skip summary format, as summmary is only for displaying which do not impact any complex logic #}
             {% if column_format == 'summary' %}
                 {# pass #}
-            {% else %}
-                {# blank column #}
-                {% if not column_name %}
-                    {# pass #}
-                {# hyphen column #}
-                {% elif column_name == '-' %}
-                    {# pass #}
-                {# group column #}
-                {% elif column_name|float(-1) != -1 %}
-                    {{- iterate_layout(column_layout, schema) -}}
-                {# normal column #}
+            {# group column #}
+            {% elif column_name|float(-1) != -1 %}
+                {{- iterate_layout(column_layout, schema) -}}
+            {# normal column #}
+            {% elif column_schema %}
+                {% set necessary_formats = [] %}
+                {% if render_controls.is_read %}
+                    {% set necessary_formats = ['image', 'calendar', 'chart'] %}
+                {% elif render_controls.is_form %}
+                    {% set necessary_formats = ['image', 'avatar', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
+                {% elif render_controls.is_query %}
+                    {% set necessary_formats = ['date', 'datetime'] %}
+                {% endif %}
+                {% if column_schema.format in necessary_formats and column_schema.format not in render_controls.formats %}
+                    {% set render_controls.formats = render_controls.formats + [column_schema.format] %}
+                {% endif %}
+                {% set inner_schema = none %}
+                {% if column_schema.type == 'object' %}
+                    {% set inner_schema = column_schema %}
+                {% elif column_schema.type == 'array' %}
+                    {% set inner_schema = column_schema['items'] if column_schema['items']['type'] == 'object' else none %}
+                {% endif %}
+                {# relation logic #}
+                {% if column_schema.is_relation %}
+                    {% set related_model_name = inner_schema.py_type %}
+                    {% set projection = (column_layout or inner_schema)|fields %}
+                    {# relations_needing_search is used in action form when searching related models #}
+                    {% if column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
+                        {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [related_model_name] %}
+                        {% set render_controls.relations_projection_needing_search = projection %}
+                    {% endif %}
+                    {# relations_needing_async_load is used in action read #}
+                    {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
+                        {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [related_model_name] %}
+                        {% set render_controls.relations_projection_needing_async_load = projection %}
+                    {% endif %}
+                {# object/array/simple #}
                 {% else %}
-                    {% set column_schema = schema.properties[column_name] %}
-                    {% set necessary_formats = [] %}
-                    {% if render_controls.is_read %}
-                        {% set necessary_formats = ['image', 'calendar', 'chart'] %}
-                    {% elif render_controls.is_form %}
-                        {% set necessary_formats = ['image', 'avatar', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
-                    {% elif render_controls.is_query %}
-                        {% set necessary_formats = ['date', 'datetime'] %}
-                    {% endif %}
-                    {% if column_schema.format in necessary_formats and column_schema.format not in render_controls.formats %}
-                        {% set render_controls.formats = render_controls.formats + [column_schema.format] %}
-                    {% endif %}
-                    {% set inner_schema = none %}
-                    {% if column_schema.type == 'object' %}
-                        {% set inner_schema = column_schema %}
-                    {% elif column_schema.type == 'array' %}
-                        {% set inner_schema = column_schema['items'] if column_schema['items']['type'] == 'object' else none %}
-                    {% endif %}
-                    {# relation logic #}
-                    {% if column_schema.is_relation %}
-                        {# TODO: Support same related model with different layout #}
-                        {% set related_model_name = inner_schema.py_type %}
-                        {% set projection = (column_layout or inner_schema)|fields %}
-                        {% if not projection %}
-                            {% set projection = inner_schema['requires'] %}
-                        {% endif %}
-                        {# relations_needing_search is used in action form when searching related models #}
-                        {% if column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
-                            {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [related_model_name] %}
-                            {% set render_controls.relations_projection_needing_search = projection %}
-                        {% endif %}
-                        {# relations_needing_async_load is used in action read #}
-                        {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
-                            {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [related_model_name] %}
-                            {% set render_controls.relations_projection_needing_async_load = projection %}
-                        {% endif %}
-                    {# object/array/simple #}
-                    {% else %}
-                        {# iterate inner layout #}
-                        {% if inner_schema %}
-                            {{- iterate_layout(column_layout, inner_schema) -}}
-                        {% endif %}
+                    {# iterate inner layout #}
+                    {% if inner_schema %}
+                        {{- iterate_layout(column_layout, inner_schema) -}}
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -326,7 +313,7 @@
         param["{{ model.name_snake }}.{{ '{{' }} arg[0] {{ '}}' }}"] = "{{ '{{' }} arg[1] {{ '}}' }}";
         {{ '{%' }} endfor {{ '%}' }}
         //
-        var url = "{{ '{{' }} request.path {{ '}}' }}/{{ view.name }}-{{ action }}?id={{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} or '' {{ '}}' }}";
+        var url = "/{{ blueprint.name }}/{{ view.name }}-{{ action }}?id={{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} or '' {{ '}}' }}";
         $.post(url, param, function (result) {
             if (result.error == 0) {
                 showSuccess(result.message);
@@ -382,7 +369,7 @@
 {% set related_model = models[relation] %}
 {% set related_model_schema = related_model.schema %}
     function load_{{ related_model.name_snake_plural }}(params, successCallback){
-        var url = "{{ '{{' }} request.path {{ '}}' }}/load-{{ related_model.name_kebab_plural }}";
+        var url = "/{{ blueprint.name }}/load-{{ related_model.name_kebab_plural }}";
         // Post
         $.post(url, params, function (result) {
             if (result.error == 0) {

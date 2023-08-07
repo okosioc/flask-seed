@@ -207,7 +207,7 @@
         param["demo_user.{{ arg[0] }}"] = "{{ arg[1] }}";
         {% endfor %}
         //
-        var url = "{{ request.path }}/user-profile-update?id={{ demo_user.id or '' }}";
+        var url = "/demo/user-profile-update?id={{ demo_user.id or '' }}";
         $.post(url, param, function (result) {
             if (result.error == 0) {
                 showSuccess(result.message);

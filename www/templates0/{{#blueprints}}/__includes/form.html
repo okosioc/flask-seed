@@ -4,22 +4,29 @@
 {% set view_is_card = view.params.is_card or false %}
 {% set view_is_horizontal = view.params.is_horizontal or false %}
 {# * #}
-{# * macro - render field who is relation or format #}
+{# * macro - render format #}
 {# * #}
 {% macro render_format(field_name, field_path, field_schema, field_layout, format, is_in_card) %}
 {% set format_file = '__includes/input_' ~ format ~ '.html' %}
 {% if format == 'summary' %}
     {% set format_file = '__includes/display_summary.html' %}
-{% elif field_schema.is_relation %}
-    {# relations w/o format or in select format load related models directly, while media/timeline/modal formats support async search #}
-    {% if not format or format in ['select'] %}
-        {% set format_file = '__includes/input_relation.html' %}
-    {% endif %}
 {% endif %}
 {% if exists(format_file) %}
 {% include format_file %}
 {% else %}
 UNSUPPORTED! input_{{ format }}.html does not exist!
+{% endif %}
+{% endmacro %}
+{# * #}
+{# * macro - render relation #}
+{# * #}
+{% macro render_relation(field_name, field_path, field_schema, field_layout, format, is_in_card) %}
+{% if field_schema.is_back_relation %}
+UNSUPPORTED! back relation {{ field_name }} is non-editable!
+{% elif format in ['media', 'timeline', 'modal'] %}
+{% include '__includes/input_' ~ format ~ '.html' %}
+{% else %}
+{% include '__includes/input_relation.html' %}
 {% endif %}
 {% endmacro %}
 {# * #}
@@ -70,8 +77,11 @@ UNSUPPORTED! input_{{ format }}.html does not exist!
     {# object column #}
     {% elif column_schema.type == 'object' %}
         <fieldset class="object{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_format }}">
+        {# is relation #}
+        {% if column_schema.is_relation %}
+            {% filter right(12) %}{{ render_relation(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/ format #}
-        {% if column_format %}
+        {% elif column_format %}
             {% filter right(12) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/o format #}
         {% else %}
@@ -88,8 +98,11 @@ UNSUPPORTED! input_{{ format }}.html does not exist!
     {# array column #}
     {% elif column_schema.type == 'array' %}
         <fieldset class="array{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_format }}">
+        {# is relation #}
+        {% if column_schema.is_relation %}
+            {% filter right(12) %}{{ render_relation(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/ format #}
-        {% if column_format %}
+        {% elif column_format %}
             {% filter right(12) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/o format #}
         {% else %}
@@ -123,7 +136,7 @@ UNSUPPORTED! input_{{ format }}.html does not exist!
             </div>
         {% endif %}
         </fieldset>
-    {# simple column #}
+    {# simple column, always having a format #}
     {% else %}
         {% filter right(8) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
     {% endif %}

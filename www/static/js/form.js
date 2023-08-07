@@ -940,9 +940,9 @@ function install_quill(div) {
 }
 
 function _process(param, field, path) {
-    debug("Try to process path " + path);
+    debug("Try to process path " + path + " with " + field.attr("class"));
     // object
-    if (field.is(".object")) {
+    if (field.is(".object") || field.is(".group")) {
         var card = field.children(".card");
         if (card.length) {
             field = card.children("div")
@@ -958,12 +958,16 @@ function _process(param, field, path) {
             "> .row  > div > .card > div > fieldset, " +
             "> .row  > div > .card > div > .row  > div > fieldset"
         ).each(function (i, n) {
-            var name = $(n).attr("name");
-            if (name) {
-                if (name.includes(".")) { // Restart path, so that more than two models can be posted together
-                    _process(param, $(n), name);
-                } else {
-                    _process(param, $(n), path + "." + name);
+            if ($(n).is("fieldset.group")) {
+                _process(param, $(n), path);
+            } else {
+                var name = $(n).attr("name");
+                if (name) {
+                    if (name.includes(".")) { // Restart path, so that more than two models can be posted together
+                        _process(param, $(n), name);
+                    } else {
+                        _process(param, $(n), path + "." + name);
+                    }
                 }
             }
         });
@@ -1172,7 +1176,7 @@ function _process(param, field, path) {
                     param["valid"] = false;
                 }
             }
-        } else if (rangeInputGroup.length){
+        } else if (rangeInputGroup.length) {
             rangeInputGroup.removeClass("in-valid is-invalid");
             var value = rangeInputGroup.find(".range-value").text().trim();
             if (value.length) {

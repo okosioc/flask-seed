@@ -94,7 +94,7 @@
                             {% for active_projects_item in demo_project_dashboard.active_projects %}
                             <tr class="" name="{{ loop.index0 }}">
                                 <td name="title" format="text" enum="">
-                                    <a href="javascript:;">
+                                    <a href="project-detail?id={{ active_projects_item.id }}">
                                     {{ active_projects_item.title or '-' }}
                                     </a>
                                 </td>

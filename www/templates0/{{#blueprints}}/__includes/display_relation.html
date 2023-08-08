@@ -2,9 +2,9 @@
 {% set related_model = models[related_model_name] %}
 {% set related_model_schema = related_model.schema %}
 {% set title_field_name = related_model_schema|field('title|name|\\w*name') %}
-<div class="field-group {{ 'row' if seed_is_horizontal }}">
-    <label class="text-gray-700 {{ 'col-auto col-field-label' if seed_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
-    {% if seed_is_horizontal %}
+<div class="field-group {{ 'row' if view_is_horizontal }}">
+    <label class="text-gray-700 {{ 'col-auto col-field-label' if view_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
+    {% if view_is_horizontal %}
     <div class="col">
     {% endif %}
     {% if field_schema.type == 'array' %}
@@ -20,7 +20,7 @@
         {{ '{%' }} endif {{ '%}' }}
     </div>
     {% endif %}
-    {% if seed_is_horizontal %}
+    {% if view_is_horizontal %}
     </div>
     {% endif %}
 </div>

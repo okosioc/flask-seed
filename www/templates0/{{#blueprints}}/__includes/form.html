@@ -23,6 +23,8 @@ UNSUPPORTED! input_{{ format }}.html does not exist!
 {% macro render_relation(field_name, field_path, field_schema, field_layout, format, is_in_card) %}
 {% if field_schema.is_back_relation %}
 UNSUPPORTED! back relation {{ field_name }} is non-editable!
+{% elif format == 'summary' %}
+{% include '__includes/display_summary.html' %}
 {% elif format in ['media', 'timeline', 'modal'] %}
 {% include '__includes/input_' ~ format ~ '.html' %}
 {% else %}
@@ -30,10 +32,10 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
 {% endif %}
 {% endmacro %}
 {# * #}
-{# * macro - render object recrusively #}
+{# * macro - render layout recrusively #}
 {# * NOTE: field_name/field_path/field_schema/field_layout/is_in_card may be used in __includes snippets, can not change their names #}
 {# * #}
-{% macro render_object(field_name, field_path, field_schema, field_layout, level, is_in_card) %}
+{% macro render_layout(field_name, field_path, field_schema, field_layout, level, is_in_card) %}
 {# per row #}
 {% for row in field_layout %}
 <div class="row">
@@ -65,7 +67,7 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
             {% if not is_in_card %}
             <div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
             {% endif %}
-            {% filter right(12) %}{{ render_object(field_name, field_path, field_schema, column_layout, level + 1, true) }}{% endfilter %}
+            {% filter right(12) %}{{ render_layout(field_name, field_path, field_schema, column_layout, level + 1, true) }}{% endfilter %}
             {% if not is_in_card %}
             </div></div>
             {% endif %}
@@ -89,7 +91,7 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
             <div class="card"><div class="card-header"><h4 class="card-header-title">{% if column_schema.icon %}<i class="fe fe-{{ column_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
             {% endif %}
             {{ '{%' }} set {{ column_name }} = {{ column_path }} {{ '%}' }}
-            {% filter right(12) %}{{ render_object(column_name, column_name, column_schema, column_layout, level + 1, true) }}{% endfilter %}
+            {% filter right(12) %}{{ render_layout(column_name, column_name, column_schema, column_layout, level + 1, true) }}{% endfilter %}
             {% if not is_in_card %}
             </div></div>
             {% endif %}
@@ -116,7 +118,7 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
                         {% if item_schema.format %}
                             {% filter right(28) %}{{ render_format('-', column_name~'_item', item_schema, column_layout, is_in_card) }}{% endfilter %}
                         {% elif item_schema.type == 'object' %}
-                            {% filter right(28) %}{{ render_object('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
+                            {% filter right(28) %}{{ render_layout('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
                         {% else %}
                             UNSUPPORTED! {{ item_schema.type }} with format {{ item_schema.format }} can not in an array!
                         {% endif %}
@@ -154,15 +156,15 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
     {% endif %}
     <form id="{{ view.name_kebab }}" class="form-editor needs-validation" novalidate method="post">
         <fieldset class="object" name="{{ model.name_snake }}">
-            {% filter right(12) %}{{ render_object(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
+            {% filter right(12) %}{{ render_layout(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
         </fieldset>
     </form>
     <div class="form-actions mb-4">
         <a class="btn btn-primary mr-2" onclick="{{ view.name_snake }}_{{ action }}($(this));"><i class="fe fe-save mr-1"></i>保存</a>
-        {% set target = generate_url(model.schema.py_type, model.name_snake, ['read', 'query']) %}
-        {% if target != 'javascript:;' %}
-        {{ '{%' }} if {{ model.name_snake }}.{{ model_schema.id_name }} {{ '%}' }}
-        <a href="{{ target }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        {% set target_url = generate_url(model.schema.py_type, model.name_snake, ['read', 'query']) %}
+        {% if target_url != 'javascript:;' %}
+        {{ '{%' }} if {{ model.name_snake }}.{{ model.schema.id_name }} {{ '%}' }}
+        <a href="{{ target_url }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
         {{ '{%' }} endif {{ '%}' }}
         {% endif %}
     </div>

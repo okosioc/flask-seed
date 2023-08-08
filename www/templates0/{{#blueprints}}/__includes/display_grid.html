@@ -36,14 +36,6 @@
 {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
     <div class="array-item col">
         <div class="card">
-        {% if item_schema.stat %}
-            <div class="card-header">
-                <h4 class="card-header-title">{% if item_schema.icon %}<i class="fe fe-{{ item_schema.icon }} mr-2"></i>{% endif %}{{ '{{' }} {{ field_name }}_item.{{ title_field }} {{ '}}' }}</h4>
-            </div>
-            <div class="card-body">
-                {{ render_field('-', item_schema, field_name+'_item', true)|indent(16) }}
-            </div>
-        {% else %}
             {# Has top image #}
             {% if 'image' in item_schema.properties %}
             <img src="{{ '{{' }} {{ field_name }}_item.image {{ '}}' }}" class="card-img-top" alt="...">
@@ -54,7 +46,7 @@
                 {{ '{%'}} if {{ field_name }}_item.subtitle {{ '%}' }}
                 <p class="text-muted mb-2">{{ '{{' }} {{ field_name }}_item.subtitle {{ '}}' }}</p>
                 {{ '{%' }} endif {{ '%}' }}
-                {{ render_item_list_group(item_schema, field_name+'_item', excludes=['image', title_field, 'subtitle'])|indent(16) }}
+                {% filter right(16) %}{{ render_item_list_group(item_schema, field_name+'_item', excludes=['image', title_field, 'subtitle']) }}{% endfilter %}
             </div>
             {# Only has title/name #}
             {% else %}
@@ -62,10 +54,9 @@
             <div class="card-header"><h4 class="card-header-title">{{ '{{' }} {{ field_name }}_item.{{ title_field }} {{ '}}' }}</h4></div>
             {{ '{%' }} endif {{ '%}' }}
             <div class="card-body">
-                {{ render_item_list_group(item_schema, field_name+'_item', excludes=[title_field])|indent(16) }}
+                {% filter right(16) %}{{ render_item_list_group(item_schema, field_name+'_item', excludes=[title_field]) }}{% endfilter %}
             </div>
             {% endif %}
-        {% endif %}
         </div>
     </div>
 {{ '{%' }} else {{ '%}' }}

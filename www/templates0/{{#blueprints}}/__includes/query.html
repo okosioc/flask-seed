@@ -1,0 +1,373 @@
+{# * #}
+{# * available context {view, model, action, render_controls, ...} #}
+{# * #}
+{% set view_is_card = view.params.is_card or False %}
+{% set has_search = True if 'has_search' not in view.params else view.params.has_search %}
+{% set result_view = view.params.result_view or 'table' %}
+{% set grid_type = view.params.grid_type or 'default' %}
+{% set schema = model.schema %}
+{% set layout = view.rows %}
+{% set fields = (layout or schema)|fields %}
+{% set first_field_name = fields[0] %}
+{% set first_field_schema = schema.properties[first_field_name] %}
+{% set title_field_name = fields|match('title|name|\\w*name') %}
+{% set subtitle_field_name = fields|match('subtitle|type|category|tag|tags|text|description') %}
+{# * #}
+{# * macro - render search form #}
+{# * #}
+{% macro render_search_form() %}
+<form class="form-query" novalidate>
+    <div class="form-row justify-content-center">
+        {% for f in schema.searchables %}
+        {# Do not support nested field, and f may contains comparator #}
+        {% set rf =  f %}
+        {% set comparator = 'eq' %}
+        {% if '__' in rf %}
+            {% set tokens = f|split('__') %}
+            {% set rf = tokens[0] %}
+            {% set comparator = tokens[1] %}
+        {% endif %}
+        {% set fs = schema.properties[rf] %}
+        {% set path = 'search.' + f %}
+        <div class="form-group col-sm{{ '-auto' if fs.enum or fs.type in ['integer', 'number', 'boolean', 'date'] }} mb-4">
+            <label class="sr-only">{{ fs.title }}</label>
+            {% if fs.enum %}
+            <select class="custom-select" name="{{ path }}" >
+                <option value="">请选择{{ fs.title }}...</option>
+                {{ '{%' }} for value, label in enum_titles('{{ fs.py_type }}')|items {{ '%}' }}
+                <option value="{{ '{{' }} value {{ '}}' }}" {{ '{{' }} 'selected' if value=={{ path }} {{ '}}' }}>{{ '{{' }} label {{ '}}' }}</option>
+                {{ '{%' }} endfor {{ '%}' }}
+            </select>
+            {% elif fs.type == 'boolean' %}
+            <select class="custom-select" name="{{ path }}">
+                <option value="">请选择{{ fs.title }}...</option>
+                <option value="true" {{ '{{' }} 'selected' if value==true {{ '}}' }}>True</option>
+                <option value="false" {{ '{{' }} 'selected' if value==false {{ '}}' }}>False</option>
+            </select>
+            {% elif fs.type in ['integer', 'number'] %}
+            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                   value="{{ '{{' }} {{ path }} if {{ path }} is not none {{ '}}' }}"
+                   name="{{ path }}">
+            {% elif fs.format in ['date', 'datetime'] %}
+            <div class="input-group input-group-merge">
+                <input type="text" class="form-control form-control-prepended date" placeholder="{{ fs.title }}"
+                       value="{{ '{{' }} {{ path }} or '' {{ '}}' }}"
+                       name="{{ path }}">
+                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-calendar"></span></div></div>
+            </div>
+            {% elif comparator == 'like' %}
+            <div class="input-group input-group-merge">
+                <input type="text" class="form-control form-control-prepended" placeholder="{{ fs.title }}"
+                       value="{{ '{{' }} {{ path }} or '' {{ '}}' }}"
+                       name="{{ path }}">
+                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-search"></span></div></div>
+            </div>
+            {% else %}
+            <input type="text" class="form-control" placeholder="{{ fs.title }}"
+                   value="{{ '{{' }} {{ path }} or '' {{ '}}' }}"
+                   name="{{ path }}">
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="col-sm-auto mb-4">
+            <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">查找</button>
+            <button type="button" class="btn btn-light btn-default" onclick="search_reset();">重置</button>
+        </div>
+    </div>
+</form>
+<form class="form-batch" novalidate style="display:none">
+    <div class="alert alert-light mb-4">
+        <div class="row align-items-center">
+            <div class="col-sm">
+                <i class="fe fe-info mr-2"></i>您选择了<span id="span-checked" class="text-primary mx-1"></span>个{{ schema.title }}
+            </div>
+            <div class="col-sm-auto">
+                <button type="button" class="btn btn-primary btn-default" onclick="coming($(this));">ACTION</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endmacro %}
+{# * #}
+{# * macro - render grid view #}
+{# * #}
+{% macro render_grid(type) %}
+{{ '{%' }} if {{ model.name_snake_plural }} {{ '%}' }}
+<div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
+    {{ '{%' }} for {{ model.name_snake }} in {{ model.name_snake_plural }} {{ '%}' }}
+    {% set detail_url = generate_url(model.name, model.name_snake, 'read') %}
+    {% set edit_url = generate_url(model.name, model.name_snake, ['update', 'upcreate']) %}
+    {% set target_url = edit_url if detail_url=='javascript:;' else detail_url %}
+    <div class="col">
+        {# image + title #}
+        {% if grid_type == 'simple' %}
+        <div class="card">
+            {% if first_field_schema.format in ['image'] %}
+            <a href="{{ target_url }}">
+                <img src="{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }} {{ '}}' }}" class="card-img-top" alt="...">
+            </a>
+            {% endif %}
+            <div class="card-body">
+                {% if first_field_schema.format not in ['image'] %}
+                {% if first_field_schema.format in ['avatar'] %}
+                <div class="row text-center">
+                    <div class="col">
+                        <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
+                            <img src="{{ '{{' }} {{ model.name_snake~'.'~first_field_name }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ model.name_snake~'.'~first_field_name }} {{ '}}' }}">
+                            <span fallback={{ title_field_name }} class="avatar-title rounded-circle bg-primary {{ '{{' }} 'd-none' if {{ model.name_snake~'.'~first_field_name }} {{ '}}' }}">{{ '{{' }} {{ model.name_snake~'.'~title_field_name }}|first|upper if {{ model.name_snake~'.'~title_field_name }} is not none {{ '}}' }}</span>
+                        </a>
+                    </div>
+                </div>
+                {% elif first_field_schema.format in ['int', 'float'] %}
+                <div class="row align-items-center text-center">
+                    <div class="col">
+                        <div class="text-muted mb-2">{{ first_field_schema.title }}{{ '('~first_field_schema.unit~')' if first_field_schema.unit }}</div>
+                        <div>
+                            <span class="h2 text-primary" name="{{ first_field_name }}" format="{{ first_field_schema.format }}">{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }}|int|commas if {{ model.name_snake }}.{{ first_field_name }} is not none else '-' {{ '}}' }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row text-center">
+                    <div class="col">
+                        <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
+                            <span class="avatar-title rounded bg-primary">{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }}|first|upper if {{ model.name_snake }}.{{ first_field_name }} is not none {{ '}}' }}</span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="{{ 'mb-0' if not subtitle_field_name }}">
+                            <a href="{{ target_url }}">{{ '{{' }} {{ model.name_snake }}.{{ title_field_name }} {{ '}}' }}</a>
+                        </h4>
+                        {% if subtitle_field_name %}
+                        <p class="small text-muted mb-0">{{ display_inline(subtitle_field_name, model.name_snake~'.'~subtitle_field_name, schema.properties[subtitle_field_name]) }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-auto">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-ellipses dropdown-toggle" role="button" data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false">
+                                <i class="fe fe-more-vertical"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                {% if detail_url != 'javascript:;' %}
+                                <a class="dropdown-item" href="{{ detail_url }}"><i class="fe fe-eye mr-2"></i>Detail</a>
+                                {% endif %}
+                                {% if edit_url != 'javascript:;' %}
+                                <a class="dropdown-item" href="{{ edit_url }}"><i class="fe fe-edit mr-2"></i>Edit</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% elif grid_type == 'overlay' %}
+        {% if first_field_schema.format in ['image'] %}
+        <div class="card bg-cover" style="min-height:320px;background-image:url({{ '{{' }} {{ model.name_snake }}.{{ first_field_name }} {{ '}}' }});">
+            <div class="card-img-overlay card-img-overlay-hover align-items-center bg-white-90">
+                <div class="text-center">
+                    <h2 class="mb-2"><a href="{{ target_url }}">{{ '{{' }} {{ model.name_snake }}.{{ title_field_name }} {{ '}}' }}</a></h2>
+                    {% if subtitle_field_name %}
+                    <p class="small text-muted mb-2">{{ display_inline(subtitle_field_name, model.name_snake~'.'~subtitle_field_name, schema.properties[subtitle_field_name]) }}</p>
+                    {% endif %}
+                    <p class="mb-0">
+                        {% if detail_url != 'javascript:;' %}
+                        <a class="btn btn-link text-reset" href="{{ detail_url }}"><i class="fe fe-eye"></i></a>
+                        {% endif %}
+                        {% if edit_url != 'javascript:;' %}
+                        <a class="btn btn-link text-reset" href="{{ edit_url }}"><i class="fe fe-edit"></i></a>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        UNSUPPORTED! The format of first field should be image!
+        {% endif %}
+        {% else %}
+        {% filter right(8) %}{{ display_summary(model.name_snake, model.name_snake, schema, layout, false, target_url) }}{% endfilter %}
+        {% endif %}
+    </div>
+    {{ '{%' }} endfor {{ '%}' }}
+</div>
+<div style="margin:0 1rem 1rem;">
+{{ '{%' }} include 'includes/pagination.html' {{ '%}' }}
+</div>
+{{ '{%' }} else {{ '%}' }}
+<div class="alert alert-light"><i class="fe fe-alert-circle mr-2"></i>找不到{{ schema.title }}!</div>
+{{ '{%' }} endif {{ '%}' }}
+{% endmacro %}
+{# * #}
+{# * macro - render media view #}
+{# * #}
+{% macro render_media() %}
+TODO
+{% endmacro %}
+{# * #}
+{# * macro - render table view #}
+{# * #}
+{% macro render_table() %}
+<div class="table-responsive">
+    <table class="table table-striped {{ '{{' }} 'border-bottom mb1' if {{ model.name_snake_plural }} {{ '}}' }}">
+        <thead>
+        <tr>
+            <th>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="list-checkbox-all custom-control-input" id="checkbox-all-{{ model.name_kebab }}">
+                    <label class="custom-control-label" for="checkbox-all-{{ model.name_kebab }}"></label>
+                </div>
+            </th>
+            {% for f in fields %}
+            {% set fs = schema.properties[f] %}
+            <th>{{ fs.title }}{{ '(' + fs.unit + ')' if fs.unit }}</th>
+            {% endfor %}
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ '{%' }} for {{ model.name_snake }} in {{ model.name_snake_plural }} {{ '%}' }}
+        <tr>
+            <td>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="list-checkbox custom-control-input" id="checkbox-{{ model.name_kebab }}-{{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} {{ '}}' }}">
+                    <label class="custom-control-label" for="checkbox-{{ model.name_kebab }}-{{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} {{ '}}' }}"></label>
+                </div>
+            </td>
+            {% set detail_url = generate_url(model.name, model.name_snake, 'read') %}
+            {% set edit_url = generate_url(model.name, model.name_snake, ['update', 'upcreate']) %}
+            {% set target_url = edit_url if detail_url=='javascript:;' else detail_url %}
+            {% filter right(12) %}{{ display_table_columns(model.name_snake, schema, layout, row_target=target_url)}}{% endfilter %}
+            <td>
+                {% if detail_url != 'javascript:;' %}
+                <a class="btn pl-0 py-0" href="{{ detail_url }}"><i class="fe fe-eye"></i></a>
+                {% endif %}
+                {% if edit_url != 'javascript:;' %}
+                <a class="btn pl-0 py-0" href="{{ edit_url }}"><i class="fe fe-edit"></i></a>
+                {% endif %}
+            </td>
+        </tr>
+        {{ '{%' }} else {{ '%}' }}
+        <tr>
+            <td colspan="{{ 2+columns|length }}">
+                <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>找不到{{ schema.title }}!</div>
+            </td>
+        </tr>
+        {{ '{%' }} endfor {{ '%}' }}
+        </tbody>
+    </table>
+    {{ '{%' }} if {{ model.name_snake_plural }} {{ '%}' }}
+    <div class="m1">
+    {{ '{%' }} include 'includes/pagination.html' {{ '%}' }}
+    </div>
+    {{ '{%' }} endif {{ '%}' }}
+</div>
+{% endmacro %}
+{# * #}
+{# * main #}
+{# * #}
+<div id="div-{{ view.name_kebab }}">
+{% if result_view == 'grid' %}
+    {% if has_search %}
+    {% if view_is_card %}
+    <div class="card"><div class="card-body pb-0">
+    {% endif %}
+    {% filter right(4) %}{{ render_search_form() }}{% endfilter %}
+    {% if view_is_card %}
+    </div></div>
+    {% endif %}
+    {% endif %}
+    {# do not wrap card to grid #}
+    {% filter right(4) %}{{ render_grid() }}{% endfilter %}
+{% elif result_view == 'media' %}
+    {% if view_is_card %}
+    <div class="card"><div class="card-body">
+    {% endif %}
+    {% if has_search %}
+    {% filter right(4) %}{{ render_search_form() }}{% endfilter %}
+    {% endif %}
+    {% filter right(4) %}{{ render_media() }}{% endfilter %}
+    {% if view_is_card %}
+    </div></div>
+    {% endif %}
+{% else %}
+    {% if view_is_card %}
+    <div class="card">
+    {% endif %}
+    {% if has_search %}
+    {% if view_is_card %}
+    <div class="card-body pb-0">
+    {% endif %}
+    {% filter right(4) %}{{ render_search_form() }}{% endfilter %}
+    {% if view_is_card %}
+    </div>
+    {% endif %}
+    {% endif %}
+    {% filter right(4) %}{{ render_table() }}{% endfilter %}
+    {% if view_is_card %}
+    </div>
+    {% endif %}
+{% endif %}
+</div>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".list-checkbox-all").change(function () {
+            var checked = $(this).is(":checked");
+            $(this).closest("table").find(".list-checkbox").prop("checked", checked);
+            toggle_batch();
+        });
+        $(".list-checkbox").change(function () {
+            var checked = $(this).is(":checked");
+            toggle_batch();
+        });
+    });
+    //
+    function toggle_batch() {
+        var checked_length = $(".list-checkbox:checked").length;
+        if (checked_length > 0) {
+            $(".form-query").hide();
+            $("#span-checked").text(checked_length);
+            $(".form-batch").show();
+        } else {
+            $("#span-checked").text("");
+            $(".form-batch").hide();
+            $(".form-query").show();
+        }
+    }
+    //
+    function search_do(btn) {
+        var form = btn.closest("form");
+        location.href = "{{ '{{' }} request.path {{ '}}' }}?" + form.serialize();
+    }
+    function search_reset() {
+        location.href = "{{ '{{' }} request.path {{ '}}' }}";
+    }
+    //
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, 'json');
+    }
+</script>

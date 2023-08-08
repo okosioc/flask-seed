@@ -1,3 +1,5 @@
+{% if field_schema.type == 'array' %}
+{% set item_schema = field_schema['items'] %}
 <div class="array-items row row-cols-1 row-cols-lg-2">
     {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ field_schema['items'].py_type }}')] {{ '%}' }}
     <div class="array-item col {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="-">
@@ -11,7 +13,10 @@
                         </a>
                     </div>
                 </div>
-                {{ render_field('-', field_schema['items'], field_name+'_item', true)|indent(16) }}
+                <fieldset class="object" name="-">
+                    {# grid is card, so is_in_card is true #}
+                    {% filter right(20) %}{{ render_layout('-', field_name+'_item', item_schema, field_layout, true) }}{% endfilter %}
+                </fieldset>
             </div>
         </div>
     </div>
@@ -20,3 +25,6 @@
 <div class="card-actions mb-4">
     <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ field_schema.title }}</a>
 </div>
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}

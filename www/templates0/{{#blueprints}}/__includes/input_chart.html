@@ -1,3 +1,6 @@
+{% if not is_in_card %}
+<div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ field_schema.title }}</h4></div><div class="table-responsive">
+{% endif %}
 {% if field_schema.type == 'array' %}
 {% set item_schema = field_schema['items'] %}
 <table class="table table-striped mb-4">
@@ -60,4 +63,7 @@
 </div>
 {% else %}
 UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}
+{% if not is_in_card %}
+</div></div>
 {% endif %}

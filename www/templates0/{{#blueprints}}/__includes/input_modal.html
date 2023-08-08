@@ -1,3 +1,6 @@
+{% if not is_in_card %}
+<div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ field_schema.title }}</h4></div><div class="table-responsive">
+{% endif %}
 {% if field_schema.type == 'array' %}
 {% set item_schema = field_schema['items'] %}
 {% set title_field_name = (field_layout or item_schema)|field('title|name|\\w*name') %}
@@ -14,7 +17,7 @@
     <tbody class="array-items">
         {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ item_schema.py_type }}')] {{ '%}' }}
         <tr class="array-item {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="{{ '{{' }} '-' if loop.last else loop.index0 {{ '}}' }}">
-            {{ display_table_columns(field_name~'_item', item_schema, field_layout)|indent(12) }}
+            {% filter right(12) %}{{ display_table_columns(field_name~'_item', item_schema, field_layout) }}{% endfilter %}
             <td>
                 <a class="btn pl-0 py-0" onclick="array_action_show_modal($(this));"><i class="fe fe-eye"></i></a>
                 <a class="btn pl-0 py-0" onclick="array_action_delete_modal($(this));" data-title="{{ item_schema.title }}"><i class="fe fe-delete"></i></a>
@@ -43,10 +46,12 @@
                             <input name="{{ item_schema.id_name }}" type="text" value="{{ '{{' }} {{ field_name }}_item.{{ item_schema.id_name }} or '' {{ '}}' }}">
                         </div>
                     </fieldset>
-                    {{ display_summary('-', item_schema, field_name+'_item')|indent(20) }}
+                    {% filter right(20) %}{{ display_summary('-', field_name+'_item', item_schema, field_layout, true) }}{% endfilter %}
                 {% else %}
-                    {# modal is card-like, so is_in_card is true #}
-                    {{ render_field('-', item_schema, field_name+'_item', true)|indent(20) }}
+                    <fieldset class="object" name="-">
+                        {# modal is card-like, so is_in_card is true #}
+                        {% filter right(24) %}{{ render_layout('-', field_name+'_item', item_schema, field_layout, true) }}{% endfilter %}
+                    <fieldset>
                 {% endif %}
                 </div>
                 <div class="modal-footer py-3">
@@ -71,4 +76,7 @@
 </div>
 {% else %}
 UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}
+{% if not is_in_card %}
+</div></div>
 {% endif %}

@@ -21,7 +21,7 @@
                         <div class="row text-center">
                             <div class="col">
                                 <div name="logo" format="avatar">
-                                    <a href="javascript:;" class="avatar avatar-xl mt-2 mb-4">
+                                    <a href="team-members?id={{ demo_team.id }}" class="avatar avatar-xl mt-2 mb-4">
                                         <img src="{{ demo_team.logo or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_team.logo }}">
                                         <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if demo_team.logo }}">{{ demo_team.name|first|upper if demo_team.name is not none }}</span>
                                     </a>
@@ -148,6 +148,9 @@
     </form>
     <div class="form-actions mb-4">
         <a class="btn btn-primary mr-2" onclick="team_profile_update($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        {% if demo_team.id %}
+        <a href="team-members?id={{ demo_team.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -191,7 +194,7 @@
                 showSuccess(result.message);
                 showInfo('Refreshing...');
                 setTimeout(function () {
-                    location.href = "{{ request.path }}?id=" + result.id;
+                    location.href = "team-members?id=" + result.id;
                 }, 2000);
             } else {
                 showError(result.message);

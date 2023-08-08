@@ -4,7 +4,7 @@
     <div class="col">
     {% endif %}
     <div class="field-control">
-        <span>{{ display_inline(column_name, column_path, column_schema) }}</span>
+        {% filter right(8) %}{{ display_inline(field_name, field_path, field_schema) }}{% endfilter %}
     </div>
     {% if view_is_horizontal %}
     </div>

@@ -205,13 +205,13 @@ class DemoProject(CacheModel):
     __icon__ = 'briefcase'
     __title__ = '项目'
     #
-    __views0__ = {
-        'www://demo/project-list': '''#!query?extends=layout-dash-demo&title=项目管理&result_view=grid
+    __views__ = {
+        'www://demo/project-list': '''#!query?extends=layout-dash-demo&title=项目管理&is_card=true&result_view=grid
             title, status, value, start, members, percent, create_time
         ''',
         'www://demo/project-detail': '''#!read?extends=layout-dash-demo&title=项目详情
             1#4,              2#8
-              1.1#summary4      tasks                                   
+              1.1#summary       tasks                                   
                 title             title, status, user, start, create_time 
                 status          activities                  
                 value             user, title, content, time
@@ -262,9 +262,9 @@ class DemoTask(CacheModel):
     __icon__ = 'check-square'
     __title__ = '任务'
     #
-    __views0__ = {
+    __views__ = {
         'www://demo/task-detail': '''#!read?extends=layout-dash-demo&title=任务详情
-            project#summary4,  1#8     
+            project#summary4,  1?title=任务基本信息#8     
               title              title 
               status             status     
               value              content    
@@ -274,7 +274,7 @@ class DemoTask(CacheModel):
               create_time
         ''',
         'www://demo/task-edit': '''#!upcreate?extends=layout-dash-demo&title=任务编辑
-            project#summary4,  1#8     
+            project#summary4,  1?title=任务基本信息#8     
               title              title 
               status             status     
               value              content    

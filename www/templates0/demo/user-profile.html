@@ -59,7 +59,7 @@
                                     </div>
                                     <div class="col-auto text-muted" name="roles" format="select" enum="DemoUserRole">
                                         {% for roles_item in demo_user.roles %}
-                                        {% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
+                                        {{ ' ' if not loop.fist }}{% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
                                         {% endfor %}
                                     </div>
                                 </div>

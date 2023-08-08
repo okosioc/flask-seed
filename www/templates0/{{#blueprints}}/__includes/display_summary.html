@@ -8,10 +8,11 @@
 {% set first_field = field_schema.properties[first_field_name] %}
 {% set first_field_rendered = False %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
-{% set target = generate_url(field_schema.py_type, field_path, 'read') %}
+{# can pass a target_url in context #}
+{% set target_url = target_url or generate_url(field_schema.py_type, field_path, 'read') %}
 {# 头图 #}
 {% if first_field.format in ['image'] %}
-<a href="{{ target }}">
+<a href="{{ target_url }}">
     <img src="{{ '{{' }} {{ field_path }}.{{ first_field_name }} {{ '}}' }}" class="card-img-top" alt="...">
 </a>
 {% set first_field_rendered = True %}
@@ -20,7 +21,7 @@
 <div class="row text-center">
     <div class="col">
         <div name="{{ first_field_name }}" format="avatar">
-            <a href="{{ target }}" class="avatar avatar-xl mt-2 mb-4">
+            <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
                 <img src="{{ '{{' }} {{ field_path~'.'~first_field_name }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ field_path~'.'~first_field_name }} {{ '}}' }}">
                 <span fallback={{ title_field_name }} class="avatar-title rounded-circle bg-primary {{ '{{' }} 'd-none' if {{ field_path~'.'~first_field_name }} {{ '}}' }}">{{ '{{' }} {{ field_path~'.'~title_field_name }}|first|upper if {{ field_path~'.'~title_field_name }} is not none {{ '}}' }}</span>
             </a>
@@ -36,7 +37,7 @@
 <div class="row text-center ">
     <div class="col">
         <div name="{{ first_field_name }}" format="text">
-            <a href="{{ target }}" class="avatar avatar-xl mt-2 mb-4">
+            <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
                 <span class="avatar-title rounded bg-primary">{{ '{{' }} {{ field_path }}.{{ first_field_name }}|first|upper if {{ field_path }}.{{ first_field_name }} is not none {{ '}}' }}</span>
             </a>
         </div>

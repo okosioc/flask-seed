@@ -35,7 +35,9 @@
                 {% if content_field_name %}
                 <p name="{{ content_field_name }}" format="{{ item_schema.properties[content_field_name].format }}" class="small text-gray-700 mb-1">{{ '{{' }} {{ field_name }}_item.{{ content_field_name }} or '' {{ '}}' }}</p>
                 {% endif %}
+                {% if time_field_name %}
                 <p class="small text-muted mb-0"><i class="fe fe-clock mr-2"></i>{{ '{{' }} {{ field_name }}_item.{{ time_field_name }}|timesince if {{ field_name }}_item.{{ time_field_name }} is not none {{ '}}' }}</p>
+                {% endif %}
             </div>
         </div>
     </li>

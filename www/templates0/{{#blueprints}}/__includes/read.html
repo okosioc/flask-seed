@@ -14,10 +14,10 @@
 {% include format_file %}
 {% endmacro %}
 {# * #}
-{# * macro - render object recrusively #}
-{# * NOTE: field_name/field_path/field_schema/field_layout/is_in_card may be used in __includes snippets, can not change their names #}
+{# * macro - render layout for an object, a group or a list item object recrusively #}
+{# * NOTE: field_name/field_path/field_schema/field_layout/is_in_card are used in __includes snippets, can not change their names #}
 {# * #}
-{% macro render_object(field_name, field_path, field_schema, field_layout, level, is_in_card) %}
+{% macro render_layout(field_name, field_path, field_schema, field_layout, level, is_in_card) %}
 {# per row #}
 {% for row in field_layout %}
 <div class="row">
@@ -46,11 +46,12 @@
             {% filter right(12) %}{{ render_format(field_name, field_path, field_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/o format #}
         {% else %}
-            {% if not is_in_card %}
+            {% set render_card = true if (not is_in_card and column_title) else false %}
+            {% if render_card %}
             <div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
             {% endif %}
-            {% filter right(12) %}{{ render_object(field_name, field_path, field_schema, column_layout, level + 1, true) }}{% endfilter %}
-            {% if not is_in_card %}
+            {% filter right(12) %}{{ render_layout(field_name, field_path, field_schema, column_layout, level + 1, render_card) }}{% endfilter %}
+            {% if render_card  %}
             </div></div>
             {% endif %}
         {% endif %}
@@ -66,12 +67,13 @@
             {% filter right(12) %}{{ render_format(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/o format #}
         {% else %}
-            {% if not is_in_card %}
+            {% set render_card = true if (not is_in_card) else false %}
+            {% if render_card %}
             <div class="card"><div class="card-header"><h4 class="card-header-title">{% if column_schema.icon %}<i class="fe fe-{{ column_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
             {% endif %}
             {{ '{%' }} set {{ column_name }} = {{ column_path }} {{ '%}' }}
-            {% filter right(12) %}{{ render_object(column_name, column_name, column_schema, column_layout, level + 1, true) }}{% endfilter %}
-            {% if not is_in_card %}
+            {% filter right(12) %}{{ render_layout(column_name, column_name, column_schema, column_layout, level + 1, render_card) }}{% endfilter %}
+            {% if render_card %}
             </div></div>
             {% endif %}
         {% endif %}
@@ -92,7 +94,7 @@
                     {% if item_schema.format %}
                     {% filter right(20) %}{{ render_format('-', column_name~'_item', item_schema, column_layout, is_in_card) }}{% endfilter %}
                     {% elif item_schema.type == 'object' %}
-                    {% filter right(20) %}{{ render_object('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
+                    {% filter right(20) %}{{ render_layout('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
                     {% else %}
                     UNSUPPORTED! {{ item_schema.type }} with format {{ item_schema.format }} can not in an array!
                     {% endif %}
@@ -122,7 +124,7 @@
     <div class="card"><div class="card-body">
     {% endif %}
     <div class="object" name="{{ model.name_snake }}">
-        {% filter right(8) %}{{ render_object(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
+        {% filter right(8) %}{{ render_layout(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
     </div>
     {% if view_is_card %}
     </div></div>

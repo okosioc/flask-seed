@@ -1,17 +1,17 @@
 {% if field_schema.type == 'array' %}
-<div class="field-group {{ 'row' if seed_is_horizontal }}">
-    <label class="text-gray-700 {{ 'col-auto col-field-label' if seed_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
-    {% if seed_is_horizontal %}
+<div class="field-group {{ 'row' if view_is_horizontal }}">
+    <label class="text-gray-700 {{ 'col-auto col-field-label' if view_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
+    {% if view_is_horizontal %}
     <div class="col">
     {% endif %}
-        <div class="field-control">
-            {{ '{%' }} for value in {{ field_path }} {{ '%}' }}
-            <span class="font-size-base badge badge-soft-secondary mr-2 mb-2">{{ '{{' }} value {{ '}}' }}</span>
-            {{ '{%' }} else {{ '%}' }}
-            -
-            {{ '{%' }} endfor {{ '%}' }}
-        </div>
-    {% if seed_is_horizontal %}
+    <div class="field-control">
+        {{ '{%' }} for value in {{ field_path }} {{ '%}' }}
+        <span class="font-size-base badge badge-soft-secondary mr-2 mb-2">{{ '{{' }} value {{ '}}' }}</span>
+        {{ '{%' }} else {{ '%}' }}
+        -
+        {{ '{%' }} endfor {{ '%}' }}
+    </div>
+    {% if view_is_horizontal %}
     </div>
     {% endif %}
 </div>

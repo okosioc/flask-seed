@@ -11,12 +11,177 @@
 <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg-4">
-        project
-    </div>
-    <div class="col-lg-8">
-        1
+<div id="div-task-edit">
+    <form id="task-edit" class="form-editor needs-validation" novalidate method="post">
+        <fieldset class="object" name="demo_task">
+            <div class="row">
+                <div class="col-lg-4">
+                    <fieldset class="object relation" name="project" format="summary">
+                        <div class="card"><div class="card-body">
+                        <div class="row text-center ">
+                            <div class="col">
+                                <div name="title" format="text">
+                                    <a href="project-detail?id={{ demo_task.project.id }}" class="avatar avatar-xl mt-2 mb-4">
+                                        <span class="avatar-title rounded bg-primary">{{ demo_task.project.title|first|upper if demo_task.project.title is not none }}</span>
+                                    </a>
+                                </div>
+                                <div class="mb-4">
+                                    <span class="h3 text-primary" name="title" foramt="text">{{ demo_task.project.title or '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group list-group-flush border-top">
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <span><i class="fe fe-circle mr-2"></i>项目状态</span>
+                                    </div>
+                                    <div class="col-auto text-muted" name="status" format="select" enum="DemoProjectStatus">
+                                        {% if demo_task.project.status is not none %}<span class="text-{{ demo_task.project.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoProjectStatus')[demo_task.project.status] }}{% else %}-{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <span><i class="fe fe-dollar-sign mr-2"></i>项目价值(元)</span>
+                                    </div>
+                                    <div class="col-auto text-muted" name="value" format="float" enum="">
+                                        {{ demo_task.project.value|int|commas if demo_task.project.value is not none else '-' }} 
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <span><i class="fe fe-calendar mr-2"></i>开始日期</span>
+                                    </div>
+                                    <div class="col-auto text-muted" name="start" format="date" enum="">
+                                        {{ demo_task.project.start|date if demo_task.project.start is not none else '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <span><i class="fe fe-users mr-2"></i>项目成员</span>
+                                    </div>
+                                    <div class="col-auto text-muted" name="members" format="media" enum="">
+                                        {{ demo_task.project.members|length }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span><i class="fe fe-percent mr-2"></i>项目进度</span>
+                                    </div>
+                                    <div class="col" name="" format="float">
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar" role="progressbar" style="width:{{ demo_task.project.percent or 0 }}%;" aria-valuenow="{{ demo_task.project.percent or 0 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto text-muted" name="percent" format="float" enum="">
+                                        {{ demo_task.project.percent|int|commas if demo_task.project.percent is not none else '-' }} %
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                                    </div>
+                                    <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                                        {{ demo_task.project.create_time|datetime if demo_task.project.create_time is not none else '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div></div>
+                    </fieldset>
+                </div>
+                <div class="col-lg-8">
+                    <fieldset class="group" name="1" format="">
+                        <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-check-square mr-2"></i>任务基本信息</h4></div><div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="title">
+                                    <label class=""><span class="text-danger mr-1">*</span>任务标题</label>
+                                    <input name="title" type="text" class="form-control" required
+                                           value="{{ demo_task.title or '' }}">
+                                    <div class="invalid-feedback">请输入正确的任务标题!</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group string " name="status">
+                                    <label class=""><span class="text-danger mr-1">*</span>任务状态</label>
+                                    <select class="custom-select select2" name="status" required>
+                                        <option value="">请选择...</option>
+                                        {% for value, label in enum_titles('DemoTaskStatus')|items %}
+                                        <option value="{{ value }}" {{ 'selected' if value==demo_task.status }}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">请选择任务状态!</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="content">
+                                    <label class="">任务详情</label>
+                                    <textarea name="content" rows="5"
+                                              class="form-control autosize" >{{ demo_task.content or '' }}</textarea>
+                                    <div class="invalid-feedback">请输入正确的任务详情!</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="start">
+                                    <label class="">开始日期</label>
+                                    <input name="start" type="text" class="form-control date" 
+                                           value="{{ demo_task.start or '' }}">
+                                    <div class="invalid-feedback">请输入正确的开始日期!</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group " name="end">
+                                    <label class="">结束日期</label>
+                                    <input name="end" type="text" class="form-control date" 
+                                           value="{{ demo_task.end or '' }}">
+                                    <div class="invalid-feedback">请输入正确的结束日期!</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="object relation" name="user" format="select">
+                                    <div class="form-group relation " name="@" relation-id="id" relation-title="name">
+                                        <label class=""><span class="text-danger mr-1">*</span>负责人</label>
+                                        <select class="custom-select select2" name="" required>
+                                            <option value="">请选择...</option>
+                                            {% for demo_user in demo_users %}
+                                            <option value="{{ demo_user.id }}" {{ 'selected' if demo_task.user.id == demo_user.id }}>{{ demo_user.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">请选择负责人!</div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        </div></div>
+                    </fieldset>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div class="form-actions mb-4">
+        <a class="btn btn-primary mr-2" onclick="task_edit_upcreate($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        {% if demo_task.id %}
+        <a href="task-detail?id={{ demo_task.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -27,8 +192,73 @@
 <script src="{{ base() }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
 <script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function(){
+        //
         install_form();
     });
+    function task_edit_upcreate(btn){
+        if (btn.is(".doing")) {
+            return;
+        }
+        var msg = "确定要保存么?";
+        var con = window.confirm(msg);
+        if (!con) {
+            return false;
+        }
+        var param = process_form($("#task-edit"));
+        if (!param["valid"]) {
+            showError('检测到不正确的数据, 请更正后重试!');
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        {% for arg in args %}
+        param["demo_task.{{ arg[0] }}"] = "{{ arg[1] }}";
+        {% endfor %}
+        //
+        var url = "/demo/task-edit-upcreate?id={{ demo_task.id or '' }}";
+        $.post(url, param, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+                showInfo('Refreshing...');
+                setTimeout(function () {
+                    location.href = "task-detail?id=" + result.id;
+                }, 2000);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
 </script>
 {% endblock %}

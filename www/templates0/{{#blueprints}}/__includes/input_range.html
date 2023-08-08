@@ -1,6 +1,6 @@
-<div class="form-group {{ 'row' if seed_is_horizontal }}" name="{{ field_name }}">
-    <label class="{{ 'col-auto col-form-label' if seed_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
-    {% if seed_is_horizontal %}
+<div class="form-group {{ 'row' if view_is_horizontal }}" name="{{ field_name }}">
+    <label class="{{ 'col-auto col-form-label' if view_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
+    {% if view_is_horizontal %}
     <div class="col">
     {% endif %}
     <div class="range-input-group row" {{ 'required' if field_schema.required }} data-steps='{{ '{{ '~field_path~'_depends'~'|todict|tojson }}' if field_schema.depends else '{}' }}'>
@@ -15,7 +15,7 @@
     <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
     {% endif %}
     <div class="invalid-feedback">请输入正确的{{ field_schema.title }}!</div>
-    {% if seed_is_horizontal %}
+    {% if view_is_horizontal %}
     </div>
     {% endif %}
 </div>

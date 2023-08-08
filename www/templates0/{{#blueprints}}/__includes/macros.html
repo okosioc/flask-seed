@@ -14,7 +14,13 @@
             {% break %}
         {% endif %}
     {% endfor %}
-    {% if ns.found %}{{ ns.view.name }}{{ '?id={{ '~model_path~'.'~model.schema.id_name~' }}' if model_path }}{% else %}javascript:;{% endif %}
+    {% if ns.view %}{{ ns.view.name }}{{ '?id={{ '~model_path~'.'~model.schema.id_name~' }}' if model_path }}{% else %}javascript:;{% endif %}
+{% endmacro %}
+{# * #}
+{# * macro - render summary, used as default grid #}
+{# * #}
+{% macro display_summary(field_name, field_path, field_schema, field_layout, is_in_card, target_url=none) %}
+{% include '__includes/display_summary.html' %}
 {% endmacro %}
 {# * #}
 {# * macro - display field content inline, i.e, in a table column or in summary's .list-group-item #}
@@ -30,7 +36,7 @@
 {% else %}
 {# display each for simple array #}
 {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
-{{ display_inline('-', field_name~'_item', field_schema['items']) -}}
+{{ '{{' }} ' ' if not loop.fist {{ '}}' }}{{ display_inline('-', field_name~'_item', field_schema['items']) -}}
 {{ '{%' }} endfor {{ '%}' }}
 {% endif %}
 {% else %}

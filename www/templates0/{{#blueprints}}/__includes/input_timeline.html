@@ -1,3 +1,6 @@
+{% if not is_in_card %}
+<div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ field_schema.title }}</h4></div><div class="card-body">
+{% endif %}
 {% if field_schema.type == 'array' %}
 {% set item_schema = field_schema['items'] %}
 {# First field should be a meaningful subject, i.e, user name or event type and etc. #}
@@ -60,10 +63,12 @@
                             <input name="{{ item_schema.id_name }}" type="text" value="{{ '{{' }} {{ field_name }}_item.{{ item_schema.id_name }} or '' {{ '}}' }}">
                         </div>
                     </fieldset>
-                    {{ display_summary('-', item_schema, field_name+'_item')|indent(20) }}
+                    {% filter right(20) %}{{ display_summary('-', field_name+'_item', item_schema, none, true) }}{% endfilter %}
                 {% else %}
-                    {# Modal is card-like #}
-                    {{ render_field('-', item_schema, field_name+'_item', true)|indent(20) }}
+                    <fieldset class="object" name="-">
+                        {# modal is card-like, so is_in_card is true #}
+                        {% filter right(24) %}{{ render_layout('-', field_name+'_item', item_schema, field_layout, true) }}{% endfilter %}
+                    </fieldset>
                 {% endif %}
                 </div>
                 <div class="modal-footer py-3">
@@ -88,4 +93,7 @@
 </div>
 {% else %}
 UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
+{% endif %}
+{% if not is_in_card %}
+</div></div>
 {% endif %}

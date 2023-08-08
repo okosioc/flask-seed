@@ -8,9 +8,99 @@ from flask_login import current_user
 from py3seed import populate_model, populate_search
 from .common import get_id
 from www.tools import auth_permission, admin_permission, prepare_demo_data
-from core.models import DemoProjectDashboard, DemoTeam, DemoUser, DemoProject
+from core.models import DemoProject, DemoProjectDashboard, DemoTask, DemoTeam, DemoUser
 
 demo = Blueprint('demo', __name__)
+
+
+@demo.route('/project-list')
+@auth_permission
+def project_list():
+    """ 项目管理. """
+    page, sort = request.args.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
+    search, condition = populate_search(request.args, DemoProject)
+    current_app.logger.info(f'Try to search demo project by {condition}, sort by {sort}')
+    demo_projects, pagination = DemoProject.search(condition, page, sort=sort)
+    #
+    return render_template('demo/project-list.html',
+                           search=search, pagination=pagination, demo_projects=demo_projects)
+
+
+@demo.route('/project-detail')
+@auth_permission
+def project_detail():
+    """ 项目详情. """
+    id_ = get_id(int)
+    demo_project = DemoProject.find_one(id_)
+    if not demo_project:
+        abort(404)
+    #
+    return render_template('demo/project-detail.html', demo_project=demo_project)
+
+
+@demo.route('/project-edit')
+@auth_permission
+def project_edit():
+    """ 项目编辑. """
+    args, preloads = [], {}
+    id_ = get_id(int)
+    if id_:
+        demo_project = DemoProject.find_one(id_)
+        if not demo_project:
+            abort(404)
+    else:
+        demo_project = DemoProject()
+    #
+    demo_users, demo_users_pagination = DemoUser.search({}, projection=['avatar', 'name'], sort=[('create_time', -1)])
+    current_app.logger.info(f'Preloaded {len(demo_users)} demo users')
+    preloads.update({'demo_users': demo_users, 'demo_users_pagination': dict(demo_users_pagination), })
+    #
+    return render_template('demo/project-edit.html', demo_project=demo_project, args=args, **preloads)
+
+
+@demo.route('/project-edit-upcreate', methods=('POST',))
+@auth_permission
+def project_edit_upcreate():
+    """ Upcreate demo project. """
+    req_demo_project = populate_model(request.form, DemoProject)
+    id_ = get_id(int)
+    current_app.logger.info(f'Try to save demo project with id {id_}: {req_demo_project}')
+    #
+    if not id_:
+        req_demo_project.save()
+        id_ = req_demo_project.id
+        current_app.logger.info(f'Successfully create demo project {id_}')
+    else:
+        existing = DemoProject.find_one(id_)
+        if not existing:
+            abort(404)
+        #
+        existing.title = req_demo_project.title
+        existing.description = req_demo_project.description
+        existing.status = req_demo_project.status
+        existing.value = req_demo_project.value
+        existing.start = req_demo_project.start
+        existing.end = req_demo_project.end
+        existing.percent = req_demo_project.percent
+        existing.members = req_demo_project.members
+        #
+        existing.update_time = datetime.now()
+        existing.save()
+        current_app.logger.info(f'Successfully update demo project {id_}')
+    #
+    return jsonify(error=0, message='Save demo project successfully.', id=id_)
+
+
+@demo.route('/project-edit/search-demo-users', methods=('POST',))
+@auth_permission
+def project_edit_search_demo_users():
+    """ Search demo user. """
+    page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
+    search, condition = populate_search(request.form, DemoUser)
+    current_app.logger.info(f'Try to search demo user at page {page} by {condition}, sort by {sort}')
+    demo_users, pagination = DemoUser.search(condition, page, projection=['avatar', 'name'], sort=sort)
+    return jsonify(error=0, message='Search demo user successfully.', pagination=dict(pagination), demo_users=demo_users)
+
 
 prepare_demo_data()
 
@@ -40,6 +130,74 @@ def project_dashboard():
     dpd.recent_activities = recent_activities[:10]
     #
     return render_template('demo/project-dashboard.html', demo_project_dashboard=dpd)
+
+
+@demo.route('/task-detail')
+@auth_permission
+def task_detail():
+    """ 任务详情. """
+    id_ = get_id(int)
+    demo_task = DemoTask.find_one(id_)
+    if not demo_task:
+        abort(404)
+    #
+    return render_template('demo/task-detail.html', demo_task=demo_task)
+
+
+@demo.route('/task-edit')
+@auth_permission
+def task_edit():
+    """ 任务编辑. """
+    args, preloads = [], {}
+    id_ = get_id(int)
+    if id_:
+        demo_task = DemoTask.find_one(id_)
+        if not demo_task:
+            abort(404)
+    else:
+        demo_task = DemoTask()
+        #
+        if 'project_id' in request.args:
+            project_id = int(request.args.get('project_id'))
+            demo_task.project = DemoProject.find_one(project_id)
+            args.append(('project_id', project_id))
+    #
+    demo_users, demo_users_pagination = DemoUser.search({}, projection=['id', 'name', 'status', 'roles', 'type', 'due_date', 'email', 'password', 'phone', 'avatar', 'intro', 'team', 'team_id', 'team_join_time', 'update_time', 'create_time', 'projects', 'tasks'], sort=[('create_time', -1)])
+    current_app.logger.info(f'Preloaded {len(demo_users)} demo users')
+    preloads.update({'demo_users': demo_users, 'demo_users_pagination': dict(demo_users_pagination), })
+    #
+    return render_template('demo/task-edit.html', demo_task=demo_task, args=args, **preloads)
+
+
+@demo.route('/task-edit-upcreate', methods=('POST',))
+@auth_permission
+def task_edit_upcreate():
+    """ Upcreate demo task. """
+    req_demo_task = populate_model(request.form, DemoTask)
+    id_ = get_id(int)
+    current_app.logger.info(f'Try to save demo task with id {id_}: {req_demo_task}')
+    #
+    if not id_:
+        req_demo_task.save()
+        id_ = req_demo_task.id
+        current_app.logger.info(f'Successfully create demo task {id_}')
+    else:
+        existing = DemoTask.find_one(id_)
+        if not existing:
+            abort(404)
+        #
+        existing.title = req_demo_task.title
+        existing.status = req_demo_task.status
+        existing.content = req_demo_task.content
+        existing.start = req_demo_task.start
+        existing.end = req_demo_task.end
+        existing.user = req_demo_task.user
+        #
+        existing.update_time = datetime.now()
+        existing.save()
+        current_app.logger.info(f'Successfully update demo task {id_}')
+    #
+    return jsonify(error=0, message='Save demo task successfully.', id=id_)
 
 
 @demo.route('/team-profile')

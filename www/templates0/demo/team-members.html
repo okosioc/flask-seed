@@ -19,7 +19,7 @@
                     <div class="row text-center">
                         <div class="col">
                             <div name="logo" format="avatar">
-                                <a href="javascript:;" class="avatar avatar-xl mt-2 mb-4">
+                                <a href="team-members?id={{ demo_team.id }}" class="avatar avatar-xl mt-2 mb-4">
                                     <img src="{{ demo_team.logo or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_team.logo }}">
                                     <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if demo_team.logo }}">{{ demo_team.name|first|upper if demo_team.name is not none }}</span>
                                 </a>
@@ -108,7 +108,7 @@
                                 </td>
                                 <td name="roles" format="select" enum="DemoUserRole">
                                     {% for roles_item in members_item.roles %}
-                                    {% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
+                                    {{ ' ' if not loop.fist }}{% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
                                     {% endfor %}
                                 </td>
                                 <td name="email" format="text" enum="">

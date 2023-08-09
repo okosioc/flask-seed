@@ -99,73 +99,7 @@
     {% set edit_url = generate_url(model.name, model.name_snake, ['update', 'upcreate']) %}
     {% set target_url = edit_url if detail_url=='javascript:;' else detail_url %}
     <div class="col">
-        {# image + title #}
-        {% if grid_type == 'simple' %}
-        <div class="card">
-            {% if first_field_schema.format in ['image'] %}
-            <a href="{{ target_url }}">
-                <img src="{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }} {{ '}}' }}" class="card-img-top" alt="...">
-            </a>
-            {% endif %}
-            <div class="card-body">
-                {% if first_field_schema.format not in ['image'] %}
-                {% if first_field_schema.format in ['avatar'] %}
-                <div class="row text-center">
-                    <div class="col">
-                        <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
-                            <img src="{{ '{{' }} {{ model.name_snake~'.'~first_field_name }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ model.name_snake~'.'~first_field_name }} {{ '}}' }}">
-                            <span fallback={{ title_field_name }} class="avatar-title rounded-circle bg-primary {{ '{{' }} 'd-none' if {{ model.name_snake~'.'~first_field_name }} {{ '}}' }}">{{ '{{' }} {{ model.name_snake~'.'~title_field_name }}|first|upper if {{ model.name_snake~'.'~title_field_name }} is not none {{ '}}' }}</span>
-                        </a>
-                    </div>
-                </div>
-                {% elif first_field_schema.format in ['int', 'float'] %}
-                <div class="row align-items-center text-center">
-                    <div class="col">
-                        <div class="text-muted mb-2">{{ first_field_schema.title }}{{ '('~first_field_schema.unit~')' if first_field_schema.unit }}</div>
-                        <div>
-                            <span class="h2 text-primary" name="{{ first_field_name }}" format="{{ first_field_schema.format }}">{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }}|int|commas if {{ model.name_snake }}.{{ first_field_name }} is not none else '-' {{ '}}' }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="row text-center">
-                    <div class="col">
-                        <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
-                            <span class="avatar-title rounded bg-primary">{{ '{{' }} {{ model.name_snake }}.{{ first_field_name }}|first|upper if {{ model.name_snake }}.{{ first_field_name }} is not none {{ '}}' }}</span>
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-                {% endif %}
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h4 class="{{ 'mb-0' if not subtitle_field_name }}">
-                            <a href="{{ target_url }}">{{ '{{' }} {{ model.name_snake }}.{{ title_field_name }} {{ '}}' }}</a>
-                        </h4>
-                        {% if subtitle_field_name %}
-                        <p class="small text-muted mb-0">{{ display_inline(subtitle_field_name, model.name_snake~'.'~subtitle_field_name, schema.properties[subtitle_field_name]) }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="col-auto">
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-ellipses dropdown-toggle" role="button" data-toggle="dropdown"
-                               aria-haspopup="true" aria-expanded="false">
-                                <i class="fe fe-more-vertical"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                {% if detail_url != 'javascript:;' %}
-                                <a class="dropdown-item" href="{{ detail_url }}"><i class="fe fe-eye mr-2"></i>Detail</a>
-                                {% endif %}
-                                {% if edit_url != 'javascript:;' %}
-                                <a class="dropdown-item" href="{{ edit_url }}"><i class="fe fe-edit mr-2"></i>Edit</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% elif grid_type == 'overlay' %}
+        {% if grid_type == 'overlay' %}
         {% if first_field_schema.format in ['image'] %}
         <div class="card bg-cover" style="min-height:320px;background-image:url({{ '{{' }} {{ model.name_snake }}.{{ first_field_name }} {{ '}}' }});">
             <div class="card-img-overlay card-img-overlay-hover align-items-center bg-white-90">
@@ -240,7 +174,7 @@ TODO
             {% set detail_url = generate_url(model.name, model.name_snake, 'read') %}
             {% set edit_url = generate_url(model.name, model.name_snake, ['update', 'upcreate']) %}
             {% set target_url = edit_url if detail_url=='javascript:;' else detail_url %}
-            {% filter right(12) %}{{ display_table_columns(model.name_snake, schema, layout, row_target=target_url)}}{% endfilter %}
+            {% filter right(12) %}{{ display_table_columns(model.name_snake, schema, fields, row_target_url=target_url)}}{% endfilter %}
             <td>
                 {% if detail_url != 'javascript:;' %}
                 <a class="btn pl-0 py-0" href="{{ detail_url }}"><i class="fe fe-eye"></i></a>

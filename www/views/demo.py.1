@@ -51,7 +51,7 @@ def project_edit():
     else:
         demo_project = DemoProject()
     #
-    demo_users, demo_users_pagination = DemoUser.search({}, projection=['avatar', 'name'], sort=[('create_time', -1)])
+    demo_users, demo_users_pagination = DemoUser.search({}, projection=['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time'], sort=[('create_time', -1)])
     current_app.logger.info(f'Preloaded {len(demo_users)} demo users')
     preloads.update({'demo_users': demo_users, 'demo_users_pagination': dict(demo_users_pagination), })
     #
@@ -98,7 +98,7 @@ def project_edit_search_demo_users():
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, DemoUser)
     current_app.logger.info(f'Try to search demo user at page {page} by {condition}, sort by {sort}')
-    demo_users, pagination = DemoUser.search(condition, page, projection=['avatar', 'name'], sort=sort)
+    demo_users, pagination = DemoUser.search(condition, page, projection=['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time'], sort=sort)
     return jsonify(error=0, message='Search demo user successfully.', pagination=dict(pagination), demo_users=demo_users)
 
 

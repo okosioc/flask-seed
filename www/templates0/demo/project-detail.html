@@ -18,87 +18,89 @@
                     <div class="row">
                         <div class="col">
                             <div class="group" name="1.1" format="summary">
-                                <div class="card"><div class="card-body">
-                                <div class="row text-center ">
-                                    <div class="col">
-                                        <div name="title" format="text">
-                                            <a href="project-detail?id={{ demo_project.id }}" class="avatar avatar-xl mt-2 mb-4">
-                                                <span class="avatar-title rounded bg-primary">{{ demo_project.title|first|upper if demo_project.title is not none }}</span>
-                                            </a>
-                                        </div>
-                                        <div class="mb-4">
-                                            <span class="h3 text-primary" name="title" foramt="text">{{ demo_project.title or '-' }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="list-group list-group-flush border-top">
-                                    <div class="list-group-item">
-                                        <div class="row align-items-center">
-                                            <div class="col">
-                                                <span><i class="fe fe-circle mr-2"></i>项目状态</span>
+                                <div class="card">
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col">
+                                            <div name="title" format="text">
+                                                <a href="project-detail?id={{ demo_project.id }}" class="avatar avatar-xl mt-2 mb-4">
+                                                    <span class="avatar-title rounded bg-primary">{{ demo_project.title|first|upper if demo_project.title is not none }}</span>
+                                                </a>
                                             </div>
-                                            <div class="col-auto text-muted" name="status" format="select" enum="DemoProjectStatus">
-                                                {% if demo_project.status is not none %}<span class="text-{{ demo_project.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoProjectStatus')[demo_project.status] }}{% else %}-{% endif %}
+                                            <div class="mb-4">
+                                                <span class="h3 text-primary" name="title" foramt="text">{{ demo_project.title or '-' }}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="list-group-item">
-                                        <div class="row align-items-center">
-                                            <div class="col">
-                                                <span><i class="fe fe-dollar-sign mr-2"></i>项目价值(元)</span>
-                                            </div>
-                                            <div class="col-auto text-muted" name="value" format="float" enum="">
-                                                {{ demo_project.value|int|commas if demo_project.value is not none else '-' }} 
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="list-group-item">
-                                        <div class="row align-items-center">
-                                            <div class="col">
-                                                <span><i class="fe fe-calendar mr-2"></i>开始日期</span>
-                                            </div>
-                                            <div class="col-auto text-muted" name="start" format="date" enum="">
-                                                {{ demo_project.start|date if demo_project.start is not none else '-' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="list-group-item">
-                                        <div class="row align-items-center">
-                                            <div class="col">
-                                                <span><i class="fe fe-users mr-2"></i>项目成员</span>
-                                            </div>
-                                            <div class="col-auto text-muted" name="members" format="media" enum="">
-                                                {{ demo_project.members|length }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="list-group-item">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span><i class="fe fe-percent mr-2"></i>项目进度</span>
-                                            </div>
-                                            <div class="col" name="" format="float">
-                                                <div class="progress progress-sm">
-                                                    <div class="progress-bar" role="progressbar" style="width:{{ demo_project.percent or 0 }}%;" aria-valuenow="{{ demo_project.percent or 0 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="list-group list-group-flush border-top">
+                                        <div class="list-group-item">
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <span><i class="fe fe-circle mr-2"></i>项目状态</span>
+                                                </div>
+                                                <div class="col-auto text-muted" name="status" format="select" enum="DemoProjectStatus">
+                                                    {% if demo_project.status is not none %}<span class="text-{{ demo_project.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoProjectStatus')[demo_project.status] }}{% else %}-{% endif %}
                                                 </div>
                                             </div>
-                                            <div class="col-auto text-muted" name="percent" format="float" enum="">
-                                                {{ demo_project.percent|int|commas if demo_project.percent is not none else '-' }} %
+                                        </div>
+                                        <div class="list-group-item">
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <span><i class="fe fe-dollar-sign mr-2"></i>项目价值(元)</span>
+                                                </div>
+                                                <div class="col-auto text-muted" name="value" format="float" enum="">
+                                                    {{ demo_project.value|int|commas if demo_project.value is not none else '-' }} 
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="list-group-item">
-                                        <div class="row align-items-center">
-                                            <div class="col">
-                                                <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                                        <div class="list-group-item">
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <span><i class="fe fe-calendar mr-2"></i>开始日期</span>
+                                                </div>
+                                                <div class="col-auto text-muted" name="start" format="date" enum="">
+                                                    {{ demo_project.start|date if demo_project.start is not none else '-' }}
+                                                </div>
                                             </div>
-                                            <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
-                                                {{ demo_project.create_time|datetime if demo_project.create_time is not none else '-' }}
+                                        </div>
+                                        <div class="list-group-item">
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <span><i class="fe fe-users mr-2"></i>项目成员</span>
+                                                </div>
+                                                <div class="col-auto text-muted" name="members" format="media" enum="">
+                                                    {{ demo_project.members|length }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span><i class="fe fe-percent mr-2"></i>项目进度</span>
+                                                </div>
+                                                <div class="col" name="" format="float">
+                                                    <div class="progress progress-sm">
+                                                        <div class="progress-bar" role="progressbar" style="width:{{ demo_project.percent or 0 }}%;" aria-valuenow="{{ demo_project.percent or 0 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-auto text-muted" name="percent" format="float" enum="">
+                                                    {{ demo_project.percent|int|commas if demo_project.percent is not none else '-' }} %
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item">
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                                                </div>
+                                                <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                                                    {{ demo_project.create_time|datetime if demo_project.create_time is not none else '-' }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                </div></div>
+                                </div>
                             </div>
                         </div>
                     </div>

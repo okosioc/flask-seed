@@ -73,12 +73,7 @@
 {# * #}
 {# * macro - display columns in table #}
 {# * #}
-{% macro display_table_columns(row_path, row_schema, row_layout, row_target=none, excludes=[], columns=[]) %}
-{% if columns %}
-    {% set fields = columns %}
-{% else %}
-    {% set fields = row_layout|fields %}
-{% endif %}
+{% macro display_table_columns(row_path, row_schema, fields, excludes=[], row_target_url=none) %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
 {% for field_name in fields if field_name not in excludes %}
 {% set field_path = row_path~'.'~field_name %}
@@ -90,11 +85,11 @@
     {% endset %}
 {% endif %}
 <td name="{{ field_name }}" format="{{ field_schema.format }}" enum="{{ field_enum }}">
-    {% if row_target and loop.first and field_schema.format != 'link' %}
-    <a href="{{ row_target }}">
+    {% if row_target_url and loop.first and field_schema.format != 'link' %}
+    <a href="{{ row_target_url }}">
     {% endif %}
     {% filter right(4) %}{{ display_inline(field_name, field_path, field_schema, fallback)}}{% endfilter %}
-    {% if row_target and loop.first %}
+    {% if row_target_url and loop.first %}
     </a>
     {% endif %}
 </td>
@@ -103,8 +98,7 @@
 {# * #}
 {# * macro - display list-group-item in a list-group #}
 {# * #}
-{% macro display_list_group_items(item_path, item_schema, item_layout, excludes=[]) %}
-{% set fields = item_layout|fields or item_schema['columns'] %}
+{% macro display_list_group_items(item_path, item_schema, fields, excludes=[]) %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
 {% for field_name in fields if field_name not in excludes %}
 {% set field_path = item_path~'.'~field_name %}

@@ -256,7 +256,7 @@
                                         <label class="custom-control-label"></label>
                                     </div>
                                 </td>
-                                {% filter right(32) %}{{ display_table_columns(related_model.name_snake, related_model_schema, columns=related_columns) }}{% endfilter %}
+                                {% filter right(32) %}{{ display_table_columns(related_model.name_snake, related_model_schema, related_columns) }}{% endfilter %}
                             </tr>
                             {{ '{%' }} endfor {{ '%}' }}
                             <tr style=""><td colspan="{{ related_columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ related_model_schema.title }}！</div></td></tr>

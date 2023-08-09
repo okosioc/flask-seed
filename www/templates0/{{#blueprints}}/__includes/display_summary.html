@@ -1,5 +1,5 @@
 {% if not is_in_card %}
-<div class="card"><div class="card-body">
+<div class="card">
 {% endif %}
 {# a summary can be display in modal or card #}
 {% if field_schema.type == 'object' %}
@@ -8,65 +8,98 @@
 {% set first_field_schema = field_schema.properties[first_field_name] %}
 {% set first_field_rendered = False %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
+{% set subtitle_field_name = fields|match('subtitle|type|category|tag|tags|text|description') %}
 {# can pass a target_url in context #}
-{% set target_url = target_url or generate_url(field_schema.py_type, field_path, 'read') %}
-{# 头图 #}
+{% set target_url = target_url or generate_url(field_schema.py_type, field_path, ['read', 'update', 'upcreate']) %}
+{# image + title + list #}
 {% if first_field_schema.format in ['image'] %}
+{% set excludes = [first_field_name, title_field_name] %}
 <a href="{{ target_url }}">
+    {# TODO: Support image object and multi images #}
     <img src="{{ '{{' }} {{ field_path }}.{{ first_field_name }} {{ '}}' }}" class="card-img-top" alt="...">
 </a>
-{% set first_field_rendered = True %}
-{# 头像 #}
-{% elif first_field_schema.format in ['avatar'] %}
-<div class="row text-center">
-    <div class="col">
-        <div name="{{ first_field_name }}" format="avatar">
-            <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
-                <img src="{{ '{{' }} {{ field_path~'.'~first_field_name }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ field_path~'.'~first_field_name }} {{ '}}' }}">
-                <span fallback={{ title_field_name }} class="avatar-title rounded-circle bg-primary {{ '{{' }} 'd-none' if {{ field_path~'.'~first_field_name }} {{ '}}' }}">{{ '{{' }} {{ field_path~'.'~title_field_name }}|first|upper if {{ field_path~'.'~title_field_name }} is not none {{ '}}' }}</span>
-            </a>
+<div class="{{ 'card-body' if not is_in_card }}">
+    <div class="row align-items-center">
+        <div class="col">
+            <h4 class="{{ 'mb-0' if not subtitle_field_name }}">
+                <a href="{{ target_url }}">{{ '{{' }} {{ model.name_snake }}.{{ title_field_name }} {{ '}}' }}</a>
+            </h4>
+            {% if subtitle_field_name %}
+            <p class="small text-muted mb-0">{{ display_inline(subtitle_field_name, field_path~'.'~subtitle_field_name, field_schema.properties[subtitle_field_name]) }}</p>
+            {% set excludes = excludes + [subtitle_field_name] %}
+            {% endif %}
         </div>
-        <div class="mb-4">
-            <span class="h3 text-primary" name="{{ title_field_name }}" foramt="text">{{ '{{' }} {{ field_path }}.{{ title_field_name }} or '-' {{ '}}' }}</span>
-        </div>
-    </div>
-</div>
-{% set first_field_rendered = True %}
-{# 文本 #}
-{% elif first_field_schema.format in ['text'] %}
-<div class="row text-center ">
-    <div class="col">
-        <div name="{{ first_field_name }}" format="text">
-            <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
-                <span class="avatar-title rounded bg-primary">{{ '{{' }} {{ field_path }}.{{ first_field_name }}|first|upper if {{ field_path }}.{{ first_field_name }} is not none {{ '}}' }}</span>
-            </a>
-        </div>
-        <div class="mb-4">
-            <span class="h3 text-primary" name="{{ title_field_name }}" foramt="text">{{ '{{' }} {{ field_path }}.{{ first_field_name }} or '-' {{ '}}' }}</span>
+        <div class="col-auto">
+            <div class="dropdown">
+                <a href="#" class="dropdown-ellipses dropdown-toggle" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    <i class="fe fe-more-vertical"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="javascript:coming($(this));">ACTION</a>
+                </div>
+            </div>
         </div>
     </div>
+    {% if fields|length > excludes|length %}
+    <div class="list-group list-group-flush border-top">
+        {% filter right(8) %}{{ display_list_group_items(field_path, field_schema, fields, excludes) }}{% endfilter %}
+    </div>
+    {% endif %}
 </div>
-{% set first_field_rendered = True %}
-{# 数字 #}
-{% elif first_field_schema.format in ['int', 'float'] %}
-<div class="row align-items-center text-center">
-    <div class="col">
-        <div class="text-muted mb-2">{{ first_field_schema.title }}{{ '('~first_field_schema.unit~')' if first_field_schema.unit }}</div>
-        <div>
-            <span class="h2 text-primary" name="{{ first_field_name }}" format="{{ first_field_schema.format }}">{{ '{{' }} {{ field_path }}.{{ first_field_name }}|int|commas if {{ field_path }}.{{ first_field_name }} is not none else '-' {{ '}}' }}</span>
+{# first + list #}
+{% else %}
+<div class="{{ 'card-body' if not is_in_card }}">
+    {% if first_field_schema.format in ['avatar'] %}
+    {% set excludes = [first_field_name, title_field_name] %}
+    <div class="row text-center">
+        <div class="col">
+            <div name="{{ first_field_name }}" format="avatar">
+                <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
+                    <img src="{{ '{{' }} {{ field_path~'.'~first_field_name }} or '' {{ '}}' }}" alt="..." class="avatar-img rounded-circle {{ '{{' }} 'd-none' if not {{ field_path~'.'~first_field_name }} {{ '}}' }}">
+                    <span fallback={{ title_field_name }} class="avatar-title rounded-circle bg-primary {{ '{{' }} 'd-none' if {{ field_path~'.'~first_field_name }} {{ '}}' }}">{{ '{{' }} {{ field_path~'.'~title_field_name }}|first|upper if {{ field_path~'.'~title_field_name }} is not none {{ '}}' }}</span>
+                </a>
+            </div>
+            <div class="mb-4">
+                <span class="h3 text-primary" name="{{ title_field_name }}" foramt="text">{{ '{{' }} {{ field_path }}.{{ title_field_name }} or '-' {{ '}}' }}</span>
+            </div>
         </div>
     </div>
+    {% elif first_field_schema.format in ['int', 'float'] %}
+    {% set excludes = [first_field_name] %}
+    <div class="row align-items-center text-center">
+        <div class="col">
+            <div class="text-muted mb-2">{{ first_field_schema.title }}{{ '('~first_field_schema.unit~')' if first_field_schema.unit }}</div>
+            <div>
+                <span class="h2 text-primary" name="{{ first_field_name }}" format="{{ first_field_schema.format }}">{{ '{{' }} {{ field_path }}.{{ first_field_name }}|int|commas if {{ field_path }}.{{ first_field_name }} is not none else '-' {{ '}}' }}</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    {% set excludes = [first_field_name] %}
+    <div class="row text-center">
+        <div class="col">
+            <div name="{{ first_field_name }}" format="text">
+                <a href="{{ target_url }}" class="avatar avatar-xl mt-2 mb-4">
+                    <span class="avatar-title rounded bg-primary">{{ '{{' }} {{ field_path }}.{{ first_field_name }}|first|upper if {{ field_path }}.{{ first_field_name }} is not none {{ '}}' }}</span>
+                </a>
+            </div>
+            <div class="mb-4">
+                <span class="h3 text-primary" name="{{ first_field_name }}" foramt="text">{{ '{{' }} {{ field_path }}.{{ first_field_name }} or '-' {{ '}}' }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if fields|length > excludes|length %}
+    <div class="list-group list-group-flush border-top">
+        {% filter right(8) %}{{ display_list_group_items(field_path, field_schema, fields, excludes) }}{% endfilter %}
+    </div>
+    {% endif %}
 </div>
-{% set first_field_rendered = True %}
 {% endif %}
-{# 其他字段简单罗列 #}
-<div class="list-group list-group-flush border-top">
-    {% set excludes = [first_field_name] if first_field_rendered else [] %}
-    {% filter right(4) %}{{ display_list_group_items(field_path, field_schema, field_layout, excludes) }}{% endfilter %}
-</div>
 {% else %}
 UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
 {% endif %}
 {% if not is_in_card %}
-</div></div>
+</div>
 {% endif %}

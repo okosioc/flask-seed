@@ -70,7 +70,8 @@
                             <input name="{{ item_schema.id_name }}" type="text" value="{{ '{{' }} {{ field_name }}_item.{{ item_schema.id_name }} or '' {{ '}}' }}">
                         </div>
                     </fieldset>
-                    {% filter right(20) %}{{ display_summary('-', field_name+'_item', item_schema, field_layout, true) }}{% endfilter %}
+                    {# do not specify layout param so that we can display item's columns #}
+                    {% filter right(20) %}{{ display_summary('-', field_name+'_item', item_schema, none, true) }}{% endfilter %}
                 {% else %}
                     <fieldset class="object" name="-">
                         {# modal is card-like, so is_in_card is true #}

@@ -24,8 +24,8 @@
     <tbody>
         {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
         <tr class="" name="{{ '{{' }} loop.index0 {{ '}}' }}">
-            {% set target = generate_url(item_schema.py_type, field_name~'_item', 'read') if field_schema.is_relation else none %}
-            {% filter right(12) %}{{ display_table_columns(field_name~'_item', item_schema, field_layout, row_target=target, excludes=excludes.value) }}{% endfilter %}
+            {% set target_url = generate_url(item_schema.py_type, field_name~'_item', 'read') if field_schema.is_relation else none %}
+            {% filter right(12) %}{{ display_table_columns(field_name~'_item', item_schema, fields, excludes.value, target_url) }}{% endfilter %}
         </tr>
         {{ '{%' }} else {{ '%}' }}
         <tr><td colspan="{{ fields|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>

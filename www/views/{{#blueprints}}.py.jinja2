@@ -30,21 +30,18 @@
                 {# relation logic #}
                 {% if column_schema.is_relation %}
                     {% set related_model_name = inner_schema.py_type %}
-                    {% set projection = (column_layout or inner_schema)|fields %}
+                    {% set projection = column_layout|fields or column_schema['columns'] %}
                     {# relations_needing_preload is used in action form when loading view #}
                     {% if related_model_name not in render_controls.relations_needing_preload %}
-                        {% set render_controls.relations_needing_preload = render_controls.relations_needing_preload + [related_model_name] %}
-                        {% set render_controls.relations_projection_needing_preload = projection %}
+                        {% set render_controls.relations_needing_preload = render_controls.relations_needing_preload + [(related_model_name, projection)] %}
                     {% endif %}
                     {# relations_needing_search is used in action form when searching related models #}
                     {% if column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
-                        {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [related_model_name] %}
-                        {% set render_controls.relations_projection_needing_search = projection %}
+                        {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [(related_model_name, projection)] %}
                     {% endif %}
                     {# relations_needing_async_load is used in action read #}
                     {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
-                        {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [related_model_name] %}
-                        {% set render_controls.relations_projection_needing_async_load = projection %}
+                        {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [(related_model_name, projection)] %}
                     {% endif %}
                 {# object/array/simple #}
                 {% else %}
@@ -103,9 +100,9 @@ if '{{ field_schema.save_field_name }}' in request.args:
 {# * macro - render snippet for preloading related models in a create/update/upcreate action #}
 {# * #}
 {% macro render_preloads() %}
-{% for relation in render_controls.relations_needing_preload %}
+{% for relation, projection in render_controls.relations_needing_preload %}
 {% set related_model = models[relation] %}
-{{ related_model.name_snake_plural }}, {{ related_model.name_snake_plural }}_pagination = {{ related_model.name }}.search({}, projection={{ render_controls.relations_projection_needing_preload }}, sort=[('create_time', -1)])
+{{ related_model.name_snake_plural }}, {{ related_model.name_snake_plural }}_pagination = {{ related_model.name }}.search({}, projection={{ projection }}, sort=[('create_time', -1)])
 current_app.logger.info(f'Preloaded {len({{ related_model.name_snake_plural }})} {{ related_model.name_title_lower_plural }}')
 preloads.update({'{{ related_model.name_snake_plural }}': {{ related_model.name_snake_plural }}, '{{ related_model.name_snake_plural }}_pagination': dict({{ related_model.name_snake_plural }}_pagination), })
 {% endfor %}
@@ -219,7 +216,7 @@ def {{ view.name_snake }}():
 {# define post function in read #}
 {% if action == 'read' %}
 {# define load relation function in read, i.e, loading events monthly in a calendar #}
-{% for relation in render_controls.relations_needing_async_load %}
+{% for relation, projection in render_controls.relations_needing_async_load %}
 {% set related_model = models[relation] %}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/load-{{ related_model.name_kebab_plural }}', methods=('POST',))
 {{ generate_permisson(blueprint.name) -}}
@@ -228,7 +225,7 @@ def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to load {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')
-    {{ related_model.name_snake_plural }}, pagination = {{ related_model.name }}.search(condition, page, projection={{ render_controls.relations_projection_needing_async_load }}, sort=sort)
+    {{ related_model.name_snake_plural }}, pagination = {{ related_model.name }}.search(condition, page, projection={{ projection }}, sort=sort)
     return jsonify(error=0, message='Load {{ related_model.name_title_lower }} successfully.', pagination=dict(pagination), {{ related_model.name_snake_plural }}={{ related_model.name_snake_plural }})
 
 
@@ -259,7 +256,7 @@ def {{ view.name_snake }}_{{ action }}():
 
 
 {# define search relation function in create/update/upcreate #}
-{% for relation in render_controls.relations_needing_search %}
+{% for relation, projection in render_controls.relations_needing_search %}
 {% set related_model = models[relation] %}
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/search-{{ related_model.name_kebab_plural }}', methods=('POST',))
 {{ render_permisson(blueprint.name) -}}
@@ -268,7 +265,7 @@ def {{ view.name_snake }}_search_{{ related_model.name_snake_plural }}():
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to search {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')
-    {{ related_model.name_snake_plural }}, pagination = {{ related_model.name }}.search(condition, page, projection={{ render_controls.relations_projection_needing_search }}, sort=sort)
+    {{ related_model.name_snake_plural }}, pagination = {{ related_model.name }}.search(condition, page, projection={{ projection }}, sort=sort)
     return jsonify(error=0, message='Search {{ related_model.name_title_lower }} successfully.', pagination=dict(pagination), {{ related_model.name_snake_plural }}={{ related_model.name_snake_plural }})
 
 

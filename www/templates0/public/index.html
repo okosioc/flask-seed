@@ -1,0 +1,10 @@
+{% extends "layout-public.html" %}
+{% set title = '首页' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+    {% include 'includes/basic-promo.html' %}
+    {% include 'includes/basic-features.html' %}
+    {% include 'includes/basic-feature-1.html' %}
+    {% include 'includes/basic-feature-2.html' %}
+    {% include 'includes/basic-pricing.html' %}
+{% endblock %}

@@ -259,6 +259,11 @@
                                 </th>
                                 <th>头像</th>
                                 <th>用户名</th>
+                                <th>用户状态</th>
+                                <th>用户角色</th>
+                                <th>登录邮箱</th>
+                                <th>手机号</th>
+                                <th>创建时间</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -270,8 +275,11 @@
                                         <label class="custom-control-label"></label>
                                     </div>
                                 </td>
-                                <td name="id" format="int" enum="">
-                                    {{ demo_user.id|int|commas if demo_user.id is not none else '-' }} 
+                                <td name="avatar" format="avatar" enum="">
+                                    <div class="avatar avatar-sm">
+                                        <img src="{{ demo_user.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_user.avatar }}">
+                                        <span fallback=name class="avatar-title bg-primary-soft rounded-circle text-primary {{ 'd-none' if demo_user.avatar }}">{{ demo_user.name|first|upper if demo_user.name is not none }}</span>
+                                    </div>
                                 </td>
                                 <td name="name" format="text" enum="">
                                     {{ demo_user.name or '-' }}
@@ -284,54 +292,18 @@
                                     {{ ' ' if not loop.fist }}{% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
                                     {% endfor %}
                                 </td>
-                                <td name="type" format="select" enum="DemoUserType">
-                                    {% if demo_user.type is not none %}{{ enum_titles('DemoUserType')[demo_user.type] }}{% else %}-{% endif %}
-                                </td>
-                                <td name="due_date" format="date" enum="">
-                                    {{ demo_user.due_date|date if demo_user.due_date is not none else '-' }}
-                                </td>
                                 <td name="email" format="text" enum="">
                                     {{ demo_user.email or '-' }}
-                                </td>
-                                <td name="password" format="password" enum="">
-                                    {{ demo_user.password or '-' }}
                                 </td>
                                 <td name="phone" format="text" enum="">
                                     {{ demo_user.phone or '-' }}
                                 </td>
-                                <td name="avatar" format="avatar" enum="">
-                                    <div class="avatar avatar-sm">
-                                        <img src="{{ demo_user.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_user.avatar }}">
-                                        <span fallback=name class="avatar-title bg-primary-soft rounded-circle text-primary {{ 'd-none' if demo_user.avatar }}">{{ demo_user.name|first|upper if demo_user.name is not none }}</span>
-                                    </div>
-                                </td>
-                                <td name="intro" format="textarea" enum="">
-                                    {{ demo_user.intro or '-' }}
-                                </td>
-                                <td name="team" format="" enum="">
-                                    {{ demo_user.team.name or '-' }}
-                                </td>
-                                <td name="team_id" format="int" enum="">
-                                    {{ demo_user.team_id|int|commas if demo_user.team_id is not none else '-' }} 
-                                </td>
-                                <td name="team_join_time" format="datetime" enum="">
-                                    {{ demo_user.team_join_time|datetime if demo_user.team_join_time is not none else '-' }}
-                                </td>
-                                <td name="update_time" format="datetime" enum="">
-                                    {{ demo_user.update_time|datetime if demo_user.update_time is not none else '-' }}
-                                </td>
                                 <td name="create_time" format="datetime" enum="">
                                     {{ demo_user.create_time|datetime if demo_user.create_time is not none else '-' }}
                                 </td>
-                                <td name="projects" format="grid" enum="">
-                                    {{ demo_user.projects|length }}
-                                </td>
-                                <td name="tasks" format="table" enum="">
-                                    {{ demo_user.tasks|length }}
-                                </td>
                             </tr>
                             {% endfor %}
-                            <tr style=""><td colspan="3"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></td></tr>
+                            <tr style=""><td colspan="8"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></td></tr>
                         </tbody>
                     </table>
                     <ul class="pagination border-top mb-0" style="padding:1rem;display:none;"></ul>

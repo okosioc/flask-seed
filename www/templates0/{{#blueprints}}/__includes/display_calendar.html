@@ -3,7 +3,7 @@
 {% endif %}
 {% if field_schema.type == 'array' %}
 {% set item_schema = field_schema['items'] %}
-{% set title_field_name = (field_layout or item_schema)|field('title|name|\\w*name') %}
+{% set title_field_name = field_layout|field('title|name|\\w*name') or item_schema['columns'] %}
 {{ '{%' }} set calendar_id = randstr() {{ '%}' }}
 <div id="calendar-{{ '{{' }} calendar_id {{ '}}' }}"></div>
 {# FullCalendar is big and complex in configration, and there is always only one instance in a page, so we init full calendar here but not in js. #}

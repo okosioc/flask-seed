@@ -7,7 +7,7 @@
 {% set grid_type = view.params.grid_type or 'default' %}
 {% set schema = model.schema %}
 {% set layout = view.rows %}
-{% set fields = (layout or schema)|fields %}
+{% set fields = layout|fields or schema['columns'] %}
 {% set first_field_name = fields[0] %}
 {% set first_field_schema = schema.properties[first_field_name] %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}

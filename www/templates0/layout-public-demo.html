@@ -13,8 +13,8 @@
     <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon">
     {% block style %}
     {% endblock %}
-    <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css"/>
-    <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css" />
+    <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css" />
 </head>
 <body>
 {% set nav = {
@@ -78,45 +78,7 @@
     {% block content %}
     {% endblock %}
 </div>
-{% set footer = {
-    'title': 'flask-seed',
-    'subtitle': '数据结构+项目模板=种子项目',
-    'action': {'title': '免费试用<i class="fe fe-arrow-right d-none d-md-inline ml-2"></i>', 'url': '/dashboard'},
-    'remarks': '2023 © koidesk.com',
-} %}
-<footer class="bg-dark text-white">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="py-6">
-                    <div class="row align-items-center">
-                        <div class="col-md-8 mb-4 mb-md-0">
-                            <div>
-                                <h3 class="text-white mb-3">{{ footer.title }}</h3>
-                                <p class="text-white-50 mo-mb-20 mb-0">{{ footer.subtitle }}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-md-right">
-                                <a href="{{ footer.action.url }}" class="btn btn-white">{{ footer.action.title|safe }}</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <hr class="my-0" style="border-top:1px solid rgba(255, 255, 255, 0.1);">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="py-3">
-                    <div class="text-center">
-                        <p class="text-white-50">{{ footer.remarks }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
+{% include 'includes/basic-footer.html' %}
 <script src="{{ base() }}/assets/js/vendor.min.js"></script>
 <script src="{{ base() }}/js/app.min.js?{{ version() }}"></script>
 {% block script %}

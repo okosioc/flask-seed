@@ -1,0 +1,12 @@
+{% set footer = blocks['footer'] or {
+    'remarks': '2023 © flask-seed.com',
+} %}
+<footer class="footer py-3">
+    <div class="container-{{ 'fluid' if nav_mode == 'side' else 'xxl'}}">
+        <div class="row">
+            <div class="col">
+                <div class="text-right text-muted">{{ footer.remarks }}</div>
+            </div>
+        </div>
+    </div>
+</footer>

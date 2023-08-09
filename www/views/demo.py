@@ -162,7 +162,7 @@ def task_edit():
             demo_task.project = DemoProject.find_one(project_id)
             args.append(('project_id', project_id))
     #
-    demo_users, demo_users_pagination = DemoUser.search({}, projection=['id', 'name', 'status', 'roles', 'type', 'due_date', 'email', 'password', 'phone', 'avatar', 'intro', 'team', 'team_id', 'team_join_time', 'update_time', 'create_time', 'projects', 'tasks'], sort=[('create_time', -1)])
+    demo_users, demo_users_pagination = DemoUser.search({}, projection=['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time'], sort=[('create_time', -1)])
     current_app.logger.info(f'Preloaded {len(demo_users)} demo users')
     preloads.update({'demo_users': demo_users, 'demo_users_pagination': dict(demo_users_pagination), })
     #

@@ -3,21 +3,21 @@
 {% endif %}
 {# a summary can be display in modal or card #}
 {% if field_schema.type == 'object' %}
-{% set fields = (field_layout or field_schema)|fields %}
+{% set fields = field_layout|fields or field_schema['columns'] %}
 {% set first_field_name = fields[0] %}
-{% set first_field = field_schema.properties[first_field_name] %}
+{% set first_field_schema = field_schema.properties[first_field_name] %}
 {% set first_field_rendered = False %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
 {# can pass a target_url in context #}
 {% set target_url = target_url or generate_url(field_schema.py_type, field_path, 'read') %}
 {# 头图 #}
-{% if first_field.format in ['image'] %}
+{% if first_field_schema.format in ['image'] %}
 <a href="{{ target_url }}">
     <img src="{{ '{{' }} {{ field_path }}.{{ first_field_name }} {{ '}}' }}" class="card-img-top" alt="...">
 </a>
 {% set first_field_rendered = True %}
 {# 头像 #}
-{% elif first_field.format in ['avatar'] %}
+{% elif first_field_schema.format in ['avatar'] %}
 <div class="row text-center">
     <div class="col">
         <div name="{{ first_field_name }}" format="avatar">
@@ -33,7 +33,7 @@
 </div>
 {% set first_field_rendered = True %}
 {# 文本 #}
-{% elif first_field.format in ['text'] %}
+{% elif first_field_schema.format in ['text'] %}
 <div class="row text-center ">
     <div class="col">
         <div name="{{ first_field_name }}" format="text">
@@ -48,12 +48,12 @@
 </div>
 {% set first_field_rendered = True %}
 {# 数字 #}
-{% elif first_field.format in ['int', 'float'] %}
+{% elif first_field_schema.format in ['int', 'float'] %}
 <div class="row align-items-center text-center">
     <div class="col">
-        <div class="text-muted mb-2">{{ first_field.title }}{{ '('~first_field.unit~')' if first_field.unit }}</div>
+        <div class="text-muted mb-2">{{ first_field_schema.title }}{{ '('~first_field_schema.unit~')' if first_field_schema.unit }}</div>
         <div>
-            <span class="h2 text-primary" name="{{ first_field_name }}" format="{{ first_field.format }}">{{ '{{' }} {{ field_path }}.{{ first_field_name }}|int|commas if {{ field_path }}.{{ first_field_name }} is not none else '-' {{ '}}' }}</span>
+            <span class="h2 text-primary" name="{{ first_field_name }}" format="{{ first_field_schema.format }}">{{ '{{' }} {{ field_path }}.{{ first_field_name }}|int|commas if {{ field_path }}.{{ first_field_name }} is not none else '-' {{ '}}' }}</span>
         </div>
     </div>
 </div>

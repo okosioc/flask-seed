@@ -73,8 +73,12 @@
 {# * #}
 {# * macro - display columns in table #}
 {# * #}
-{% macro display_table_columns(row_path, row_schema, row_layout, row_target=none, excludes=[]) %}
-{% set fields = (row_layout or row_schema)|fields %}
+{% macro display_table_columns(row_path, row_schema, row_layout, row_target=none, excludes=[], columns=[]) %}
+{% if columns %}
+    {% set fields = columns %}
+{% else %}
+    {% set fields = row_layout|fields %}
+{% endif %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
 {% for field_name in fields if field_name not in excludes %}
 {% set field_path = row_path~'.'~field_name %}
@@ -100,7 +104,7 @@
 {# * macro - display list-group-item in a list-group #}
 {# * #}
 {% macro display_list_group_items(item_path, item_schema, item_layout, excludes=[]) %}
-{% set fields = (item_layout or item_schema)|fields %}
+{% set fields = item_layout|fields or item_schema['columns'] %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
 {% for field_name in fields if field_name not in excludes %}
 {% set field_path = item_path~'.'~field_name %}

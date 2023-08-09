@@ -44,16 +44,13 @@
                 {# relation logic #}
                 {% if column_schema.is_relation %}
                     {% set related_model_name = inner_schema.py_type %}
-                    {% set projection = (column_layout or inner_schema)|fields %}
                     {# relations_needing_search is used in action form when searching related models #}
                     {% if column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
                         {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [related_model_name] %}
-                        {% set render_controls.relations_projection_needing_search = projection %}
                     {% endif %}
                     {# relations_needing_async_load is used in action read #}
                     {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
                         {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [related_model_name] %}
-                        {% set render_controls.relations_projection_needing_async_load = projection %}
                     {% endif %}
                 {# object/array/simple #}
                 {% else %}
@@ -158,7 +155,8 @@
 {% for relation in render_controls.relations_needing_search %}
 {% set related_model = models[relation] %}
 {% set related_model_schema = related_model.schema %}
-{% set title_field_name = related_model_schema|field('title|name|\\w*name') %}
+{% set related_columns = related_model_schema['columns'] %}
+{% set title_field_name = related_columns|match('title|name|\\w*name') %}
 <div class="modal fade search-modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
      id="search-{{ related_model.name_kebab_plural }}"
      relation-url="{{ '{{' }} request.path {{ '}}' }}/search-{{ related_model.name_kebab_plural }}"
@@ -243,7 +241,7 @@
                                         <label class="custom-control-label" for="checkbox-all-{{ related_model.name_kebab_plural }}"></label>
                                     </div>
                                 </th>
-                                {% for f in render_controls.relations_projection_needing_search %}
+                                {% for f in related_columns %}
                                 {% set fs = related_model_schema.properties[f] %}
                                 <th>{{ fs.title }}{{ '(' + fs.unit + ')' if fs.unit }}</th>
                                 {% endfor %}
@@ -258,10 +256,10 @@
                                         <label class="custom-control-label"></label>
                                     </div>
                                 </td>
-                                {% filter right(32) %}{{ display_table_columns(related_model.name_snake, related_model_schema) }}{% endfilter %}
+                                {% filter right(32) %}{{ display_table_columns(related_model.name_snake, related_model_schema, columns=related_columns) }}{% endfilter %}
                             </tr>
                             {{ '{%' }} endfor {{ '%}' }}
-                            <tr style=""><td colspan="{{ render_controls.relations_projection_needing_search|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ related_model_schema.title }}！</div></td></tr>
+                            <tr style=""><td colspan="{{ related_columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ related_model_schema.title }}！</div></td></tr>
                         </tbody>
                     </table>
                     <ul class="pagination border-top mb-0" style="padding:1rem;display:none;"></ul>

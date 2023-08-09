@@ -105,6 +105,7 @@ class DemoUser(CacheModel, UserMixin):
     #
     __icon__ = 'user'
     __title__ = '用户'
+    __columns__ = ['avatar', 'name', 'status', 'roles', 'email', 'phone', 'create_time']
     #
     __views__ = {
         'www://demo/user-profile': '''#!update?extends=layout-dash-demo&title=用户设置

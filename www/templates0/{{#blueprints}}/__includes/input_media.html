@@ -4,7 +4,7 @@
 {% if field_schema.type == 'array' %}
 {% set item_schema = field_schema['items'] %}
 {# First field should be media, i.e, image or video #}
-{% set fields = (field_layout or item_schema)|fields %}
+{% set fields = field_layout|fields or item_schema['columns'] %}
 {% set first_field_name = fields[0] %}
 {% set first_field_schema = item_schema.properties[first_field_name] %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}

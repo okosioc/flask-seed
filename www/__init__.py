@@ -166,8 +166,9 @@ def configure_i18n(app):
         else:
             return None
 
-    #
     Babel(app, locale_selector=get_locale)
+    # Support inline gettext by _(), , e.g, <h1>_(Welcome)</h1>, <p>_(This is a paragraph)</p>
+    app.jinja_env.add_extension('py3seed.ext.InlineGettext')
 
 
 def configure_schedulers(app):

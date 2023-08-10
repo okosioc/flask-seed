@@ -61,7 +61,7 @@ def project_edit():
 @demo.route('/project-edit-upcreate', methods=('POST',))
 @auth_permission
 def project_edit_upcreate():
-    """ Upcreate demo project. """
+    """ 提交项目编辑. """
     req_demo_project = populate_model(request.form, DemoProject)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo project with id {id_}: {req_demo_project}')
@@ -94,7 +94,7 @@ def project_edit_upcreate():
 @demo.route('/project-edit/search-demo-users', methods=('POST',))
 @auth_permission
 def project_edit_search_demo_users():
-    """ Search demo user. """
+    """ 查找用户. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, DemoUser)
     current_app.logger.info(f'Try to search demo user at page {page} by {condition}, sort by {sort}')
@@ -154,7 +154,7 @@ def task_edit():
 @demo.route('/task-edit-upcreate', methods=('POST',))
 @auth_permission
 def task_edit_upcreate():
-    """ Upcreate demo task. """
+    """ 提交任务编辑. """
     req_demo_task = populate_model(request.form, DemoTask)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo task with id {id_}: {req_demo_task}')
@@ -198,7 +198,7 @@ def team_profile():
 @demo.route('/team-profile-update', methods=('POST',))
 @auth_permission
 def team_profile_update():
-    """ Update demo team. """
+    """ 提交团队设置. """
     req_demo_team = populate_model(request.form, DemoTeam)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo team with id {id_}: {req_demo_team}')
@@ -247,7 +247,7 @@ def user_profile():
 @demo.route('/user-profile-update', methods=('POST',))
 @auth_permission
 def user_profile_update():
-    """ Update demo user. """
+    """ 提交用户设置. """
     req_demo_user = populate_model(request.form, DemoUser)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo user with id {id_}: {req_demo_user}')

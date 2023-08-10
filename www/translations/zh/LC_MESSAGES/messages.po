@@ -1,0 +1,105 @@
+# Chinese translations for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-08-10 17:28+0800\n"
+"PO-Revision-Date: 2023-08-10 17:29+0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh\n"
+"Language-Team: zh <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: www/templates0/demo/project-edit.html:289
+msgid "search"
+msgstr "查找"
+
+#: www/templates0/demo/project-edit.html:290
+msgid "reset"
+msgstr "重置"
+
+#: www/tools/helpers.py:26
+msgid "just now"
+msgstr ""
+
+#: www/tools/helpers.py:40
+#, python-format
+msgid "%(num)s year"
+msgid_plural "%(num)s years"
+msgstr[0] ""
+
+#: www/tools/helpers.py:41
+#, python-format
+msgid "%(num)s month"
+msgid_plural "%(num)s months"
+msgstr[0] ""
+
+#: www/tools/helpers.py:42
+#, python-format
+msgid "%(num)s week"
+msgid_plural "%(num)s weeks"
+msgstr[0] ""
+
+#: www/tools/helpers.py:43
+#, python-format
+msgid "%(num)s day"
+msgid_plural "%(num)s days"
+msgstr[0] ""
+
+#: www/tools/helpers.py:44
+#, python-format
+msgid "%(num)s hour"
+msgid_plural "%(num)s hours"
+msgstr[0] ""
+
+#: www/tools/helpers.py:45
+#, python-format
+msgid "%(num)s minute"
+msgid_plural "%(num)s minutes"
+msgstr[0] ""
+
+#: www/tools/helpers.py:46
+#, python-format
+msgid "%(num)s second"
+msgid_plural "%(num)s seconds"
+msgstr[0] ""
+
+#: www/tools/helpers.py:51
+#, python-format
+msgid "%(period)s ago"
+msgstr ""
+
+#: www/views/public.py:58 www/views/public.py:101
+msgid "Email is required!"
+msgstr ""
+
+#: www/views/public.py:59 www/views/public.py:102
+msgid "Invalid email address!"
+msgstr ""
+
+#: www/views/public.py:61 www/views/public.py:105 www/views/public.py:110
+msgid "Password is required!"
+msgstr ""
+
+#: www/views/public.py:107
+msgid ""
+"Password length should between 8 and 16, and should contains at least one"
+" letter and one number!"
+msgstr ""
+
+#: www/views/public.py:111
+msgid "Password mismatched!"
+msgstr ""
+
+#: www/views/public.py:113
+msgid "Please agree our terms and conditions!"
+msgstr ""
+

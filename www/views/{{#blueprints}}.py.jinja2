@@ -163,7 +163,7 @@ from core.models import {{ blueprint.views|map(attribute='model')|map(attribute=
 @{{ blueprint.name_snake }}.route('/{{ view.name }}')
 {{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}():
-    """ {{ view.params.title if view.params.title else (action|capitalize ~ ' ' ~ model.schema.title) }}. """
+    """ {{ view.params.title }}. """
     {# read #}
     {% if action == 'read' %}
     id_ = get_id({{ model.schema.id_type }})
@@ -221,7 +221,7 @@ def {{ view.name_snake }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/load-{{ related_model.name_kebab_plural }}', methods=('POST',))
 {{ generate_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
-    """ Load {{ related_model.name_title_lower }}. """
+    """ $$(text_load){{ related_model.name_title_lower }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to load {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')
@@ -236,7 +236,7 @@ def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}-{{ action }}', methods=('POST',))
 {{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_{{ action }}():
-    """ {{ action|capitalize ~ ' ' ~ model.name_title_lower }}. """
+    """ $$(text_post){{ view.params.title }}. """
     req_{{ model.name_snake }} = populate_model(request.form, {{ model.name }})
     id_ = get_id({{ model.schema.id_type }})
     current_app.logger.info(f'Try to save {{ model.name_title_lower }} with id {id_}: {{ '{' }}req_{{ model.name_snake }}{{ '}' }}')
@@ -261,7 +261,7 @@ def {{ view.name_snake }}_{{ action }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}/search-{{ related_model.name_kebab_plural }}', methods=('POST',))
 {{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_search_{{ related_model.name_snake_plural }}():
-    """ Search {{ related_model.name_title_lower }}. """
+    """ $$(text_search){{ related_model.schema.title }}. """
     page, sort = request.form.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
     search, condition = populate_search(request.form, {{ related_model.name }})
     current_app.logger.info(f'Try to search {{ related_model.name_title_lower }} at page {page} by {condition}, sort by {sort}')

@@ -46,5 +46,6 @@ venv/
 .ipynb_checkpoints/
 
 # pyseed
-*.*.11
-*.*.111
+*.*.BASE
+*.*.THIS
+*.*.OTHER

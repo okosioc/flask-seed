@@ -15,6 +15,8 @@ import qiniu
 
 
 class QiniuSupport(object):
+    """ This class is a wrapper of Qiniu client. """
+
     def __init__(self, app=None):
         self.app = app
         self.auth = None

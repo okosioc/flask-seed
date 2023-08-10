@@ -15753,6 +15753,18 @@ a.card-img-overlay:hover {
 .modal-content > .modal-body > .list-group:last-child {
   margin-bottom: -0.75rem;
 }
+.card > .card-body > div > .list-group:first-child,
+.card > .card-body > .object > div > .list-group:first-child,
+.card > .card-body > .array > div > .list-group:first-child,
+.modal-content > .modal-body > div > .list-group:first-child {
+  margin-top: -0.75rem;
+}
+.card > .card-body > div > .list-group:last-child,
+.card > .card-body > .object > div > .list-group:last-child,
+.card > .card-body > .array > div > .list-group:last-child,
+.modal-content > .modal-body > div > .list-group:last-child {
+  margin-bottom: -0.75rem;
+}
 .card > .card-body > .array-actions:last-child,
 .card > .card-body > .object > .array-actions:last-child,
 .card > .card-body > .array > .array-actions:last-child,

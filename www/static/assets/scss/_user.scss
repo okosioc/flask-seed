@@ -840,6 +840,14 @@ a.card-img-overlay {
     margin-bottom: -0.75rem;
   }
 
+  > div > .list-group:first-child {
+    margin-top: -0.75rem;
+  }
+
+  > div > .list-group:last-child {
+    margin-bottom: -0.75rem;
+  }
+
   // actions
   > .array-actions:last-child {
     margin-bottom: 0;

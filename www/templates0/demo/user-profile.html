@@ -99,7 +99,7 @@
                                     <label class=""><span class="text-danger mr-1">*</span>用户名</label>
                                     <input name="name" type="text" class="form-control" required
                                            value="{{ demo_user.name or '' }}">
-                                    <div class="invalid-feedback">请输入正确的用户名!</div>
+                                    <div class="invalid-feedback">__(Invalid )用户名__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                                     <label class="">手机号</label>
                                     <input name="phone" type="text" class="form-control" 
                                            value="{{ demo_user.phone or '' }}">
-                                    <div class="invalid-feedback">请输入正确的手机号!</div>
+                                    <div class="invalid-feedback">__(Invalid )手机号__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -119,7 +119,7 @@
                                     <label class="">个人简介</label>
                                     <textarea name="intro" rows="5"
                                               class="form-control autosize" >{{ demo_user.intro or '' }}</textarea>
-                                    <div class="invalid-feedback">请输入正确的个人简介!</div>
+                                    <div class="invalid-feedback">__(Invalid )个人简介__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -135,8 +135,8 @@
                                            data-preview='{"image":"?imageView2/1/w/200/h/200/","video":""}'
                                            data-suffix='{"image":"?imageView2/1/w/200/h/200/","video":""}'
                                            data-filters='{"mime_types":"{{ upload_config.mimes_image|join(", ") }}"}'
-                                           data-hiddens="url">选择图片...</a>
-                                        <small class="mt-2 form-text text-muted">支持的图片格式有 {{ upload_config.mimes_image|join(', ') }}</small>
+                                           data-hiddens="url">__(Choose Image)...</a>
+                                        <small class="mt-2 form-text text-muted">__(Availabe formats: ){{ upload_config.mimes_image|join(', ') }}</small>
                                         <div class="plupload-input-result image-input-result mt-1 clearfix">
                                             {% if demo_user.avatar %}
                                             <div class="image uploaded" style="width: auto">
@@ -150,7 +150,7 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="invalid-feedback">请上传头像!</div>
+                                    <div class="invalid-feedback">__(Please upload )头像__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -161,7 +161,7 @@
         </fieldset>
     </form>
     <div class="form-actions mb-4">
-        <a class="btn btn-primary mr-2" onclick="user_profile_update($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        <a class="btn btn-primary mr-2" onclick="user_profile_update($(this));"><i class="fe fe-save mr-1"></i>__(Save)</a>
     </div>
 </div>
 {% endblock %}
@@ -179,14 +179,14 @@
         if (btn.is(".doing")) {
             return;
         }
-        var msg = "确定要保存么?";
+        var msg = "__(Are you sure to save)__(?)";
         var con = window.confirm(msg);
         if (!con) {
             return false;
         }
         var param = process_form($("#user-profile"));
         if (!param["valid"]) {
-            showError('检测到不正确的数据, 请更正后重试!');
+            showError('__(Found invalid data, please correct and retry)__(!)');
             return false;
         }
         //

@@ -27,7 +27,7 @@
             <div class="form-group col-sm-auto mb-4">
                 <label class="sr-only">项目状态</label>
                 <select class="custom-select" name="search.status" >
-                    <option value="">请选择项目状态...</option>
+                    <option value="">项目状态...</option>
                     {% for value, label in enum_titles('DemoProjectStatus')|items %}
                     <option value="{{ value }}" {{ 'selected' if value==search.status }}>{{ label }}</option>
                     {% endfor %}
@@ -43,8 +43,8 @@
                 </div>
             </div>
             <div class="col-sm-auto mb-4">
-                <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">查找</button>
-                <button type="button" class="btn btn-light btn-default" onclick="search_reset();">重置</button>
+                <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">__(Search)</button>
+                <button type="button" class="btn btn-light btn-default" onclick="search_reset();">__(Reset)</button>
             </div>
         </div>
     </form>
@@ -52,7 +52,7 @@
         <div class="alert alert-light mb-4">
             <div class="row align-items-center">
                 <div class="col-sm">
-                    <i class="fe fe-info mr-2"></i>您选择了<span id="span-checked" class="text-primary mx-1"></span>个项目
+                    <i class="fe fe-info mr-2"></i>__(Choosed )<span id="span-checked" class="text-primary mx-1"></span>
                 </div>
                 <div class="col-sm-auto">
                     <button type="button" class="btn btn-primary btn-default" onclick="coming($(this));">ACTION</button>
@@ -155,7 +155,7 @@
     {% include 'includes/pagination.html' %}
     </div>
     {% else %}
-    <div class="alert alert-light"><i class="fe fe-alert-circle mr-2"></i>找不到项目!</div>
+    <div class="alert alert-light"><i class="fe fe-alert-circle mr-2"></i>__(No )项目__(!)</div>
     {% endif %}
 </div>
 <script type="text/javascript">

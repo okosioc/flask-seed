@@ -28,7 +28,7 @@
             {% filter right(12) %}{{ display_table_columns(field_name~'_item', item_schema, fields, excludes.value, target_url) }}{% endfilter %}
         </tr>
         {{ '{%' }} else {{ '%}' }}
-        <tr><td colspan="{{ fields|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>
+        <tr><td colspan="{{ fields|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ item_schema.title }}__(!)</div></td></tr>
         {{ '{%' }} endfor {{ '%}' }}
     </tbody>
 </table>
@@ -37,7 +37,7 @@
 {% set target_url = generate_url(item_schema.py_type, actions=['create', 'upcreate']) %}
 {% if target_url !='javascript:;' %}
 <div class="array-actions m1">
-    <a class="btn btn-outline-primary" href="{{ target_url }}?{{ field_schema.save_field_name }}={{ '{{ '~model.name_snake~'.'~model.schema.id_name~' }}' }}">创建{{ item_schema.title }}...</a>
+    <a class="btn btn-outline-primary" href="{{ target_url }}?{{ field_schema.save_field_name }}={{ '{{ '~model.name_snake~'.'~model.schema.id_name~' }}' }}">__(Create ){{ item_schema.title }}...</a>
 </div>
 {% endif %}
 {% endif %}

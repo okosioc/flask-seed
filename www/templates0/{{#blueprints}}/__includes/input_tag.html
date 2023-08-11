@@ -9,12 +9,12 @@
             <small class="fe fe-x ml-2" style="cursor:pointer" onclick="$(this).parent().remove();"></small>
         </span>
         {{ '{%' }} endfor {{ '%}' }}
-        <input class="tag-input" type="text" placeholder="+ 添加{{ field_schema.title }}">
+        <input class="tag-input" type="text" placeholder="+ __(Add ){{ field_schema.title }}">
     </div>
     {% if field_schema.description %}
     <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
     {% endif %}
-    <div class="invalid-feedback">请输入{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Invalid ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}

@@ -16,7 +16,7 @@
     {% if field_schema.description %}
     <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
     {% endif %}
-    <div class="invalid-feedback">请输入正确的{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Invalid ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}

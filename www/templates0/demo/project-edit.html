@@ -24,7 +24,7 @@
                                     <label class=""><span class="text-danger mr-1">*</span>项目名称</label>
                                     <input name="title" type="text" class="form-control" required
                                            value="{{ demo_project.title or '' }}">
-                                    <div class="invalid-feedback">请输入正确的项目名称!</div>
+                                    <div class="invalid-feedback">__(Invalid )项目名称__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -34,7 +34,7 @@
                                     <label class="">项目介绍</label>
                                     <textarea name="description" rows="5"
                                               class="form-control autosize" >{{ demo_project.description or '' }}</textarea>
-                                    <div class="invalid-feedback">请输入正确的项目介绍!</div>
+                                    <div class="invalid-feedback">__(Invalid )项目介绍__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -43,12 +43,12 @@
                                 <div class="form-group string " name="status">
                                     <label class=""><span class="text-danger mr-1">*</span>项目状态</label>
                                     <select class="custom-select select2" name="status" required>
-                                        <option value="">请选择...</option>
+                                        <option value="">__(Choose)...</option>
                                         {% for value, label in enum_titles('DemoProjectStatus')|items %}
                                         <option value="{{ value }}" {{ 'selected' if value==demo_project.status }}>{{ label }}</option>
                                         {% endfor %}
                                     </select>
-                                    <div class="invalid-feedback">请选择项目状态!</div>
+                                    <div class="invalid-feedback">__(Please choose at least one )项目状态__(!)</div>
                                 </div>
                             </div>
                             <div class="col">
@@ -60,7 +60,7 @@
                                            value="{{ demo_project.value if demo_project.value is not none }}">
                                     <div class="input-group-append"><div class="input-group-text">元</div></div>
                                     </div>
-                                    <div class="invalid-feedback">请输入正确的项目价值!</div>
+                                    <div class="invalid-feedback">__(Invalid )项目价值__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                                     <label class=""><span class="text-danger mr-1">*</span>开始日期</label>
                                     <input name="start" type="text" class="form-control date" required
                                            value="{{ demo_project.start or '' }}">
-                                    <div class="invalid-feedback">请输入正确的开始日期!</div>
+                                    <div class="invalid-feedback">__(Invalid )开始日期__(!)</div>
                                 </div>
                             </div>
                             <div class="col">
@@ -78,7 +78,7 @@
                                     <label class=""><span class="text-danger mr-1">*</span>结束日期</label>
                                     <input name="end" type="text" class="form-control date" required
                                            value="{{ demo_project.end or '' }}">
-                                    <div class="invalid-feedback">请输入正确的结束日期!</div>
+                                    <div class="invalid-feedback">__(Invalid )结束日期__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +92,7 @@
                                            value="{{ demo_project.percent if demo_project.percent is not none }}">
                                     <div class="input-group-append"><div class="input-group-text">%</div></div>
                                     </div>
-                                    <div class="invalid-feedback">请输入正确的项目进度!</div>
+                                    <div class="invalid-feedback">__(Invalid )项目进度__(!)</div>
                                 </div>
                             </div>
                             <div class="col">
@@ -220,7 +220,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer py-3">
-                                            <button type="button" class="btn btn-light" onclick="array_action_cancel_modal($(this));">关闭</button>
+                                            <button type="button" class="btn btn-light" onclick="array_action_cancel_modal($(this));">__(Cancel)</button>
                                         </div>
                                     </div>
                                 </div>
@@ -237,9 +237,9 @@
         </fieldset>
     </form>
     <div class="form-actions mb-4">
-        <a class="btn btn-primary mr-2" onclick="project_edit_upcreate($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        <a class="btn btn-primary mr-2" onclick="project_edit_upcreate($(this));"><i class="fe fe-save mr-1"></i>__(Save)</a>
         {% if demo_project.id %}
-        <a href="project-list?id={{ demo_project.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        <a href="project-list?id={{ demo_project.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>__(Cancel)</a>
         {% endif %}
     </div>
 </div>
@@ -286,8 +286,8 @@
                             </div>
                         </div>
                         <div class="col-sm-auto mb-4">
-                            <button type="button" class="btn btn-primary btn-default" onclick="relation_action_search($(this));">__(search)</button>
-                            <button type="button" class="btn btn-light btn-default" onclick="relation_action_search_reset($(this));">__(reset)</button>
+                            <button type="button" class="btn btn-primary btn-default" onclick="relation_action_search($(this));">__(Search)</button>
+                            <button type="button" class="btn btn-light btn-default" onclick="relation_action_search_reset($(this));">__(Reset)</button>
                         </div>
                     </div>
                 </div>
@@ -347,16 +347,16 @@
                                 </td>
                             </tr>
                             {% endfor %}
-                            <tr style=""><td colspan="8"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></td></tr>
+                            <tr style=""><td colspan="8"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No )用户__(!)</div></td></tr>
                         </tbody>
                     </table>
                     <ul class="pagination border-top mb-0" style="padding:1rem;display:none;"></ul>
                 </div>
             </div>
             <div class="modal-footer py-3">
-                <a class="btn btn-light mr-auto"><i class="fe fe-check-square mr-2"></i>选择了<span class="span-checked mx-1 text-primary">0</span>个用户</a>
-                <button type="button" class="btn btn-light" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" onclick="relation_action_choosed_return($(this));" message="请至少选择一个用户！">选择</button>
+                <a class="btn btn-light mr-auto"><i class="fe fe-check-square mr-2"></i>__(Choosed )<span class="span-checked mx-1 text-primary">0</span></a>
+                <button type="button" class="btn btn-light" data-dismiss="modal">__(Close)</button>
+                <button type="button" class="btn btn-primary" onclick="relation_action_choosed_return($(this));" message="__(Please choose at least one )用户__(!)">__(Choose)</button>
             </div>
         </div>
     </div>
@@ -378,14 +378,14 @@
         if (btn.is(".doing")) {
             return;
         }
-        var msg = "确定要保存么?";
+        var msg = "__(Are you sure to save)__(?)";
         var con = window.confirm(msg);
         if (!con) {
             return false;
         }
         var param = process_form($("#project-edit"));
         if (!param["valid"]) {
-            showError('检测到不正确的数据, 请更正后重试!');
+            showError('__(Found invalid data, please correct and retry)__(!)');
             return false;
         }
         //

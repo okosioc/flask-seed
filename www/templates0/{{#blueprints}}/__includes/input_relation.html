@@ -12,14 +12,14 @@
     {% if field_schema.type == 'array' %}
     {{ '{%' }} set selected_ids = {{ field_path }}|map(attribute='{{ related_model_schema.id_name }}')|list {{ '%}' }}
     <select class="custom-select select2 data" name="" {{ 'required' if field_schema.required }} multiple>
-        <option value="">请选择...</option>
+        <option value="">__(Choose)...</option>
         {{ '{%' }} for {{ related_model.name_snake }} in {{ related_model.name_snake_plural }} {{ '%}' }}
         <option value="{{ '{{' }} {{ related_model.name_snake }}.{{ related_model_schema.id_name }} {{ '}}' }}" {{ '{{' }} 'selected' if {{ related_model.name_snake }}.{{ related_model_schema.id_name }} in selected_ids {{ '}}' }}>{{ '{{' }} {{ related_model.name_snake }}.{{ title_field_name }} {{ '}}' }}</option>
         {{ '{%' }} endfor {{ '%}' }}
     </select>
     {% else %}
     <select class="custom-select select2" name="" {{ 'required' if field_schema.required }}>
-        <option value="">请选择...</option>
+        <option value="">__(Choose)...</option>
         {{ '{%' }} for {{ related_model.name_snake }} in {{ related_model.name_snake_plural }} {{ '%}' }}
         <option value="{{ '{{' }} {{ related_model.name_snake }}.{{ related_model_schema.id_name }} {{ '}}' }}" {{ '{{' }} 'selected' if {{ field_path }}.{{ related_model_schema.id_name }} == {{ related_model.name_snake }}.{{ related_model_schema.id_name }} {{ '}}' }}>{{ '{{' }} {{ related_model.name_snake }}.{{ title_field_name }} {{ '}}' }}</option>
         {{ '{%' }} endfor {{ '%}' }}
@@ -28,7 +28,7 @@
     {% if field_schema.description %}
     <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
     {% endif %}
-    <div class="invalid-feedback">请选择{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Please choose at least one ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}
@@ -60,7 +60,7 @@
     {% if field_schema.description %}
     <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
     {% endif %}
-    <div class="invalid-feedback">请输入{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Please choose at least one ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}

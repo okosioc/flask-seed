@@ -131,10 +131,10 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
                     </div>
                 </div>
                 {{ '{%' }} endfor {{ '%}' }}
-                <div class="array-item p-0" style="{{ '{{' }} 'display:none' if {{ column_path }}  {{ '}}' }}"><div class="alert alert-light mb-4"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></div>
+                <div class="array-item p-0" style="{{ '{{' }} 'display:none' if {{ column_path }}  {{ '}}' }}"><div class="alert alert-light mb-4"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ item_schema.title }}!</div></div>
             </div>
             <div class="array-actions mb-4">
-                <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ item_schema.title }}</a>
+                <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>__(Add ){{ item_schema.title }}</a>
             </div>
         {% endif %}
         </fieldset>
@@ -160,11 +160,11 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
         </fieldset>
     </form>
     <div class="form-actions mb-4">
-        <a class="btn btn-primary mr-2" onclick="{{ view.name_snake }}_{{ action }}($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        <a class="btn btn-primary mr-2" onclick="{{ view.name_snake }}_{{ action }}($(this));"><i class="fe fe-save mr-1"></i>__(Save)</a>
         {% set target_url = generate_url(model.schema.py_type, model.name_snake, ['read', 'query']) %}
         {% if target_url != 'javascript:;' %}
         {{ '{%' }} if {{ model.name_snake }}.{{ model.schema.id_name }} {{ '%}' }}
-        <a href="{{ target_url }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        <a href="{{ target_url }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>__(Cancel)</a>
         {{ '{%' }} endif {{ '%}' }}
         {% endif %}
     </div>

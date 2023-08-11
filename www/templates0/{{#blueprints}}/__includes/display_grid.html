@@ -8,7 +8,7 @@
         {% filter right(8) %}{{ display_summary('-', field_name~'_item', item_schema, field_layout, false) }}{% endfilter %}
     </div>
 {{ '{%' }} else {{ '%}' }}
-    <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div>
+    <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ item_schema.title }}__(!)</div>
 {{ '{%' }} endfor {{ '%}' }}
 </div>
 {% else %}

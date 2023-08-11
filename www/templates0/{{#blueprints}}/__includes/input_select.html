@@ -9,7 +9,7 @@
     {% if item_schema.enum %}
     <select class="custom-select select2" name="{{ field_name }}" {{ 'required' if field_schema.required }}
             multiple>
-        <option value="">请选择...</option>
+        <option value="">__(Choose)...</option>
         {{ '{%' }} for value, label in enum_titles('{{ item_schema.py_type }}')|items {{ '%}' }}
         <option value="{{ '{{' }} value {{ '}}' }}" {{ '{{' }} 'selected' if value in {{ field_path }} {{ '}}' }}>{{ '{{' }} label {{ '}}' }}</option>
         {{ '{%' }} endfor {{ '%}' }}
@@ -26,14 +26,14 @@
     {% else %}
     {% if field_schema.enum %}
     <select class="custom-select select2" name="{{ field_name }}" {{ 'required' if field_schema.required }}>
-        <option value="">请选择...</option>
+        <option value="">__(Choose)...</option>
         {{ '{%' }} for value, label in enum_titles('{{ field_schema.py_type }}')|items {{ '%}' }}
         <option value="{{ '{{' }} value {{ '}}' }}" {{ '{{' }} 'selected' if value=={{ field_path }} {{ '}}' }}>{{ '{{' }} label {{ '}}' }}</option>
         {{ '{%' }} endfor {{ '%}' }}
     </select>
     {% else %}
     <select class="custom-select select2" name="{{ field_name }}" {{ 'required' if field_schema.required }}>
-        <option value="">请选择...</option>
+        <option value="">__(Choose)...</option>
         {% if field_schema.depends %}
         {{ '{%' }} for value in {{ field_path }}_depends {{ '%}' }}
         <option value="{{ '{{' }} value {{ '}}' }}" {{ '{{' }} 'selected' if value=={{ field_path }} {{ '}}' }}>{{ '{{' }} value {{ '}}' }}</option>
@@ -49,7 +49,7 @@
     {% if field_schema.description %}
     <small class="mt-2 form-text text-muted">{{ field_schema.description }}</small>
     {% endif %}
-    <div class="invalid-feedback">请选择{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Please choose at least one ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}

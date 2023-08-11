@@ -29,8 +29,8 @@
            data-max="{{ '{{ upload_config.max }}' }}"
            data-preview='{"image":"{{ '{{' }} upload_config.image_preview_sm {{ '}}' }}", "video":"{{ '{{' }} upload_config.video_poster_sm {{ '}}' }}"}'
            data-filters='{"mime_types":"{{ '{{' }} upload_config.mimes_image|join(", ") {{ '}}' }}"}'
-           data-hiddens="{{ hiddens|join(',') }}">选择图片...</a>
-        <small class="mt-2 form-text text-muted">{{ '可上传多张图片；' if field_schema.type == 'array' }}支持的图片格式有 {{ '{{' }} upload_config.mimes_image|join(', ') {{ '}}' }}</small>
+           data-hiddens="{{ hiddens|join(',') }}">__(Choose Image)...</a>
+        <small class="mt-2 form-text text-muted">{{ '__(Support multiple uploads;)' if field_schema.type == 'array' }}__(Availabe formats: ){{ '{{' }} upload_config.mimes_image|join(', ') {{ '}}' }}</small>
         <div class="plupload-input-result image-input-result mt-1 clearfix">
         {% if field_schema.type == 'array' %}
         {% if field_schema['items'].type == 'object' %}
@@ -51,7 +51,7 @@
         {% endif %}
         </div>
     </div>
-    <div class="invalid-feedback">请上传{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Please upload ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}

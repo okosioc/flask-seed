@@ -10,7 +10,7 @@
             {% set column_schema = item_schema.properties[c] %}
             <th>{{ column_schema.title }}{{ '(' + column_schema.unit + ')' if column_schema.unit }}</th>
             {% endfor %}
-            <th>操作</th>
+            <th></th>
         </tr>
     </thead>
     <tbody class="array-items">
@@ -26,7 +26,7 @@
                 <input class="form-control" pattern="[0-9\.]*" name="{{ c }}" {{ 'required' if column_schema.required }} value="{{ '{{' }} {{ column_path }} if {{ column_path }} is not none {{ '}}' }}">
                 {% elif column_schema.format in ['select', 'buttongroup'] %}
                 <select class="custom-select" name="{{ c }}" {{ 'required' if column_schema.required }} {{ 'multiple' if column_schema.type=='array' }}>
-                    <option value="">请选择...</option>
+                    <option value="">__(Choose)...</option>
                     {% if column_schema.type == 'array' %}
                     {% if column_schema['items'].enum %}
                     {% for value, label in column_schema['items'].enum_titles|items %}
@@ -55,11 +55,11 @@
             </td>
         </tr>
         {{ '{%' }} endfor {{ '%}' }}
-        <tr class="array-item" style="{{ '{{' }} 'display:none' if {{ field_path }}  {{ '}}' }}"><td colspan="{{ item_schema.columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>
+        <tr class="array-item" style="{{ '{{' }} 'display:none' if {{ field_path }}  {{ '}}' }}"><td colspan="{{ item_schema.columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ item_schema.title }}__(!)</div></td></tr>
     </tbody>
 </table>
 <div class="table-actions" style="margin-bottom:1rem;">
-    <a class="btn btn-outline-primary mr-2" style="margin:0 1rem;" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ item_schema.title }}</a>
+    <a class="btn btn-outline-primary mr-2" style="margin:0 1rem;" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>__(Add ){{ item_schema.title }}</a>
 </div>
 {% else %}
 UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!

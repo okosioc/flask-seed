@@ -33,14 +33,14 @@
             <label class="sr-only">{{ fs.title }}</label>
             {% if fs.enum %}
             <select class="custom-select" name="{{ path }}" >
-                <option value="">请选择{{ fs.title }}...</option>
+                <option value="">{{ fs.title }}...</option>
                 {{ '{%' }} for value, label in enum_titles('{{ fs.py_type }}')|items {{ '%}' }}
                 <option value="{{ '{{' }} value {{ '}}' }}" {{ '{{' }} 'selected' if value=={{ path }} {{ '}}' }}>{{ '{{' }} label {{ '}}' }}</option>
                 {{ '{%' }} endfor {{ '%}' }}
             </select>
             {% elif fs.type == 'boolean' %}
             <select class="custom-select" name="{{ path }}">
-                <option value="">请选择{{ fs.title }}...</option>
+                <option value="">{{ fs.title }}...</option>
                 <option value="true" {{ '{{' }} 'selected' if value==true {{ '}}' }}>True</option>
                 <option value="false" {{ '{{' }} 'selected' if value==false {{ '}}' }}>False</option>
             </select>
@@ -70,8 +70,8 @@
         </div>
         {% endfor %}
         <div class="col-sm-auto mb-4">
-            <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">查找</button>
-            <button type="button" class="btn btn-light btn-default" onclick="search_reset();">重置</button>
+            <button type="button" class="btn btn-primary btn-default" onclick="search_do($(this));">__(Search)</button>
+            <button type="button" class="btn btn-light btn-default" onclick="search_reset();">__(Reset)</button>
         </div>
     </div>
 </form>
@@ -79,7 +79,7 @@
     <div class="alert alert-light mb-4">
         <div class="row align-items-center">
             <div class="col-sm">
-                <i class="fe fe-info mr-2"></i>您选择了<span id="span-checked" class="text-primary mx-1"></span>个{{ schema.title }}
+                <i class="fe fe-info mr-2"></i>__(Choosed )<span id="span-checked" class="text-primary mx-1"></span>
             </div>
             <div class="col-sm-auto">
                 <button type="button" class="btn btn-primary btn-default" onclick="coming($(this));">ACTION</button>
@@ -132,7 +132,7 @@
 {{ '{%' }} include 'includes/pagination.html' {{ '%}' }}
 </div>
 {{ '{%' }} else {{ '%}' }}
-<div class="alert alert-light"><i class="fe fe-alert-circle mr-2"></i>找不到{{ schema.title }}!</div>
+<div class="alert alert-light"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ schema.title }}__(!)</div>
 {{ '{%' }} endif {{ '%}' }}
 {% endmacro %}
 {# * #}
@@ -187,7 +187,7 @@ TODO
         {{ '{%' }} else {{ '%}' }}
         <tr>
             <td colspan="{{ 2+columns|length }}">
-                <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>找不到{{ schema.title }}!</div>
+                <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ schema.title }}__(!)</div>
             </td>
         </tr>
         {{ '{%' }} endfor {{ '%}' }}

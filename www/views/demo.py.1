@@ -61,7 +61,7 @@ def project_edit():
 @demo.route('/project-edit-upcreate', methods=('POST',))
 @auth_permission
 def project_edit_upcreate():
-    """ 提交项目编辑. """
+    """ 保存项目编辑. """
     req_demo_project = populate_model(request.form, DemoProject)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo project with id {id_}: {req_demo_project}')
@@ -154,7 +154,7 @@ def task_edit():
 @demo.route('/task-edit-upcreate', methods=('POST',))
 @auth_permission
 def task_edit_upcreate():
-    """ 提交任务编辑. """
+    """ 保存任务编辑. """
     req_demo_task = populate_model(request.form, DemoTask)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo task with id {id_}: {req_demo_task}')
@@ -198,7 +198,7 @@ def team_profile():
 @demo.route('/team-profile-update', methods=('POST',))
 @auth_permission
 def team_profile_update():
-    """ 提交团队设置. """
+    """ 保存团队设置. """
     req_demo_team = populate_model(request.form, DemoTeam)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo team with id {id_}: {req_demo_team}')
@@ -247,7 +247,7 @@ def user_profile():
 @demo.route('/user-profile-update', methods=('POST',))
 @auth_permission
 def user_profile_update():
-    """ 提交用户设置. """
+    """ 保存用户设置. """
     req_demo_user = populate_model(request.form, DemoUser)
     id_ = get_id(int)
     current_app.logger.info(f'Try to save demo user with id {id_}: {req_demo_user}')

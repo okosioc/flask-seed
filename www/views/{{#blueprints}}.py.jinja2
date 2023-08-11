@@ -236,7 +236,7 @@ def {{ view.name_snake }}_load_{{ related_model.name_snake_plural }}():
 @{{ blueprint.name_snake }}.route('/{{ view.name }}-{{ action }}', methods=('POST',))
 {{ render_permisson(blueprint.name) -}}
 def {{ view.name_snake }}_{{ action }}():
-    """ $$(text_post){{ view.params.title }}. """
+    """ $$(text_save){{ view.params.title }}. """
     req_{{ model.name_snake }} = populate_model(request.form, {{ model.name }})
     id_ = get_id({{ model.schema.id_type }})
     current_app.logger.info(f'Try to save {{ model.name_title_lower }} with id {id_}: {{ '{' }}req_{{ model.name_snake }}{{ '}' }}')

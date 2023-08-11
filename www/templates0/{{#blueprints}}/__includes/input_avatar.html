@@ -15,8 +15,8 @@ UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.typ
            data-preview='{"image":"?imageView2/1/w/200/h/200/","video":""}'
            data-suffix='{"image":"?imageView2/1/w/200/h/200/","video":""}'
            data-filters='{"mime_types":"{{ '{{' }} upload_config.mimes_image|join(", ") {{ '}}' }}"}'
-           data-hiddens="url">选择图片...</a>
-        <small class="mt-2 form-text text-muted">支持的图片格式有 {{ '{{' }} upload_config.mimes_image|join(', ') {{ '}}' }}</small>
+           data-hiddens="url">__(Choose Image)...</a>
+        <small class="mt-2 form-text text-muted">__(Availabe formats: ){{ '{{' }} upload_config.mimes_image|join(', ') {{ '}}' }}</small>
         <div class="plupload-input-result image-input-result mt-1 clearfix">
             {{ '{%' }} if {{ field_path }} {{ '%}' }}
             <div class="image uploaded" style="width: auto">
@@ -30,7 +30,7 @@ UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.typ
             {{ '{%' }} endif {{ '%}' }}
         </div>
     </div>
-    <div class="invalid-feedback">请上传{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Please upload ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}

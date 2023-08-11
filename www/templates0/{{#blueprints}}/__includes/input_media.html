@@ -80,9 +80,9 @@
                 {% endif %}
                 </div>
                 <div class="modal-footer py-3">
-                    <button type="button" class="btn btn-light" onclick="array_action_cancel_modal($(this));">关闭</button>
+                    <button type="button" class="btn btn-light" onclick="array_action_cancel_modal($(this));">__(Cancel)</button>
                     {% if not field_schema.is_out_relation %}
-                    <button type="button" class="btn btn-primary" onclick="array_action_save_modal($(this));">确定</button>
+                    <button type="button" class="btn btn-primary" onclick="array_action_save_modal($(this));">__(Confirm)</button>
                     {% endif %}
                 </div>
             </div>
@@ -96,7 +96,7 @@
     {% set related_model = models[related_model_name] %}
     <a class="btn btn-outline-primary mr-2" relation-key="{{ related_model.name_kebab_plural }}" relation-return="{{ 'many' if field_schema.type == 'array' else 'one' }}" onclick="relation_action_show_search_modal($(this));" data-title="{{ item_schema.title }}"><i class="fe fe-search mr-1"></i>添加{{ item_schema.title }}...</a>
     {% else %}
-    <a class="btn btn-outline-primary mr-2" onclick="array_action_add_modal($(this));"><i class="fe fe-plus mr-1"></i>添加{{ item_schema.title }}...</a>
+    <a class="btn btn-outline-primary mr-2" onclick="array_action_add_modal($(this));"><i class="fe fe-plus mr-1"></i>_(Add ){{ item_schema.title }}...</a>
     {% endif %}
 </div>
 {% else %}

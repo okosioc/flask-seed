@@ -111,7 +111,7 @@
                                     <label class=""><span class="text-danger mr-1">*</span>任务标题</label>
                                     <input name="title" type="text" class="form-control" required
                                            value="{{ demo_task.title or '' }}">
-                                    <div class="invalid-feedback">请输入正确的任务标题!</div>
+                                    <div class="invalid-feedback">__(Invalid )任务标题__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -120,12 +120,12 @@
                                 <div class="form-group string " name="status">
                                     <label class=""><span class="text-danger mr-1">*</span>任务状态</label>
                                     <select class="custom-select select2" name="status" required>
-                                        <option value="">请选择...</option>
+                                        <option value="">__(Choose)...</option>
                                         {% for value, label in enum_titles('DemoTaskStatus')|items %}
                                         <option value="{{ value }}" {{ 'selected' if value==demo_task.status }}>{{ label }}</option>
                                         {% endfor %}
                                     </select>
-                                    <div class="invalid-feedback">请选择任务状态!</div>
+                                    <div class="invalid-feedback">__(Please choose at least one )任务状态__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -135,7 +135,7 @@
                                     <label class="">任务详情</label>
                                     <textarea name="content" rows="5"
                                               class="form-control autosize" >{{ demo_task.content or '' }}</textarea>
-                                    <div class="invalid-feedback">请输入正确的任务详情!</div>
+                                    <div class="invalid-feedback">__(Invalid )任务详情__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +145,7 @@
                                     <label class="">开始日期</label>
                                     <input name="start" type="text" class="form-control date" 
                                            value="{{ demo_task.start or '' }}">
-                                    <div class="invalid-feedback">请输入正确的开始日期!</div>
+                                    <div class="invalid-feedback">__(Invalid )开始日期__(!)</div>
                                 </div>
                             </div>
                             <div class="col">
@@ -153,7 +153,7 @@
                                     <label class="">结束日期</label>
                                     <input name="end" type="text" class="form-control date" 
                                            value="{{ demo_task.end or '' }}">
-                                    <div class="invalid-feedback">请输入正确的结束日期!</div>
+                                    <div class="invalid-feedback">__(Invalid )结束日期__(!)</div>
                                 </div>
                             </div>
                         </div>
@@ -163,12 +163,12 @@
                                     <div class="form-group relation " name="@" relation-id="id" relation-title="name">
                                         <label class=""><span class="text-danger mr-1">*</span>负责人</label>
                                         <select class="custom-select select2" name="" required>
-                                            <option value="">请选择...</option>
+                                            <option value="">__(Choose)...</option>
                                             {% for demo_user in demo_users %}
                                             <option value="{{ demo_user.id }}" {{ 'selected' if demo_task.user.id == demo_user.id }}>{{ demo_user.name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <div class="invalid-feedback">请选择负责人!</div>
+                                        <div class="invalid-feedback">__(Please choose at least one )负责人__(!)</div>
                                     </div>
                                 </fieldset>
                             </div>
@@ -180,9 +180,9 @@
         </fieldset>
     </form>
     <div class="form-actions mb-4">
-        <a class="btn btn-primary mr-2" onclick="task_edit_upcreate($(this));"><i class="fe fe-save mr-1"></i>保存</a>
+        <a class="btn btn-primary mr-2" onclick="task_edit_upcreate($(this));"><i class="fe fe-save mr-1"></i>__(Save)</a>
         {% if demo_task.id %}
-        <a href="task-detail?id={{ demo_task.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>返回</a>
+        <a href="task-detail?id={{ demo_task.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>__(Cancel)</a>
         {% endif %}
     </div>
 </div>
@@ -202,14 +202,14 @@
         if (btn.is(".doing")) {
             return;
         }
-        var msg = "确定要保存么?";
+        var msg = "__(Are you sure to save)__(?)";
         var con = window.confirm(msg);
         if (!con) {
             return false;
         }
         var param = process_form($("#task-edit"));
         if (!param["valid"]) {
-            showError('检测到不正确的数据, 请更正后重试!');
+            showError('__(Found invalid data, please correct and retry)__(!)');
             return false;
         }
         //

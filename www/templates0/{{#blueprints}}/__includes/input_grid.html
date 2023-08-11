@@ -23,7 +23,7 @@
     {{ '{%' }} endfor {{ '%}' }}
 </div>
 <div class="card-actions mb-4">
-    <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>添加{{ field_schema.title }}</a>
+    <a class="btn btn-outline-primary mr-2" onclick="array_action_add($(this));"><i class="fe fe-plus mr-1"></i>__(Add ){{ field_schema.title }}</a>
 </div>
 {% else %}
 UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!

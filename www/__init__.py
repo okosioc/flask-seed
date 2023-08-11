@@ -152,6 +152,7 @@ def configure_i18n(app):
 
     def get_locale():
         """ Guess locale. """
+        locale = app.config.get('BABEL_DEFAULT_LOCALE')
         if has_request_context() and request:
             # Request a locale and save to session
             rl = request.args.get('_locale', None)
@@ -159,14 +160,16 @@ def configure_i18n(app):
                 accept_languages = app.config.get('ACCEPT_LANGUAGES')
                 if rl not in accept_languages:
                     rl = request.accept_languages.best_match(accept_languages)
+                # Update session
                 session['_locale'] = rl
-
             # Get locale from session, or return default locale
-            return session.get('_locale', app.config.get('BABEL_DEFAULT_LOCALE'))
-        else:
-            return None
+            locale = session.get('_locale', locale)
+        #
+        return locale
 
     Babel(app, locale_selector=get_locale)
+    # Use new style gettext, https://jinja.palletsprojects.com/en/3.0.x/extensions/#new-style-gettext
+    app.jinja_env.newstyle_gettext = True
     # Support inline gettext by _(), , e.g, <h1>_(Welcome)</h1>, <p>_(This is a paragraph)</p>
     app.jinja_env.add_extension('py3seed.ext.InlineGettext')
 

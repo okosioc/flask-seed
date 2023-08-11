@@ -226,8 +226,8 @@
                         </div>
                         {% endfor %}
                         <div class="col-sm-auto mb-4">
-                            <button type="button" class="btn btn-primary btn-default" onclick="relation_action_search($(this));">__(search)</button>
-                            <button type="button" class="btn btn-light btn-default" onclick="relation_action_search_reset($(this));">__(reset)</button>
+                            <button type="button" class="btn btn-primary btn-default" onclick="relation_action_search($(this));">__(Search)</button>
+                            <button type="button" class="btn btn-light btn-default" onclick="relation_action_search_reset($(this));">__(Reset)</button>
                         </div>
                     </div>
                 </div>
@@ -259,16 +259,16 @@
                                 {% filter right(32) %}{{ display_table_columns(related_model.name_snake, related_model_schema, related_columns) }}{% endfilter %}
                             </tr>
                             {{ '{%' }} endfor {{ '%}' }}
-                            <tr style=""><td colspan="{{ related_columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ related_model_schema.title }}！</div></td></tr>
+                            <tr style=""><td colspan="{{ related_columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ related_model_schema.title }}__(!)</div></td></tr>
                         </tbody>
                     </table>
                     <ul class="pagination border-top mb-0" style="padding:1rem;display:none;"></ul>
                 </div>
             </div>
             <div class="modal-footer py-3">
-                <a class="btn btn-light mr-auto"><i class="fe fe-check-square mr-2"></i>选择了<span class="span-checked mx-1 text-primary">0</span>个{{ related_model_schema.title }}</a>
-                <button type="button" class="btn btn-light" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" onclick="relation_action_choosed_return($(this));" message="请至少选择一个{{ related_model_schema.title }}！">选择</button>
+                <a class="btn btn-light mr-auto"><i class="fe fe-check-square mr-2"></i>__(Choosed )<span class="span-checked mx-1 text-primary">0</span></a>
+                <button type="button" class="btn btn-light" data-dismiss="modal">__(Close)</button>
+                <button type="button" class="btn btn-primary" onclick="relation_action_choosed_return($(this));" message="__(Please choose at least one ){{ related_model_schema.title }}__(!)">__(Choose)</button>
             </div>
         </div>
     </div>
@@ -291,14 +291,14 @@
         if (btn.is(".doing")) {
             return;
         }
-        var msg = "确定要保存么?";
+        var msg = "__(Are you sure to save)__(?)";
         var con = window.confirm(msg);
         if (!con) {
             return false;
         }
         var param = process_form($("#{{ view.name_kebab }}"));
         if (!param["valid"]) {
-            showError('检测到不正确的数据, 请更正后重试!');
+            showError('__(Found invalid data, please correct and retry)__(!)');
             return false;
         }
         //

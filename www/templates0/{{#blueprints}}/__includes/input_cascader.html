@@ -7,7 +7,7 @@
         <input name="{{ field_name }}" type="text" class="form-control cascader dropdown-toggle" data-toggle="dropdown" data-codes='{{ '{{' }} ({{ field_path }} or [])|tojson {{ '}}' }}'>
         <ul class="cascader-list dropdown-menu"></ul>
     </div>
-    <div class="invalid-feedback">请选择{{ field_schema.title }}!</div>
+    <div class="invalid-feedback">__(Please choose at least one ){{ field_schema.title }}__(!)</div>
     {% if view_is_horizontal %}
     </div>
     {% endif %}

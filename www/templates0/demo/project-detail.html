@@ -126,7 +126,7 @@
                                     {% else %}
                                     <li class="array-item list-group-item">
                                         <div class="row align-items-center">
-                                            <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></div>
+                                            <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No )用户__(!)</div></div>
                                         </div>
                                     </li>
                                     {% endfor %}
@@ -175,12 +175,12 @@
                                             </td>
                                         </tr>
                                         {% else %}
-                                        <tr><td colspan="6"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有任务！</div></td></tr>
+                                        <tr><td colspan="6"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No )任务__(!)</div></td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                                 <div class="array-actions m1">
-                                    <a class="btn btn-outline-primary" href="task-edit?project_id={{ demo_project.id }}">创建任务...</a>
+                                    <a class="btn btn-outline-primary" href="task-edit?project_id={{ demo_project.id }}">__(Create )任务...</a>
                                 </div>
                                 </div></div>
                             </div>
@@ -209,7 +209,7 @@
                                     {% else %}
                                     <li class="array-item list-group-item">
                                         <div class="row align-items-center">
-                                            <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有操作！</div></div>
+                                            <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No )操作__(!)</div></div>
                                         </div>
                                     </li>
                                     {% endfor %}

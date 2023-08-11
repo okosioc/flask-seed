@@ -10,7 +10,7 @@
             {% set column_schema = item_schema.properties[c] %}
             <th>{{ column_schema.title }}{{ '(' + column_schema.unit + ')' if column_schema.unit }}</th>
             {% endfor %}
-            <th>操作</th>
+            <th></th>
         </tr>
     </thead>
     <tbody class="array-items">
@@ -26,7 +26,7 @@
                 <input class="form-control" pattern="[0-9\.]*" name="{{ c }}" {{ 'required' if column_schema.required }} value="{{ '{{' }} {{ column_path }} if {{ column_path }} is not none {{ '}}' }}">
                 {% elif column_schema.format in ['select', 'buttongroup'] %}
                 <select class="custom-select" name="{{ c }}" {{ 'required' if column_schema.required }} {{ 'multiple' if column_schema.type=='array' }}>
-                    <option value="">请选择...</option>
+                    <option value="">__(Choose)...</option>
                     {% if column_schema.type == 'array' %}
                     {% if column_schema['items'].enum %}
                     {% for value, label in column_schema['items'].enum_titles|items %}

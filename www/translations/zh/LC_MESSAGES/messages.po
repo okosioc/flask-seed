@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-08-10 17:28+0800\n"
-"PO-Revision-Date: 2023-08-10 17:29+0800\n"
+"POT-Creation-Date: 2023-08-11 11:42+0800\n"
+"PO-Revision-Date: 2023-08-11 11:43+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
 "Language-Team: zh <LL@li.org>\n"
@@ -18,17 +18,186 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
+#: www/templates0/layout-dash-demo.html:13
+msgid "Messages"
+msgstr "消息"
+
+#: www/templates0/layout-dash-demo.html:14
+msgid "View All"
+msgstr "查看所有"
+
+#: www/templates0/layout-dash-demo.html:17
+msgid "You do not have any messages"
+msgstr "您还没有消息"
+
+#: www/templates0/demo/project-dashboard.html:121
+#: www/templates0/demo/project-dashboard.html:150
+#: www/templates0/demo/project-detail.html:129
+#: www/templates0/demo/project-detail.html:178
+#: www/templates0/demo/project-detail.html:212
+#: www/templates0/demo/project-edit.html:27
+#: www/templates0/demo/project-edit.html:37
+#: www/templates0/demo/project-edit.html:51
+#: www/templates0/demo/project-edit.html:63
+#: www/templates0/demo/project-edit.html:73
+#: www/templates0/demo/project-edit.html:81
+#: www/templates0/demo/project-edit.html:95
+#: www/templates0/demo/project-edit.html:350
+#: www/templates0/demo/project-edit.html:359
+#: www/templates0/demo/project-edit.html:388
+#: www/templates0/demo/project-list.html:158
+#: www/templates0/demo/task-edit.html:114
+#: www/templates0/demo/task-edit.html:128
+#: www/templates0/demo/task-edit.html:138
+#: www/templates0/demo/task-edit.html:148
+#: www/templates0/demo/task-edit.html:156
+#: www/templates0/demo/task-edit.html:171
+#: www/templates0/demo/task-edit.html:212
+#: www/templates0/demo/team-members.html:117
+#: www/templates0/demo/team-profile.html:80
+#: www/templates0/demo/team-profile.html:90
+#: www/templates0/demo/team-profile.html:100
+#: www/templates0/demo/team-profile.html:131
+#: www/templates0/demo/team-profile.html:170
+#: www/templates0/demo/user-profile.html:102
+#: www/templates0/demo/user-profile.html:112
+#: www/templates0/demo/user-profile.html:122
+#: www/templates0/demo/user-profile.html:153
+#: www/templates0/demo/user-profile.html:189
+#: www/templates0/layout-dash-demo.html:17
+msgid "!"
+msgstr "！"
+
+#: www/templates0/layout-public-demo.html:68
+#: www/templates0/layout-public.html:69
+msgid "Home"
+msgstr "个人首页"
+
+#: www/templates0/layout-public-demo.html:70
+#: www/templates0/layout-public.html:71
+msgid "Login/Signup"
+msgstr "登录/注册"
+
+#: www/templates0/demo/project-dashboard.html:121
+#: www/templates0/demo/project-dashboard.html:150
+#: www/templates0/demo/project-detail.html:129
+#: www/templates0/demo/project-detail.html:178
+#: www/templates0/demo/project-detail.html:212
+#: www/templates0/demo/project-edit.html:350
+#: www/templates0/demo/project-list.html:158
+#: www/templates0/demo/team-members.html:117
+msgid "No "
+msgstr "没有"
+
+#: www/templates0/demo/project-detail.html:183
+msgid "Create "
+msgstr "创建"
+
+#: www/templates0/demo/project-edit.html:27
+#: www/templates0/demo/project-edit.html:37
+#: www/templates0/demo/project-edit.html:63
+#: www/templates0/demo/project-edit.html:73
+#: www/templates0/demo/project-edit.html:81
+#: www/templates0/demo/project-edit.html:95
+#: www/templates0/demo/task-edit.html:114
+#: www/templates0/demo/task-edit.html:138
+#: www/templates0/demo/task-edit.html:148
+#: www/templates0/demo/task-edit.html:156
+#: www/templates0/demo/team-profile.html:80
+#: www/templates0/demo/team-profile.html:90
+#: www/templates0/demo/team-profile.html:100
+#: www/templates0/demo/user-profile.html:102
+#: www/templates0/demo/user-profile.html:112
+#: www/templates0/demo/user-profile.html:122
+msgid "Invalid "
+msgstr "请输入正确的"
+
+#: www/templates0/demo/project-edit.html:46
+#: www/templates0/demo/project-edit.html:359
+#: www/templates0/demo/task-edit.html:123
+#: www/templates0/demo/task-edit.html:166
+msgid "Choose"
+msgstr "选择"
+
+#: www/templates0/demo/project-edit.html:51
+#: www/templates0/demo/project-edit.html:359
+#: www/templates0/demo/task-edit.html:128
+#: www/templates0/demo/task-edit.html:171
+msgid "Please choose at least one "
+msgstr "请选择至少一个"
+
+#: www/templates0/demo/project-edit.html:223
+#: www/templates0/demo/project-edit.html:242
+#: www/templates0/demo/task-edit.html:185
+#: www/templates0/demo/team-profile.html:144
+msgid "Cancel"
+msgstr "取消"
+
+#: www/templates0/demo/project-edit.html:240
+#: www/templates0/demo/task-edit.html:183
+#: www/templates0/demo/team-profile.html:142
+#: www/templates0/demo/user-profile.html:164
+msgid "Save"
+msgstr "保存"
+
 #: www/templates0/demo/project-edit.html:289
-msgid "search"
+#: www/templates0/demo/project-list.html:46
+msgid "Search"
 msgstr "查找"
 
 #: www/templates0/demo/project-edit.html:290
-msgid "reset"
+#: www/templates0/demo/project-list.html:47
+msgid "Reset"
 msgstr "重置"
+
+#: www/templates0/demo/project-edit.html:357
+#: www/templates0/demo/project-list.html:55
+msgid "Choosed "
+msgstr "选择了"
+
+#: www/templates0/demo/project-edit.html:358
+msgid "Close"
+msgstr "关闭"
+
+#: www/templates0/demo/project-edit.html:381
+#: www/templates0/demo/task-edit.html:205
+#: www/templates0/demo/team-profile.html:163
+#: www/templates0/demo/user-profile.html:182
+msgid "Are you sure to save"
+msgstr "确定保存么"
+
+#: www/templates0/demo/project-edit.html:381
+#: www/templates0/demo/task-edit.html:205
+#: www/templates0/demo/team-profile.html:163
+#: www/templates0/demo/user-profile.html:182
+msgid "?"
+msgstr "？"
+
+#: www/templates0/demo/project-edit.html:388
+#: www/templates0/demo/task-edit.html:212
+#: www/templates0/demo/team-profile.html:170
+#: www/templates0/demo/user-profile.html:189
+msgid "Found invalid data, please correct and retry"
+msgstr "检测到非法数据，请更正后重试"
+
+#: www/templates0/demo/team-profile.html:116
+#: www/templates0/demo/user-profile.html:138
+msgid "Choose Image"
+msgstr "选择图像"
+
+#: www/templates0/demo/team-profile.html:117
+#: www/templates0/demo/user-profile.html:139
+msgid "Availabe formats: "
+msgstr "支持的格式："
+
+#: www/templates0/demo/team-profile.html:131
+#: www/templates0/demo/user-profile.html:153
+msgid "Please upload "
+msgstr "请上传"
 
 #: www/tools/helpers.py:26
 msgid "just now"
-msgstr ""
+msgstr "刚刚"
 
 #: www/tools/helpers.py:40
 #, python-format
@@ -90,9 +259,7 @@ msgid "Password is required!"
 msgstr ""
 
 #: www/views/public.py:107
-msgid ""
-"Password length should between 8 and 16, and should contains at least one"
-" letter and one number!"
+msgid "Password length should between 8 and 16, and should contains at least one letter and one number!"
 msgstr ""
 
 #: www/views/public.py:111

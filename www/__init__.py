@@ -48,7 +48,7 @@ def create_www(blueprints=None, pytest=False, runscripts=False):
     if blueprints is None:
         blueprints = DEFAULT_BLUEPRINTS
     #
-    app = Flask(DEFAULT_APP_NAME, instance_relative_config=True, template_folder='templates0')
+    app = Flask(DEFAULT_APP_NAME, instance_relative_config=True)
     # Json encoder
     app.json_encoder = ModelJSONEncoder
     # Url converter
@@ -323,7 +323,10 @@ def configure_template_filters(app):
 
     @app.template_filter()
     def path(value):
-        """ Return the path part from a url. """
+        """ Return the path part from a url.
+        e.g,
+        /demo/project-detail?id=1 -> /demo/project-detail
+        """
         return value.split('?')[0]
 
     @app.template_filter()
@@ -376,7 +379,7 @@ def configure_template_functions(app):
     def update_full_path(view):
         """ Update current full path, by supporting special commands.
 
-        i.e, if current path is /dashboard/profile?uid=xxx&tab=password
+        e.g, if current path is /dashboard/profile?uid=xxx&tab=password
         view=timeline -> timeline
         view=timeline? -> timeline?uid=xxx&index=0, keeping all queries
         view=timeline?uid -> timeline?uid=xxx, keeping the query with specified key

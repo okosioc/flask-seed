@@ -1,9 +1,0 @@
-{% if field_schema.type == 'object' %}
-<div class="field-group row">
-    <div class="col">
-        <a href="{{ '{{' }} {{ field_path }}.url {{ '}}' }}"><i class="fe fe-download mr-2"></i>{{ '{{' }} {{ field_path }}.name {{ '}}' }}</a>
-    </div>
-</div>
-{% else %}
-UNSUPPORTED! {{ field_schema.format }} format do not support {{ field_schema.type }}!
-{% endif %}

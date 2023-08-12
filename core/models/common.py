@@ -33,7 +33,7 @@ class Action(BaseModel):
 
 @register
 class Block(MongoModel):
-    """ 页面版块, 仅包含内容 """
+    """ 页面版块, 仅包含内容. """
     key: str = Field(title='key')  # 用于查询, 方便页面模版引用指定版块的内容
     tag: str = Field(required=False, title='标签')
     icon: str = Field(required=False, title='图标')
@@ -50,4 +50,6 @@ class Block(MongoModel):
     actions: List[Action] = Field(required=False, title='动作列表')
     children: List[ForwardRef('Block')] = Field(required=False, title='子版块')
     #
-    __key__ = 'key'
+    __indexes__ = [
+        {'fields': ['key'], 'unique': True},
+    ]

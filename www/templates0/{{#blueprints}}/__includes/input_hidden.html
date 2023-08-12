@@ -1,7 +1,0 @@
-<div class="form-group d-none" name="{{ field_name }}">
-    {% if field_schema.type in ['integer', 'number'] %}
-    <input name="{{ field_name }}" type="text" value="{{ '{{' }} {{ field_path }} if {{ field_path }} is not none {{ '}}' }}">
-    {% else %}
-    <input name="{{ field_name }}" type="text" value="{{ '{{' }} {{ field_path }} or '' {{ '}}' }}">
-    {% endif %}
-</div>

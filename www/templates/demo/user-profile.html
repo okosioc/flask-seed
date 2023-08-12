@@ -1,30 +1,243 @@
 {% extends "layout-dash-demo.html" %}
 {% set title = '用户设置' %}
 {% set breadcrumb = {
-    'subtitle': 'User',
+    'subtitle': '',
     'title': title,
     'actions': [],
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
 {% block style %}
+<link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg-4">
-        {% include "seeds/DemoUser-summary.html" %}
-    </div>
-    <div class="col-lg-8">
-        {% include "seeds/DemoUser-form.html" %}
+<div id="div-user-profile">
+    <form id="user-profile" class="form-editor needs-validation" novalidate method="post">
+        <fieldset class="object" name="demo_user">
+            <div class="row">
+                <div class="col-lg-4">
+                    <fieldset class="group" name="1" format="summary">
+                        <div class="card">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <div name="avatar" format="avatar">
+                                        <a href="user-profile?id={{ demo_user.id }}" class="avatar avatar-xl mt-2 mb-4">
+                                            <img src="{{ demo_user.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_user.avatar }}">
+                                            <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if demo_user.avatar }}">{{ demo_user.name|first|upper if demo_user.name is not none }}</span>
+                                        </a>
+                                    </div>
+                                    <div class="mb-4">
+                                        <span class="h3 text-primary" name="name" foramt="text">{{ demo_user.name or '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group list-group-flush border-top">
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-circle mr-2"></i>用户状态</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="status" format="select" enum="DemoUserStatus">
+                                            {% if demo_user.status is not none %}<span class="text-{{ demo_user.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoUserStatus')[demo_user.status] }}{% else %}-{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-box mr-2"></i>用户角色</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="roles" format="select" enum="DemoUserRole">
+                                            {% for roles_item in demo_user.roles %}
+                                            {{ ' ' if not loop.fist }}{% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-mail mr-2"></i>登录邮箱</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="email" format="text" enum="">
+                                            {{ demo_user.email or '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-phone mr-2"></i>手机号</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="phone" format="text" enum="">
+                                            {{ demo_user.phone or '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                                            {{ demo_user.create_time|datetime if demo_user.create_time is not none else '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="col-lg-8">
+                    <fieldset class="group" name="0" format="">
+                        <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-user mr-2"></i>用户基本信息</h4></div><div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="name">
+                                    <label class=""><span class="text-danger mr-1">*</span>用户名</label>
+                                    <input name="name" type="text" class="form-control" required
+                                           value="{{ demo_user.name or '' }}">
+                                    <div class="invalid-feedback">__(Invalid )用户名__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="phone">
+                                    <label class="">手机号</label>
+                                    <input name="phone" type="text" class="form-control" 
+                                           value="{{ demo_user.phone or '' }}">
+                                    <div class="invalid-feedback">__(Invalid )手机号__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="intro">
+                                    <label class="">个人简介</label>
+                                    <textarea name="intro" rows="5"
+                                              class="form-control autosize" >{{ demo_user.intro or '' }}</textarea>
+                                    <div class="invalid-feedback">__(Invalid )个人简介__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group string " name="avatar">
+                                    <label class="">头像</label>
+                                    <div class="plupload-input-group image-input-group" >
+                                        <a class="btn btn-outline-primary plupload" href="javascript:;"
+                                           data-token="{{ upload_config.token }}"
+                                           data-upload="{{ upload_config.endpoint }}"
+                                           data-max="{{ upload_config.max }}"
+                                           data-preview='{"image":"?imageView2/1/w/200/h/200/","video":""}'
+                                           data-suffix='{"image":"?imageView2/1/w/200/h/200/","video":""}'
+                                           data-filters='{"mime_types":"{{ upload_config.mimes_image|join(", ") }}"}'
+                                           data-hiddens="url">__(Choose Image)...</a>
+                                        <small class="mt-2 form-text text-muted">__(Availabe formats: ){{ upload_config.mimes_image|join(', ') }}</small>
+                                        <div class="plupload-input-result image-input-result mt-1 clearfix">
+                                            {% if demo_user.avatar %}
+                                            <div class="image uploaded" style="width: auto">
+                                                <img data-src="{{ demo_user.avatar }}">
+                                                <div class="btns">
+                                                    <a href="{{ demo_user.avatar }}" target="_blank">i</a>
+                                                    <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+                                                </div>
+                                                <input type="hidden" name="url" value="{{ demo_user.avatar }}">
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback">__(Please upload )头像__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        </div></div>
+                    </fieldset>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div class="form-actions mb-4">
+        <a class="btn btn-primary mr-2" onclick="user_profile_update($(this));"><i class="fe fe-save mr-1"></i>__(Save)</a>
     </div>
 </div>
 {% endblock %}
 {% block script %}
+<script src="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
+<script src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
 <script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
 <script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function(){
+        //
         install_form();
     });
+    function user_profile_update(btn){
+        if (btn.is(".doing")) {
+            return;
+        }
+        var msg = "__(Are you sure to save)__(?)";
+        var con = window.confirm(msg);
+        if (!con) {
+            return false;
+        }
+        var param = process_form($("#user-profile"));
+        if (!param["valid"]) {
+            showError('__(Found invalid data, please correct and retry)__(!)');
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        {% for arg in args %}
+        param["demo_user.{{ arg[0] }}"] = "{{ arg[1] }}";
+        {% endfor %}
+        //
+        var url = "/demo/user-profile-update?id={{ demo_user.id or '' }}";
+        $.post(url, param, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+                showInfo('Refreshing...');
+                setTimeout(function () {
+                    location.href = "{{ request.path }}?id=" + result.id;
+                }, 2000);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
 </script>
 {% endblock %}

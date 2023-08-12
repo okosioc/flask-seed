@@ -1,30 +1,224 @@
 {% extends "layout-dash-demo.html" %}
 {% set title = '团队设置' %}
 {% set breadcrumb = {
-    'subtitle': 'Team',
+    'subtitle': '',
     'title': title,
     'actions': [],
     'tabs': [],
 } %}
 {% block title %}{{ title }}{% endblock %}
 {% block style %}
+<link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg-4">
-        {% include "seeds/DemoTeam-summary.html" %}
-    </div>
-    <div class="col-lg-8">
-        {% include "seeds/DemoTeam-form.html" %}
+<div id="div-team-profile">
+    <form id="team-profile" class="form-editor needs-validation" novalidate method="post">
+        <fieldset class="object" name="demo_team">
+            <div class="row">
+                <div class="col-lg-4">
+                    <fieldset class="group" name="1" format="summary">
+                        <div class="card">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <div name="logo" format="avatar">
+                                        <a href="team-profile?id={{ demo_team.id }}" class="avatar avatar-xl mt-2 mb-4">
+                                            <img src="{{ demo_team.logo or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_team.logo }}">
+                                            <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if demo_team.logo }}">{{ demo_team.name|first|upper if demo_team.name is not none }}</span>
+                                        </a>
+                                    </div>
+                                    <div class="mb-4">
+                                        <span class="h3 text-primary" name="name" foramt="text">{{ demo_team.name or '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group list-group-flush border-top">
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-circle mr-2"></i>团队状态</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="status" format="select" enum="DemoTeamStatus">
+                                            {% if demo_team.status is not none %}<span class="text-{{ demo_team.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoTeamStatus')[demo_team.status] }}{% else %}-{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-users mr-2"></i>团队成员</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="members" format="table" enum="">
+                                            {{ demo_team.members|length }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                                        </div>
+                                        <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                                            {{ demo_team.create_time|datetime if demo_team.create_time is not none else '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="col-lg-8">
+                    <fieldset class="group" name="2" format="">
+                        <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-users mr-2"></i>团队基本信息</h4></div><div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="name">
+                                    <label class=""><span class="text-danger mr-1">*</span>团队名称</label>
+                                    <input name="name" type="text" class="form-control" required
+                                           value="{{ demo_team.name or '' }}">
+                                    <div class="invalid-feedback">__(Invalid )团队名称__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="code">
+                                    <label class="">邀请码</label>
+                                    <input name="code" type="text" class="form-control" 
+                                           value="{{ demo_team.code or '' }}">
+                                    <div class="invalid-feedback">__(Invalid )邀请码__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="remarks">
+                                    <label class="">备注</label>
+                                    <textarea name="remarks" rows="5"
+                                              class="form-control autosize" >{{ demo_team.remarks or '' }}</textarea>
+                                    <div class="invalid-feedback">__(Invalid )备注__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group string " name="logo">
+                                    <label class="">团队图标</label>
+                                    <div class="plupload-input-group image-input-group" >
+                                        <a class="btn btn-outline-primary plupload" href="javascript:;"
+                                           data-token="{{ upload_config.token }}"
+                                           data-upload="{{ upload_config.endpoint }}"
+                                           data-max="{{ upload_config.max }}"
+                                           data-preview='{"image":"?imageView2/1/w/200/h/200/","video":""}'
+                                           data-suffix='{"image":"?imageView2/1/w/200/h/200/","video":""}'
+                                           data-filters='{"mime_types":"{{ upload_config.mimes_image|join(", ") }}"}'
+                                           data-hiddens="url">__(Choose Image)...</a>
+                                        <small class="mt-2 form-text text-muted">__(Availabe formats: ){{ upload_config.mimes_image|join(', ') }}</small>
+                                        <div class="plupload-input-result image-input-result mt-1 clearfix">
+                                            {% if demo_team.logo %}
+                                            <div class="image uploaded" style="width: auto">
+                                                <img data-src="{{ demo_team.logo }}">
+                                                <div class="btns">
+                                                    <a href="{{ demo_team.logo }}" target="_blank">i</a>
+                                                    <a href="javascript:;" onclick="$(this).closest('.image').remove();">x</a>
+                                                </div>
+                                                <input type="hidden" name="url" value="{{ demo_team.logo }}">
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback">__(Please upload )团队图标__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        </div></div>
+                    </fieldset>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div class="form-actions mb-4">
+        <a class="btn btn-primary mr-2" onclick="team_profile_update($(this));"><i class="fe fe-save mr-1"></i>__(Save)</a>
+        {% if demo_team.id %}
+        <a href="team-members?id={{ demo_team.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>__(Cancel)</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 {% block script %}
+<script src="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
+<script src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
 <script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
 <script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function(){
+        //
         install_form();
     });
+    function team_profile_update(btn){
+        if (btn.is(".doing")) {
+            return;
+        }
+        var msg = "__(Are you sure to save)__(?)";
+        var con = window.confirm(msg);
+        if (!con) {
+            return false;
+        }
+        var param = process_form($("#team-profile"));
+        if (!param["valid"]) {
+            showError('__(Found invalid data, please correct and retry)__(!)');
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        {% for arg in args %}
+        param["demo_team.{{ arg[0] }}"] = "{{ arg[1] }}";
+        {% endfor %}
+        //
+        var url = "/demo/team-profile-update?id={{ demo_team.id or '' }}";
+        $.post(url, param, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+                showInfo('Refreshing...');
+                setTimeout(function () {
+                    location.href = "team-members?id=" + result.id;
+                }, 2000);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
 </script>
 {% endblock %}

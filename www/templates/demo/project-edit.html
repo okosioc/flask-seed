@@ -1,7 +1,7 @@
 {% extends "layout-dash-demo.html" %}
 {% set title = '项目编辑' %}
 {% set breadcrumb = {
-    'subtitle': 'Project',
+    'subtitle': '',
     'title': title,
     'actions': [],
     'tabs': [],
@@ -11,9 +11,236 @@
 <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block content %}
-<div class="row ">
-    <div class="col-lg">
-        {% include "seeds/DemoProject-form.html" %}
+<div id="div-project-edit">
+    <form id="project-edit" class="form-editor needs-validation" novalidate method="post">
+        <fieldset class="object" name="demo_project">
+            <div class="row">
+                <div class="col-lg">
+                    <fieldset class="group" name="1" format="">
+                        <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-briefcase mr-2"></i>项目基本信息</h4></div><div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="title">
+                                    <label class=""><span class="text-danger mr-1">*</span>项目名称</label>
+                                    <input name="title" type="text" class="form-control" required
+                                           value="{{ demo_project.title or '' }}">
+                                    <div class="invalid-feedback">__(Invalid )项目名称__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="description">
+                                    <label class="">项目介绍</label>
+                                    <textarea name="description" rows="5"
+                                              class="form-control autosize" >{{ demo_project.description or '' }}</textarea>
+                                    <div class="invalid-feedback">__(Invalid )项目介绍__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group string " name="status">
+                                    <label class=""><span class="text-danger mr-1">*</span>项目状态</label>
+                                    <select class="custom-select select2" name="status" required>
+                                        <option value="">__(Choose)...</option>
+                                        {% for value, label in enum_titles('DemoProjectStatus')|items %}
+                                        <option value="{{ value }}" {{ 'selected' if value==demo_project.status }}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">__(Please choose at least one )项目状态__(!)</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group " name="value">
+                                    <label class=""><span class="text-danger mr-1">*</span>项目价值</label>
+                                    <div class="input-group input-group-merge" required>
+                                    <input name="value" type="text" class="form-control form-control-appended"
+                                           pattern="[0-9\.]*" required
+                                           value="{{ demo_project.value if demo_project.value is not none }}">
+                                    <div class="input-group-append"><div class="input-group-text">元</div></div>
+                                    </div>
+                                    <div class="invalid-feedback">__(Invalid )项目价值__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="start">
+                                    <label class=""><span class="text-danger mr-1">*</span>开始日期</label>
+                                    <input name="start" type="text" class="form-control date" required
+                                           value="{{ demo_project.start or '' }}">
+                                    <div class="invalid-feedback">__(Invalid )开始日期__(!)</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group " name="end">
+                                    <label class=""><span class="text-danger mr-1">*</span>结束日期</label>
+                                    <input name="end" type="text" class="form-control date" required
+                                           value="{{ demo_project.end or '' }}">
+                                    <div class="invalid-feedback">__(Invalid )结束日期__(!)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group " name="percent">
+                                    <label class=""><span class="text-danger mr-1">*</span>项目进度</label>
+                                    <div class="input-group input-group-merge" required>
+                                    <input name="percent" type="text" class="form-control form-control-appended"
+                                           pattern="[0-9\.]*" required
+                                           value="{{ demo_project.percent if demo_project.percent is not none }}">
+                                    <div class="input-group-append"><div class="input-group-text">%</div></div>
+                                    </div>
+                                    <div class="invalid-feedback">__(Invalid )项目进度__(!)</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                            </div>
+                        </div>
+                        </div></div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <fieldset class="array relation" name="members" format="media">
+                        <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-users mr-2"></i>项目成员</h4></div><div class="card-body">
+                        <ul class="array-items list-group list-group-flush">
+                            {% for members_item in demo_project.members + [new_model('DemoUser')] %}
+                            <li class="array-item list-group-item {{ 'template' if loop.last }}" name="-">
+                                <div class="row align-items-center">
+                                    <div class="col-auto" name="avatar" format="avatar">
+                                        <a href="javascript:;" class="avatar ">
+                                            <img src="{{ members_item.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not members_item.avatar }}">
+                                            <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if members_item.avatar }}">{{ members_item.name|first|upper if members_item.name is not none }}</span>
+                                        </a>
+                                    </div>
+                                    <div class="col ml-n2">
+                                        <p name="name" format="text" class="mb-1">{{ members_item.name or '' }}</p>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a class="btn pl-0 py-0" onclick="array_action_show_modal($(this));"><i class="fe fe-eye"></i></a>
+                                        <a class="btn pl-0 py-0" onclick="array_action_delete_modal($(this));" data-title="用户"><i class="fe fe-delete"></i></a>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                            <li class="array-item list-group-item pb-0" style="{{ 'display:none' if demo_project.members }}">
+                                <div class="row align-items-center">
+                                    <div class="col"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有用户！</div></div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="modals">
+                            {% for members_item in demo_project.members + [new_model('DemoUser')] %}
+                            <div class="modal fade {{ 'template' if loop.last }}" name="-" data-backdrop="static" data-keyboard="false" tabindex="-1">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i class="fe fe-user mr-2"></i>用户详情</h5>
+                                            <button type="button" class="close" aria-label="Close" onclick="array_action_cancel_modal($(this));">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <fieldset class="object d-none" name="-">
+                                                <div class="form-group" name="id">
+                                                    <input name="id" type="text" value="{{ members_item.id or '' }}">
+                                                </div>
+                                            </fieldset>
+                                            <div class="">
+                                                <div class="row text-center">
+                                                    <div class="col">
+                                                        <div name="avatar" format="avatar">
+                                                            <a href="user-profile?id={{ members_item.id }}" class="avatar avatar-xl mt-2 mb-4">
+                                                                <img src="{{ members_item.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not members_item.avatar }}">
+                                                                <span fallback=name class="avatar-title rounded-circle bg-primary {{ 'd-none' if members_item.avatar }}">{{ members_item.name|first|upper if members_item.name is not none }}</span>
+                                                            </a>
+                                                        </div>
+                                                        <div class="mb-4">
+                                                            <span class="h3 text-primary" name="name" foramt="text">{{ members_item.name or '-' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="list-group list-group-flush border-top">
+                                                    <div class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col">
+                                                                <span><i class="fe fe-circle mr-2"></i>用户状态</span>
+                                                            </div>
+                                                            <div class="col-auto text-muted" name="status" format="select" enum="DemoUserStatus">
+                                                                {% if members_item.status is not none %}<span class="text-{{ members_item.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoUserStatus')[members_item.status] }}{% else %}-{% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col">
+                                                                <span><i class="fe fe-box mr-2"></i>用户角色</span>
+                                                            </div>
+                                                            <div class="col-auto text-muted" name="roles" format="select" enum="DemoUserRole">
+                                                                {% for roles_item in members_item.roles %}
+                                                                {{ ' ' if not loop.fist }}{% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col">
+                                                                <span><i class="fe fe-mail mr-2"></i>登录邮箱</span>
+                                                            </div>
+                                                            <div class="col-auto text-muted" name="email" format="text" enum="">
+                                                                {{ members_item.email or '-' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col">
+                                                                <span><i class="fe fe-phone mr-2"></i>手机号</span>
+                                                            </div>
+                                                            <div class="col-auto text-muted" name="phone" format="text" enum="">
+                                                                {{ members_item.phone or '-' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col">
+                                                                <span><i class="fe fe-clock mr-2"></i>创建时间</span>
+                                                            </div>
+                                                            <div class="col-auto text-muted" name="create_time" format="datetime" enum="">
+                                                                {{ members_item.create_time|datetime if members_item.create_time is not none else '-' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer py-3">
+                                            <button type="button" class="btn btn-light" onclick="array_action_cancel_modal($(this));">__(Cancel)</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="array-actions mt-4">
+                            <a class="btn btn-outline-primary mr-2" relation-key="demo-users" relation-return="many" onclick="relation_action_show_search_modal($(this));" data-title="用户"><i class="fe fe-search mr-1"></i>添加用户...</a>
+                        </div>
+                        </div></div>
+                    </fieldset>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div class="form-actions mb-4">
+        <a class="btn btn-primary mr-2" onclick="project_edit_upcreate($(this));"><i class="fe fe-save mr-1"></i>__(Save)</a>
+        {% if demo_project.id %}
+        <a href="project-list?id={{ demo_project.id }}" class="btn btn-outline-primary mr-2"><i class="fe fe-corner-up-left mr-1"></i>__(Cancel)</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -23,9 +250,193 @@
 <script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
 <script src="{{ base() }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
 <script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
+<div class="modal fade search-modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+     id="search-demo-users"
+     relation-url="{{ request.path }}/search-demo-users"
+     relation-key="demo_users"
+     relation-title="name"
+     relation-id="id">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fe fe-search mr-2"></i>添加用户</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pb-0">
+                <div class="form-search">
+                    <div class="form-row justify-content-center">
+                        <div class="form-group col-sm mb-4">
+                            <label class="sr-only">用户名</label>
+                            <div class="input-group input-group-merge">
+                                <input type="text" class="form-control form-control-prepended" placeholder="用户名"
+                                       value=""
+                                       name="search.name__like">
+                                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-search"></span></div></div>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm mb-4">
+                            <label class="sr-only">手机号</label>
+                            <div class="input-group input-group-merge">
+                                <input type="text" class="form-control form-control-prepended" placeholder="手机号"
+                                       value=""
+                                       name="search.phone__like">
+                                <div class="input-group-prepend"><div class="input-group-text"><span class="fe fe-search"></span></div></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-auto mb-4">
+                            <button type="button" class="btn btn-primary btn-default" onclick="relation_action_search($(this));">__(Search)</button>
+                            <button type="button" class="btn btn-light btn-default" onclick="relation_action_search_reset($(this));">__(Reset)</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mx-n4">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="list-checkbox-all custom-control-input" id="checkbox-all-demo-users" onchange="relation_action_checkbox_changed($(this));">
+                                        <label class="custom-control-label" for="checkbox-all-demo-users"></label>
+                                    </div>
+                                </th>
+                                <th>头像</th>
+                                <th>用户名</th>
+                                <th>用户状态</th>
+                                <th>用户角色</th>
+                                <th>登录邮箱</th>
+                                <th>手机号</th>
+                                <th>创建时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for demo_user in [new_model('DemoUser')] %}
+                            <tr class="template" name="-'">
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="list-checkbox custom-control-input" onchange="relation_action_checkbox_changed($(this));">
+                                        <label class="custom-control-label"></label>
+                                    </div>
+                                </td>
+                                <td name="avatar" format="avatar" enum="">
+                                    <div class="avatar avatar-sm">
+                                        <img src="{{ demo_user.avatar or '' }}" alt="..." class="avatar-img rounded-circle {{ 'd-none' if not demo_user.avatar }}">
+                                        <span fallback=name class="avatar-title bg-primary-soft rounded-circle text-primary {{ 'd-none' if demo_user.avatar }}">{{ demo_user.name|first|upper if demo_user.name is not none }}</span>
+                                    </div>
+                                </td>
+                                <td name="name" format="text" enum="">
+                                    {{ demo_user.name or '-' }}
+                                </td>
+                                <td name="status" format="select" enum="DemoUserStatus">
+                                    {% if demo_user.status is not none %}<span class="text-{{ demo_user.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoUserStatus')[demo_user.status] }}{% else %}-{% endif %}
+                                </td>
+                                <td name="roles" format="select" enum="DemoUserRole">
+                                    {% for roles_item in demo_user.roles %}
+                                    {{ ' ' if not loop.fist }}{% if roles_item is not none %}{{ enum_titles('DemoUserRole')[roles_item] }}{% else %}-{% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td name="email" format="text" enum="">
+                                    {{ demo_user.email or '-' }}
+                                </td>
+                                <td name="phone" format="text" enum="">
+                                    {{ demo_user.phone or '-' }}
+                                </td>
+                                <td name="create_time" format="datetime" enum="">
+                                    {{ demo_user.create_time|datetime if demo_user.create_time is not none else '-' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr style=""><td colspan="8"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No )用户__(!)</div></td></tr>
+                        </tbody>
+                    </table>
+                    <ul class="pagination border-top mb-0" style="padding:1rem;display:none;"></ul>
+                </div>
+            </div>
+            <div class="modal-footer py-3">
+                <a class="btn btn-light mr-auto"><i class="fe fe-check-square mr-2"></i>__(Choosed )<span class="span-checked mx-1 text-primary">0</span></a>
+                <button type="button" class="btn btn-light" data-dismiss="modal">__(Close)</button>
+                <button type="button" class="btn btn-primary" onclick="relation_action_choosed_return($(this));" message="__(Please choose at least one )用户__(!)">__(Choose)</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% if demo_users %}
 <script type="text/javascript">
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function(){
+        // render preload data in above table
+        relation_action_render_results("demo_users", {{ demo_users|tojson }}, {{ demo_users_pagination|tojson }});
+    });
+</script>
+{% endif %}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        //
         install_form();
     });
+    function project_edit_upcreate(btn){
+        if (btn.is(".doing")) {
+            return;
+        }
+        var msg = "__(Are you sure to save)__(?)";
+        var con = window.confirm(msg);
+        if (!con) {
+            return false;
+        }
+        var param = process_form($("#project-edit"));
+        if (!param["valid"]) {
+            showError('__(Found invalid data, please correct and retry)__(!)');
+            return false;
+        }
+        //
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        //
+        {% for arg in args %}
+        param["demo_project.{{ arg[0] }}"] = "{{ arg[1] }}";
+        {% endfor %}
+        //
+        var url = "/demo/project-edit-upcreate?id={{ demo_project.id or '' }}";
+        $.post(url, param, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+                showInfo('Refreshing...');
+                setTimeout(function () {
+                    location.href = "project-detail?id=" + result.id;
+                }, 2000);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
+    function action(btn) {
+        if (btn.is(".doing")) {
+            return;
+        }
+        var con = window.confirm("action?");
+        if (!con) {
+            return false;
+        }
+        // Validation
+        // Set doing to prevent duplicate clicks
+        btn.addClass("doing");
+        var method = btn.is("input") ? "val" : "text";
+        var oldLabel = btn[method]();
+        btn[method](oldLabel + "...");
+        // Post
+        $.post("action", {"r": Math.random()}, function (result) {
+            if (result.error == 0) {
+                showSuccess(result.message);
+            } else {
+                showError(result.message);
+            }
+            btn.removeClass("doing");
+            btn[method](oldLabel);
+        }, "json");
+    }
 </script>
 {% endblock %}

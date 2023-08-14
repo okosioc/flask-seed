@@ -569,8 +569,8 @@ def configure_logging(app):
         mail_handler = SSLSMTPHandler(*mail_config)
     else:
         mail_handler = SMTPHandler(*mail_config)
-    # Only send email in production mode
-    if app.env == 'production':
+    # Only send email when app is not in debug mode
+    if not app.debug:
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
     #

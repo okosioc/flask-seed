@@ -151,12 +151,15 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
 {# * main #}
 {# * #}
 <div id="div-{{ view.name_kebab }}">
-    {% if view_is_card %}
-    <div class="card"><div class="card-body">
-    {% endif %}
     <form id="{{ view.name_kebab }}" class="form-editor needs-validation" novalidate method="post">
         <fieldset class="object" name="{{ model.name_snake }}">
+            {% if view_is_card %}
+            <div class="card"><div class="card-body">
+            {% endif %}
             {% filter right(12) %}{{ render_layout(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
+            {% if view_is_card %}
+            </div></div>
+            {% endif %}
         </fieldset>
     </form>
     <div class="form-actions mb-4">
@@ -168,7 +171,4 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
         {{ '{%' }} endif {{ '%}' }}
         {% endif %}
     </div>
-    {% if view_is_card %}
-    </div></div>
-    {% endif %}
 </div>

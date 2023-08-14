@@ -159,7 +159,7 @@ TODO
             {% set fs = schema.properties[f] %}
             <th>{{ fs.title }}{{ '(' + fs.unit + ')' if fs.unit }}</th>
             {% endfor %}
-            <th>操作</th>
+            <th>#</th>
         </tr>
         </thead>
         <tbody>
@@ -186,7 +186,7 @@ TODO
         </tr>
         {{ '{%' }} else {{ '%}' }}
         <tr>
-            <td colspan="{{ 2+columns|length }}">
+            <td colspan="{{ 2+fields|length }}">
                 <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ schema.title }}__(!)</div>
             </td>
         </tr>

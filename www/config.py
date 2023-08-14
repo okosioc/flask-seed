@@ -1,5 +1,4 @@
 DOMAIN = 'flask-seed.com'
-ENV = 'production'
 SECRET_KEY = '<FIXME>'
 # Cache
 CACHE_TYPE = "simple"

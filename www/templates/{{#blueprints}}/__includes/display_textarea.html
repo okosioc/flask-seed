@@ -4,7 +4,8 @@
     <div class="col">
     {% endif %}
     <div class="field-control">
-        {% filter right(8) %}{{ display_inline(field_name, field_path, field_schema) }}{% endfilter %}
+        {# Flask enable autoescape, so if you would like to display html content, need to add |replace('\n', '<br>')|safe filter manually. #}
+        <div class="border-left-primary border-left-3 px-4 py-2 font-size-lg">{{ '{{' }} {{ field_path }} if {{ field_path }} is not none else '-' {{ '}}' }}</div>
     </div>
     {% if view_is_horizontal %}
     </div>

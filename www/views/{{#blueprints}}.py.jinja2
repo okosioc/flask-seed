@@ -143,10 +143,10 @@ from flask_login import current_user
 
 from py3seed import populate_model, populate_search
 from .common import get_id
-from www.tools import auth_permission, admin_permission, prepare_demo_data
+from www.tools import auth_permission, admin_permission
 from core.models import {{ blueprint.views|map(attribute='model')|map(attribute='name')|unique|join(', ') }}
 
-{{ blueprint.name_snake }} = Blueprint('{{ blueprint.name_snake }}', __name__)
+{{ blueprint.name_snake }} = Blueprint('{{ blueprint.name }}', __name__, url_prefix='/{{ blueprint.name }}')
 
 
 {% for view in blueprint.views %}
@@ -169,7 +169,7 @@ def {{ view.name_snake }}():
     id_ = get_id({{ model.schema.id_type }})
     {% filter right(4) %}{{ render_model_read(model) }}{% endfilter %}
     #
-    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }})
+    return render_template('{{ blueprint.name }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }})
     {# update #}
     {% elif action == 'update' %}
     preloads = {}
@@ -177,14 +177,14 @@ def {{ view.name_snake }}():
     {% filter right(4) %}{{ render_model_read(model) }}{% endfilter %}
     {% filter right(4) %}{{ render_preloads() }}{% endfilter %}
     #
-    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, **preloads)
+    return render_template('{{ blueprint.name }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, **preloads)
     {# create #}
     {% elif action == 'create' %}
     args, preloads = [], {}
     {% filter right(4) %}{{ render_model_create(model) }}{% endfilter %}
     {% filter right(4) %}{{ render_preloads() }}{% endfilter %}
     #
-    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
+    return render_template('{{ blueprint.name }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
     {# upcreate #}
     {% elif action == 'upcreate' %}
     args, preloads = [], {}
@@ -196,7 +196,7 @@ def {{ view.name_snake }}():
     #
     {% filter right(4) %}{{ render_preloads() }}{% endfilter %}
     #
-    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
+    return render_template('{{ blueprint.name }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)
     {# query #}
     {% elif action == 'query' %}
     page, sort = request.args.get('p', 1, lambda x: int(x) if x.isdigit() else 1), [('create_time', -1)]
@@ -204,12 +204,12 @@ def {{ view.name_snake }}():
     current_app.logger.info(f'Try to search {{ model.name_title_lower }} by {condition}, sort by {sort}')
     {{ model.name_snake_plural }}, pagination = {{ model.name }}.search(condition, page, sort=sort)
     #
-    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html',
+    return render_template('{{ blueprint.name }}/{{ view.name }}.html',
                            search=search, pagination=pagination, {{ model.name_snake_plural }}={{ model.name_snake_plural }})
     {# unsupported action #}
     {% else %}
     # FIXME: UNSUPPORTED action {{ action }}!
-    return render_template('{{ blueprint.name_snake }}/{{ view.name }}.html')
+    return render_template('{{ blueprint.name }}/{{ view.name }}.html')
     {% endif %}
 
 

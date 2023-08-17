@@ -20,10 +20,10 @@ from importlib import import_module
 from logging.handlers import SMTPHandler, TimedRotatingFileHandler
 from urllib.parse import urlparse
 
-from flask import Flask, request, redirect, jsonify, url_for, render_template, session, has_request_context, abort, current_app
+from flask import Flask, request, redirect, jsonify, url_for, render_template, session, has_request_context, abort, current_app, Blueprint
 from flask_babel import Babel
 from flask_login import LoginManager
-from py3seed import ModelJSONEncoder, connect, SimpleEnumMeta
+from py3seed import ModelJSONProvider, connect, SimpleEnumMeta
 from werkzeug.datastructures import MultiDict
 from werkzeug.urls import url_quote, url_encode
 
@@ -34,27 +34,19 @@ from core.models import DemoUser, Block
 from www.tools import SSLSMTPHandler, helpers, ListConverter, BSONObjectIdConverter
 
 DEFAULT_APP_NAME = 'www'
-
-DEFAULT_BLUEPRINTS = (
-    (views.public, ''),
-    (views.demo, '/demo'),
-)
-
+VIEWS_MODULE = import_module('www.views')
 MODELS_MODULE = import_module('core.models')
 
 
-def create_www(blueprints=None, pytest=False, runscripts=False):
+def create_www(pytest=False, runscripts=False):
     """ Create www instance. """
-    if blueprints is None:
-        blueprints = DEFAULT_BLUEPRINTS
-    #
     app = Flask(DEFAULT_APP_NAME, instance_relative_config=True)
-    # Json encoder
-    app.json_encoder = ModelJSONEncoder
+    # Json provider
+    app.json = ModelJSONProvider(app)
     # Url converter
     app.url_map.converters['list'] = ListConverter
     app.url_map.converters['ObjectId'] = BSONObjectIdConverter
-    # Jinja whitespace control
+    # Whitespace control
     app.jinja_options['trim_blocks'] = True
     app.jinja_options['lstrip_blocks'] = True
     # Config
@@ -79,7 +71,7 @@ def create_www(blueprints=None, pytest=False, runscripts=False):
     if not pytest and not runscripts:  # Do not start schedules during testing
         configure_schedulers(app)
     # Register blueprints
-    configure_blueprints(app, blueprints)
+    configure_blueprints(app)
     #
     return app
 
@@ -549,10 +541,11 @@ def configure_errorhandlers(app):
         return render_template('public/error.html', error=err), error.code
 
 
-def configure_blueprints(app, blueprints):
+def configure_blueprints(app):
     """ Register all the blueprints. """
-    for blueprint, url_prefix in blueprints:
-        app.register_blueprint(blueprint, url_prefix=url_prefix)
+    for v in VIEWS_MODULE.__dict__.values():
+        if isinstance(v, Blueprint):
+            app.register_blueprint(v)
 
 
 def configure_logging(app):
@@ -588,9 +581,8 @@ def configure_logging(app):
     error_file_handler.setLevel(logging.ERROR)
     error_file_handler.setFormatter(formatter)
     app.logger.addHandler(error_file_handler)
-
-    # Set logging level to info in production mode
-    if app.env == 'production':
-        app.logger.setLevel(logging.INFO)
-    else:
+    # Set logging level
+    if app.debug:
         app.logger.setLevel(logging.DEBUG)
+    else:
+        app.logger.setLevel(logging.INFO)

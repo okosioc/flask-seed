@@ -3,10 +3,11 @@
 {% endif %}
 {% if field_schema.type == 'array' %}
 {% set item_schema = field_schema['items'] %}
+{% set fields = field_layout|fields or item_schema['columns'] %}
 <table class="table table-striped mb-4">
     <thead>
         <tr>
-            {% for c in item_schema.columns %}
+            {% for c in fields %}
             {% set column_schema = item_schema.properties[c] %}
             <th>{{ column_schema.title }}{{ '(' + column_schema.unit + ')' if column_schema.unit }}</th>
             {% endfor %}
@@ -16,7 +17,7 @@
     <tbody class="array-items">
         {{ '{%' }} for {{ field_name }}_item in {{ field_path }} + [new_model('{{ item_schema.py_type }}')] {{ '%}' }}
         <tr class="array-item {{ '{{' }} 'template' if loop.last {{ '}}' }}" name="{{ '{{' }} '-' if loop.last else loop.index0 {{ '}}' }}">
-            {% for c in item_schema.columns %}
+            {% for c in fields %}
             {% set column_schema = item_schema.properties[c] %}
             {% set column_path = field_name~'_item.'~c %}
             <td name="{{ c }}">
@@ -55,7 +56,7 @@
             </td>
         </tr>
         {{ '{%' }} endfor {{ '%}' }}
-        <tr style="{{ '{{' }} 'display:none' if {{ field_path }}  {{ '}}' }}"><td colspan="{{ item_schema.columns|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>
+        <tr style="{{ '{{' }} 'display:none' if {{ field_path }}  {{ '}}' }}"><td colspan="{{ fields|length + 1 }}"><div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>没有{{ item_schema.title }}！</div></td></tr>
     </tbody>
 </table>
 <div class="table-actions mb-4">

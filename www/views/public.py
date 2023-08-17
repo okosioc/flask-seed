@@ -24,7 +24,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 from core.models import DemoUser, DemoUserRole
 from www.tools import send_support_email, editor_permission
 
-public = Blueprint('public', __name__)
+public = Blueprint('public', __name__, url_prefix='')
 
 
 @public.route('/')

@@ -109,21 +109,27 @@
             <ul class="navbar-nav">
             {% for l in nav.children %}
             {% if current_user.has_role(l.role) %}
+                {% set ns = namespace(active=false) %}
+                {% if l.url|path == request.path %}
+                    {% set ns.active = true %}
+                {% endif %}
                 {% if l.children %}
-                {% set ns = namespace(show=false) %}
-                {% for sl in l.children %}
-                    {% if sl.url|path == request.path %}
-                        {% set ns.show = true %}
-                    {% endif %}
-                {% endfor %}
+                    {% for sl in l.children %}
+                        {% if sl.url|path == request.path %}
+                            {% set ns.active = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {# show children #}
+                {% if l.children and not l.hide_children %}
                 <li class="nav-item">
                     <a class="nav-link"
                        href="#sidebar-{{ loop.index }}" data-toggle="collapse" role="button"
-                       aria-expanded="{{ 'true' if ns.show else 'false' }}"
+                       aria-expanded="{{ 'true' if ns.active else 'false' }}"
                        aria-controls="sidebar-{{ loop.index }}">
                         <i class="{{ l.icon }}"></i> {{ l.title }}
                     </a>
-                    <div class="collapse {{ 'show' if ns.show }}" id="sidebar-{{ loop.index }}">
+                    <div class="collapse {{ 'show' if ns.active }}" id="sidebar-{{ loop.index }}">
                         <ul class="nav nav-sm flex-column">
                             {% for sl in l.children %}
                             {% if current_user.has_role(sl.role) %}

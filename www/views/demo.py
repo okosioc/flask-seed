@@ -10,7 +10,7 @@ from .common import get_id
 from www.tools import auth_permission, admin_permission, prepare_demo_data
 from core.models import DemoProject, DemoProjectDashboard, DemoTask, DemoTeam, DemoUser
 
-demo = Blueprint('demo', __name__)
+demo = Blueprint('demo', __name__, url_prefix='/demo')
 
 
 @demo.route('/project-list')

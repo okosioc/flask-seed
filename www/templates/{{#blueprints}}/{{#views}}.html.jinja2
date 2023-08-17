@@ -68,12 +68,12 @@
 {# * #}
 {% macro calculate_actions(model) %}
     {% if render_controls.is_query %}
-        {% for v in model.views if v.action in ['create', 'upcreate'] %}
+        {% for v in model.views if blueprint.name == v.blueprint and v.action in ['create', 'upcreate'] %}
             {% set render_controls.actions = [{'icon': 'plus', 'title': v.params.title, 'view': v.name}] %}
             {% break %}
         {% endfor %}
     {% elif render_controls.is_read %}
-        {% for v in model.views if v.action in ['update', 'upcreate'] %}
+        {% for v in model.views if blueprint.name == v.blueprint and v.action in ['update', 'upcreate'] %}
             {% set render_controls.actions = [{'icon': 'edit', 'title': v.params.title, 'view': v.name~'?'}] %}
             {% break %}
         {% endfor %}

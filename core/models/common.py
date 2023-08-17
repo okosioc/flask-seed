@@ -46,8 +46,10 @@ class Block(MongoModel):
     value: float = Field(required=False, title='数值')
     url: str = Field(required=False, title='转跳地址')
     cls: str = Field(required=False, title='样式')
+    role: str = Field(required=False, title='角色', description='能访问此版块的角色')
     action: Action = Field(required=False, title='动作')
     actions: List[Action] = Field(required=False, title='动作列表')
+    hide_children: bool = Field(default=False, title='是否隐藏子版块')
     children: List[ForwardRef('Block')] = Field(required=False, title='子版块')
     #
     __indexes__ = [

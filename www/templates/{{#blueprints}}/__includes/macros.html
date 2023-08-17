@@ -2,14 +2,14 @@
 {# * macro - generate url for a model under current domain, return the first view with matched action #}
 {# * #}
 {% macro generate_url(model_name, model_path=none, actions=none) %}
-    {# NOTE: models & domain is in context always #}
+    {# NOTE: models({name:model_setting}) & domain(str) is in context always, while blueprint({name, views}) is in context when rendering view #}
     {% set model = models[model_name] %}
     {% if actions is not sequence %}
         {% set actions = [action] %}
     {% endif %}
     {% set ns = namespace(view=none) %}
     {% for v in model.views %}
-        {% if domain in v.domains and v.action in actions %}
+        {% if domain in v.domains and blueprint.name == v.blueprint and v.action in actions %}
             {% set ns.view = v %}
             {% break %}
         {% endif %}

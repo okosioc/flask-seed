@@ -22,10 +22,12 @@
     <div class="row align-items-center">
         <div class="col">
             <h4 class="{{ 'mb-0' if not subtitle_field_name }}">
-                <a href="{{ target_url }}">{{ '{{' }} {{ model.name_snake }}.{{ title_field_name }} {{ '}}' }}</a>
+                <a href="{{ target_url }}">{{ '{{' }} {{ field_path }}.{{ title_field_name }} {{ '}}' }}</a>
             </h4>
             {% if subtitle_field_name %}
-            <p class="small text-muted mb-0">{{ display_inline(subtitle_field_name, field_path~'.'~subtitle_field_name, field_schema.properties[subtitle_field_name]) }}</p>
+            <p class="small text-muted mb-0">
+                {% filter right(16) %}{{ display_inline(subtitle_field_name, field_path~'.'~subtitle_field_name, field_schema.properties[subtitle_field_name]) }}{% endfilter %}
+            </p>
             {% set excludes = excludes + [subtitle_field_name] %}
             {% endif %}
         </div>
@@ -42,7 +44,7 @@
         </div>
     </div>
     {% if fields|length > excludes|length %}
-    <div class="list-group list-group-flush border-top">
+    <div class="list-group list-group-flush border-top mt-3">
         {% filter right(8) %}{{ display_list_group_items(field_path, field_schema, fields, excludes) }}{% endfilter %}
     </div>
     {% endif %}

@@ -1,12 +1,19 @@
 {% if field_schema.type == 'array' %}
-<div class="field-group {{ 'row' if view_is_horizontal }}">
+<div class="field-group{{ ' row' if view_is_horizontal }}">
     <label class="text-gray-700 {{ 'col-auto col-field-label' if view_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
     {% if view_is_horizontal %}
     <div class="col">
     {% endif %}
     <div class="field-control">
         {{ '{%' }} for value in {{ field_path }} {{ '%}' }}
-        <span class="font-size-base badge badge-soft-secondary mr-2 mb-2">{{ '{{' }} value {{ '}}' }}</span>
+        {% set item_schema = field_schema['items'] %}
+        {% if item_schema.type == 'object' %}
+        {% set fields = field_layout|fields or item_schema['columns'] %}
+        {% set title_field_name = fields|match('title|name|\\w*name') %}
+        <a href="javascript:;"><span class="font-size-base badge badge-light mr-2 mb-2">{{ '{{' }} value.{{ title_field_name }} {{ '}}' }}</span></a>
+        {% else %}
+        <a href="javascript:;"><span class="font-size-base badge badge-light mr-2 mb-2">{{ '{{' }} value {{ '}}' }}</span></a>
+        {% endif %}
         {{ '{%' }} else {{ '%}' }}
         -
         {{ '{%' }} endfor {{ '%}' }}

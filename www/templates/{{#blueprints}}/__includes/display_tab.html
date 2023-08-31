@@ -1,6 +1,7 @@
 {% if field_schema.type == 'array' %}
 {% set item_schema = field_schema['items'] %}
-{% set title_field = item_schema|field('title|name') %}
+{% set fields = field_layout|fields or item_schema['columns'] %}
+{% set title_field_name = fields|match('title|name|\\w*name') %}
 <div class="card">
     {{ '{%' }} if {{ field_path }} {{ '%}' }}
     {# 遍历每个元素生成标题 #}
@@ -9,8 +10,8 @@
             {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
             <li class="nav-item">
                 <a class="nav-link {{ '{{' }} 'active' if loop.first {{ '}}' }}" data-toggle="tab" href="#{{ field_name }}_item_{{ '{{' }} loop.index {{ '}}' }}">
-                    {% if title_field %}
-                    {{ '{{' }} {{ field_name }}_item.{{ title_field }} {{ '}}' }}
+                    {% if title_field_name %}
+                    {{ '{{' }} {{ field_name }}_item.{{ title_field_name }} {{ '}}' }}
                     {% else %}
                     {{ item_schema.title }}
                     {% endif %}

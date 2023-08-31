@@ -8,7 +8,7 @@ from flask_login import current_user
 from py3seed import populate_model, populate_search
 from .common import get_id
 from www.tools import auth_permission, admin_permission, prepare_demo_data
-from core.models import DemoProject, DemoProjectDashboard, DemoTask, DemoTeam, DemoUser
+from core.models import DemoProject, DemoUser, DemoTask, DemoProjectDashboard, DemoTeam
 
 demo = Blueprint('demo', __name__, url_prefix='/demo')
 

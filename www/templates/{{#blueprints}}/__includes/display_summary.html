@@ -8,7 +8,7 @@
 {% set first_field_schema = field_schema.properties[first_field_name] %}
 {% set first_field_rendered = False %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
-{% set subtitle_field_name = fields|match('subtitle|type|category|tag|tags|text|description') %}
+{% set subtitle_field_name = fields|match('subtitle|status|type|category|tags?|text|description') %}
 {# can pass a target_url in context #}
 {% set target_url = target_url or generate_url(field_schema.py_type, field_path, ['read', 'update', 'upcreate']) %}
 {# image + title + list #}

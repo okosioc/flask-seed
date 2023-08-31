@@ -17,7 +17,7 @@
     {% if ns.view %}{{ ns.view.name }}{{ '?id={{ '~model_path~'.'~model.schema.id_name~' }}' if model_path }}{% else %}javascript:;{% endif %}
 {% endmacro %}
 {# * #}
-{# * macro - render summary, used as default grid #}
+{# * macro - render summary, also used as default grid #}
 {# * #}
 {% macro display_summary(field_name, field_path, field_schema, field_layout, is_in_card, target_url=none) %}
 {% include '__includes/display_summary.html' %}
@@ -125,6 +125,128 @@
             {% filter right(12) %}{{ display_inline(field_name, field_path, field_schema, fallback) }}{% endfilter %}
         </div>
     </div>
+</div>
+{% endfor %}
+{% endmacro %}
+{# * #}
+{# * macro - display format #}
+{# * #}
+{% macro display_format(field_name, field_path, field_schema, field_layout, field_format, is_in_card) %}
+{% set format_file = '__includes/display_' ~ field_format ~ '.html' %}
+{% if not exists(format_file) %}
+    {% set format_file = '__includes/display_*.html' %}
+{% endif %}
+{% include format_file %}
+{% endmacro %}
+{# * #}
+{# * macro - display field #}
+{# * NOTE: field_name/field_path/field_schema/field_layout/is_in_card are used in __includes snippets, can not change their names #}
+{# * #}
+{% macro display_field(field_name, field_path, field_schema, field_layout, field_format, is_in_card) %}
+{# object field #}
+{% if field_schema.type == 'object' %}
+<div class="object{{ ' relation' if field_schema.is_relation }}" name="{{ field_name }}" format="{{ field_format }}">
+{# w/ format #}
+{% if field_format %}
+    {% filter right(4) %}{{ display_format(field_name, field_path, field_schema, field_layout, field_format, is_in_card) }}{% endfilter %}
+{# w/o format #}
+{% else %}
+    {% set render_card = true if (not is_in_card) else false %}
+    {% if render_card %}
+    <div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ field_schema.title }}</h4></div><div class="card-body">
+    {% endif %}
+    {{ '{%' }} set {{ field_name }} = {{ field_path }} {{ '%}' }}
+    {% filter right(4) %}{{ display_layout(field_name, field_name, field_schema, field_layout, render_card) }}{% endfilter %}
+    {% if render_card %}
+    </div></div>
+    {% endif %}
+{% endif %}
+</div>
+{# array field #}
+{% elif field_schema.type == 'array' %}
+<div class="array{{ ' relation' if field_schema.is_relation }}" name="{{ field_name }}" format="{{ field_format }}">
+{# w/ format #}
+{% if field_format %}
+    {% filter right(4) %}{{ display_format(field_name, field_path, field_schema, field_layout, field_format, is_in_card) }}{% endfilter %}
+{# w/o format #}
+{% else %}
+    {% set item_schema = field_schema['items'] %}
+    <div class="array-items">
+        {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+        <div class="array-item {{ item_schema.type }}" name="-" format="{{ item_schema.format }}">
+            {# simple types always have a format, this also handle objects that have format #}
+            {% if item_schema.format %}
+            {% filter right(12) %}{{ display_format('-', field_name~'_item', item_schema, field_layout, is_in_card) }}{% endfilter %}
+            {% elif item_schema.type == 'object' %}
+            {% filter right(12) %}{{ display_layout('-', field_name~'_item', item_schema, field_layout, is_in_card) }}{% endfilter %}
+            {% else %}
+            UNSUPPORTED! {{ item_schema.type }} with format {{ item_schema.format }} can not in an array!
+            {% endif %}
+        </div>
+        {{ '{%' }} else {{ '%}' }}
+        <div class="array-item">
+            <div class="alert alert-light mb-0"><i class="fe fe-alert-circle mr-2"></i>__(No ){{ item_schema.title }}__(!)</div>
+        </div>
+        {{ '{%' }} endfor {{ '%}' }}
+    </div>
+{% endif %}
+</div>
+{# simple field, always having a format #}
+{% else %}
+{% filter right(0) %}{{ display_format(field_name, field_path, field_schema, field_layout, field_format, is_in_card) }}{% endfilter %}
+{% endif %}
+{% endmacro %}
+{# * #}
+{# * macro - display layout for an object, a group or a list item object recrusively #}
+{# * NOTE: field_name/field_path/field_schema/field_layout/is_in_card are used in __includes snippets, can not change their names #}
+{# * #}
+{% macro display_layout(field_name, field_path, field_schema, field_layout, is_in_card, is_first_level=false) %}
+{# per row #}
+{% for row in field_layout %}
+<div class="row">
+{# per column #}
+{% for column in row %}
+    {% set column_name = column['name'] %}
+    {% set column_path = field_path~'.'~column_name %}
+    {% set column_schema = field_schema.properties[column_name] or {} %}
+    {% set column_layout = column['rows'] %}
+    {# column format overwrites schema format #}
+    {% set column_format = column.format or column_schema.format %}
+    {% set column_is_card = true if 'is_card' not in column.params else column.params.is_card %}
+    {% set column_class = 'col-lg' if is_first_level else 'col' %}
+    <div class="{{ (column_class~'-'~column.span|string) if column.span else column_class }}">
+    {# blank column #}
+    {% if not column_name %}
+        {# pass #}
+    {# hyphen column #}
+    {% elif column_name == '-' %}
+        <hr class="mt-3 mb-3">
+    {# group column #}
+    {% elif column_name|float(-1) != -1 %}
+        <div class="group" name="{{ column_name }}" format="{{ column_format }}">
+        {# w/ format, i.e, summary #}
+        {% if column_format %}
+            {% filter right(12) %}{{ display_format(field_name, field_path, field_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
+        {# w/o format #}
+        {% else %}
+            {% set render_card = not is_in_card and column_is_card %}
+            {% if render_card %}
+            <div class="card">{% if column.params.title %}<div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ column.params.title }}</h4></div>{% endif %}<div class="card-body">
+            {% endif %}
+            {% filter right(12) %}{{ display_layout(field_name, field_path, field_schema, column_layout, render_card) }}{% endfilter %}
+            {% if render_card %}
+            </div></div>
+            {% endif %}
+        {% endif %}
+        </div>
+    {# make sure column_schema is valid #}
+    {% elif not column_schema %}
+        UNSUPPORTED! invalid column name: {{ column_name }}!
+    {% else %}
+        {% filter right(8) %}{{ display_field(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
+    {% endif %}
+    </div>
+{% endfor %}
 </div>
 {% endfor %}
 {% endmacro %}

@@ -6,36 +6,71 @@
 {# * #}
 {# * macro - render format #}
 {# * #}
-{% macro render_format(field_name, field_path, field_schema, field_layout, format, is_in_card) %}
-{% set format_file = '__includes/input_' ~ format ~ '.html' %}
-{% if format == 'summary' %}
+{% macro render_format(field_name, field_path, field_schema, field_layout, field_format, is_in_card) %}
+{% set format_file = '__includes/input_' ~ field_format ~ '.html' %}
+{% if field_format == 'summary' %}
     {% set format_file = '__includes/display_summary.html' %}
 {% endif %}
 {% if exists(format_file) %}
 {% include format_file %}
 {% else %}
-UNSUPPORTED! input_{{ format }}.html does not exist!
+UNSUPPORTED! {{ format_file }} does not exist!
 {% endif %}
 {% endmacro %}
 {# * #}
 {# * macro - render relation #}
 {# * #}
-{% macro render_relation(field_name, field_path, field_schema, field_layout, format, is_in_card) %}
-{% if field_schema.is_back_relation %}
-UNSUPPORTED! back relation {{ field_name }} is non-editable!
-{% elif format == 'summary' %}
+{% macro render_relation(field_name, field_path, field_schema, field_layout, field_format, is_in_card) %}
+{% if field_format == 'summary' %}
 {% include '__includes/display_summary.html' %}
-{% elif format in ['media', 'timeline', 'modal'] %}
-{% include '__includes/input_' ~ format ~ '.html' %}
+{% elif field_format in ['media', 'timeline', 'modal'] %}
+{% include '__includes/input_'~field_format~'.html' %}
 {% else %}
 {% include '__includes/input_relation.html' %}
+{% endif %}
+{# * #}
+{# * macro - render tab #}
+{# * each row will be rendered as a tab #}
+{# * #}
+{% endmacro %}
+{% macro render_tab(field_name, field_path, field_schema, field_layout, field_format, is_in_card) %}
+{% if not is_in_card %}
+<div class="card">
+{% endif %}
+<div class="{{ 'card-header' if not is_in_card }}">
+    <ul class="nav nav-tabs nav-tabs-lg {{ 'card-header-tabs' if not is_in_card }}">
+    {% for row in field_layout %}
+        {% set tab_column = row[0] %}
+        {# use column's title or first column's schema title #}
+        {% set tab_schema = field_schema.properties[tab_column['name']] or {} %}
+        {% set tab_title = tab_column.params.title if tab_column.params.title else tab_schema.title %}
+        <li class="nav-item">
+            <a class="nav-link{{ ' active' if loop.first }}" data-toggle="tab" href="#tab-{{ field_name }}-{{ loop.index }}">
+                {{ tab_title }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<div class="{{ 'card-body' if not is_in_card  }}">
+    <div class="tab-content">
+    {% for row in field_layout %}
+        <div class="tab-pane{{ ' active' if loop.first }}" id="tab-{{ field_name }}-{{ loop.index }}">
+            {# use [row] as layout to render #}
+            {% filter right(12) %}{{ render_layout(field_name, field_path, field_schema, [row], true) }}{% endfilter %}
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% if not is_in_card %}
+</div>
 {% endif %}
 {% endmacro %}
 {# * #}
 {# * macro - render layout recrusively #}
 {# * NOTE: field_name/field_path/field_schema/field_layout/is_in_card may be used in __includes snippets, can not change their names #}
 {# * #}
-{% macro render_layout(field_name, field_path, field_schema, field_layout, level, is_in_card) %}
+{% macro render_layout(field_name, field_path, field_schema, field_layout, is_in_card, is_seed_level=false) %}
 {# per row #}
 {% for row in field_layout %}
 <div class="row">
@@ -48,27 +83,32 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
     {# column format overwrites schema format #}
     {% set column_format = column.format or column_schema.format %}
     {% set column_title = column.params.title if column.params.title else column_schema.title %}
-    {% set column_class = 'col-lg' if level == 0 else 'col' %}
+    {% set column_is_card = true if 'is_card' not in column.params else column.params.is_card %}
+    {% set column_class = 'col-lg' if is_seed_level else 'col' %}
     <div class="{{ (column_class~'-'~column.span|string) if column.span else column_class }}">
     {# blank column #}
     {% if not column_name %}
         {# pass #}
     {# hyphen column #}
     {% elif column_name == '-' %}
-        <hr class="mt-3 mb-4">
+        <hr class="mt-3 mb-3">
     {# group column #}
     {% elif column_name|float(-1) != -1 %}
         <fieldset class="group" name="{{ column_name }}" format="{{ column_format }}">
+        {# tab format #}
+        {% if column_format == 'tab' %}
+            {% filter right(12) %}{{ render_tab(field_name, field_path, field_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/ format, i.e, summary #}
-        {% if column_format %}
+        {% elif column_format %}
             {% filter right(12) %}{{ render_format(field_name, field_path, field_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
         {# w/o format #}
         {% else %}
-            {% if not is_in_card %}
-            <div class="card"><div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
+            {% set render_card = not is_in_card and column_is_card %}
+            {% if render_card %}
+            <div class="card">{% if column_title %}<div class="card-header"><h4 class="card-header-title">{% if field_schema.icon %}<i class="fe fe-{{ field_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div>{% endif %}<div class="card-body">
             {% endif %}
-            {% filter right(12) %}{{ render_layout(field_name, field_path, field_schema, column_layout, level + 1, true) }}{% endfilter %}
-            {% if not is_in_card %}
+            {% filter right(12) %}{{ render_layout(field_name, field_path, field_schema, column_layout, render_card) }}{% endfilter %}
+            {% if render_card %}
             </div></div>
             {% endif %}
         {% endif %}
@@ -76,6 +116,10 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
     {# make sure column_schema is valid #}
     {% elif not column_schema %}
         UNSUPPORTED! invalid column name: {{ column_name }}!
+    {# non-editable column #}
+    {# NOTE: back relation is non editable, so no need to handle back relation in macro render_relation() #}
+    {% elif not column_schema.editable %}
+        {% filter right(8) %}{{ display_field(column_name, column_path, column_schema, column_layout, column_format, is_in_card) }}{% endfilter %}
     {# object column #}
     {% elif column_schema.type == 'object' %}
         <fieldset class="object{{ ' relation' if column_schema.is_relation }}" name="{{ column_name }}" format="{{ column_format }}">
@@ -91,7 +135,7 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
             <div class="card"><div class="card-header"><h4 class="card-header-title">{% if column_schema.icon %}<i class="fe fe-{{ column_schema.icon }} mr-2"></i>{% endif %}{{ column_title }}</h4></div><div class="card-body">
             {% endif %}
             {{ '{%' }} set {{ column_name }} = {{ column_path }} {{ '%}' }}
-            {% filter right(12) %}{{ render_layout(column_name, column_name, column_schema, column_layout, level + 1, true) }}{% endfilter %}
+            {% filter right(12) %}{{ render_layout(column_name, column_name, column_schema, column_layout, true) }}{% endfilter %}
             {% if not is_in_card %}
             </div></div>
             {% endif %}
@@ -118,7 +162,7 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
                         {% if item_schema.format %}
                             {% filter right(28) %}{{ render_format('-', column_name~'_item', item_schema, column_layout, is_in_card) }}{% endfilter %}
                         {% elif item_schema.type == 'object' %}
-                            {% filter right(28) %}{{ render_layout('-', column_name~'_item', item_schema, column_layout, level + 1, is_in_card) }}{% endfilter %}
+                            {% filter right(28) %}{{ render_layout('-', column_name~'_item', item_schema, column_layout, is_in_card) }}{% endfilter %}
                         {% else %}
                             UNSUPPORTED! {{ item_schema.type }} with format {{ item_schema.format }} can not in an array!
                         {% endif %}
@@ -156,7 +200,7 @@ UNSUPPORTED! back relation {{ field_name }} is non-editable!
             {% if view_is_card %}
             <div class="card"><div class="card-body">
             {% endif %}
-            {% filter right(12) %}{{ render_layout(model.name_snake, model.name_snake, model.schema, view.rows, 0, view_is_card) }}{% endfilter %}
+            {% filter right(12) %}{{ render_layout(model.name_snake, model.name_snake, model.schema, view.rows, view_is_card, true) }}{% endfilter %}
             {% if view_is_card %}
             </div></div>
             {% endif %}

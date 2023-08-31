@@ -107,9 +107,9 @@
                         <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-check-square mr-2"></i>任务基本信息</h4></div><div class="card-body">
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="title">
+                                <div class="form-group" name="title">
                                     <label class=""><span class="text-danger mr-1">*</span>任务标题</label>
-                                    <input name="title" type="text" class="form-control" required
+                                    <input name="title" type="text" required class="form-control"
                                            value="{{ demo_task.title or '' }}">
                                     <div class="invalid-feedback">__(Invalid )任务标题__(!)</div>
                                 </div>
@@ -131,7 +131,7 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="content">
+                                <div class="form-group" name="content">
                                     <label class="">任务详情</label>
                                     <textarea name="content" rows="5"
                                               class="form-control autosize" >{{ demo_task.content or '' }}</textarea>
@@ -194,10 +194,11 @@
 <script src="{{ base() }}/assets/vendor/select2/dist/js/select2.full.min.js"></script>
 <script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         //
         install_form();
     });
+    //
     function task_edit_upcreate(btn){
         if (btn.is(".doing")) {
             return;
@@ -237,6 +238,7 @@
             btn[method](oldLabel);
         }, "json");
     }
+    //
     function action(btn) {
         if (btn.is(".doing")) {
             return;

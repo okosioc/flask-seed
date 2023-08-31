@@ -8,12 +8,12 @@
 {% set first_field_name = fields[0] %}
 {% set first_field_schema = item_schema.properties[first_field_name] %}
 {% if first_field_schema.type == 'object' %}
-    {% set object_field_name = first_field_schema|field('name|\\w*name') %}
+    {% set object_field_name = first_field_schema|field('title|name|\\w*name') %}
     {% set first_field_name = first_field_name~'.'~object_field_name %}
     {% set first_field_schema = first_field_schema.properties[object_field_name] %}
 {% endif %}
-{% set title_field_name = fields|match('title') %}
-{% set content_field_name = fields|match('content|text') %}
+{% set title_field_name = fields|match('title|name|\\w*name') %}
+{% set content_field_name = fields|match('content|text|description|details?|remarks?') %}
 {% set time_field_name = fields|match('update_time|create_time|\\w*time') %}
 <ul class="array-items list-group list-group-flush list-group-activity">
     {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}

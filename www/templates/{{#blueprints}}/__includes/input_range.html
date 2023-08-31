@@ -1,4 +1,4 @@
-<div class="form-group {{ 'row' if view_is_horizontal }}" name="{{ field_name }}">
+<div class="form-group{{ ' row' if view_is_horizontal }}" name="{{ field_name }}">
     <label class="{{ 'col-auto col-form-label' if view_is_horizontal }}">{{ '<span class="text-danger mr-1">*</span>' if field_schema.required }}{{ field_schema.title }}</label>
     {% if view_is_horizontal %}
     <div class="col">

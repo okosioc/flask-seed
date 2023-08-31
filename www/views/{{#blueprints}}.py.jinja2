@@ -30,18 +30,17 @@
                 {# relation logic #}
                 {% if column_schema.is_relation %}
                     {% set related_model_name = inner_schema.py_type %}
-                    {% set projection = column_layout|fields or inner_schema['columns'] %}
                     {# relations_needing_preload is used in action form when loading view #}
-                    {% if related_model_name not in render_controls.relations_needing_preload %}
+                    {% if column_schema.is_out_relation and related_model_name not in render_controls.relations_needing_preload %}
                         {% set render_controls.relations_needing_preload = render_controls.relations_needing_preload + [(related_model_name, inner_schema['columns'])] %}
                     {% endif %}
                     {# relations_needing_search is used in action form when searching related models #}
-                    {% if column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
+                    {% if column_schema.is_out_relation and column_schema.format in ['media', 'timeline', 'modal'] and related_model_name not in render_controls.relations_needing_search %}
                         {% set render_controls.relations_needing_search = render_controls.relations_needing_search + [(related_model_name, inner_schema['columns'])] %}
                     {% endif %}
                     {# relations_needing_async_load is used in action read #}
                     {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
-                        {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [(related_model_name, projection)] %}
+                        {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [(related_model_name, column_layout|fields or inner_schema['columns'])] %}
                     {% endif %}
                 {# object/array/simple #}
                 {% else %}
@@ -81,7 +80,8 @@ if not {{ model.name_snake }}:
 {% set field_schema = model.schema.properties[field] %}
 {# presetting values for out relation fields #}
 {# e.g, task.project -> project.tasks, project field is a out relation to project, and project owns a task means we have to create task under project, by passing project_id param #}
-{% if field_schema.is_out_relation and field_schema.ownership == 'own' %}
+{# e.g, task.user -> user.tasks, user has many tasks and we can create task by passing user_id #}
+{% if field_schema.is_out_relation and field_schema.ownership %}
 #
 if '{{ field_schema.save_field_name }}' in request.args:
     {% if field_schema.type == 'array' %}
@@ -100,6 +100,9 @@ if '{{ field_schema.save_field_name }}' in request.args:
 {# * macro - render snippet for preloading related models in a create/update/upcreate action #}
 {# * #}
 {% macro render_preloads() %}
+{% if render_controls.relations_needing_preload %}
+#
+{% endif %}
 {% for relation, projection in render_controls.relations_needing_preload %}
 {% set related_model = models[relation] %}
 {{ related_model.name_snake_plural }}, {{ related_model.name_snake_plural }}_pagination = {{ related_model.name }}.search({}, projection={{ projection }}, sort=[('create_time', -1)])
@@ -123,7 +126,7 @@ existing = {{ model.name }}.find_one(id_)
 if not existing:
     abort(404)
 #
-{% for field in layout|fields %}
+{% for field in layout|fields if model.schema.properties[field].editable %}
 existing.{{ field }} = req_{{ model.name_snake }}.{{ field }}
 {% endfor %}
 #
@@ -144,7 +147,7 @@ from flask_login import current_user
 from py3seed import populate_model, populate_search
 from .common import get_id
 from www.tools import auth_permission, admin_permission
-from core.models import {{ blueprint.views|map(attribute='model')|map(attribute='name')|unique|join(', ') }}
+from core.models import {{ blueprint.models|map(attribute='name')|unique|join(', ') }}
 
 {{ blueprint.name_snake }} = Blueprint('{{ blueprint.name }}', __name__, url_prefix='/{{ blueprint.name }}')
 
@@ -193,7 +196,6 @@ def {{ view.name_snake }}():
         {% filter right(8) %}{{ render_model_read(model) }}{% endfilter %}
     else:
         {% filter right(8) %}{{ render_model_create(model) }}{% endfilter %}
-    #
     {% filter right(4) %}{{ render_preloads() }}{% endfilter %}
     #
     return render_template('{{ blueprint.name }}/{{ view.name }}.html', {{ model.name_snake }}={{ model.name_snake }}, args=args, **preloads)

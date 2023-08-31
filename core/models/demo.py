@@ -109,7 +109,7 @@ class DemoUser(CacheModel, UserMixin):
     #
     __views__ = {
         'www://demo/user-profile': '''#!update?extends=layout-dash-demo&title=用户设置
-            1#summary4,    0?title=用户基本信息#8                                           
+            1#summary4,    2?title=用户基本信息#8                                           
               avatar         name  
               name           phone                                                  
               status         intro                                                 
@@ -211,11 +211,11 @@ class DemoProject(CacheModel):
             title, status, value, start, members, percent, create_time
         ''',
         'www://demo/project-detail': '''#!read?extends=layout-dash-demo&title=项目详情
-            1#4,              2#8
-              1.1#summary       tasks                                   
-                title             title, status, user, start, create_time 
-                status          activities                  
-                value             user, title, content, time
+            1?is_card=false#4,  2?is_card=false#8
+              1.1#summary         tasks                                   
+                title               title, status, user, start, create_time 
+                status            activities                  
+                value               user, title, content, time
                 start         
                 members       
                 percent       

@@ -73,9 +73,9 @@
                         <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-users mr-2"></i>团队基本信息</h4></div><div class="card-body">
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="name">
+                                <div class="form-group" name="name">
                                     <label class=""><span class="text-danger mr-1">*</span>团队名称</label>
-                                    <input name="name" type="text" class="form-control" required
+                                    <input name="name" type="text" required class="form-control"
                                            value="{{ demo_team.name or '' }}">
                                     <div class="invalid-feedback">__(Invalid )团队名称__(!)</div>
                                 </div>
@@ -83,9 +83,9 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="code">
+                                <div class="form-group" name="code">
                                     <label class="">邀请码</label>
-                                    <input name="code" type="text" class="form-control" 
+                                    <input name="code" type="text" class="form-control"
                                            value="{{ demo_team.code or '' }}">
                                     <div class="invalid-feedback">__(Invalid )邀请码__(!)</div>
                                 </div>
@@ -93,7 +93,7 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="remarks">
+                                <div class="form-group" name="remarks">
                                     <label class="">备注</label>
                                     <textarea name="remarks" rows="5"
                                               class="form-control autosize" >{{ demo_team.remarks or '' }}</textarea>
@@ -152,10 +152,11 @@
 <script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
 <script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         //
         install_form();
     });
+    //
     function team_profile_update(btn){
         if (btn.is(".doing")) {
             return;
@@ -195,6 +196,7 @@
             btn[method](oldLabel);
         }, "json");
     }
+    //
     function action(btn) {
         if (btn.is(".doing")) {
             return;

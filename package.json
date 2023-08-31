@@ -34,7 +34,7 @@
     "select2": "^4.0.13",
     "sortablejs": "^1.10.2",
     "timepicker": "^1.13.18",
-    "@fancyapps/ui": "^4.0.9",
+    "@fancyapps/ui": "^5.0.22",
     "autosize": "^4.0.2",
     "flickity": "^2.2.1"
   }

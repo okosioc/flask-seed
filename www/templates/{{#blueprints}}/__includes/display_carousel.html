@@ -1,0 +1,29 @@
+{% if field_schema.type == 'array' %}
+{{ '{%' }} if {{ field_path }} {{ '%}' }}
+{{ '{%' }} set carousel_id = randstr() {{ '%}' }}
+<div class="f-carousel bg-light" id="carousel-{{ '{{' }} carousel_id {{ '}}' }}" style="height:400px;">
+    {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}
+    <div class="f-carousel__slide" data-thumb-src="{{ '{{' }} {{ field_name }}_item {{ '}}' }}" data-fancybox="gallery_{{ field_name|lower }}" data-src="{{ '{{' }} {{ field_name }}_item {{ '}}' }}">
+        <img data-lazy-src="{{ '{{' }} {{ field_name }}_item {{ '}}' }}" />
+    </div>
+    {{ '{%' }} endfor {{ '%}' }}
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    new Carousel(document.getElementById("carousel-{{ '{{' }} carousel_id {{ '}}' }}"), {
+        infinite: true,
+        Dots: false,
+        Thumbs: {
+            type: "classic",
+        },
+    }, { Thumbs });
+});
+</script>
+{{ '{%' }} else {{ '%}' }}
+<div class="bg-light text-center" style="height:400px;line-height:400px;">
+    <i class="fe fe-image"></i>
+</div>
+{{ '{%' }} endif {{ '%}' }}
+{% else %}
+UNSUPPORTED! {{ field_schema.format }} format do not support carousel!
+{% endif %}

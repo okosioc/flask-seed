@@ -1108,6 +1108,7 @@ function _process(param, field, path) {
             rangeInputGroup = field.find(".range-input-group"),
             relationInputGroup = field.find(".relation-input-group"),
             inputGroup = field.find(".input-group"),
+            contenteditableDiv = field.find("div[contenteditable]"),
             selectInput = field.find("select"),
             simpleInput = field.find(":input[name]");
         if (radioInputGroup.length) {
@@ -1232,6 +1233,18 @@ function _process(param, field, path) {
                 if (inputGroup.is("[required]")) {
                     inputGroup.addClass("is-invalid");
                     innerInput.addClass("is-invalid");
+                    param["valid"] = false;
+                }
+            }
+        } else if (contenteditableDiv.length) {
+            contenteditableDiv.removeClass("is-invalid is-valid");
+            var val = contenteditableDiv.html();
+            var visible_val = contenteditableDiv.text().trim();
+            if (visible_val.length) {
+                param[path] = val;
+            } else {
+                if (contenteditableDiv.is("[required]")) {
+                    contenteditableDiv.addClass("is-invalid");
                     param["valid"] = false;
                 }
             }

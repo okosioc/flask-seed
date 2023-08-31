@@ -127,7 +127,7 @@
                        href="#sidebar-{{ loop.index }}" data-toggle="collapse" role="button"
                        aria-expanded="{{ 'true' if ns.active else 'false' }}"
                        aria-controls="sidebar-{{ loop.index }}">
-                        <i class="{{ l.icon }}"></i> {{ l.title }}
+                        <i class="{{ l.icon }}"></i>{{ l.title }}
                     </a>
                     <div class="collapse {{ 'show' if ns.active }}" id="sidebar-{{ loop.index }}">
                         <ul class="nav nav-sm flex-column">
@@ -144,9 +144,10 @@
                         </ul>
                     </div>
                 </li>
+                {# no children #}
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link {{ 'active' if l.url == request.path }}" href="{{ l.url }}">
+                    <a class="nav-link {{ 'active' if ns.active }}" href="{{ l.url }}">
                         <i class="{{ l.icon }}"></i>{{ l.title }}
                     </a>
                 </li>
@@ -172,11 +173,24 @@
             {{ navbar_user() }}
             <div class="navbar-collapse collapse" id="topbarCollapse">
                 <ul class="navbar-nav">
-                    {% for l in nav.children %}
+                {% for l in nav.children %}
+                {% if current_user.has_role(l.role) %}
+                    {% set ns = namespace(active=false) %}
+                    {% if l.url|path == request.path %}
+                        {% set ns.active = true %}
+                    {% endif %}
                     {% if l.children %}
+                        {% for sl in l.children %}
+                            {% if sl.url|path == request.path %}
+                                {% set ns.active = true %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {# show children #}
+                    {% if l.children and not l.hide_children %}
                     <li class="nav-item">
                         <div class="dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{ l.url }}" role="button"
+                            <a class="nav-link dropdown-toggle {{ 'active' if ns.active }}" href="{{ l.url }}" role="button"
                                data-toggle="dropdown"
                                aria-haspopup="true" aria-expanded="false">
                                 {{ l.title|safe }}
@@ -194,10 +208,13 @@
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ l.url }}">{{ l.title|safe }}</a>
+                        <a class="nav-link {{ 'active' if ns.active }}" href="{{ l.url }}">
+                            {{ l.title|safe }}
+                        </a>
                     </li>
                     {% endif %}
-                    {% endfor %}
+                {% endif %}
+                {% endfor %}
                 </ul>
             </div> <!-- /.collapse -->
         </div>

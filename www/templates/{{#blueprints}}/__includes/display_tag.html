@@ -1,6 +1,6 @@
 {% if field_schema.type == 'array' %}
 <div class="field-group{{ ' row' if view_is_horizontal }}">
-    <label class="text-gray-700 {{ 'col-auto col-field-label' if view_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
+    <label class="text-gray-700{{ ' col-auto col-field-label' if view_is_horizontal }}">{{ field_schema.title }}{{ '('~field_schema.unit~')' if field_schema.unit }}</label>
     {% if view_is_horizontal %}
     <div class="col">
     {% endif %}
@@ -10,9 +10,9 @@
         {% if item_schema.type == 'object' %}
         {% set fields = field_layout|fields or item_schema['columns'] %}
         {% set title_field_name = fields|match('title|name|\\w*name') %}
-        <a href="javascript:;"><span class="font-size-base badge badge-light mr-2 mb-2">{{ '{{' }} value.{{ title_field_name }} {{ '}}' }}</span></a>
+        <span class="font-size-base badge badge-light mr-2 mb-2">{{ '{{' }} value.{{ title_field_name }} {{ '}}' }}</span>
         {% else %}
-        <a href="javascript:;"><span class="font-size-base badge badge-light mr-2 mb-2">{{ '{{' }} value {{ '}}' }}</span></a>
+        <span class="font-size-base badge badge-light mr-2 mb-2">{{ '{{' }} value {{ '}}' }}</span>
         {% endif %}
         {{ '{%' }} else {{ '%}' }}
         -

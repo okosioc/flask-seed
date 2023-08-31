@@ -9,7 +9,7 @@
 {% set first_field_schema = item_schema.properties[first_field_name] %}
 {% set title_field_name = fields|match('title|name|\\w*name') %}
 {% set title_field_schema = item_schema.properties[title_field_name] %}
-{% set content_field_name = fields|match('content|text') %}
+{% set content_field_name = fields|match('content|text|description|details?|remarks?') %}
 {% set time_field_name = fields|match('update_time|create_time|\\w*time') %}
 <ul class="array-items list-group list-group-flush">
     {{ '{%' }} for {{ field_name }}_item in {{ field_path }} {{ '%}' }}

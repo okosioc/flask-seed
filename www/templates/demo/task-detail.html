@@ -106,7 +106,7 @@
                     <div class="row">
                         <div class="col">
                             <div class="field-group">
-                                <label class="text-gray-700 ">任务标题</label>
+                                <label class="text-gray-700">任务标题</label>
                                 <div class="field-control">
                                     {{ demo_task.title or '-' }}
                                 </div>
@@ -116,7 +116,7 @@
                     <div class="row">
                         <div class="col">
                             <div class="field-group">
-                                <label class="text-gray-700 ">任务状态</label>
+                                <label class="text-gray-700">任务状态</label>
                                 <div class="field-control">
                                     {% if demo_task.status is not none %}<span class="text-{{ demo_task.status|tocolor }} mr-2">●</span>{{ enum_titles('DemoTaskStatus')[demo_task.status] }}{% else %}-{% endif %}
                                 </div>
@@ -126,9 +126,9 @@
                     <div class="row">
                         <div class="col">
                             <div class="field-group">
-                                <label class="text-gray-700 ">任务详情</label>
+                                <label class="text-gray-700">任务详情</label>
                                 <div class="field-control">
-                                    <div class="border-left-primary border-left-3 px-4 py-2 font-size-lg">{{ demo_task.content if demo_task.content is not none else '-' }}</div>
+                                    <div class="border-left-primary border-left-3 px-3 py-2 font-size-lg">{{ demo_task.content if demo_task.content is not none else '-' }}</div>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +136,7 @@
                     <div class="row">
                         <div class="col">
                             <div class="field-group">
-                                <label class="text-gray-700 ">开始日期</label>
+                                <label class="text-gray-700">开始日期</label>
                                 <div class="field-control">
                                     {{ demo_task.start|date if demo_task.start is not none else '-' }}
                                 </div>
@@ -144,7 +144,7 @@
                         </div>
                         <div class="col">
                             <div class="field-group">
-                                <label class="text-gray-700 ">结束日期</label>
+                                <label class="text-gray-700">结束日期</label>
                                 <div class="field-control">
                                     {{ demo_task.end|date if demo_task.end is not none else '-' }}
                                 </div>
@@ -155,7 +155,7 @@
                         <div class="col">
                             <div class="object relation" name="user" format="select">
                                 <div class="field-group">
-                                    <label class="text-gray-700 ">负责人</label>
+                                    <label class="text-gray-700">负责人</label>
                                     <div class="field-control">
                                         {{ demo_task.user.name or '-' }}
                                     </div>
@@ -166,7 +166,7 @@
                     <div class="row">
                         <div class="col">
                             <div class="field-group">
-                                <label class="text-gray-700 ">创建时间</label>
+                                <label class="text-gray-700">创建时间</label>
                                 <div class="field-control">
                                     {{ demo_task.create_time|datetime if demo_task.create_time is not none else '-' }}
                                 </div>
@@ -182,7 +182,7 @@
 {% endblock %}
 {% block script %}
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         //
     });
 </script>

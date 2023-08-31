@@ -8,6 +8,7 @@
 } %}
 {% block title %}{{ title }}{% endblock %}
 {% block style %}
+<link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
 <link href="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.css" rel="stylesheet" type="text/css">
 {% endblock %}
 {% block content %}
@@ -20,9 +21,9 @@
                         <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-briefcase mr-2"></i>项目基本信息</h4></div><div class="card-body">
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="title">
+                                <div class="form-group" name="title">
                                     <label class=""><span class="text-danger mr-1">*</span>项目名称</label>
-                                    <input name="title" type="text" class="form-control" required
+                                    <input name="title" type="text" required class="form-control"
                                            value="{{ demo_project.title or '' }}">
                                     <div class="invalid-feedback">__(Invalid )项目名称__(!)</div>
                                 </div>
@@ -30,7 +31,7 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="description">
+                                <div class="form-group" name="description">
                                     <label class="">项目介绍</label>
                                     <textarea name="description" rows="5"
                                               class="form-control autosize" >{{ demo_project.description or '' }}</textarea>
@@ -52,12 +53,11 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="form-group " name="value">
+                                <div class="form-group" name="value">
                                     <label class=""><span class="text-danger mr-1">*</span>项目价值</label>
                                     <div class="input-group input-group-merge" required>
-                                    <input name="value" type="text" class="form-control form-control-appended"
-                                           pattern="[0-9\.]*" required
-                                           value="{{ demo_project.value if demo_project.value is not none }}">
+                                    <input name="value" type="text" required class="form-control form-control-appended"
+                                           pattern="[\-0-9\.]*" value="{{ demo_project.value if demo_project.value is not none }}">
                                     <div class="input-group-append"><div class="input-group-text">元</div></div>
                                     </div>
                                     <div class="invalid-feedback">__(Invalid )项目价值__(!)</div>
@@ -84,12 +84,11 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="percent">
+                                <div class="form-group" name="percent">
                                     <label class=""><span class="text-danger mr-1">*</span>项目进度</label>
                                     <div class="input-group input-group-merge" required>
-                                    <input name="percent" type="text" class="form-control form-control-appended"
-                                           pattern="[0-9\.]*" required
-                                           value="{{ demo_project.percent if demo_project.percent is not none }}">
+                                    <input name="percent" type="text" required class="form-control form-control-appended"
+                                           pattern="[\-0-9\.]*" value="{{ demo_project.percent if demo_project.percent is not none }}">
                                     <div class="input-group-append"><div class="input-group-text">%</div></div>
                                     </div>
                                     <div class="invalid-feedback">__(Invalid )项目进度__(!)</div>
@@ -245,6 +244,8 @@
 </div>
 {% endblock %}
 {% block script %}
+<script src="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
+<script src="{{ base() }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
 <script src="{{ base() }}/assets/vendor/flatpickr/dist/flatpickr.min.js"></script>
 <script src="{{ base() }}/assets/vendor/flatpickr/dist/l10n/zh.js"></script>
 <script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
@@ -370,10 +371,11 @@
 </script>
 {% endif %}
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         //
         install_form();
     });
+    //
     function project_edit_upcreate(btn){
         if (btn.is(".doing")) {
             return;
@@ -413,6 +415,7 @@
             btn[method](oldLabel);
         }, "json");
     }
+    //
     function action(btn) {
         if (btn.is(".doing")) {
             return;

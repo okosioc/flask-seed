@@ -1,4 +1,4 @@
-{% from "__includes/macros.html" import generate_url, display_summary, display_inline, display_table_columns, display_list_group_items with context %}
+{% from "__includes/macros.html" import generate_url, display_summary, display_inline, display_table_columns, display_list_group_items, display_format, display_field, display_layout with context %}
 {# * #}
 {# * global var to control code generation #}
 {# * - relations_needing_search is used in create/update/upcreate to assign out relation object #}
@@ -24,15 +24,15 @@
                 {{- iterate_layout(column_layout, schema) -}}
             {# normal column #}
             {% elif column_schema %}
-                {% set necessary_formats = [] %}
+                {% set needed_formats = [] %}
                 {% if render_controls.is_read %}
-                    {% set necessary_formats = ['image', 'calendar', 'chart'] %}
+                    {% set needed_formats = ['image', 'carousel', 'calendar', 'chart'] %}
                 {% elif render_controls.is_form %}
-                    {% set necessary_formats = ['image', 'avatar', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
+                    {% set needed_formats = ['image', 'carousel', 'avatar', 'calendar', 'chart', 'date', 'datetime', 'textarea', 'tag', 'select', 'file'] %}
                 {% elif render_controls.is_query %}
-                    {% set necessary_formats = ['date', 'datetime'] %}
+                    {% set needed_formats = ['date', 'datetime'] %}
                 {% endif %}
-                {% if column_schema.format in necessary_formats and column_schema.format not in render_controls.formats %}
+                {% if column_schema.format in needed_formats and column_schema.format not in render_controls.formats %}
                     {% set render_controls.formats = render_controls.formats + [column_schema.format] %}
                 {% endif %}
                 {% set inner_schema = none %}
@@ -52,12 +52,10 @@
                     {% if column_schema.format in ['calendar'] and related_model_name not in render_controls.relations_needing_async_load %}
                         {% set render_controls.relations_needing_async_load = render_controls.relations_needing_async_load + [related_model_name] %}
                     {% endif %}
-                {# object/array/simple #}
-                {% else %}
-                    {# iterate inner layout #}
-                    {% if inner_schema %}
-                        {{- iterate_layout(column_layout, inner_schema) -}}
-                    {% endif %}
+                {% endif %}
+                {# iterate inner layout #}
+                {% if inner_schema %}
+                    {{- iterate_layout(column_layout, inner_schema) -}}
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -104,8 +102,12 @@
 } {{ '%}' }}
 {{ '{% block title %}{{ title }}{% endblock %}' }}
 {{ '{% block style %}' }}
-{% if 'image' in render_controls.formats or 'avatar' in render_controls.formats or 'file' in render_controls.formats %}
+{% if 'image' in render_controls.formats or 'carousel' in render_controls.formats or 'avatar' in render_controls.formats or 'file' in render_controls.formats %}
 <link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css">
+{% if 'carousel' in render_controls.formats %}
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/carousel/carousel.css" rel="stylesheet" type="text/css">
+<link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/carousel/carousel.thumbs.css" rel="stylesheet" type="text/css">
+{% endif %}
 {% endif %}
 {% if 'calendar' in render_controls.formats %}
 <link href="{{ '{{' }} base() {{ '}}' }}/assets/vendor/fullcalendar/main.min.css" rel="stylesheet" type="text/css">
@@ -122,10 +124,14 @@
 {% endif %}
 {{ '{% endblock %}' }}
 {{ '{% block script %}' }}
-{% if 'image' in render_controls.formats or 'avatar' in render_controls.formats or 'file' in render_controls.formats %}
+{% if 'image' in render_controls.formats or 'carousel' in render_controls.formats or 'avatar' in render_controls.formats or 'file' in render_controls.formats %}
 <script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/fancybox.umd.js"></script>
 {% if render_controls.is_form %}
 <script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/plupload/js/plupload.full.min.js"></script>
+{% endif %}
+{% if 'carousel' in render_controls.formats %}
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/carousel/carousel.umd.js"></script>
+<script src="{{ '{{' }} base() {{ '}}' }}/assets/vendor/@fancyapps/ui/dist/carousel/carousel.thumbs.umd.js"></script>
 {% endif %}
 {% endif %}
 {% if 'calendar' in render_controls.formats %}
@@ -283,10 +289,11 @@
 {{ '{%' }} endif {{ '%}' }}
 {% endfor %}
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         //
         install_form();
     });
+    //
     function {{ view.name_snake }}_{{ action }}(btn){
         if (btn.is(".doing")) {
             return;
@@ -331,6 +338,7 @@
             btn[method](oldLabel);
         }, "json");
     }
+    //
     function action(btn) {
         if (btn.is(".doing")) {
             return;
@@ -360,12 +368,13 @@
 {# read #}
 {% elif render_controls.is_read %}
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         //
     });
 {% for relation in render_controls.relations_needing_async_load %}
 {% set related_model = models[relation] %}
 {% set related_model_schema = related_model.schema %}
+    //
     function load_{{ related_model.name_snake_plural }}(params, successCallback){
         var url = "/{{ blueprint.name }}/load-{{ related_model.name_kebab_plural }}";
         // Post

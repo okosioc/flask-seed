@@ -91,13 +91,13 @@
                     </fieldset>
                 </div>
                 <div class="col-lg-8">
-                    <fieldset class="group" name="0" format="">
+                    <fieldset class="group" name="2" format="">
                         <div class="card"><div class="card-header"><h4 class="card-header-title"><i class="fe fe-user mr-2"></i>用户基本信息</h4></div><div class="card-body">
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="name">
+                                <div class="form-group" name="name">
                                     <label class=""><span class="text-danger mr-1">*</span>用户名</label>
-                                    <input name="name" type="text" class="form-control" required
+                                    <input name="name" type="text" required class="form-control"
                                            value="{{ demo_user.name or '' }}">
                                     <div class="invalid-feedback">__(Invalid )用户名__(!)</div>
                                 </div>
@@ -105,9 +105,9 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="phone">
+                                <div class="form-group" name="phone">
                                     <label class="">手机号</label>
-                                    <input name="phone" type="text" class="form-control" 
+                                    <input name="phone" type="text" class="form-control"
                                            value="{{ demo_user.phone or '' }}">
                                     <div class="invalid-feedback">__(Invalid )手机号__(!)</div>
                                 </div>
@@ -115,7 +115,7 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group " name="intro">
+                                <div class="form-group" name="intro">
                                     <label class="">个人简介</label>
                                     <textarea name="intro" rows="5"
                                               class="form-control autosize" >{{ demo_user.intro or '' }}</textarea>
@@ -171,10 +171,11 @@
 <script src="{{ base() }}/assets/vendor/autosize/dist/autosize.min.js"></script>
 <script src="{{ base() }}/js/form.min.js?{{ version() }}"></script>
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function () {
         //
         install_form();
     });
+    //
     function user_profile_update(btn){
         if (btn.is(".doing")) {
             return;
@@ -214,6 +215,7 @@
             btn[method](oldLabel);
         }, "json");
     }
+    //
     function action(btn) {
         if (btn.is(".doing")) {
             return;

@@ -68,6 +68,10 @@
   padding-bottom: 1rem !important;
 }
 
+.modal-footer {
+  padding: .5rem 1.25rem !important;
+}
+
 //
 // Customize colors
 //
@@ -105,6 +109,26 @@
 .bg-header-gardient {
   background-image: linear-gradient(-45deg, mix($white, $gray-400, 44%), mix($white, $gray-400, 88%));
   background-position: center;
+}
+
+.border-1 {
+  border: 1px !important;
+}
+
+.border-top-1 {
+  border-top: 1px !important;
+}
+
+.border-right-1 {
+  border-right: 1px !important;
+}
+
+.border-bottom-1 {
+  border-bottom: 1px !important;
+}
+
+.border-left-1 {
+  border-left: 1px !important;
 }
 
 $my-purple: #8338ec;
@@ -256,14 +280,6 @@ $my-orange: #ff8700;
 }
 
 //
-// Fix dashkit readonly input background color issue
-//
-
-.form-control[readonly] {
-  cursor: not-allowed;
-}
-
-//
 // Avatar for team logo
 //
 
@@ -374,6 +390,23 @@ span.twitter-typeahead {
 
 .cascader-input-group {
 
+}
+
+//
+// carousel
+//
+
+.f-carousel {
+  .f-carousel__slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
 }
 
 //
@@ -788,18 +821,19 @@ a.card-img-overlay {
 //
 // control last row's margin with in a card or modal
 //
+
 .card > .card-body,
 .card > .card-body > .object,
 .card > .card-body > .array,
 .modal-content > .modal-body {
   // last row
   > .row:last-child {
-    > .col, [class*="col-"] {
-      .form-group {
+    > .col, > [class*="col-"] {
+      > .form-group {
         margin-bottom: 0;
       }
 
-      .field-group {
+      > .field-group {
         margin-bottom: 0;
       }
     }
@@ -1122,6 +1156,18 @@ a.card-img-overlay {
   .rte-input-group.is-invalid {
     ~ .invalid-feedback {
       display: block;
+    }
+  }
+
+  div[contenteditable] {
+    display: inline-block;
+    padding: $input-padding-y $input-padding-x;
+    border: 1px solid $input-border-color;
+    border-radius: $border-radius;
+    width: 100%;
+
+    &.is-invalid {
+      border: 1px solid $danger;
     }
   }
 

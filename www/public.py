@@ -28,6 +28,7 @@ public = Blueprint('public', __name__, url_prefix='')
 
 
 @public.route('/')
+@public.route('/index')
 def index():
     """ 首页. """
     return render_template('public/index.html')

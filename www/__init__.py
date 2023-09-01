@@ -31,10 +31,11 @@ from core.models import DemoUser, Block
 from www.extensions import mail, cache, qiniu
 from www.jobs import init_schedule
 from www.commons import SSLSMTPHandler, helpers, ListConverter, BSONObjectIdConverter
+from www.public import public
+from www.blueprints import blueprints
 
 DEFAULT_APP_NAME = 'www'
 MODELS_MODULE = import_module('core.models')
-BLUEPRINTS_MODULE = import_module('www.blueprints')
 
 
 def create_www(pytest=False, runscripts=False):
@@ -371,7 +372,7 @@ def configure_template_functions(app):
     def update_full_path(view):
         """ Update current full path, by supporting special commands.
 
-        e.g, if current path is /dashboard/profile?uid=xxx&tab=password
+        e.g, if current path is /profile?uid=xxx&tab=password
         view=timeline -> timeline
         view=timeline? -> timeline?uid=xxx&index=0, keeping all queries
         view=timeline?uid -> timeline?uid=xxx, keeping the query with specified key
@@ -543,13 +544,11 @@ def configure_errorhandlers(app):
 
 def configure_blueprints(app):
     """ Register all the blueprints. """
-    #
-    from www.public import public
+    # Register public blueprint
     app.register_blueprint(public)
-    #
-    for v in BLUEPRINTS_MODULE.__dict__.values():
-        if isinstance(v, Blueprint):
-            app.register_blueprint(v)
+    # Register all other blueprints in www.blueprints
+    for bp in blueprints:
+        app.register_blueprint(bp)
 
 
 def configure_logging(app):

@@ -1,0 +1,6 @@
+""" public module. """
+{% for blueprint in blueprints %}
+from .{{ blueprint.name }} import {{ blueprint.name_snake }}
+{% endfor %}
+
+blueprints = [{{ blueprints|map(attribute='name_snake')|join(', ') }}]

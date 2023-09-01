@@ -318,7 +318,7 @@
         param["{{ model.name_snake }}.{{ '{{' }} arg[0] {{ '}}' }}"] = "{{ '{{' }} arg[1] {{ '}}' }}";
         {{ '{%' }} endfor {{ '%}' }}
         //
-        var url = "/{{ blueprint.name }}/{{ view.name }}-{{ action }}?id={{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} or '' {{ '}}' }}";
+        var url = "{{ '/'~blueprint.name if blueprint.name!='public' }}/{{ view.name }}-{{ action }}?id={{ '{{' }} {{ model.name_snake }}.{{ model.schema.id_name }} or '' {{ '}}' }}";
         $.post(url, param, function (result) {
             if (result.error == 0) {
                 showSuccess(result.message);
@@ -376,7 +376,7 @@
 {% set related_model_schema = related_model.schema %}
     //
     function load_{{ related_model.name_snake_plural }}(params, successCallback){
-        var url = "/{{ blueprint.name }}/load-{{ related_model.name_kebab_plural }}";
+        var url = "{{ '/'~blueprint.name if blueprint.name!='public' }}/load-{{ related_model.name_kebab_plural }}";
         // Post
         $.post(url, params, function (result) {
             if (result.error == 0) {

@@ -1,7 +1,7 @@
 DOMAIN = 'flask-seed.com'
 SECRET_KEY = '<FIXME>'
 # Cache
-CACHE_TYPE = "simple"
+CACHE_TYPE = 'SimpleCache'
 CACHE_DEFAULT_TIMEOUT = 300
 CACHE_THRESHOLD = 10240
 # Locale

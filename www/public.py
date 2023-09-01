@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    public.py
+    public
     ~~~~~~~~~~~~~~
 
-    Public pages/actions.
+    Public view.
 
-    :copyright: (c) 2016 by fengweimin.
-    :date: 16/5/12
+    :copyright: (c) 2021 by weiminfeng.
+    :date: 2023/8/31
 """
 import os
 from datetime import datetime
@@ -22,7 +22,7 @@ from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
 from core.models import DemoUser, DemoUserRole
-from www.tools import send_support_email, editor_permission
+from www.commons import send_support_email, editor_permission
 
 public = Blueprint('public', __name__, url_prefix='')
 

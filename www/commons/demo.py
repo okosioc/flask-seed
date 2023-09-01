@@ -11,8 +11,9 @@
 
 from datetime import datetime
 from werkzeug.security import generate_password_hash
+
 from core.models import DemoTeam, DemoUser, DemoProject, DemoTask, DemoUserRole, DemoActivity, DemoCategory, DemoAttribute, DemoAttributeOption
-from www.tools import str_datetime
+from . import str_datetime
 
 
 def prepare_demo_data():

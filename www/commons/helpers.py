@@ -11,7 +11,9 @@
 
 import json
 from datetime import datetime, timedelta
+from typing import Type
 
+from flask import abort, request
 from flask_babel import gettext, ngettext
 
 
@@ -88,3 +90,15 @@ def json_dumps(data, pretty=False):
         return json.dumps(data, indent=2, ensure_ascii=False)
     else:
         return json.dumps(data, separators=(',', ':'), ensure_ascii=False)
+
+
+def get_id(type_: Type):
+    """ Try to get model id from request.args and request.form.  """
+    id_ = request.values.get('id')
+    if id_:
+        try:
+            id_ = type_(id_)
+        except ValueError:
+            abort(400)
+    #
+    return id_

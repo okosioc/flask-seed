@@ -145,12 +145,15 @@ from flask import Blueprint, render_template, current_app, redirect, request, ab
 from flask_login import current_user
 
 from py3seed import populate_model, populate_search
-from .common import get_id
-from www.tools import auth_permission, admin_permission
 from core.models import {{ blueprint.models|map(attribute='name')|unique|join(', ') }}
+from www.commons import get_id, auth_permission, admin_permission
+{# public blueprint with blank url_prefix is defined at www/public.py #}
+{% if blueprint.name == 'public' %}
+from www.public import public
+{% else %}
 
 {{ blueprint.name_snake }} = Blueprint('{{ blueprint.name }}', __name__, url_prefix='/{{ blueprint.name }}')
-
+{% endif %}
 
 {% for view in blueprint.views %}
 {# core variables #}

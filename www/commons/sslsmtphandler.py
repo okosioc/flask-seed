@@ -15,9 +15,7 @@ from email.utils import formatdate
 from logging.handlers import SMTPHandler
 from smtplib import SMTPServerDisconnected
 
-from pydash import retry
-
-from . import async_exec
+from . import async_exec, retry
 
 
 class SSLSMTPHandler(SMTPHandler):
@@ -44,8 +42,7 @@ class SSLSMTPHandler(SMTPHandler):
             traceback.print_exc()
 
     # 遇到连接问题则触发重试, 默认重复3次
-    # https://pydash.readthedocs.io/en/latest/api.html#pydash.utilities.retry
-    @retry(delay=1, exceptions=(SMTPServerDisconnected,))
+    @retry(exceptions=(SMTPServerDisconnected, smtplib.SMTPException))
     def retry_emit(self, record):
         """
         Retry emit a record.

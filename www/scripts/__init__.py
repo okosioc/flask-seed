@@ -3,7 +3,7 @@
     __init__.py
     ~~~~~~~~~~~~~~
 
-    A brief description goes here.
+    Mannualy running scripts.
 
     :copyright: (c) 2016 by fengweimin.
     :date: 2016/11/17

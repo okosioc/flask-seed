@@ -14,10 +14,9 @@ from smtplib import SMTPServerDisconnected
 
 from flask import current_app
 from flask_mail import Message
-from pydash import retry
 
 from www.extensions import mail
-from . import async_exec
+from . import async_exec, retry
 
 
 def send_support_email(type, body, **kwargs):
@@ -57,6 +56,7 @@ def _get_host_name():
 
 @async_exec
 def send_async_email(app, subject, recipients, body):
+    """ Send mail async. """
     with app.app_context():
         msg = Message(subject, recipients, body)
         try:
@@ -67,6 +67,7 @@ def send_async_email(app, subject, recipients, body):
 
 @async_exec
 def send_async_service_email(app, subject, recipients, html, bcc):
+    """ Send service email async. """
     with app.app_context():
         msg = Message(subject, recipients, html=html, bcc=bcc)
         try:
@@ -75,8 +76,8 @@ def send_async_service_email(app, subject, recipients, html, bcc):
             app.logger.warn('Can not send service email %s to %s, %s' % (subject, recipients, e))
 
 
-# https://pydash.readthedocs.io/en/latest/api.html#pydash.utilities.retry
-@retry(delay=1, exceptions=(SMTPServerDisconnected,))
+@retry(exceptions=(SMTPServerDisconnected,))
 def retry_send(msg):
+    """ Retry to send email. """
     # print('Sending ...')
     mail.send(msg)

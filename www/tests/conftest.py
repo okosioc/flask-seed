@@ -11,17 +11,17 @@
 
 import pytest
 
-from app import create_app
+from www import create_www
 
 
 @pytest.fixture
 def app():
-    """Prepare a app for each testing, using testing db pytest."""
-    app = create_app(pytest=True)
+    """ Prepare a app for each testing, using testing db pytest. """
+    app = create_www(pytest=True)
     return app
 
 
 @pytest.fixture
 def client(app):
-    """Creates a test client for this application."""
+    """ Creates a test client for this application. """
     return app.test_client()

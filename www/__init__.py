@@ -27,15 +27,14 @@ from py3seed import ModelJSONProvider, connect, SimpleEnumMeta
 from werkzeug.datastructures import MultiDict
 from werkzeug.urls import url_quote, url_encode
 
-from www import views
+from core.models import DemoUser, Block
 from www.extensions import mail, cache, qiniu
 from www.jobs import init_schedule
-from core.models import DemoUser, Block
-from www.tools import SSLSMTPHandler, helpers, ListConverter, BSONObjectIdConverter
+from www.commons import SSLSMTPHandler, helpers, ListConverter, BSONObjectIdConverter
 
 DEFAULT_APP_NAME = 'www'
-VIEWS_MODULE = import_module('www.views')
 MODELS_MODULE = import_module('core.models')
+BLUEPRINTS_MODULE = import_module('www.blueprints')
 
 
 def create_www(pytest=False, runscripts=False):
@@ -53,6 +52,7 @@ def create_www(pytest=False, runscripts=False):
     app.config.from_object('www.config')
     app.config.from_pyfile('config.py')
     if pytest:
+        app.debug = True
         # Use test db
         app.config['MONGODB_URI'] = app.config['MONGODB_URI_PYTEST']
     # Chain
@@ -543,7 +543,11 @@ def configure_errorhandlers(app):
 
 def configure_blueprints(app):
     """ Register all the blueprints. """
-    for v in VIEWS_MODULE.__dict__.values():
+    #
+    from www.public import public
+    app.register_blueprint(public)
+    #
+    for v in BLUEPRINTS_MODULE.__dict__.values():
         if isinstance(v, Blueprint):
             app.register_blueprint(v)
 

@@ -1,4 +1,4 @@
-""" public module. """
+""" blueprints package. """
 from .demo import demo
 
 blueprints = [demo]

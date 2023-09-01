@@ -11,6 +11,7 @@ from www.commons import get_id, auth_permission, admin_permission
 
 demo = Blueprint('demo', __name__, url_prefix='/demo')
 
+
 @demo.route('/project-list')
 @auth_permission
 def project_list():

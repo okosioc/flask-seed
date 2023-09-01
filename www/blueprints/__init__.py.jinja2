@@ -1,6 +1,11 @@
-""" public module. """
+""" blueprints package. """
+{% set ns = namespace(all=[]) %}
 {% for blueprint in blueprints %}
 from .{{ blueprint.name }} import {{ blueprint.name_snake }}
+{# public is already import at www.__init__.py #}
+{% if blueprint.name != 'public'  %}
+{% set ns.all = ns.all + [blueprint.name_snake] %}
+{% endif %}
 {% endfor %}
 
-blueprints = [{{ blueprints|map(attribute='name_snake')|join(', ') }}]
+blueprints = [{{ ns.all|join(', ') }}]

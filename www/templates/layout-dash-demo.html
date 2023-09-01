@@ -1,47 +1,4 @@
-{% from "macros.html" import base, version with context %}
-{# macro to render user block in navbar #}
-{% macro navbar_user(is_in_sidebar) %}
-<div class="navbar-user {{ 'd-md-none' if is_in_sidebar else 'order-lg-last'}}">
-    <div class="d-none d-md-flex">
-        <a class="nav-link text-gray-700" href="javascript:coming();"><i class="fe fe-help-circle"></i></a>
-    </div>
-    <div class="dropdown mr-4 d-none d-md-flex">
-        <a href="#" class="navbar-user-link" role="button" data-toggle="dropdown" aria-haspopup="true"
-           aria-expanded="false"><span class="icon active"><i class="fe fe-bell"></i></span></a>
-        <div class="dropdown-menu dropdown-menu-right dropdown-menu-card">
-            <div class="card-header">
-                <h5 class="card-header-title">__(Messages)</h5>
-                <a href="javascript:coming();" class="small">__(View All)</a>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-light mb-0">__(You do not have any messages)__(!)</div>
-            </div>
-        </div>
-    </div> <!-- /.messages -->
-    <div class="dropdown">
-        <a href="#" class="avatar avatar-sm avatar-online dropdown-toggle" role="button" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">
-            {% if current_user.avatar %}
-            <img src="{{ current_user.avatar }}" class="avatar-img rounded-circle" alt="...">
-            {% else %}
-            <span class="avatar-title rounded-circle bg-primary">{{ current_user.name|first|upper }}</span>
-            {% endif %}
-        </a>
-        <div class="dropdown-menu dropdown-menu-right">
-            <h6 class="dropdown-header">Hi, {{ current_user.name|capitalize }}</h6>
-            {% for l in nav.actions %}
-            {% if l.title %}
-            <a href="{{ l.url }}" class="dropdown-item">
-                <i class="{{ l.icon }} mr-3"></i>{{ l.title }}
-            </a>
-            {% else %}
-            <div class="dropdown-divider"></div>
-            {% endif %}
-            {% endfor %}
-        </div>
-    </div> <!-- /.user -->
-</div>
-{% endmacro %}
+{% from "macros.html" import base, version, render_navbar_user with context %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -53,19 +10,19 @@
     <meta name="author" content="">
     {% endblock %}
     <title>{% block title %}{% endblock %}</title>
-    <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon">
-    <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css"/>
-    <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css"/>
+    <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon" />
+    <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css" />
+    <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css" />
     {% block style %}
     {% endblock %}
 </head>
 <body>
 {% set nav = {
-    'title': 'pySeed',
-    'icon': base() + '/img/logo-sm.png',
+    'title': 'Flask-Seed',
+    'icon': base()~'/img/logo.png',
     'url': '/dashboard',
     'actions': [
-        {'icon':'fe fe-user', 'title':'Profile', 'url':'/profile'},
+        {'icon':'fe fe-user', 'title':'Profile', 'url':'/demo/user-profile'},
         {'title':''},
         {'icon':'fe fe-log-out', 'title':'Logout', 'url':'/logout'}
     ],
@@ -93,7 +50,7 @@
 } %}
 {# nav_mode can be side/top #}
 {% set nav_mode = 'side' %}
-{# sidebar #}
+{# sidebar - use collapse for inner menus #}
 {% if nav_mode == 'side' %}
 <nav class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light" id="sidebar">
     <div class="container-fluid">
@@ -102,13 +59,16 @@
             <span class="navbar-toggler-icon"></span>
         </button> <!-- /.toggler -->
         <a href="{{ nav.url }}" class="navbar-brand">
-            <span class="navbar-brand mb-0 h1">{{ nav.title }}</span>
+        {% if nav.icon %}
+            <img src="{{ nav.icon }}" class="my-3" style="height:40px;max-height:40px;">
+        {% else %}
+            <span class="mb-0 h1">{{ nav.title }}</span>
+        {% endif %}
         </a> <!-- /.brand -->
-        {{ navbar_user(true) }}
+        {{ render_navbar_user(nav.actions, true) }}
         <div class="collapse navbar-collapse" id="sidebarCollapse">
             <ul class="navbar-nav">
-            {% for l in nav.children %}
-            {% if current_user.has_role(l.role) %}
+                {% for l in nav.children if current_user.has_role(l.role) %}
                 {% set ns = namespace(active=false) %}
                 {% if l.url|path == request.path %}
                     {% set ns.active = true %}
@@ -127,19 +87,17 @@
                        href="#sidebar-{{ loop.index }}" data-toggle="collapse" role="button"
                        aria-expanded="{{ 'true' if ns.active else 'false' }}"
                        aria-controls="sidebar-{{ loop.index }}">
-                        <i class="{{ l.icon }}"></i>{{ l.title }}
+                        <i class="{{ l.icon }}"></i>{{ l.title|safe }}
                     </a>
                     <div class="collapse {{ 'show' if ns.active }}" id="sidebar-{{ loop.index }}">
                         <ul class="nav nav-sm flex-column">
-                            {% for sl in l.children %}
-                            {% if current_user.has_role(sl.role) %}
+                            {% for sl in l.children if current_user.has_role(sl.role) %}
                             <li class="nav-item">
                                 <a href="{{ sl.url }}"
                                    class="nav-link {{ 'active' if sl.url|path == request.path }}">
                                     {{ sl.title }}
                                 </a>
                             </li>
-                            {% endif %}
                             {% endfor %}
                         </ul>
                     </div>
@@ -148,18 +106,18 @@
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if ns.active }}" href="{{ l.url }}">
-                        <i class="{{ l.icon }}"></i>{{ l.title }}
+                        <i class="{{ l.icon }}"></i>{{ l.title|safe }}
                     </a>
                 </li>
                 {% endif %}
-            {% endif %}
-            {% endfor %}
+                {% endfor %}
             </ul>
         </div> <!-- /.collapse -->
     </div>
 </nav>
 {% endif %}
 <div class="main-content">
+    {# topbar - use dropdown for inner menus #}
     {% if nav_mode == 'top' %}
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom" id="topbar">
         <div class="container-xxl">
@@ -168,13 +126,16 @@
                 <span class="navbar-toggler-icon"></span>
             </button> <!-- /.toggler -->
             <a href="{{ nav.url }}" class="navbar-brand mr-lg-auto">
-                <span class="navbar-brand mb-0 h1">{{ nav.title }}</span>
+            {% if nav.icon %}
+                <img src="{{ nav.icon }}" style="height:30px;max-height:30px;">
+            {% else %}
+                <span class="mb-0 h1">{{ nav.title }}</span>
+            {% endif %}
             </a> <!-- /.brand -->
-            {{ navbar_user() }}
+            {{ render_navbar_user(nav.actions) }}
             <div class="navbar-collapse collapse" id="topbarCollapse">
                 <ul class="navbar-nav">
-                {% for l in nav.children %}
-                {% if current_user.has_role(l.role) %}
+                    {% for l in nav.children if current_user.has_role(l.role) %}
                     {% set ns = namespace(active=false) %}
                     {% if l.url|path == request.path %}
                         {% set ns.active = true %}
@@ -213,8 +174,7 @@
                         </a>
                     </li>
                     {% endif %}
-                {% endif %}
-                {% endfor %}
+                    {% endfor %}
                 </ul>
             </div> <!-- /.collapse -->
         </div>
@@ -227,7 +187,7 @@
                     <label>&nbsp;</label>
                 </div>
             </form> <!-- /.form -->
-            {{ navbar_user() }}
+            {{ render_navbar_user(nav.actions) }}
         </div>
     </nav>
     {% endif %}

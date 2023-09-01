@@ -1,4 +1,4 @@
-{% from "macros.html" import base, version with context %}
+{% from "macros.html" import base, version, render_navbar_user with context %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,45 +10,64 @@
     <meta name="author" content="">
     {% endblock %}
     <title>{% block title %}{% endblock %}</title>
-    <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon">
-    {% block style %}
-    {% endblock %}
+    <link href="{{ base() }}/img/favicon.ico" rel="shortcut icon" />
     <link href="{{ base() }}/assets/vendor/@fancyapps/ui/dist/fancybox.css" rel="stylesheet" type="text/css" />
     <link href="{{ base() }}/assets/fonts/feather/feather.css" rel="stylesheet" type="text/css" />
     <link href="{{ base() }}/assets/css/theme.min.css?{{ version() }}" rel="stylesheet" type="text/css" />
+    {% block style %}
+    {% endblock %}
 </head>
 <body>
 {% set nav = {
-    'icon': '/static/img/logo.png',
+    'title': 'Flask-Seed',
+    'icon': base()~'/img/logo.png',
     'url': '/',
-    'children': [],
+    'actions': [
+        {'icon':'fe fe-user', 'title':'Profile', 'url':'/profile'},
+        {'title':''},
+        {'icon':'fe fe-log-out', 'title':'Logout', 'url':'/logout'}
+    ],
+    'children': [
+    ],
 } %}
-<nav class="navbar navbar-expand-lg navbar-light bg-white" id="navbar">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom" id="navbar">
     <div class="container">
-        <a class="navbar-brand" href="{{ nav.url }}">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#topbarCollapse"
+            aria-controls="topbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button> <!-- /.toggler -->
+        <a href="{{ nav.url }}" class="navbar-brand mr-lg-auto">
         {% if nav.icon %}
             <img src="{{ nav.icon }}" style="height:30px;max-height:30px;">
         {% else %}
-            {{ block.title }}
+            <span class="mb-0 h1">{{ nav.title }}</span>
         {% endif %}
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-                aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        </a> <!-- /.brand -->
         <div class="navbar-collapse collapse" id="navbarCollapse">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav">
                 {% for l in nav.children %}
-                {% if l.links %}
+                {% set ns = namespace(active=false) %}
+                {% if l.url|path == request.path %}
+                    {% set ns.active = true %}
+                {% endif %}
+                {% if l.children %}
+                    {% for sl in l.children %}
+                        {% if sl.url|path == request.path %}
+                            {% set ns.active = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {# show children #}
+                {% if l.children and not l.hide_children %}
                 <li class="nav-item">
                     <div class="dropdown">
-                        <a class="nav-link dropdown-toggle" href="{{ l.url }}" role="button"
+                        <a class="nav-link dropdown-toggle {{ 'active' if ns.active }}" href="{{ l.url }}" role="button"
                            data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">
-                            {{ l.title }}
+                            {{ l.title|safe }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                        {% for sl in l.links %}
+                        {% for sl in l.children %}
                         {% if sl.title %}
                             <a class="dropdown-item" href="{{ sl.url }}">{{ sl.title }}</a>
                         {% else %}
@@ -60,7 +79,9 @@
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ l.url }}">{{ l.title }}</a>
+                    <a class="nav-link {{ 'active' if ns.active }}" href="{{ l.url }}">
+                        {{ l.title|safe }}
+                    </a>
                 </li>
                 {% endif %}
                 {% endfor %}
@@ -72,7 +93,7 @@
                     {% endif %}
                 </li>
             </ul>
-        </div>
+        </div> <!-- /.collapse -->
     </div>
 </nav>
 <div class="container-fluid">

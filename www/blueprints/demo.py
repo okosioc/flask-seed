@@ -11,6 +11,7 @@ from www.commons import get_id, auth_permission, admin_permission, prepare_demo_
 
 demo = Blueprint('demo', __name__, url_prefix='/demo')
 
+
 @demo.route('/project-list')
 @auth_permission
 def project_list():
@@ -253,9 +254,12 @@ def user_profile():
     """ 用户设置. """
     preloads = {}
     id_ = get_id(int)
-    demo_user = DemoUser.find_one(id_)
-    if not demo_user:
-        abort(404)
+    if id_:
+        demo_user = DemoUser.find_one(id_)
+        if not demo_user:
+            abort(404)
+    else:
+        demo_user = current_user
     #
     return render_template('demo/user-profile.html', demo_user=demo_user, **preloads)
 

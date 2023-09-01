@@ -155,6 +155,7 @@ from www.public import public
 {{ blueprint.name_snake }} = Blueprint('{{ blueprint.name }}', __name__, url_prefix='/{{ blueprint.name }}')
 {% endif %}
 
+
 {% for view in blueprint.views %}
 {# core variables #}
 {% set model = view.model %}

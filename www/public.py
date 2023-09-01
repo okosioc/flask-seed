@@ -9,11 +9,13 @@
     :date: 2023/8/31
 """
 import os
+
 from datetime import datetime
+from bson import ObjectId
 
 from flask import Blueprint, render_template, current_app, redirect, request, abort, jsonify, url_for
 from flask_babel import gettext as _
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
 from werkzeug.datastructures import FileStorage
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -21,8 +23,9 @@ from werkzeug.utils import secure_filename
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
-from core.models import DemoUser, DemoUserRole
-from www.commons import send_support_email, editor_permission
+from py3seed import populate_model
+from core.models import User, UserRole
+from www.commons import get_id, send_support_email, editor_permission
 
 public = Blueprint('public', __name__, url_prefix='')
 
@@ -71,7 +74,7 @@ def login():
     #
     if form.validate_on_submit():
         em = form.email.data.strip().lower()
-        u = DemoUser.find_one({'email': em})
+        u = User.find_one({'email': em})
         if not u or not check_password_hash(u.password, form.password.data):
             form.email.errors.append('登录邮箱或者登录密码不匹配')
             return render_template('public/login.html', form=form)
@@ -97,7 +100,7 @@ def logout():
 
 
 class SignupForm(FlaskForm):
-    """ 注册表单. """
+    """ Signup form. """
     email = StringField('email', validators=[
         DataRequired(_('Email is required!')),
         Email(_('Invalid email address!'))
@@ -116,26 +119,26 @@ class SignupForm(FlaskForm):
 
 @public.route('/signup', methods=('GET', 'POST'))
 def signup():
-    """ 注册. """
+    """ Signup. """
     form = SignupForm()
     #
     if form.validate_on_submit():
         em = form.email.data.strip().lower()
         pwd = form.password.data.strip()
-        u = DemoUser.find_one({'email': em})
+        u = User.find_one({'email': em})
         if u:
             form.email.errors.append('该登录邮箱已经注册!')
             return render_template('public/signup.html', form=form)
         # Create user
-        u = DemoUser()
+        u = User()
         u.email = em
         u.password = generate_password_hash(pwd)
         u.name = u.email.split('@')[0]
         u.avatar = url_for('static', filename='img/avatar.jpg')
-        count = DemoUser.count({})
+        count = User.count({})
         # Set first signup user to admin
         if count == 0:
-            u.roles = [DemoUserRole.MEMBER, DemoUserRole.ADMIN]
+            u.roles = [UserRole.MEMBER, UserRole.ADMIN]
             current_app.logger.info('First user, set it to admin')
         else:
             current_app.logger.info('Current number of users is %s' % count)
@@ -151,7 +154,6 @@ def signup():
 
 
 # TODO: Forget password?
-
 
 @public.route('/upload', methods=('POST',))
 @editor_permission

@@ -27,7 +27,7 @@ from py3seed import ModelJSONProvider, connect, SimpleEnumMeta
 from werkzeug.datastructures import MultiDict
 from werkzeug.urls import url_quote, url_encode
 
-from core.models import DemoUser, Block
+from core.models import User, Block
 from www.extensions import mail, cache, qiniu
 from www.jobs import init_schedule
 from www.commons import SSLSMTPHandler, helpers, ListConverter, BSONObjectIdConverter
@@ -106,7 +106,7 @@ def configure_login(app):
     @login_manager.user_loader
     def load_user(user_id):
         """ Reload the user object from the user ID stored in the session. """
-        return DemoUser.find_one(int(user_id))
+        return User.find_one(User.__id_type__(user_id))
 
 
 def configure_uploads(app):

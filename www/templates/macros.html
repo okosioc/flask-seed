@@ -1,2 +1,54 @@
+{# * #}
+{# * macro - make sure css/js can be refreshed #}
+{# * #}
 {% macro version() %}20230101{% endmacro %}
+{# * #}
+{# * macro - static files can be stored in cloud #}
+{# * #}
 {% macro base() %}/static{% endmacro %}
+{# * #}
+{# * macro - render user block in navbar #}
+{# * #}
+{% macro render_navbar_user(actions, is_in_sidebar) %}
+{# sidebar user only visible in xs/sm screen #}
+<div class="navbar-user {{ 'd-md-none' if is_in_sidebar else 'order-lg-last'}}">
+    <div class="d-none d-md-flex">
+        <a class="nav-link text-gray-700" href="javascript:coming();"><i class="fe fe-help-circle"></i></a>
+    </div>
+    <div class="dropdown mr-4 d-none d-md-flex">
+        <a href="#" class="navbar-user-link" role="button" data-toggle="dropdown" aria-haspopup="true"
+           aria-expanded="false"><span class="icon active"><i class="fe fe-bell"></i></span></a>
+        <div class="dropdown-menu dropdown-menu-right dropdown-menu-card">
+            <div class="card-header">
+                <h5 class="card-header-title">__(Messages)</h5>
+                <a href="javascript:coming();" class="small">__(View All)</a>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-light mb-0">__(You do not have any messages)__(!)</div>
+            </div>
+        </div>
+    </div> <!-- /.messages -->
+    <div class="dropdown">
+        <a href="#" class="avatar avatar-sm avatar-online dropdown-toggle" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+            {% if current_user.avatar %}
+            <img src="{{ current_user.avatar }}" class="avatar-img rounded-circle" alt="...">
+            {% else %}
+            <span class="avatar-title rounded-circle bg-primary">{{ current_user.name|first|upper }}</span>
+            {% endif %}
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+            <h6 class="dropdown-header">Hi, {{ current_user.name|capitalize }}</h6>
+            {% for l in actions %}
+            {% if l.title %}
+            <a href="{{ l.url }}" class="dropdown-item">
+                <i class="{{ l.icon }} mr-3"></i>{{ l.title }}
+            </a>
+            {% else %}
+            <div class="dropdown-divider"></div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div> <!-- /.user -->
+</div>
+{% endmacro %}

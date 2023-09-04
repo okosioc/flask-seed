@@ -22,7 +22,7 @@
     'icon': base()~'/img/logo.png',
     'url': '/dashboard',
     'actions': [
-        {'icon':'fe fe-user', 'title':'Profile', 'url':'/demo/user-profile'},
+        {'icon':'fe fe-user', 'title':'Profile', 'url':'/profile'},
         {'title':''},
         {'icon':'fe fe-log-out', 'title':'Logout', 'url':'/logout'}
     ],
@@ -191,6 +191,7 @@
         </div>
     </nav>
     {% endif %}
+    {# set breadcrumb in child templates, or default breadcrumb will be used #}
     {% set breadcrumb = breadcrumb or {
         'title': 'Blank Page',
         'subtitle': 'Overview',

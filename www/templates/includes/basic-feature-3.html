@@ -1,0 +1,44 @@
+{# display one feature using format: image,text,image #}
+{% set block = blocks['feature-3'] or {
+    'icon': 'CODE',
+    'title': '二次开发',
+    'subtitle': '代码生成与定制开发的平衡',
+    'images': [
+        '/static/assets/img/illustrations/lost-cropped.png',
+        '/static/assets/img/illustrations/relax-cropped.png',
+    ],
+    'children': [
+        {'title': '如果数据结构或者模板组件的有更新，重新生成项目时即可', 'subtitle': ''},
+        {'title': '生成代码时支持自动合并，以保留二次开发的代码', 'subtitle': ''},
+    ],
+    'action': {'title': '免费试用<i class="fe fe-arrow-right d-none d-md-inline ml-2"></i>', 'url': '/dashboard'},
+} %}
+<section class="py-7 mx-n3 bg-white bg-between"
+         style="background-image: url({{ block.images[0] }}), url({{ block.images[1] }});"
+         id="contact-us">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 text-center">
+                <span class="badge badge-soft-primary mb-4">
+                    <span class="h5 text-uppercase">{{ block.icon }}</span>
+                </span>
+                <h1>{{ block.title }}</h1>
+                <p class="lead text-gray-700 mb-5">{{ block.subtitle|safe }}</p>
+            </div>
+        </div> <!-- /.row -->
+        <div class="row text-center justify-content-center align-items-center">
+            <div class="col-12 col-md-6">
+            {% for c in block.children %}
+                <p class="text-muted mb-3"><i class="{{ c.icon }} mr-2"></i>{{ c.title }}</p>
+            {% endfor %}
+            </div>
+        </div> <!-- /.row -->
+        {% if block.action %}
+        <div class="row text-center justify-content-center align-items-center mt-5">
+            <div class="col-12 col-md-6">
+                <a href="{{ block.action.url }}" class="btn btn-primary lift">{{ block.action.title|safe }}</a>
+            </div>
+        </div> <!-- /.row -->
+        {% endif %}
+    </div> <!-- /.container -->
+</section>

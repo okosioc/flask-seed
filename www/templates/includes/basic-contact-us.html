@@ -1,32 +1,56 @@
 {% set block = blocks['contact-us'] or {
-        'icon': 'CONTACT',
-        'title': '联系我们',
-        'subtitle': '-',
-        'children': [
-            {'icon': 'fe fe-map-pin', 'title': '地址', 'content': '中国香港中环'},
-            {'icon': 'fe fe-phone', 'title': '电话', 'content': '+852-12345678'},
-            {'icon': 'fe fe-mail', 'title': '邮箱', 'content': 'support@flask-seed.com'},
-        ],
-    } %}
-<section class="py-7 mx-n3 bg-light bg-between"
-         style="background-image: url(/static/assets/img/illustrations/lost-cropped.png), url(/static/assets/img/illustrations/relax-cropped.png);"
-         id="contact-us">
+    'icon': 'CONTACT',
+    'title': _('We’re Here to Help'),
+    'subtitle': _('We always want to hear from you! Let us know how we can best help you and we will do our very best.'),
+    'children': [
+        {'icon': 'fe fe-map-pin', 'title': '地址', 'content': '中国香港中环'},
+        {'icon': 'fe fe-phone', 'title': '电话', 'content': '+852-12345678'},
+        {'icon': 'fe fe-mail', 'title': '邮箱', 'content': 'support@flask-seed.com'},
+    ],
+} %}
+<section class="py-8 mx-n3 overlay overlay-dark overlay-40 bg-cover bg-ellipses"
+         style="background-image: url(/static/assets/img/covers/cover-3.jpg);">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8 text-center">
-                <span class="badge badge-soft-primary mb-4">
-                    <span class="h5 text-uppercase">{{ block.icon }}</span>
-                </span>
-                <h1>{{ block.title }}</h1>
-                <p class="lead text-gray-700 mb-5">{{ block.subtitle|safe }}</p>
+                <h1 class="display-2 font-weight-bold text-white">
+                    {{ block.title }}
+                </h1>
+                <p class="lead text-white mb-0">
+                    {{ block.subtitle }}
+                </p>
             </div>
-        </div> <!-- / .row -->
-        <div class="row text-center justify-content-center align-items-center">
-            <div class="col-12 col-md-6">
+        </div> <!-- /.row -->
+    </div> <!-- /.container -->
+</section>
+<div class="position-relative mx-n3">
+    <div class="shape shape-bottom shape-fluid-x svg-shim text-white">
+        <svg viewBox="0 0 2880 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 48h2880V0h-720C1442.5 52 720 0 720 0H0v48z" fill="currentColor"></path>
+        </svg>
+    </div>
+</div>
+<section class="py-6 py-md-9 border-bottom border-gray-300" id="info">
+    <div class="container">
+        <div class="row">
             {% for c in block.children %}
-                <p class="text-muted mb-3"><i class="{{ c.icon }} mr-2"></i>{{ c.title }} - {{ c.content }}</p>
-            {% endfor %}
+            <div class="col-md text-center {{ ' border-right border-gray-300' if not loop.last }}">
+                <span class="font-size-lg text-uppercase text-gray-700">
+                    <i class="{{ c.icon }} mr-2"></i>{{ c.title }}
+                </span>
+                <div class="mt-2 mb-5 mb-md-0">
+                    {% if c.url %}
+                    <a href="{{ c.url }}" target="_blank" class="text-primary">
+                        {{ c.content }}
+                    </a>
+                    {% else %}
+                    <span class="text-primary">
+                        {{ c.content }}
+                    </span>
+                    {% endif %}
+                </div>
             </div>
+            {% endfor %}
         </div> <!-- / .row -->
-    </div> <!-- / .container -->
+    </div>
 </section>

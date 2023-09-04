@@ -15349,6 +15349,505 @@ a:focus, button:focus {
   text-decoration: line-through !important;
 }
 
+.shape {
+  position: absolute;
+  pointer-events: none;
+}
+
+.shape > * {
+  display: block;
+}
+
+.shape:not([class*=shape-blur]) {
+  overflow: hidden;
+}
+
+.shape:not([class*=shape-blur]) > * {
+  transform: scale(2);
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .shape > svg {
+    display: none;
+  }
+}
+.shape-top {
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+.shape-top > * {
+  transform-origin: bottom center;
+}
+
+.shape-right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.shape-right > * {
+  position: inherit;
+  top: inherit;
+  bottom: inherit;
+  right: inherit;
+  transform-origin: center left;
+}
+
+.shape-bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.shape-bottom > * {
+  transform-origin: top center;
+}
+
+.shape-bottom-100 {
+  right: 0;
+  bottom: 100%;
+  left: 0;
+}
+
+.shape-bottom-100 > * {
+  transform-origin: top center;
+}
+
+.shape-left {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.shape-left > * {
+  position: inherit;
+  top: inherit;
+  bottom: inherit;
+  left: inherit;
+  transform-origin: center right;
+}
+
+.shape-fluid-x > * {
+  width: 100%;
+  height: auto;
+}
+
+.shape-fluid-y > * {
+  width: auto;
+  height: 100%;
+}
+
+.shape-flip-x {
+  transform: scaleX(-1);
+}
+
+.shape-blur-1 {
+  top: 0;
+  right: 0;
+  left: 0;
+}
+@media (min-width: 768px) {
+  .shape-blur-1 {
+    bottom: 0;
+    left: 50%;
+    right: auto;
+  }
+}
+
+.shape-blur-1 > * {
+  width: 100%;
+  height: auto;
+}
+@media (min-width: 768px) {
+  .shape-blur-1 > * {
+    width: auto;
+    height: 100%;
+  }
+}
+
+.shape-blur-2 {
+  top: 0;
+  right: 0;
+  left: 0;
+}
+@media (min-width: 768px) {
+  .shape-blur-2 {
+    bottom: 0;
+    right: 50%;
+    left: auto;
+  }
+}
+
+.shape-blur-2 > * {
+  width: 100%;
+  height: auto;
+}
+@media (min-width: 768px) {
+  .shape-blur-2 > * {
+    width: auto;
+    height: 100%;
+    float: right;
+  }
+}
+
+.shape-blur-3 {
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+.shape-blur-3 > * {
+  width: 100%;
+  height: auto;
+}
+
+.shape-blur-4 {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%) scale(1.3);
+}
+
+.shape-blur-4 > * {
+  width: auto;
+  height: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.overlay {
+  position: relative;
+}
+.overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: inherit;
+}
+
+.overlay-primary::before {
+  background-color: #2C7BE5;
+}
+
+.overlay-gradient-primary-right::before {
+  background-image: linear-gradient(to bottom, transparent, #2C7BE5);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-primary-right::before {
+    background-image: linear-gradient(to right, transparent, #2C7BE5 50%, #2C7BE5);
+  }
+}
+
+.overlay-gradient-primary-down::before {
+  background-image: linear-gradient(to bottom, transparent, #2C7BE5);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-primary-down::before {
+    background-image: linear-gradient(to bottom, transparent, #2C7BE5 50%, #2C7BE5);
+  }
+}
+
+.overlay-gradient-primary-left::before {
+  background-image: linear-gradient(to bottom, transparent, #2C7BE5);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-primary-left::before {
+    background-image: linear-gradient(to left, transparent, #2C7BE5 50%, #2C7BE5);
+  }
+}
+
+.overlay-secondary::before {
+  background-color: #6E84A3;
+}
+
+.overlay-gradient-secondary-right::before {
+  background-image: linear-gradient(to bottom, transparent, #6E84A3);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-secondary-right::before {
+    background-image: linear-gradient(to right, transparent, #6E84A3 50%, #6E84A3);
+  }
+}
+
+.overlay-gradient-secondary-down::before {
+  background-image: linear-gradient(to bottom, transparent, #6E84A3);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-secondary-down::before {
+    background-image: linear-gradient(to bottom, transparent, #6E84A3 50%, #6E84A3);
+  }
+}
+
+.overlay-gradient-secondary-left::before {
+  background-image: linear-gradient(to bottom, transparent, #6E84A3);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-secondary-left::before {
+    background-image: linear-gradient(to left, transparent, #6E84A3 50%, #6E84A3);
+  }
+}
+
+.overlay-success::before {
+  background-color: #00D97E;
+}
+
+.overlay-gradient-success-right::before {
+  background-image: linear-gradient(to bottom, transparent, #00D97E);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-success-right::before {
+    background-image: linear-gradient(to right, transparent, #00D97E 50%, #00D97E);
+  }
+}
+
+.overlay-gradient-success-down::before {
+  background-image: linear-gradient(to bottom, transparent, #00D97E);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-success-down::before {
+    background-image: linear-gradient(to bottom, transparent, #00D97E 50%, #00D97E);
+  }
+}
+
+.overlay-gradient-success-left::before {
+  background-image: linear-gradient(to bottom, transparent, #00D97E);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-success-left::before {
+    background-image: linear-gradient(to left, transparent, #00D97E 50%, #00D97E);
+  }
+}
+
+.overlay-info::before {
+  background-color: #39afd1;
+}
+
+.overlay-gradient-info-right::before {
+  background-image: linear-gradient(to bottom, transparent, #39afd1);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-info-right::before {
+    background-image: linear-gradient(to right, transparent, #39afd1 50%, #39afd1);
+  }
+}
+
+.overlay-gradient-info-down::before {
+  background-image: linear-gradient(to bottom, transparent, #39afd1);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-info-down::before {
+    background-image: linear-gradient(to bottom, transparent, #39afd1 50%, #39afd1);
+  }
+}
+
+.overlay-gradient-info-left::before {
+  background-image: linear-gradient(to bottom, transparent, #39afd1);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-info-left::before {
+    background-image: linear-gradient(to left, transparent, #39afd1 50%, #39afd1);
+  }
+}
+
+.overlay-warning::before {
+  background-color: #F6C343;
+}
+
+.overlay-gradient-warning-right::before {
+  background-image: linear-gradient(to bottom, transparent, #F6C343);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-warning-right::before {
+    background-image: linear-gradient(to right, transparent, #F6C343 50%, #F6C343);
+  }
+}
+
+.overlay-gradient-warning-down::before {
+  background-image: linear-gradient(to bottom, transparent, #F6C343);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-warning-down::before {
+    background-image: linear-gradient(to bottom, transparent, #F6C343 50%, #F6C343);
+  }
+}
+
+.overlay-gradient-warning-left::before {
+  background-image: linear-gradient(to bottom, transparent, #F6C343);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-warning-left::before {
+    background-image: linear-gradient(to left, transparent, #F6C343 50%, #F6C343);
+  }
+}
+
+.overlay-danger::before {
+  background-color: #E63757;
+}
+
+.overlay-gradient-danger-right::before {
+  background-image: linear-gradient(to bottom, transparent, #E63757);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-danger-right::before {
+    background-image: linear-gradient(to right, transparent, #E63757 50%, #E63757);
+  }
+}
+
+.overlay-gradient-danger-down::before {
+  background-image: linear-gradient(to bottom, transparent, #E63757);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-danger-down::before {
+    background-image: linear-gradient(to bottom, transparent, #E63757 50%, #E63757);
+  }
+}
+
+.overlay-gradient-danger-left::before {
+  background-image: linear-gradient(to bottom, transparent, #E63757);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-danger-left::before {
+    background-image: linear-gradient(to left, transparent, #E63757 50%, #E63757);
+  }
+}
+
+.overlay-light::before {
+  background-color: #152E4D;
+}
+
+.overlay-gradient-light-right::before {
+  background-image: linear-gradient(to bottom, transparent, #152E4D);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-light-right::before {
+    background-image: linear-gradient(to right, transparent, #152E4D 50%, #152E4D);
+  }
+}
+
+.overlay-gradient-light-down::before {
+  background-image: linear-gradient(to bottom, transparent, #152E4D);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-light-down::before {
+    background-image: linear-gradient(to bottom, transparent, #152E4D 50%, #152E4D);
+  }
+}
+
+.overlay-gradient-light-left::before {
+  background-image: linear-gradient(to bottom, transparent, #152E4D);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-light-left::before {
+    background-image: linear-gradient(to left, transparent, #152E4D 50%, #152E4D);
+  }
+}
+
+.overlay-dark::before {
+  background-color: #12263F;
+}
+
+.overlay-gradient-dark-right::before {
+  background-image: linear-gradient(to bottom, transparent, #12263F);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-dark-right::before {
+    background-image: linear-gradient(to right, transparent, #12263F 50%, #12263F);
+  }
+}
+
+.overlay-gradient-dark-down::before {
+  background-image: linear-gradient(to bottom, transparent, #12263F);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-dark-down::before {
+    background-image: linear-gradient(to bottom, transparent, #12263F 50%, #12263F);
+  }
+}
+
+.overlay-gradient-dark-left::before {
+  background-image: linear-gradient(to bottom, transparent, #12263F);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-dark-left::before {
+    background-image: linear-gradient(to left, transparent, #12263F 50%, #12263F);
+  }
+}
+
+.overlay-white::before {
+  background-color: #FFFFFF;
+}
+
+.overlay-gradient-white-right::before {
+  background-image: linear-gradient(to bottom, transparent, #FFFFFF);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-white-right::before {
+    background-image: linear-gradient(to right, transparent, #FFFFFF 50%, #FFFFFF);
+  }
+}
+
+.overlay-gradient-white-down::before {
+  background-image: linear-gradient(to bottom, transparent, #FFFFFF);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-white-down::before {
+    background-image: linear-gradient(to bottom, transparent, #FFFFFF 50%, #FFFFFF);
+  }
+}
+
+.overlay-gradient-white-left::before {
+  background-image: linear-gradient(to bottom, transparent, #FFFFFF);
+}
+@media (min-width: 768px) {
+  .overlay-gradient-white-left::before {
+    background-image: linear-gradient(to left, transparent, #FFFFFF 50%, #FFFFFF);
+  }
+}
+
+.overlay-10::before {
+  opacity: 0.1;
+}
+
+.overlay-20::before {
+  opacity: 0.2;
+}
+
+.overlay-30::before {
+  opacity: 0.3;
+}
+
+.overlay-40::before {
+  opacity: 0.4;
+}
+
+.overlay-50::before {
+  opacity: 0.5;
+}
+
+.overlay-60::before {
+  opacity: 0.6;
+}
+
+.overlay-70::before {
+  opacity: 0.7;
+}
+
+.overlay-80::before {
+  opacity: 0.8;
+}
+
+.overlay-90::before {
+  opacity: 0.9;
+}
+
 .table-compact th {
   padding: 0.8rem 1rem;
 }

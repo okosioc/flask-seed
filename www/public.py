@@ -11,7 +11,6 @@
 import os
 
 from datetime import datetime
-from bson import ObjectId
 
 from flask import Blueprint, render_template, current_app, redirect, request, abort, jsonify, url_for
 from flask_babel import gettext as _
@@ -23,9 +22,8 @@ from werkzeug.utils import secure_filename
 from wtforms import StringField, PasswordField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
-from py3seed import populate_model
 from core.models import User, UserRole
-from www.commons import get_id, send_support_email, editor_permission
+from www.commons import send_support_email, editor_permission
 
 public = Blueprint('public', __name__, url_prefix='')
 
@@ -33,7 +31,7 @@ public = Blueprint('public', __name__, url_prefix='')
 @public.route('/')
 @public.route('/index')
 def index():
-    """ 首页. """
+    """ Index page. """
     return render_template('public/index.html')
 
 
@@ -42,14 +40,26 @@ def index():
 @public.route('/404')
 @public.route('/500')
 def error():
-    """ 错误页面. """
+    """ Error page. """
     abort(int(request.path.strip('/')))
+
+
+@public.route('/contact')
+def contact():
+    """ Contact us. """
+    return render_template('public/contact.html')
 
 
 @public.route('/dashboard')
 def dashboard():
-    """ 仪表盘. """
+    """ User home page. """
     return redirect(url_for('demo.project_dashboard'))
+
+
+@public.route('/profile')
+def profile():
+    """ User profile page. """
+    return redirect(url_for('demo.user_profile'))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -57,7 +67,7 @@ def dashboard():
 #
 
 class LoginForm(FlaskForm):
-    """ 登录表单. """
+    """ Login form. """
     email = StringField('email', validators=[
         DataRequired(_('Email is required!')),
         Email(_('Invalid email address!'))
@@ -69,7 +79,7 @@ class LoginForm(FlaskForm):
 
 @public.route('/login', methods=('GET', 'POST'))
 def login():
-    """ 登录. """
+    """ Do login. """
     form = LoginForm()
     #
     if form.validate_on_submit():
@@ -119,7 +129,7 @@ class SignupForm(FlaskForm):
 
 @public.route('/signup', methods=('GET', 'POST'))
 def signup():
-    """ Signup. """
+    """ Do signup. """
     form = SignupForm()
     #
     if form.validate_on_submit():
@@ -127,7 +137,7 @@ def signup():
         pwd = form.password.data.strip()
         u = User.find_one({'email': em})
         if u:
-            form.email.errors.append('该登录邮箱已经注册!')
+            form.email.errors.append(_('This email has already been registered!'))
             return render_template('public/signup.html', form=form)
         # Create user
         u = User()
